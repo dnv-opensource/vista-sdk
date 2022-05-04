@@ -1,12 +1,9 @@
-﻿using System.Text.Json;
-
-using Avro.IO;
-using Avro.Specific;
-
-using FluentAssertions;
-
+﻿using FluentAssertions;
+using Vista.SDK.Transport.Apache.Avro;
 using Vista.SDK.Transport.Avro.DataChannel;
 using Vista.SDK.Transport.Avro.TimeSeriesData;
+
+using JsonSerializer = Vista.SDK.Transport.Json.Serializer;
 
 namespace Vista.SDK.Tests.Transport.Avro;
 
@@ -30,10 +27,7 @@ public class AvroTests
             FileShare.Read
         );
 
-        var package =
-            await JsonSerializer.DeserializeAsync<Vista.SDK.Transport.Json.DataChannel.DataChannelListPackage>(
-                reader
-            );
+        var package = await JsonSerializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
 
         var domainModel = Vista.SDK.Transport.Json.DataChannel.Extensions.ToDomainModel(package!);
@@ -41,7 +35,7 @@ public class AvroTests
         var dto = domainModel.ToAvroDto();
 
         await using var writer = new FileStream("DataChannelList.avro", FileMode.OpenOrCreate);
-        SerializeDataChannelList(writer, dto);
+        dto!.Serialize(writer);
     }
 
     [Theory]
@@ -55,10 +49,7 @@ public class AvroTests
             FileShare.Read
         );
 
-        var package =
-            await JsonSerializer.DeserializeAsync<Vista.SDK.Transport.Json.TimeSeriesData.TimeSeriesDataPackage>(
-                reader
-            );
+        var package = await JsonSerializer.DeserializeTimeSeriesDataAsync(reader);
         Assert.NotNull(package);
 
         var domainModel = Vista.SDK.Transport.Json.TimeSeriesData.Extensions.ToDomainModel(
@@ -68,7 +59,7 @@ public class AvroTests
         var dto = domainModel.ToAvroDto();
 
         await using var writer = new FileStream("TimeSeriesData.avro", FileMode.OpenOrCreate);
-        SerializeTimeSeriesData(writer, dto);
+        dto.Serialize(writer);
     }
 
     [Theory]
@@ -82,7 +73,7 @@ public class AvroTests
             FileShare.Read
         );
 
-        var package = DeserializeTimeSeriesData(reader);
+        var package = Serializer.DeserializeTimeSeriesData(reader);
         Assert.NotNull(package);
     }
 
@@ -97,7 +88,7 @@ public class AvroTests
             FileShare.Read
         );
 
-        var package = DeserializeDataChannelList(reader);
+        var package = Serializer.DeserializeDataChannelList(reader);
         Assert.NotNull(package);
     }
 
@@ -112,14 +103,14 @@ public class AvroTests
             FileShare.Read
         );
 
-        var package = DeserializeTimeSeriesData(reader);
+        var package = Serializer.DeserializeTimeSeriesData(reader);
         Assert.NotNull(package);
 
         using var serialized = new MemoryStream();
-        SerializeTimeSeriesData(serialized, package);
+        package.Serialize(serialized);
         serialized.Position = 0;
 
-        var deserialized = DeserializeTimeSeriesData(serialized);
+        var deserialized = Serializer.DeserializeTimeSeriesData(serialized);
 
         package.Should().BeEquivalentTo(deserialized);
     }
@@ -135,14 +126,14 @@ public class AvroTests
             FileShare.Read
         );
 
-        var package = DeserializeDataChannelList(reader);
+        var package = Serializer.DeserializeDataChannelList(reader);
         Assert.NotNull(package);
 
         using var serialized = new MemoryStream();
-        SerializeDataChannelList(serialized, package);
+        package.Serialize(serialized);
         serialized.Position = 0;
 
-        var deserialized = DeserializeDataChannelList(serialized);
+        var deserialized = Serializer.DeserializeDataChannelList(serialized);
 
         package.Should().BeEquivalentTo(deserialized);
     }
@@ -158,7 +149,7 @@ public class AvroTests
             FileShare.Read
         );
 
-        var package = DeserializeDataChannelList(reader);
+        var package = Serializer.DeserializeDataChannelList(reader);
         Assert.NotNull(package);
 
         var domainPackage = package!.ToDomainModel();
@@ -178,50 +169,12 @@ public class AvroTests
             FileShare.Read
         );
 
-        var package = DeserializeTimeSeriesData(reader);
+        var package = Serializer.DeserializeTimeSeriesData(reader);
         Assert.NotNull(package);
 
         var domainPackage = package!.ToDomainModel();
         var dto = domainPackage.ToAvroDto();
 
         dto.Should().BeEquivalentTo(package);
-    }
-
-    static TimeSeriesDataPackage DeserializeTimeSeriesData(Stream reader)
-    {
-        var avroReader = new SpecificReader<TimeSeriesDataPackage>(
-            TimeSeriesDataPackage._SCHEMA,
-            TimeSeriesDataPackage._SCHEMA
-        );
-        var decoder = new BinaryDecoder(reader);
-        var package = avroReader.Read(new TimeSeriesDataPackage(), decoder);
-        Assert.NotNull(package);
-        return package;
-    }
-
-    static DataChannelListPackage DeserializeDataChannelList(Stream reader)
-    {
-        var avroReader = new SpecificReader<DataChannelListPackage>(
-            DataChannelListPackage._SCHEMA,
-            DataChannelListPackage._SCHEMA
-        );
-        var decoder = new BinaryDecoder(reader);
-        var package = avroReader.Read(new DataChannelListPackage(), decoder);
-        Assert.NotNull(package);
-        return package;
-    }
-
-    static void SerializeTimeSeriesData(Stream writer, TimeSeriesDataPackage dto)
-    {
-        var avroWriter = new SpecificWriter<TimeSeriesDataPackage>(TimeSeriesDataPackage._SCHEMA);
-        var encoder = new BinaryEncoder(writer);
-        avroWriter.Write(dto, encoder);
-    }
-
-    static void SerializeDataChannelList(Stream writer, DataChannelListPackage dto)
-    {
-        var avroWriter = new SpecificWriter<DataChannelListPackage>(DataChannelListPackage._SCHEMA);
-        var encoder = new BinaryEncoder(writer);
-        avroWriter.Write(dto, encoder);
     }
 }

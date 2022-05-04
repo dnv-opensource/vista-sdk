@@ -47,4 +47,12 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\..\schemas\json\*.sample.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>schemas\json\%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      <Visible>False</Visible>
+    </None>
+  </ItemGroup>
+
 </Project>

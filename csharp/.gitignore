@@ -455,3 +455,8 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# These are copied in using an AfterBuild target
+# They exist in the root of the project
+# Along with resources/
+schemas/

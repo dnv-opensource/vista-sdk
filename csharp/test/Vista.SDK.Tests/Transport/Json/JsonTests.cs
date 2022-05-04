@@ -3,6 +3,7 @@
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using ICSharpCode.SharpZipLib.BZip2;
+using Vista.SDK.Transport.Json;
 using Vista.SDK.Transport.Json.DataChannel;
 using Vista.SDK.Transport.Json.TimeSeriesData;
 
@@ -10,6 +11,25 @@ namespace Vista.SDK.Tests.Transport.Json;
 
 public class JsonTests
 {
+    [Theory]
+    [InlineData("Transport/Json/_files/DataChannelList.json")]
+    [InlineData("schemas/json/DataChannelList.sample.json")]
+    public async Task Test_DataChannelList_File_Serialization(string file)
+    {
+        await using var reader = new FileStream(
+            file,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read
+        );
+
+        var package = await Serializer.DeserializeDataChannelListAsync(reader);
+        Assert.NotNull(package);
+
+        var newFile = $"{file}.out";
+        await File.WriteAllTextAsync(newFile, Serializer.Serialize(package!));
+    }
+
     [Theory]
     [InlineData("Transport/Json/_files/TimeSeriesData.json")]
     public async Task Test_TimeSeriesData_Deserialization(string file)
@@ -21,12 +41,13 @@ public class JsonTests
             FileShare.Read
         );
 
-        var package = await JsonSerializer.DeserializeAsync<TimeSeriesDataPackage>(reader);
+        var package = await Serializer.DeserializeTimeSeriesDataAsync(reader);
         Assert.NotNull(package);
     }
 
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
+    [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_Deserialization(string file)
     {
         await using var reader = new FileStream(
@@ -36,7 +57,7 @@ public class JsonTests
             FileShare.Read
         );
 
-        var package = await JsonSerializer.DeserializeAsync<DataChannelListPackage>(reader);
+        var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
     }
 
@@ -51,17 +72,18 @@ public class JsonTests
             FileShare.Read
         );
 
-        var package = await JsonSerializer.DeserializeAsync<TimeSeriesDataPackage>(reader);
+        var package = await Serializer.DeserializeTimeSeriesDataAsync(reader);
         Assert.NotNull(package);
 
-        var serialized = JsonSerializer.Serialize(package);
-        var deserialized = JsonSerializer.Deserialize<TimeSeriesDataPackage>(serialized);
+        var serialized = package!.Serialize();
+        var deserialized = Serializer.DeserializeTimeSeriesData(serialized);
 
         package.Should().BeEquivalentTo(deserialized, TimeSeriesDataEquivalency);
     }
 
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
+    [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_Serialization_Roundtrip(string file)
     {
         await using var reader = new FileStream(
@@ -71,17 +93,18 @@ public class JsonTests
             FileShare.Read
         );
 
-        var package = await JsonSerializer.DeserializeAsync<DataChannelListPackage>(reader);
+        var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
 
-        var serialized = JsonSerializer.Serialize(package);
-        var deserialized = JsonSerializer.Deserialize<DataChannelListPackage>(serialized);
+        var serialized = package!.Serialize();
+        var deserialized = Serializer.DeserializeDataChannelList(serialized);
 
         package.Should().BeEquivalentTo(deserialized, DataChannelListEquivalency);
     }
 
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
+    [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_Domain_Model_Roundtrip(string file)
     {
         await using var reader = new FileStream(
@@ -91,7 +114,7 @@ public class JsonTests
             FileShare.Read
         );
 
-        var package = await JsonSerializer.DeserializeAsync<DataChannelListPackage>(reader);
+        var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
 
         var domainPackage = package!.ToDomainModel();
@@ -102,6 +125,7 @@ public class JsonTests
 
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
+    [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_Compression(string file)
     {
         await using var reader = new FileStream(
@@ -111,13 +135,13 @@ public class JsonTests
             FileShare.Read
         );
 
-        var package = await JsonSerializer.DeserializeAsync<DataChannelListPackage>(reader);
+        var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
 
         using var serializedStream = new MemoryStream();
         using var compressedStream = new MemoryStream();
 
-        JsonSerializer.Serialize(serializedStream, package);
+        package!.Serialize(serializedStream);
         serializedStream.Position = 0;
         BZip2.Compress(serializedStream, compressedStream, false, 5);
 
@@ -142,7 +166,7 @@ public class JsonTests
             FileShare.Read
         );
 
-        var package = await JsonSerializer.DeserializeAsync<TimeSeriesDataPackage>(reader);
+        var package = await Serializer.DeserializeTimeSeriesDataAsync(reader);
         Assert.NotNull(package);
 
         var domainPackage = package!.ToDomainModel();

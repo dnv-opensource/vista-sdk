@@ -4,9 +4,7 @@ namespace Vista.SDK.Transport.Json.TimeSeriesData;
 
 public static class Extensions
 {
-    public static TimeSeriesDataPackage ToJsonDto(
-        this Transport.TimeSeries.TimeSeriesDataPackage package
-    )
+    public static TimeSeriesDataPackage ToJsonDto(this Domain.TimeSeriesDataPackage package)
     {
         var p = package.Package;
         var h = package.Package.Header;

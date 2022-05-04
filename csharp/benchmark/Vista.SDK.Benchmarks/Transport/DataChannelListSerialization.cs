@@ -19,6 +19,7 @@ using System.Globalization;
 using System.IO.Compression;
 using System.Text.Json;
 using Vista.SDK.Transport.Avro.DataChannel;
+using Vista.SDK.Transport.Json;
 using Vista.SDK.Transport.Json.DataChannel;
 using DataChannelListJsonPackage = Vista.SDK.Transport.Json.DataChannel.DataChannelListPackage;
 using DataChannelListAvroPackage = Vista.SDK.Transport.Avro.DataChannel.DataChannelListPackage;
@@ -104,8 +105,8 @@ public class DataChannelListSerialization
     [GlobalSetup]
     public void Setup()
     {
-        var text = File.ReadAllText("Transport/_files/DataChannelList.json");
-        _jsonPackage = JsonSerializer.Deserialize<DataChannelListJsonPackage>(text);
+        var text = File.ReadAllText("schemas/json/DataChannelList.sample.compact.json");
+        _jsonPackage = Serializer.DeserializeDataChannelList(text);
         var domainModel = _jsonPackage!.ToDomainModel();
         _avroPackage = domainModel.ToAvroDto();
 
@@ -151,7 +152,7 @@ public class DataChannelListSerialization
     public void Json()
     {
         _memoryStream.SetLength(0);
-        JsonSerializer.Serialize(_memoryStream, _jsonPackage);
+        _jsonPackage.Serialize(_memoryStream);
     }
 
     [Benchmark(Description = "Json")]
@@ -161,7 +162,7 @@ public class DataChannelListSerialization
     {
         _memoryStream.SetLength(0);
         _compressionStream.SetLength(0);
-        JsonSerializer.Serialize(_memoryStream, _jsonPackage);
+        _jsonPackage.Serialize(_memoryStream);
         _memoryStream.Position = 0;
         BZip2.Compress(_memoryStream, _compressionStream, false, CompressionLevel);
     }
@@ -172,7 +173,7 @@ public class DataChannelListSerialization
     {
         _memoryStream.SetLength(0);
         _compressionStream.SetLength(0);
-        JsonSerializer.Serialize(_memoryStream, _jsonPackage);
+        _jsonPackage.Serialize(_memoryStream);
         _memoryStream.Position = 0;
         _brotliStream = new BrotliStream(_compressionStream, CompressionLevel.SmallestSize, true);
         _memoryStream.CopyTo(_brotliStream);

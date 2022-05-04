@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -33,17 +33,38 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Transport\_files\*.*">
+    <None Include="$(MSBuildThisFileDirectory)..\..\..\schemas\json\*.sample.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>True</Visible>
-    </None>  
-    <None Include="$(OutDir)\Transport\_files\*.*">
+      <LinkBase>schemas\json</LinkBase>
+      <Visible>False</Visible>
+    </None>
+    <None Include="$(OutDir)\schemas\json\*.sample.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
       <Visible>False</Visible>
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <VisSchemaFiles Include="$(MSBuildThisFileDirectory)\..\..\..\schemas\**\*.*" />
+  </ItemGroup>
+  
+  <Target Name="CopySomeFiles" AfterTargets="AfterBuild">
+    <Copy
+      SourceFiles="@(VisSchemaFiles)"
+      DestinationFolder="$(OutDir)\schemas\%(RecursiveDir)"
+      SkipUnchangedFiles="true"
+      OverwriteReadOnlyFiles="true"
+      Retries="3"
+      RetryDelayMilliseconds="300"/>
+    <Copy
+      SourceFiles="@(VisSchemaFiles)"
+      DestinationFolder="$(MSBuildThisFileDirectory)\schemas\%(RecursiveDir)"
+      SkipUnchangedFiles="true"
+      OverwriteReadOnlyFiles="true"
+      Retries="3"
+      RetryDelayMilliseconds="300"/>
+  </Target>
 
 
 </Project>
