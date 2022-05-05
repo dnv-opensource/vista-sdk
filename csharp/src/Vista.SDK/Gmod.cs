@@ -78,6 +78,9 @@ public sealed partial class Gmod
     public bool TryGetNode(string code, [MaybeNullWhen(false)] out GmodNode node) =>
         _nodeMap.TryGetValue(code, out node);
 
+    public bool TryGetNode(ReadOnlySpan<char> code, [MaybeNullWhen(false)] out GmodNode node) =>
+        _nodeMap.TryGetValue(code.ToString(), out node);
+
     public GmodPath ParsePath(string item) => GmodPath.Parse(item, this);
 
     public bool TryParsePath(string item, [NotNullWhen(true)] out GmodPath? path) =>

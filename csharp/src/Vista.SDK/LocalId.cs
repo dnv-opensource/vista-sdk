@@ -87,7 +87,7 @@ internal readonly record struct LocalIdItems
     }
 }
 
-public sealed record class LocalId
+public sealed partial record class LocalId
 {
     internal const string NamingRule = "dnv-v2";
 

@@ -144,4 +144,27 @@ public class LocalIdTests
         Assert.True(localId == otherLocalId);
         Assert.NotSame(localId, otherLocalId);
     }
+
+    [Theory]
+    [InlineData("/dnv-v2/vis-3-4a/411.1/C101.31-2/meta")]
+    [InlineData("/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet")]
+    [InlineData(
+        "/dnv-v2/vis-3-4a/411.1/C101.63/S206/~propulsion.engine/~cooling.system/meta/qty-temperature/cnt-exhaust.gas/pos-inlet"
+    )]
+    [InlineData(
+        "/dnv-v2/vis-3-4a/411.1/C101.63/S206/sec/411.1/C101.31-5/~propulsion.engine/~cooling.system/~for.propulsion.engine/~cylinder.5/meta/qty-temperature/cnt-exhaust.gas/pos-inlet"
+    )]
+    public async Task Test_Parsing(string localIdStr)
+    {
+        var (_, vis) = VISTests.GetVis();
+
+        var visVersion = VisVersion.v3_4a;
+
+        var gmod = await vis.GetGmod(visVersion);
+        var codebooks = await vis.GetCodebooks(visVersion);
+
+        var parsed = LocalId.TryParse(localIdStr, gmod, codebooks, out var localId);
+        Assert.True(parsed);
+        Assert.Equal(localIdStr, localId!.ToString());
+    }
 }

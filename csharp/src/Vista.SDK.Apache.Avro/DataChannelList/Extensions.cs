@@ -41,7 +41,7 @@ public static class Extensions
                                 {
                                     DataChannelID = new DataChannelID()
                                     {
-                                        LocalID = dc.DataChannelId.LocalId,
+                                        LocalID = dc.DataChannelId.LocalId.ToString(),
                                         NameObject = dc.DataChannelId.NameObject is null
                                             ? null
                                             : new NameObject()

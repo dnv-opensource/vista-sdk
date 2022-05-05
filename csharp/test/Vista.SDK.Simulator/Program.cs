@@ -62,13 +62,16 @@ public sealed class GenerateTimeseries : AsyncCommand<GenerateTimeseries.Setting
 
         var generateBasedOn = new GenerateBasedOn[]
         {
-            new GenerateBasedOn("411.1", null),
-            new GenerateBasedOn("", null),
+            new GenerateBasedOn("1021.31-4S/H203", null, Command: "shut.down"),
+            new GenerateBasedOn("511.15-1/E32", null, Quantity: "frequency"),
         };
 
         var dataChannelList = dataChannelListDto.ToDomainModel();
 
-        var localIds = dataChannelList.Package.DataChannelList.DataChannel.Select(dc => dc.DataChannelId.LocalId).ToArray();
+        var localIds = dataChannelList.Package.DataChannelList.DataChannel
+            .Select(dc => dc.DataChannelId.LocalId)
+            .Where(l => l)
+            .ToArray();
 
         // var generateFor = localIds.Where(l => )
 
@@ -76,5 +79,15 @@ public sealed class GenerateTimeseries : AsyncCommand<GenerateTimeseries.Setting
         return 0;
     }
 
-    readonly record struct GenerateBasedOn(string? PrimaryItem, string? SecondaryItem);
+    readonly record struct GenerateBasedOn(
+        string? PrimaryItem,
+        string? SecondaryItem = null,
+        string? Quantity = null,
+        string? State = null,
+        string? Content = null,
+        string? Position = null,
+        string? Calculation = null,
+        string? Command = null,
+        string? Type = null
+    );
 }

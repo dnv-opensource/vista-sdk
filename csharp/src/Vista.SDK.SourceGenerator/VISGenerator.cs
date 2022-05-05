@@ -158,7 +158,7 @@ namespace Vista.SDK.SourceGenerator
                 @"
     public static class VisVersions
     {
-        public static readonly global::System.Collections.Generic.IEnumerable<VisVersion> All = new [] 
+        public static readonly global::System.Collections.Generic.IEnumerable<VisVersion> All = new []
         {"
             );
 
@@ -177,7 +177,7 @@ namespace Vista.SDK.SourceGenerator
 
         public static VisVersion Parse(string version)
         {
-            return version switch 
+            return version switch
             {"
             );
 
@@ -193,6 +193,27 @@ namespace Vista.SDK.SourceGenerator
                 @"
                 _ => throw new System.ArgumentException(""Invalid VIS version input: "" + version)
             };
+        }
+
+        public static VisVersion Parse(global::System.ReadOnlySpan<char> version)
+        {
+            "
+            );
+
+            foreach (var version in visVersions)
+            {
+                sourceBuilder.Append(
+                    @$"
+            if (version.SequenceEqual(""{version}"".AsSpan()))
+                return VisVersion.v{version.Replace('-', '_')};
+                "
+                );
+            }
+
+            sourceBuilder.Append(
+                @"
+
+            throw new System.ArgumentException(""Invalid VIS version input: "" + version.ToString());
         }
 
         public static bool TryParse(string versionStr, out VisVersion version)
@@ -218,6 +239,30 @@ namespace Vista.SDK.SourceGenerator
                     version = default;
                     return false;
             }
+        }
+
+        public static bool TryParse(global::System.ReadOnlySpan<char> versionStr, out VisVersion version)
+        {
+            "
+            );
+
+            foreach (var version in visVersions)
+            {
+                sourceBuilder.Append(
+                    @$"
+            if (versionStr.SequenceEqual(""{version}"".AsSpan()))
+            {{
+                version = VisVersion.v{version.Replace('-', '_')};
+                return true;
+            }}
+                "
+                );
+            }
+
+            sourceBuilder.Append(
+                @"
+            version = default;
+            return false;
         }
     }
 "

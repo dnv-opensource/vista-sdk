@@ -47,7 +47,7 @@ public sealed class VIS : IVIS
     private readonly MemoryCache _codebooksDtoCache;
     private readonly MemoryCache _codebooksCache;
 
-    public static IVIS Create() => new VIS();
+    public static readonly VIS Instance = new VIS();
 
     public VIS()
     {
@@ -93,7 +93,7 @@ public sealed class VIS : IVIS
 
         async ValueTask<GmodDto> Get(VisVersion visVersion)
         {
-            return await _gmodDtoCache.GetOrCreateAsync(
+            return await _gmodDtoCache.GetOrCreate(
                 visVersion,
                 async entry =>
                 {

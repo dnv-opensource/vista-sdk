@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-
+using System.Reflection;
 using Vista.SDK;
 
 namespace Vista.SDK.Tests;
@@ -38,5 +38,21 @@ public class VISTests
 
         Assert.Equal("3-4a", versionStr);
         Assert.Equal(version, VisVersions.Parse(versionStr));
+    }
+
+    [Fact]
+    public void Test_EmbeddedResource()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var resourceName = assembly.GetManifestResourceNames().Single(n => n.EndsWith("test.txt"));
+        using var stream = (UnmanagedMemoryStream)assembly.GetManifestResourceStream(resourceName)!;
+
+        var buffer = new byte[1024 * 8];
+
+        Assert.Equal(512_000_000, stream.Length);
+
+        var task = stream.ReadAsync(buffer, default);
+        Assert.True(task.IsCompletedSuccessfully);
     }
 }
