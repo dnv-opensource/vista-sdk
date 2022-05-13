@@ -9,6 +9,10 @@ on:
 env:
   DOTNET_VERSION: '6.0.x'
 
+# defaults:
+#   run:
+#     working-directory: ./csharp
+
 jobs:
   build:
     name: build-and-test-${{matrix.os}}
@@ -26,11 +30,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore tools
-        run: dotnet tool restore
+        run: |
+          cd csharp
+          dotnet tool restore
 
       - name: Check formatting
         run: |
-          dotnet csharpier ./csharp
+          dotnet csharpier --check
           dotnet format --include ./csharp/src ./csharp/test/Vista.SDK.Tests --verify-no-changes      
 
       - name: Install dependencies
