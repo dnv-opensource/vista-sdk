@@ -7,6 +7,18 @@
             "commands": [
                 "avrogen"
             ]
-        }
+        },
+        "csharpier": {
+            "version": "0.15.1",
+            "commands": [
+                "dotnet-csharpier"
+            ]
+        },
+        "dotnet-format": {
+            "version": "5.1.225507",
+            "commands": [
+              "dotnet-format"
+            ]
+          }
     }
 }

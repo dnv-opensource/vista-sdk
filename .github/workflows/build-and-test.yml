@@ -1,0 +1,43 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '6.0.x'
+
+jobs:
+  build:
+    name: build-and-test-${{matrix.os}}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Check formatting
+        run: |
+          dotnet csharpier ./csharp --check
+          dotnet format --include ./csharp/src ./csharp/test/Vista.SDK.Tests --verify-no-changes      
+
+      - name: Install dependencies
+        run:  dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release  --no-restore
+      # TO DO: Create test.sh
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
