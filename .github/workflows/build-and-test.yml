@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
 
       - name: Check formatting
         run: |
-          dotnet csharpier ./csharp --check
+          dotnet csharpier ./csharp
           dotnet format --include ./csharp/src ./csharp/test/Vista.SDK.Tests --verify-no-changes      
 
       - name: Install dependencies
