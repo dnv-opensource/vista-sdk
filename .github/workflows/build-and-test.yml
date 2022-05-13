@@ -36,7 +36,7 @@ jobs:
 
       - name: Check formatting
         run: |
-          cd sharp
+          cd csharp
           dotnet csharpier --check
           dotnet format --include ./csharp/src ./csharp/test/Vista.SDK.Tests --verify-no-changes      
 
