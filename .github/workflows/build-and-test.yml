@@ -9,6 +9,10 @@ on:
 env:
   DOTNET_VERSION: '6.0.x'
 
+defaults:
+  run:
+    working-directory: ./csharp
+
 jobs:
   build:
     name: build-and-test-${{matrix.os}}
@@ -26,17 +30,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore tools
-        run: |
-          cd csharp
-          dotnet tool restore
+        run: dotnet tool restore
 
       - name: Check formatting
-        run: |
-          cd csharp
-          dotnet csharpier --check   
+        run: dotnet csharpier --check   
 
       - name: Install dependencies
-        run:  dotnet restore
+        run: dotnet restore
 
       - name: Build
         run: dotnet build --configuration Release  --no-restore
