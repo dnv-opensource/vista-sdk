@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "sdk",
+    "sdk_resources",
+]
