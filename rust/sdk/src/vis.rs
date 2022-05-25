@@ -5,7 +5,7 @@ use moka::sync::Cache;
 use once_cell::sync::Lazy;
 
 use crate::gmod::Gmod;
-use sdk_resources::get_gmod_dto;
+use sdk_resources::gmod::get_gmod_dto;
 
 include!(concat!(env!("OUT_DIR"), "/vis.g.rs"));
 
@@ -19,7 +19,7 @@ static INSTANCE: Lazy<Box<Vis>> = Lazy::new(|| {
 });
 
 pub struct Vis {
-    gmod_cache: Cache<VisVersion, Result<Arc<Gmod>>>,
+    gmod_cache: Cache<VisVersion, Arc<Gmod>>,
 }
 
 #[derive(Debug, Clone)]
@@ -42,12 +42,13 @@ impl Vis {
         &INSTANCE
     }
 
-    pub fn get_gmod(&self, version: VisVersion) -> Result<Arc<Gmod>> {
+    pub fn get_gmod(&self, version: VisVersion) -> Arc<Gmod> {
         let gmod = self.gmod_cache.get_with(version, move || {
             let dto =
-                get_gmod_dto(version.to_string().as_str()).map_err(|e| VisError::FailedToLoad(e.to_string()))?;
+                get_gmod_dto(version.to_string().as_str()).map_err(|e| VisError::FailedToLoad(e.to_string()))
+                .expect("We should always end up having a valid gmod mapped to the binary");
 
-            Ok(Arc::new(Gmod::new(&dto)))
+            Arc::new(Gmod::new(&dto))
         });
 
         gmod
@@ -68,7 +69,7 @@ mod tests {
         let instance = Vis::instance();
         let version = VisVersion::v3_4a;
         let gmod = instance.get_gmod(version);
-        assert_eq!(gmod.unwrap().version, version)
+        assert_eq!(gmod.version, version);
     }
 
     #[test]
