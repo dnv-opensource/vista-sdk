@@ -1,6 +1,6 @@
 use crate::vis::VisVersion;
 use sdk_resources::gmod::GmodDto;
-use std::{str::FromStr, collections::HashMap};
+use std::{str::FromStr, collections::{HashMap, HashSet}};
 
 pub enum GmodRelation {
     Parent,
@@ -17,6 +17,13 @@ pub struct Gmod {
 #[derive(Debug, Clone)]
 pub struct GmodNode {
     pub code: String,
+}
+
+#[derive(PartialEq)]
+pub enum TraversalHandlerResult {
+    Stop,
+    SkipSubtree,
+    Continue,
 }
 
 impl Gmod {
@@ -70,6 +77,66 @@ impl Gmod {
     pub fn get_children(&self, node: &GmodNode) -> impl Iterator<Item = &GmodNode> {
         let index = self.index.get(&node.code).unwrap();
         self.children[(*index) as usize].iter().map(|child| &self.nodes[(*child) as usize])
+    }
+
+    pub fn traverse<F>(&self, f: F)
+    where
+        F : Fn(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+    {
+        let root_node = self.root_node();
+        let mut context = TraversalContext {
+            ids: HashSet::new(),
+            parents: Vec::new(),
+        };
+
+        let index = self.index.get(&root_node.code).unwrap();
+        let mut stack = Vec::new();
+        stack.push(index);
+
+        while !stack.is_empty() {
+            let index = stack.pop().unwrap();
+
+            if context.has(index) {
+                continue;
+            }
+
+            let parents = context.parents.iter().map(|i| &self.nodes[(*i) as usize]);
+            let result = f(&parents, &self.nodes[(*index) as usize]);
+            
+            if result == TraversalHandlerResult::Stop || result == TraversalHandlerResult::SkipSubtree {
+                return;
+            }
+            
+            context.push(index);
+
+            for child in &self.children[(*index) as usize] {
+                stack.push(child);
+            }
+        }
+
+        // context.push(index);
+
+    }
+}
+
+struct TraversalContext {
+    pub ids: HashSet<u32>,
+    pub parents: Vec<u32>,
+}
+
+impl TraversalContext {
+    pub fn has(&self, index: &u32) -> bool {
+        self.ids.contains(index)
+    }
+
+    pub fn push(&mut self, index: &u32) {
+        self.ids.insert(*index);
+        self.parents.push(*index);
+    }
+
+    pub fn pop(&mut self) {
+        let parent = self.parents.pop().unwrap();
+        self.ids.remove(&parent);
     }
 }
 
