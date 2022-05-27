@@ -15,12 +15,14 @@ Console.CancelKeyPress += (s, e) =>
 };
 
 var app = new CommandApp();
-app.Configure(config =>
-{
-    config.AddCommand<GenerateTimeseries>("generate-timeseries");
+app.Configure(
+    config =>
+    {
+        config.AddCommand<GenerateTimeseries>("generate-timeseries");
 
-    config.Settings.Registrar.RegisterInstance(cts.Token);
-});
+        config.Settings.Registrar.RegisterInstance(cts.Token);
+    }
+);
 
 app.Run(args);
 
@@ -37,28 +39,46 @@ public sealed class GenerateTimeseries : AsyncCommand<GenerateTimeseries.Setting
         public string? DataChannelListPath { get; set; }
     }
 
-    public GenerateTimeseries(CancellationToken cancellationToken) => _cancellationToken = cancellationToken;
+    public GenerateTimeseries(CancellationToken cancellationToken) =>
+        _cancellationToken = cancellationToken;
 
-    public override ValidationResult Validate([NotNull] CommandContext context, [NotNull] Settings settings)
+    public override ValidationResult Validate(
+        [NotNull] CommandContext context,
+        [NotNull] Settings settings
+    )
     {
         if (settings.Type != "tabular" && settings.Type != "event")
             return ValidationResult.Error("Invalid timeseries type: " + settings.Type);
 
-        if (string.IsNullOrWhiteSpace(settings.DataChannelListPath) || !File.Exists(settings.DataChannelListPath))
-            return ValidationResult.Error("DataChannelList does not exist at: " + settings.DataChannelListPath);
+        if (
+            string.IsNullOrWhiteSpace(settings.DataChannelListPath)
+            || !File.Exists(settings.DataChannelListPath)
+        )
+            return ValidationResult.Error(
+                "DataChannelList does not exist at: " + settings.DataChannelListPath
+            );
 
         return base.Validate(context, settings);
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        await using var dataChannelListStream = new FileStream(settings.DataChannelListPath!, FileMode.Open, FileAccess.Read, FileShare.Read);
+        await using var dataChannelListStream = new FileStream(
+            settings.DataChannelListPath!,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read
+        );
 
-        var dataChannelListDto =
-            await Serializer.DeserializeDataChannelListAsync(dataChannelListStream, _cancellationToken);
+        var dataChannelListDto = await Serializer.DeserializeDataChannelListAsync(
+            dataChannelListStream,
+            _cancellationToken
+        );
 
         if (dataChannelListDto is null)
-            throw new Exception("Couldnt load DataChannelList from " + settings.DataChannelListPath);
+            throw new Exception(
+                "Couldnt load DataChannelList from " + settings.DataChannelListPath
+            );
 
         var generateBasedOn = new GenerateBasedOn[]
         {
@@ -68,10 +88,10 @@ public sealed class GenerateTimeseries : AsyncCommand<GenerateTimeseries.Setting
 
         var dataChannelList = dataChannelListDto.ToDomainModel();
 
-        var localIds = dataChannelList.Package.DataChannelList.DataChannel
-            .Select(dc => dc.DataChannelId.LocalId)
-            .Where(l => l)
-            .ToArray();
+        // var localIds = dataChannelList.Package.DataChannelList.DataChannel
+        //     .Select(dc => dc.DataChannelId.LocalId)
+        //     .Where(l => l)
+        //     .ToArray();
 
         // var generateFor = localIds.Where(l => )
 

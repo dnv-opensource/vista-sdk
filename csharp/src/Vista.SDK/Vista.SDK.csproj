@@ -21,9 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>Vista.SDK.Tests</_Parameter1>
-    </AssemblyAttribute>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
 
   <ItemGroup>

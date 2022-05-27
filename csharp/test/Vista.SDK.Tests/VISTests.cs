@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Vista.SDK;
 
@@ -43,14 +44,17 @@ public class VISTests
     [Fact]
     public void Test_EmbeddedResource()
     {
-        var assembly = Assembly.GetExecutingAssembly();
+        var assembly = typeof(EmbeddedResource).Assembly;
+        var resourceName = EmbeddedResource
+            .GetResourceNames(assembly)
+            .FirstOrDefault(n => n.Contains("gmod", StringComparison.Ordinal));
+        Assert.NotNull(resourceName);
 
-        var resourceName = assembly.GetManifestResourceNames().Single(n => n.EndsWith("test.txt"));
-        using var stream = (UnmanagedMemoryStream)assembly.GetManifestResourceStream(resourceName)!;
+        using var stream = EmbeddedResource.GetStream(assembly, resourceName!);
 
         var buffer = new byte[1024 * 8];
 
-        Assert.Equal(512_000_000, stream.Length);
+        Assert.True(stream.Length > 1024);
 
         var task = stream.ReadAsync(buffer, default);
         Assert.True(task.IsCompletedSuccessfully);

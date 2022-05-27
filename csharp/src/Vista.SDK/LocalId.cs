@@ -4,6 +4,22 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
+public readonly record struct ShortId
+{
+    private readonly string _id;
+
+    public ShortId(string id)
+    {
+        if (id is null)
+            throw new ArgumentNullException(nameof(id));
+        _id = id;
+    }
+
+    public override string ToString() => _id.ToString();
+
+    public static implicit operator ShortId(string id) => new ShortId(id);
+}
+
 internal readonly record struct LocalIdItems
 {
     public GmodPath? PrimaryItem { get; init; }

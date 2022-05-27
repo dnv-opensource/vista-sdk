@@ -23,11 +23,11 @@ public class GmodPathTests
 
     [Theory]
     [MemberData(nameof(Valid_Test_Data))]
-    public async Task Test_GmodPath_Parse(string inputPath)
+    public void Test_GmodPath_Parse(string inputPath)
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var parsed = GmodPath.TryParse(inputPath, gmod, out var path);
         Assert.True(parsed);
@@ -36,11 +36,11 @@ public class GmodPathTests
     }
 
     [Fact]
-    public async Task Test_GetFullPath()
+    public void Test_GetFullPath()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var pathStr = "411.1/C101.72/I101";
         var expectation = new Dictionary<int, string>
@@ -72,11 +72,11 @@ public class GmodPathTests
     }
 
     [Fact]
-    public async Task Test_GetFullPathFrom()
+    public void Test_GetFullPathFrom()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var pathStr = "411.1/C101.72/I101";
         var expectation = new Dictionary<int, string>

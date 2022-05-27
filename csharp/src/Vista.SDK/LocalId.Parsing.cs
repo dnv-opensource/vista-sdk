@@ -4,18 +4,15 @@ namespace Vista.SDK;
 
 public sealed partial record class LocalId
 {
-    public static LocalId Parse(string localIdStr, Gmod gmod, Codebooks codebooks)
+    public static LocalId Parse(string localIdStr)
     {
-        if (!TryParse(localIdStr, gmod, codebooks, out var localId))
+        if (!TryParse(localIdStr, out var localId))
             throw new ArgumentException("Could not parse local ID: " + localIdStr);
 
         return localId;
     }
 
-    public static bool TryParse(
-        string localIdStr,
-        [MaybeNullWhen(false)] out LocalId localId
-    )
+    public static bool TryParse(string localIdStr, [MaybeNullWhen(false)] out LocalId localId)
     {
         localId = null;
         if (localIdStr is null)
@@ -28,6 +25,8 @@ public sealed partial record class LocalId
         ReadOnlySpan<char> span = localIdStr.AsSpan();
 
         VisVersion visVersion = (VisVersion)int.MaxValue;
+        Gmod? gmod = null;
+        Codebooks? codebooks = null;
         GmodPath? primaryItem = null;
         GmodPath? secondaryItem = null;
         MetadataTag? qty = null;
@@ -71,6 +70,11 @@ public sealed partial record class LocalId
                     //     return false;
                     // VIS.Instance.GetGmod((visVersion))
 
+                    gmod = VIS.Instance.GetGmod(visVersion);
+                    codebooks = VIS.Instance.GetCodebooks(visVersion);
+                    if (gmod is null || codebooks is null)
+                        return false;
+
                     AdvanceParser(ref i, in segment, ref state);
                     break;
                 case ParsingState.PrimaryItem:
@@ -78,6 +82,9 @@ public sealed partial record class LocalId
                     {
                         var dashIndex = segment.IndexOf('-');
                         var code = dashIndex == -1 ? segment : segment.Slice(0, dashIndex);
+
+                        if (gmod is null)
+                            return false;
 
                         if (primaryItemStart == -1)
                         {
@@ -144,6 +151,9 @@ public sealed partial record class LocalId
                     {
                         var dashIndex = segment.IndexOf('-');
                         var code = dashIndex == -1 ? segment : segment.Slice(0, dashIndex);
+
+                        if (gmod is null)
+                            return false;
 
                         if (secondaryItemStart == -1)
                         {
@@ -346,9 +356,12 @@ public sealed partial record class LocalId
             ref int i,
             in ReadOnlySpan<char> segment,
             ref MetadataTag? tag,
-            Codebooks codebooks
+            Codebooks? codebooks
         )
         {
+            if (codebooks is null)
+                return false;
+
             var dashIndex = segment.IndexOf('-');
             if (dashIndex == -1)
                 return false;
@@ -361,15 +374,15 @@ public sealed partial record class LocalId
             if (actualState < state)
                 return false;
 
-            var value = segment.Slice(dashIndex + 1);
-            if (value.Length == 0)
-                return false;
-
             if (actualState > state)
             {
                 AdvanceParser(ref state, actualState.Value);
                 return true;
             }
+
+            var value = segment.Slice(dashIndex + 1);
+            if (value.Length == 0)
+                return false;
 
             tag = codebooks.TryCreateTag(codebookName, value.ToString());
             if (tag is null)
@@ -408,15 +421,9 @@ public sealed partial record class LocalId
         i += segment.Length + 1;
     }
 
-    static void AdvanceParser(ref int i, in ReadOnlySpan<char> segment)
-    {
-        i += segment.Length + 1;
-    }
+    static void AdvanceParser(ref int i, in ReadOnlySpan<char> segment) => i += segment.Length + 1;
 
-    static void AdvanceParser(ref ParsingState state, ParsingState to)
-    {
-        state = to;
-    }
+    static void AdvanceParser(ref ParsingState state, ParsingState to) => state = to;
 
     static void AdvanceParser(
         ref int i,

@@ -14,7 +14,7 @@ public static class Extensions
                             c =>
                                 new DataChannel(
                                     new DataChannelID(
-                                        c.DataChannelId.LocalId,
+                                        c.DataChannelId.LocalId.ToString(),
                                         c.DataChannelId.NameObject is null
                                           ? null
                                           : new NameObject(c.DataChannelId.NameObject.NamingRule)
@@ -128,6 +128,14 @@ public static class Extensions
                             c =>
                                 new Domain.DataChannel(
                                     new Domain.DataChannelId(
+                                        // c.DataChannelID.LocalID is null
+                                        //   ? throw new Exception()
+                                        //   : LocalId.TryParse(
+                                        //         c.DataChannelID.LocalID,
+                                        //         out var localId
+                                        //     )
+                                        //       ? localId
+                                        //       : throw new Exception(),
                                         c.DataChannelID.LocalID,
                                         c.DataChannelID.ShortID,
                                         c.DataChannelID.NameObject is null

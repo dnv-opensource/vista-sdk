@@ -63,14 +63,14 @@ public class LocalIdTests
 
     [Theory]
     [MemberData(nameof(Valid_Test_Data))]
-    public async Task Test_LocalId_Build_Valid(Input input, string expectedOutput)
+    public void Test_LocalId_Build_Valid(Input input, string expectedOutput)
     {
         var (_, vis) = VISTests.GetVis();
 
         var visVersion = VisVersion.v3_4a;
 
-        var gmod = await vis.GetGmod(visVersion);
-        var codebooks = await vis.GetCodebooks(visVersion);
+        var gmod = vis.GetGmod(visVersion);
+        var codebooks = vis.GetCodebooks(visVersion);
 
         var primaryItem = gmod.ParsePath(input.PrimaryItem);
         var secondaryItem = input.SecondaryItem is not null
@@ -94,15 +94,15 @@ public class LocalIdTests
     [Theory]
     [MemberData(nameof(Valid_Test_Data))]
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
-    public async Task Test_LocalId_Equality(Input input, string _)
+    public void Test_LocalId_Equality(Input input, string _)
 #pragma warning restore xUnit1026 // Theory methods should use all of their parameters
     {
         var (_, vis) = VISTests.GetVis();
 
         var visVersion = VisVersion.v3_4a;
 
-        var gmod = await vis.GetGmod(visVersion);
-        var codebooks = await vis.GetCodebooks(visVersion);
+        var gmod = vis.GetGmod(visVersion);
+        var codebooks = vis.GetCodebooks(visVersion);
 
         var primaryItem = gmod.ParsePath(input.PrimaryItem);
         var secondaryItem = input.SecondaryItem is not null
@@ -154,17 +154,19 @@ public class LocalIdTests
     [InlineData(
         "/dnv-v2/vis-3-4a/411.1/C101.63/S206/sec/411.1/C101.31-5/~propulsion.engine/~cooling.system/~for.propulsion.engine/~cylinder.5/meta/qty-temperature/cnt-exhaust.gas/pos-inlet"
     )]
-    public async Task Test_Parsing(string localIdStr)
+    public void Test_Parsing(string localIdStr)
     {
-        var (_, vis) = VISTests.GetVis();
-
-        var visVersion = VisVersion.v3_4a;
-
-        var gmod = await vis.GetGmod(visVersion);
-        var codebooks = await vis.GetCodebooks(visVersion);
-
-        var parsed = LocalId.TryParse(localIdStr, gmod, codebooks, out var localId);
+        var parsed = LocalId.TryParse(localIdStr, out var localId);
         Assert.True(parsed);
         Assert.Equal(localIdStr, localId!.ToString());
+    }
+
+    [Fact]
+    public void Test()
+    {
+        var localIdAsString =
+            "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet";
+
+        var localId = LocalId.Parse(localIdAsString);
     }
 }

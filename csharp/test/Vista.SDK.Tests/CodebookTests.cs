@@ -28,13 +28,10 @@ public class CodebookTests
 
     [Theory]
     [MemberData(nameof(Valid_Position_Test_data))]
-    public async Task Test_Position_Validation(
-        string input,
-        PositionValidationResult expectedOutput
-    )
+    public void Test_Position_Validation(string input, PositionValidationResult expectedOutput)
     {
         var (_, vis) = VISTests.GetVis();
-        var codebooks = await vis.GetCodebooks(VisVersion.v3_4a);
+        var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var codebookType = codebooks[CodebookName.Position];
         var validPosition = codebookType.ValidatePosition(input);
@@ -43,10 +40,10 @@ public class CodebookTests
     }
 
     [Fact]
-    public async Task Test_Positions()
+    public void Test_Positions()
     {
         var (_, vis) = VISTests.GetVis();
-        var codebooks = await vis.GetCodebooks(VisVersion.v3_4a);
+        var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var positions = codebooks[CodebookName.Position];
 
@@ -55,10 +52,10 @@ public class CodebookTests
     }
 
     [Fact]
-    public async Task Test_States()
+    public void Test_States()
     {
         var (_, vis) = VISTests.GetVis();
-        var codebooks = await vis.GetCodebooks(VisVersion.v3_4a);
+        var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var states = codebooks[CodebookName.State];
         Assert.NotNull(states);
@@ -69,10 +66,10 @@ public class CodebookTests
     }
 
     [Fact]
-    public async Task Test_Create_Tag()
+    public void Test_Create_Tag()
     {
         var (_, vis) = VISTests.GetVis();
-        var codebooks = await vis.GetCodebooks(VisVersion.v3_4a);
+        var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var codebookType = codebooks[CodebookName.Position];
 
@@ -103,20 +100,20 @@ public class CodebookTests
     }
 
     [Fact]
-    public async Task Test_Get_Groups()
+    public void Test_Get_Groups()
     {
         var (_, vis) = VISTests.GetVis();
-        var codebooks = await vis.GetCodebooks(VisVersion.v3_4a);
+        var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var groups = codebooks[CodebookName.Position].Groups;
         Assert.True(groups.Count > 1);
     }
 
     [Fact]
-    public async Task Test_Detail_Tag()
+    public void Test_Detail_Tag()
     {
         var (_, vis) = VISTests.GetVis();
-        var codebooks = await vis.GetCodebooks(VisVersion.v3_4a);
+        var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var codebook = codebooks[CodebookName.Detail];
         Assert.NotNull(codebook);

@@ -5,22 +5,22 @@ namespace Vista.SDK.Tests;
 public class GmodTests
 {
     [Fact]
-    public async Task Test_Gmod_Loads()
+    public void Test_Gmod_Loads()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
         Assert.NotNull(gmod);
 
         Assert.True(gmod.TryGetNode("400a", out _));
     }
 
     [Fact]
-    public async Task Test_Gmod_Node_Equality()
+    public void Test_Gmod_Node_Equality()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var node1 = gmod["400a"];
 
@@ -39,11 +39,11 @@ public class GmodTests
     }
 
     [Fact]
-    public async Task Test_Gmod_RootNode_Children()
+    public void Test_Gmod_RootNode_Children()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var node = gmod.RootNode;
 
@@ -51,11 +51,11 @@ public class GmodTests
     }
 
     [Fact]
-    public async Task Test_Normal_Assignments()
+    public void Test_Normal_Assignments()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var node = gmod["411.3"];
         Assert.NotNull(node.ProductType);
@@ -66,11 +66,11 @@ public class GmodTests
     }
 
     [Fact]
-    public async Task Test_Node_With_Product_Selection()
+    public void Test_Node_With_Product_Selection()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var node = gmod["411.2"];
         Assert.NotNull(node.ProductSelection);
@@ -81,11 +81,11 @@ public class GmodTests
     }
 
     [Fact]
-    public async Task Test_Product_Selection()
+    public void Test_Product_Selection()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var node = gmod["CS1"];
         Assert.True(node.IsProductSelection);
@@ -107,11 +107,11 @@ public class GmodTests
     [InlineData("C101.21s", false)]
     [InlineData("F201.11", true)]
     [InlineData("C101.211", false)]
-    public async Task Test_Mappability(string code, bool mappable)
+    public void Test_Mappability(string code, bool mappable)
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var node = gmod[code];
 
@@ -119,16 +119,24 @@ public class GmodTests
     }
 
     [Fact]
-    public async Task Test_Full_Traversal()
+    public void Test_Full_Traversal()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
+
+        var paths = new List<GmodPath>();
 
         var completed = gmod.Traverse(
             (parents, node) =>
             {
                 Assert.True(parents.Count == 0 || parents[0].Code == "VE");
+
+                if (parents.Any(p => p.Code == "HG3") || node.Code == "HG3")
+                {
+                    paths.Add(new GmodPath(parents, node));
+                }
+
                 return TraversalHandlerResult.Continue;
             }
         );
@@ -136,11 +144,11 @@ public class GmodTests
     }
 
     [Fact]
-    public async Task Test_Partial_Traversal()
+    public void Test_Partial_Traversal()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var state = new TraversalState(5) { NodeCount = 0 };
 
@@ -160,11 +168,11 @@ public class GmodTests
     }
 
     [Fact]
-    public async Task Test_Full_Traversal_From()
+    public void Test_Full_Traversal_From()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = await vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var state = new TraversalState(0) { NodeCount = 0 };
 

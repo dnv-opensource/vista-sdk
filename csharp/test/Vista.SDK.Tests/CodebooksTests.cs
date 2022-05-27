@@ -17,22 +17,22 @@ namespace Vista.SDK.Tests
         }
 
         [Fact]
-        public async Task Test_Codebooks_Loads()
+        public void Test_Codebooks_Loads()
         {
             var (_, vis) = GetVis();
 
-            var codebooks = await vis.GetCodebooks(VisVersion.v3_4a);
+            var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
             Assert.NotNull(codebooks);
 
             Assert.NotNull(codebooks.GetCodebook(CodebookName.Position));
         }
 
         [Fact]
-        public async Task Test_Codebooks_Equality()
+        public void Test_Codebooks_Equality()
         {
             var (_, vis) = GetVis();
 
-            var codebooks = await vis.GetCodebooks(VisVersion.v3_4a);
+            var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
             Assert.True(codebooks[CodebookName.Position].HasStandardValue("centre"));
         }

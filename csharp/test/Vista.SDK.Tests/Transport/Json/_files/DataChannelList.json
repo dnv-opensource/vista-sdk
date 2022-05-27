@@ -20,7 +20,7 @@
       "DataChannel": [
         {
           "DataChannelID": {
-            "LocalID": "/Naming_Rule/MainEngine/AirCooler1/CoolingFreshWater/Outlet/Temp",
+            "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air",
             "ShortID": "0010",
             "NameObject": {
               "NamingRule": "Naming_Rule",
@@ -56,7 +56,7 @@
         },
         {
           "DataChannelID": {
-            "LocalID": "/Naming_Rule/MainEngine/AirCooler1/CoolingFreshWater/Outlet/Press",
+            "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air/calc-mean",
             "ShortID": "0020",
             "NameObject": {
               "NamingRule": "Naming_Rule",
@@ -94,7 +94,7 @@
         },
         {
           "DataChannelID": {
-            "LocalID": "/Naming_Rule/MainEngine/AirCooler1/CoolingFreshWater/Outlet/Temp/Alert",
+            "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air/type-status",
             "ShortID": "0011",
             "NameObject": {
               "NamingRule": "Naming_Rule",
@@ -124,7 +124,7 @@
         },
         {
           "DataChannelID": {
-            "LocalID": "/Naming_Rule/MainEngine/AirCooler1/CoolingFreshWater/Outlet/Press/Alert",
+            "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-pressure/cnt-cooling.air/type-status",
             "ShortID": "0021",
             "NameObject": {
               "NamingRule": "Naming_Rule",

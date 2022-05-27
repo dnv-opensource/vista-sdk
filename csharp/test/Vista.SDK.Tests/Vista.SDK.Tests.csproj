@@ -55,9 +55,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="_files\test.txt" />
-    <EmbeddedResource Include="_files\test.txt" />
-  </ItemGroup>
-
 </Project>
