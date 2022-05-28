@@ -88,13 +88,13 @@ impl Gmod {
             .map(|child| &self.nodes[(*child) as usize])
     }
 
-    fn traverse_node<TState, THandler>(
+    fn traverse_node<THandler>(
         &self,
-        context: &mut TraversalContext<TState, THandler>,
+        context: &mut TraversalContext<THandler>,
         index: u32,
     ) -> TraversalHandlerResult
     where
-        THandler: FnMut(&mut TState, &dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+        THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
     {
         if context.has(index) {
             return TraversalHandlerResult::Continue;
@@ -102,7 +102,7 @@ impl Gmod {
 
         let parents = context.parents.iter().map(|i| &self.nodes[(*i) as usize]);
         let node = &self.nodes[index as usize];
-        let result = (context.handler)(&mut context.state, &parents, node);
+        let result = (context.handler)(&parents, node);
         if result == TraversalHandlerResult::Stop || result == TraversalHandlerResult::SkipSubtree {
             return result;
         }
@@ -131,33 +131,15 @@ impl Gmod {
         self.traverse_from(&self.nodes[(*index) as usize], handler)
     }
 
-    pub fn traverse_from<THandler>(&self, from_node: &GmodNode, mut handler: THandler) -> bool
+    pub fn traverse_from<THandler>(&self, from_node: &GmodNode, handler: THandler) -> bool
     where
         THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
-    {
-        let handler = 
-            |_state: &mut (), parents: &dyn Iterator<Item = &GmodNode>, node: &GmodNode| (handler)(parents, node);
-        self.traverse_with_from(&mut (), from_node, handler)
-    }
-
-    pub fn traverse_with<TState, THandler>(&self, state: &mut TState, handler: THandler) -> bool
-    where
-        THandler: FnMut(&mut TState, &dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
-    {
-        let index = self.index.get("VE").unwrap();
-        self.traverse_with_from(state, &self.nodes[(*index) as usize], handler)
-    }
-
-    pub fn traverse_with_from<TState, THandler>(&self, state: &mut TState, from_node: &GmodNode, handler: THandler) -> bool
-    where
-        THandler: FnMut(&mut TState, &dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
-    {
+    {        
         let index = self.index.get(&from_node.code).unwrap();
-        let mut context = TraversalContext::<TState, THandler> {
+        let mut context = TraversalContext {
             ids: VecSet::new(16),
             parents: Vec::with_capacity(16),
             handler: handler,
-            state: state,
         };
 
         let result = self.traverse_node(&mut context, *index);
@@ -165,19 +147,18 @@ impl Gmod {
     }
 }
 
-struct TraversalContext<'a, TState, THandler>
+struct TraversalContext<THandler>
 where
-    THandler: FnMut(&mut TState, &dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+    THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
 {
     ids: VecSet,
     pub parents: Vec<u32>,
     pub handler: THandler,
-    pub state: &'a mut TState,
 }
 
-impl<'a, TState, THandler> TraversalContext<'a, TState, THandler>
+impl<THandler> TraversalContext<THandler>
 where
-    THandler: FnMut(&mut TState, &dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+    THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
 {
     pub fn has(&self, index: u32) -> bool {
         self.ids.contains(index)
@@ -261,66 +242,35 @@ mod tests {
         let instance = Vis::instance();
         let gmod = instance.get_gmod(VisVersion::v3_4a);
 
-        let mut count = 0;
-        let reached_end = gmod.traverse(|_parents, _node| {
-            count += 1;
+        let traverse_count = {
+            let mut count = 0;
+            let reached_end = gmod.traverse(|_parents, _node| {
+                count += 1;
+    
+                TraversalHandlerResult::Continue
+            });
+            assert!(reached_end);
+            assert!(count > 0, "Count should increase after traversal");
+            println!("Gmod traversal count: {}", count);
+            count
+        };
 
-            TraversalHandlerResult::Continue
-        });
+        let traverse_from_count = {
+            let root = gmod.root_node();
 
-        assert!(reached_end);
-        assert!(count > 0, "Count should increase after traversal");
-    }
+            let mut count = 0;
+            let reached_end = gmod.traverse_from(root, |_parents, _node| {
+                count += 1;
+    
+                TraversalHandlerResult::Continue
+            });
+    
+            assert!(reached_end);
+            assert!(count > 0, "Count should increase after traversal");
+            println!("Gmod traversal count: {}", count);
+            count
+        };
 
-    #[test]
-    fn traverse_from() {
-        let instance = Vis::instance();
-        let gmod = instance.get_gmod(VisVersion::v3_4a);
-
-        let root = gmod.root_node();
-
-        let mut count = 0;
-        let reached_end = gmod.traverse_from(root, |_parents, _node| {
-            count += 1;
-
-            TraversalHandlerResult::Continue
-        });
-
-        assert!(reached_end);
-        assert!(count > 0, "Count should increase after traversal");
-    }
-
-    #[test]
-    fn traverse_with() {
-        let instance = Vis::instance();
-        let gmod = instance.get_gmod(VisVersion::v3_4a);
-
-        let mut count = 0;
-        let reached_end = gmod.traverse_with(&mut count, |count, _parents, _node| {
-            (*count) += 1;
-
-            TraversalHandlerResult::Continue
-        });
-
-        assert!(reached_end);
-        assert!(count > 0, "Count should increase after traversal");
-    }
-
-    #[test]
-    fn traverse_with_from() {
-        let instance = Vis::instance();
-        let gmod = instance.get_gmod(VisVersion::v3_4a);
-
-        let root = gmod.root_node();
-
-        let mut count = 0;
-        let reached_end = gmod.traverse_with_from(&mut count, root, |count, _parents, _node| {
-            (*count) += 1;
-
-            TraversalHandlerResult::Continue
-        });
-
-        assert!(reached_end);
-        assert!(count > 0, "Count should increase after traversal");
+        assert_eq!(traverse_count, traverse_from_count);
     }
 }
