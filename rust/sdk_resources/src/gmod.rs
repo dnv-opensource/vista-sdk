@@ -1,11 +1,11 @@
 use std::borrow::Cow;
-use std::{io::Read};
+use std::io::Read;
 
 use flate2::read::GzDecoder;
-use std::{collections::HashMap};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
-use crate::{result::LoadResourceError, asset::Asset, result::Result};
+use crate::{asset::Asset, result::LoadResourceError, result::Result};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GmodDto {
@@ -39,9 +39,9 @@ pub struct GmodNodeDto {
     pub normal_assignment_names: Option<HashMap<String, String>>,
 }
 
-
 pub fn get_gmod_dto(vis_version: &str) -> Result<GmodDto> {
-    let gmod_file_name = match Asset::iter().find(|f| f.contains("gmod") && f.contains(vis_version)) {
+    let gmod_file_name = match Asset::iter().find(|f| f.contains("gmod") && f.contains(vis_version))
+    {
         Some(f) => f,
         None => return Err(LoadResourceError::ResourceNotFound),
     };
@@ -64,8 +64,17 @@ pub fn deserialize_gmod_dto(gmod_file_name: Cow<str>) -> Result<GmodDto> {
         Err(e) => return Err(LoadResourceError::ReadError(e)),
     };
 
-    match gmod_json {
-        Ok(v) => Ok(v),
-        Err(e) => Err(LoadResourceError::DeserializationError(e)),
-    }
+    let mut gmod = match gmod_json {
+        Ok(v) => v,
+        Err(e) => return Err(LoadResourceError::DeserializationError(e)),
+    };
+
+    const EXCLUDE_PATTERN: &'static str = "99";
+    gmod.items
+        .retain(|node| !node.code.ends_with(EXCLUDE_PATTERN));
+    gmod.relations.retain(|[parent, child]| {
+        !parent.ends_with(EXCLUDE_PATTERN) && !child.ends_with(EXCLUDE_PATTERN)
+    });
+
+    Ok(gmod)
 }
