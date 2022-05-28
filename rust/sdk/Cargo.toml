@@ -11,7 +11,7 @@ liquid = "0.26.0"
 
 [dev-dependencies]
 criterion = "0.3"
-pprof = { version = "0.9", features = ["flamegraph", "criterion"] }
+pprof = { version = "0.9", features = ["flamegraph", "criterion", "protobuf-codec"] }
 
 [[bench]]
 name = "benchmarks"
