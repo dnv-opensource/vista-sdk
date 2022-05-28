@@ -19,9 +19,9 @@ pub fn criterion_benchmark(c: &mut Criterion) {
 criterion_group!{
     name = benches;
     config = Criterion::default()
-        .measurement_time(Duration::from_secs(30))
+        .measurement_time(Duration::from_secs(50))
         .sample_size(500)
-        .with_profiler(PProfProfiler::new(100, Output::Flamegraph(None)));
+        .with_profiler(PProfProfiler::new(100, Output::Protobuf));
     targets = criterion_benchmark
 }
 criterion_main!(benches);
