@@ -1,16 +1,13 @@
 use crate::vis::VisVersion;
 use sdk_resources::gmod::GmodDto;
-use std::{
-    collections::{HashMap},
-    str::FromStr,
-};
+use std::{collections::HashMap, str::FromStr};
 
 pub enum GmodRelation {
     Parent,
 }
 
 pub struct Gmod {
-    pub version: VisVersion,
+    version: VisVersion,
     index: HashMap<String, u32>,
     children: Vec<Vec<u32>>,
     parents: Vec<Vec<u32>>,
@@ -19,7 +16,31 @@ pub struct Gmod {
 
 #[derive(Debug, Clone)]
 pub struct GmodNode {
-    pub code: String,
+    code: String,
+    location: String,
+    node_type: String,
+}
+
+impl GmodNode {
+    pub fn code(&self) -> &str {
+        self.code.as_str()
+    }
+
+    pub fn location(&self) -> &str {
+        self.location.as_str()
+    }
+
+    pub fn with_location(&self, location: String) -> GmodNode {
+        let mut result = self.clone();
+        result.location = location;
+        result
+    }
+
+    pub fn without_location(&self) -> GmodNode {
+        let mut result = self.clone();
+        result.location = Default::default();
+        result
+    }
 }
 
 #[derive(PartialEq)]
@@ -43,6 +64,8 @@ impl Gmod {
 
             nodes.push(GmodNode {
                 code: node.code.to_string(),
+                location: Default::default(),
+                node_type: node.node_type.to_string(),
             });
 
             children.push(Vec::with_capacity(1));
@@ -67,6 +90,10 @@ impl Gmod {
             parents,
             nodes,
         }
+    }
+
+    pub fn version(&self) -> VisVersion {
+        self.version
     }
 
     pub fn root_node(&self) -> &GmodNode {
@@ -134,7 +161,7 @@ impl Gmod {
     pub fn traverse_from<THandler>(&self, from_node: &GmodNode, handler: THandler) -> bool
     where
         THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
-    {        
+    {
         let index = self.index.get(&from_node.code).unwrap();
         let mut context = TraversalContext {
             ids: VecSet::new(16),
@@ -246,7 +273,7 @@ mod tests {
             let mut count = 0;
             let reached_end = gmod.traverse(|_parents, _node| {
                 count += 1;
-    
+
                 TraversalHandlerResult::Continue
             });
             assert!(reached_end);
@@ -261,10 +288,10 @@ mod tests {
             let mut count = 0;
             let reached_end = gmod.traverse_from(root, |_parents, _node| {
                 count += 1;
-    
+
                 TraversalHandlerResult::Continue
             });
-    
+
             assert!(reached_end);
             assert!(count > 0, "Count should increase after traversal");
             println!("Gmod traversal count: {}", count);
