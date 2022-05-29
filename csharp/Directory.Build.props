@@ -1,17 +1,29 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <EnablePreviewFeatures>true</EnablePreviewFeatures>
-    <LangVersion>preview</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <LangVersion>latest</LangVersion>
+
+    <Author>DNV AS</Author>
+    <Company>DNV AS</Company>
+    <Copyright>DNV AS</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup>
     <DotNetVersion>6.0.0</DotNetVersion>
   </PropertyGroup>
 
+   <ItemGroup>
+    <None Include="..\LICENSE" Pack="true" Visible="false" PackagePath="" />
+  </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="CSharpier.MsBuild" Version="0.15.1" PrivateAssets="all" />
+    <PackageReference Include="CSharpier.MsBuild" Version="0.15.1" >
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

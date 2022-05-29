@@ -5,15 +5,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Vista.SDK</AssemblyName>
     <RootNamespace>Vista.SDK</RootNamespace>
-    <Author>DNV AS</Author>
-    <Company>DNV AS</Company>
-    <Copyright>DNV AS</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\..\..\LICENSE" Pack="true" Visible="false" PackagePath="" />
-  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\resources\*.gz">
