@@ -69,7 +69,7 @@ mod tests {
         let instance = Vis::instance();
         let version = VisVersion::v3_4a;
         let gmod = instance.get_gmod(version);
-        assert_eq!(gmod.version, version);
+        assert_eq!(gmod.version(), version);
     }
 
     #[test]
