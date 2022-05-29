@@ -9,10 +9,6 @@ on:
 env:
   DOTNET_VERSION: '6.0.x'
 
-defaults:
-  run:
-    working-directory: ./csharp
-
 jobs:
   build:
     name: build-and-test-${{matrix.os}}
@@ -29,17 +25,12 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore tools
-        run: dotnet tool restore
-
-      - name: Check formatting
-        run: dotnet csharpier --check   
-
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore Build.csproj
 
       - name: Build
-        run: dotnet build --configuration Release  --no-restore
-      # TO DO: Create test.sh
+        run: dotnet build Build.csproj --no-restore -c Release
+
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test Build.csproj --no-build --verbosity normal -c Release -f net6.0
+
