@@ -26,11 +26,11 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install dependencies
-        run: dotnet restore Build.csproj
+        run: dotnet restore csharp/Build.csproj
 
       - name: Build
-        run: dotnet build Build.csproj --no-restore -c Release
+        run: dotnet build csharp/Build.csproj --no-restore -c Release
 
       - name: Test
-        run: dotnet test Build.csproj --no-build --verbosity normal -c Release -f net6.0
+        run: dotnet test csharp/Build.csproj --no-build --verbosity normal -c Release -f net6.0
 
