@@ -1,4 +1,5 @@
 ## Vista SDK
+[![Build and Test](https://github.com/dnv-opensource/vista-sdk/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/dnv-opensource/vista-sdk/actions/workflows/build-and-test.yml)
 
 The Vista team at DNV are working on tooling related to
 * DNV Vessel Information Structure (VIS)
