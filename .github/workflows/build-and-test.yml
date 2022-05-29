@@ -31,7 +31,6 @@ jobs:
 
       - name: Build
         run: dotnet build csharp/Build.csproj --no-restore -c Release
-        dotnet build Build.csproj --no-restore -c Release
 
       - name: Test
         run: dotnet test csharp/Build.csproj --no-build --verbosity normal -c Release -f net6.0
