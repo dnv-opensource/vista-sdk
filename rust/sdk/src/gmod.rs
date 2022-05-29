@@ -2,10 +2,6 @@ use crate::vis::VisVersion;
 use sdk_resources::gmod::GmodDto;
 use std::{collections::HashMap, str::FromStr};
 
-pub enum GmodRelation {
-    Parent,
-}
-
 pub struct Gmod {
     version: VisVersion,
     index: HashMap<String, u32>,
@@ -18,7 +14,19 @@ pub struct Gmod {
 pub struct GmodNode {
     code: String,
     location: String,
+    metadata: GmodNodeMetadata,
+}
+
+#[derive(Debug, Clone)]
+pub struct GmodNodeMetadata {
+    category: String,
     node_type: String,
+    name: Option<String>,
+    common_name: Option<String>,
+    definition: Option<String>,
+    common_definition: Option<String>,
+    install_substructure: Option<bool>,
+    normal_assignment_names: HashMap<String, String>,
 }
 
 impl GmodNode {
@@ -40,6 +48,18 @@ impl GmodNode {
         let mut result = self.clone();
         result.location = Default::default();
         result
+    }
+
+    pub fn product_type<'a>(&self, gmod: &'a Gmod) -> Option<&'a GmodNode> {
+        gmod.get_product_type_for(self)
+    }
+
+    pub fn product_selection<'a>(&self, gmod: &'a Gmod) -> Option<&'a GmodNode> {
+        gmod.get_product_selection_for(self)
+    }
+
+    pub fn is_mappable(&self) -> bool {
+        todo!()
     }
 }
 
@@ -65,7 +85,19 @@ impl Gmod {
             nodes.push(GmodNode {
                 code: node.code.to_string(),
                 location: Default::default(),
-                node_type: node.node_type.to_string(),
+                metadata: GmodNodeMetadata {
+                    category: node.category.to_string(),
+                    node_type: node.node_type.to_string(),
+                    name: node.name.clone(),
+                    common_name: node.common_name.clone(),
+                    definition: node.definition.clone(),
+                    common_definition: node.common_definition.clone(),
+                    install_substructure: node.install_substructure.clone(),
+                    normal_assignment_names: node
+                        .normal_assignment_names
+                        .clone()
+                        .unwrap_or_default(),
+                },
             });
 
             children.push(Vec::with_capacity(1));
@@ -109,10 +141,50 @@ impl Gmod {
     }
 
     pub fn get_children(&self, node: &GmodNode) -> impl Iterator<Item = &GmodNode> {
-        let index = self.index.get(&node.code).unwrap();
-        self.children[(*index) as usize]
+        let index = self.get_index(node);
+        self.children[index]
             .iter()
             .map(|child| &self.nodes[(*child) as usize])
+    }
+
+    pub fn get_product_type_for(&self, node: &GmodNode) -> Option<&GmodNode> {
+        let index = self.index[&node.code];
+        let children = &self.children[index as usize];
+        if children.len() != 1 {
+            return None;
+        }
+        if !node.metadata.category.contains("FUNCTION") {
+            return None;
+        }
+
+        let child = &self.nodes[children[0] as usize];
+        if child.metadata.category != "PRODUCT" || child.metadata.node_type != "TYPE" {
+            return None;
+        }
+
+        Some(child)
+    }
+
+    pub fn get_product_selection_for(&self, node: &GmodNode) -> Option<&GmodNode> {
+        let index = self.index[&node.code];
+        let children = &self.children[index as usize];
+        if children.len() != 1 {
+            return None;
+        }
+        if !node.metadata.category.contains("FUNCTION") {
+            return None;
+        }
+
+        let child = &self.nodes[children[0] as usize];
+        if !child.metadata.category.contains("PRODUCT") || child.metadata.node_type != "SELECTION" {
+            return None;
+        }
+
+        Some(child)
+    }
+
+    fn get_index(&self, node: &GmodNode) -> usize {
+        self.index[&node.code] as usize
     }
 
     fn traverse_node<THandler>(
@@ -154,22 +226,22 @@ impl Gmod {
     where
         THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
     {
-        let index = self.index.get("VE").unwrap();
-        self.traverse_from(&self.nodes[(*index) as usize], handler)
+        let index = self.index["VE"];
+        self.traverse_from(&self.nodes[index as usize], handler)
     }
 
     pub fn traverse_from<THandler>(&self, from_node: &GmodNode, handler: THandler) -> bool
     where
         THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
     {
-        let index = self.index.get(&from_node.code).unwrap();
+        let index = self.index[&from_node.code];
         let mut context = TraversalContext {
             ids: VecSet::new(16),
             parents: Vec::with_capacity(16),
             handler: handler,
         };
 
-        let result = self.traverse_node(&mut context, *index);
+        let result = self.traverse_node(&mut context, index);
         result == TraversalHandlerResult::Continue
     }
 }
