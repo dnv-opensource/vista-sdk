@@ -13,7 +13,7 @@
     <Author>DNV AS</Author>
     <Company>DNV AS</Company>
     <Copyright>DNV AS</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
     <Copyright>Copyright 2022 DNV AS</Copyright>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
@@ -25,10 +25,6 @@
   <PropertyGroup>
     <DotNetVersion>6.0.0</DotNetVersion>
   </PropertyGroup>
-
-   <ItemGroup>
-    <None Include="..\LICENSE" Pack="true" Visible="false" PackagePath="" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CSharpier.MsBuild" Version="0.15.1" >

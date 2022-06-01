@@ -5,6 +5,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Vista.SDK</AssemblyName>
     <RootNamespace>Vista.SDK</RootNamespace>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

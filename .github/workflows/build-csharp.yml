@@ -8,6 +8,9 @@ on:
     branches: [ main ]
     paths: [ csharp/** ]
 
+env:
+  CI_BUILD: true
+
 jobs:
   build:
     name: build-and-test-${{matrix.os}}
@@ -37,5 +40,8 @@ jobs:
         run: dotnet test Build.csproj --no-build --verbosity normal -c Release
 
       - name: Pack
-        run: dotnet pack Pack.csproj --no-build --verbosity normal -c Release -o artifacts/
+        run: find . -path "src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.0.1-preview-$GITHUB_RUN_NUMBER
 
+      - name: Push
+        if: ${{ success() && !github.base_ref }}
+        run: dotnet nuget push artifacts/**.nupkg -s https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
