@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
 
+    <IsPackable>false</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>

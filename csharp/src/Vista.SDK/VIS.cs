@@ -23,6 +23,9 @@ public interface IVIS
     //GmodPath Convert(VisVersion sourceVersion, GmodPath sourcePath, VisVersion targetVersion);
 }
 
+/// <summary>
+/// Extensions for working with VIS versions
+/// </summary>
 public static partial class VisVersionExtensions { }
 
 public sealed class VIS : IVIS

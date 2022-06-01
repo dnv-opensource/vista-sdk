@@ -1,0 +1,41 @@
+name: Build and publish
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ csharp/** ]
+  pull_request:
+    branches: [ main ]
+    paths: [ csharp/** ]
+
+jobs:
+  build:
+    name: build-and-test-${{matrix.os}}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: csharp/
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+            global-json-file: csharp/global.json
+
+      - name: Install dependencies
+        run: dotnet restore Build.csproj
+
+      - name: Build
+        run: dotnet build Build.csproj --no-restore -c Release
+
+      - name: Test
+        run: dotnet test Build.csproj --no-build --verbosity normal -c Release
+
+      - name: Pack
+        run: dotnet pack Pack.csproj --no-build --verbosity normal -c Release -o artifacts/
+

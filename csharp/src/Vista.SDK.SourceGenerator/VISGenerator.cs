@@ -27,7 +27,10 @@ namespace Vista.SDK.SourceGenerator
             }
 
             var sourceBuilder = new StringBuilder(
-                @"namespace Vista.SDK
+                @"
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
+namespace Vista.SDK
 {
     public enum VisVersion
     {"
