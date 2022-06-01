@@ -37,6 +37,9 @@ jobs:
         run: dotnet test Build.csproj --no-build --verbosity normal -c Release
 
       - name: Pack
+        run: echo echo "$(pwd)" && find . -path "src/*/*.*sproj"
+
+      - name: Pack
         run: find . -path "src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.0.1-preview-$GITHUB_RUN_NUMBER
 
       - name: Push
