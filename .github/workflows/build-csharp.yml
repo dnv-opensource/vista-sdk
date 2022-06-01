@@ -36,7 +36,7 @@ jobs:
       - name: Test
         run: dotnet test Build.csproj --no-build --verbosity normal -c Release
 
-      - name: Pack
+      - name: Context
         run: echo echo "$(pwd)" && find . -path "src/*/*.*sproj"
 
       - name: Pack
