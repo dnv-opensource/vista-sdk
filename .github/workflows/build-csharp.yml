@@ -1,4 +1,4 @@
-name: Build and publish
+name: Build, test and publish
 
 on:
   push:
@@ -13,14 +13,11 @@ env:
 
 jobs:
   build:
-    name: build-and-test-${{matrix.os}}
-    runs-on: ${{ matrix.os }}
+    name: Build, test and publish
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: csharp/
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v3
