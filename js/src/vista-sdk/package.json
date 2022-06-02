@@ -1,5 +1,5 @@
 {
-    "name": "vista.sdk",
+    "name": "dnv.vista.sdk",
     "version": "1.0.0",
     "description": "In this repository we codify the rules and principles of VIS and related ISO-standards to enable and support users and implementers of the standards.",
     "main": "index.js",
