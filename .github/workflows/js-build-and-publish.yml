@@ -2,42 +2,41 @@ name: Node.js Package
 
 on:
   workflow_dispatch:
-    branches: [feature/js-sdk]
-    paths: [ js/src/vista-sdk/** ]
+    branches: [main, feature/js-sdk, feature/js-yaml-build-and-publish]
   push:
-    branches: [feature/js-sdk]
-    paths: [ js/src/vista-sdk/** ]
+    branches: [main, feature/js-sdk, feature/js-yaml-build-and-publish]
+  pull_request:
+    branches: [main, feature/js-sdk, feature/js-yaml-build-and-publish]
+env:
+  CI_BUILD: true
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: js/src/vista-sdk/
+    runs-on: ubuntu-latest   
     
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - run: ls
+      - run: cd js/src/vista-sdk          
+      - run: ls      
       - run: npm ci
       - run: npm test
 
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: js/src/vista-sdk/
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+      - run: cd js/src/vista-sdk          
       - run: ls
       - run: npm ci
-      - run: npm publish
+      - if: ${{ success() && !github.base_ref }}
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NUGET_API_KEY}}
