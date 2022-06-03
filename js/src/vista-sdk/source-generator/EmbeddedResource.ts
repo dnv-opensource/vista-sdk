@@ -3,7 +3,7 @@ import * as zlib from "zlib";
 import { CodebooksDto } from "../types/CodebookDto";
 import { GmodDto } from "../types/GmodDto";
 
-export class EmbeddedResource {
+export class EmbeddedResource { 
     public static readonly RESOURCE_DIR = "./resources";
 
     public static async getGmodVisVersions(apiUrl?: string) {
@@ -30,6 +30,7 @@ export class EmbeddedResource {
     }
 
     public static getResourceNames() {
+        console.log(`__dirname: [${__dirname}] end__dirname`);
         return this.isNode()
             ? this.getResourceNames__node()
             : this.getResourceNames__browser();
