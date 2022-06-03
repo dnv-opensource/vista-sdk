@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - run: ls js/src/vista-sdk     
+      - run: node js/src/vista-sdk/source-generator/dirtest.js
       - run: cd js/src/vista-sdk; npm ci
       - run: cd js/src/vista-sdk; npm test
 
