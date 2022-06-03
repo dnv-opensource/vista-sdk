@@ -1,36 +1,43 @@
-# feature/js-yaml-build-and-publish
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-
 name: Node.js Package
 
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+    branches: [feature/js-sdk]
+    paths: [ js/src/vista-sdk/** ]
+  push:
+    branches: [feature/js-sdk]
+    paths: [ js/src/vista-sdk/** ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: js/src/vista-sdk/
     
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - run: cd 'js/src/vista-sdk'
+      - run: ls
       - run: npm ci
       - run: npm test
 
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: js/src/vista-sdk/
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+      - run: ls
       - run: npm ci
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{NPM_API_KEY}}
+          NODE_AUTH_TOKEN: ${{secrets.NUGET_API_KEY}}
