@@ -20,7 +20,8 @@ jobs:
         with:
           node-version: 16
       # - run: node js/src/vista-sdk/source-generator/dirtest.js
-      - run: cd js/src/vista-sdk; npm ci; npm run build; npm test
+      - run: cd js/src/vista-sdk; npm ci; npm run build;
+#      - run: cd js/src/vista-sdk; npm test
 
   publish-npm:
     needs: build
@@ -31,7 +32,8 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/          
-      - run: cd js/src/vista-sdk; npm ci; npm run build; npm test
+      - run: cd js/src/vista-sdk; npm ci; npm run build;
+#      - run: cd js/src/vista-sdk; npm test
       - if: ${{ success() && !github.base_ref }}
         run: cd js/src/vista-sdk; npm publish
         env:
