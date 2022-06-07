@@ -38,4 +38,54 @@ describe("Gmod", () => {
 
         expect(node.children).not.toHaveLength(0);
     });
+
+    test("Normal assignments", async () => {
+        const gmod = await gmodPromise;
+
+        const node1 = gmod.getNode("411.3");
+
+        expect(node1.productType).toBeTruthy();
+        expect(node1.productSelection).toBeFalsy();
+
+        const node2 = gmod.getNode("H601");
+        expect(node2.productType).toBeFalsy();
+    }
+    );
+
+    test("Product selection", async () => {
+        const gmod = await gmodPromise;
+
+        const node = gmod.getNode("CS1");
+
+        expect(node.isProductSelection);
+    });
+
+    const testMappabilityData = [
+        { input: "VE", output: true},
+        { input: "300a", output: false},
+        { input: "300", output: true},
+        { input: "411", output: true},
+        { input: "410", output: true},
+        { input: "651.21s", output: false},
+        { input: "942.2", output: true},
+        { input: "411.1", output: false},
+        { input: "C101", output: true},
+        { input: "CS1", output: false},
+        { input: "C101.663", output: true},
+        { input: "C101.4", output: true},
+        { input: "C101.21s", output: false},
+        { input: "F201.11", output: true},
+        { input: "C101.211", output: false},
+    ];
+
+    test("Mappability", async () => {
+        const gmod = await gmodPromise;
+
+        testMappabilityData.forEach(({input, output}) => {
+            const node = gmod.getNode(input);
+            console.log(node.code);
+            expect(node.isMappable).toBe(output);
+        });
+    });
+
 });

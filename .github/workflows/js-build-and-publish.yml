@@ -12,16 +12,15 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest   
+    runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - run: node js/src/vista-sdk/source-generator/dirtest.js
-      - run: cd js/src/vista-sdk; npm ci
-      - run: cd js/src/vista-sdk; npm test
+      # - run: node js/src/vista-sdk/source-generator/dirtest.js
+      - run: cd js/src/vista-sdk; npm ci; npm run build; npm test
 
   publish-npm:
     needs: build
@@ -32,8 +31,7 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/          
-      - run: ls js/src/vista-sdk
-      - run: cd js/src/vista-sdk; npm ci
+      - run: cd js/src/vista-sdk; npm ci; npm run build; npm test
       - if: ${{ success() && !github.base_ref }}
         run: cd js/src/vista-sdk; npm publish
         env:
