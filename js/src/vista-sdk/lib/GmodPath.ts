@@ -1,7 +1,6 @@
-import { Gmod } from "./Gmod";
-import { GmodNode } from "./GmodNode";
+import { GmodNode, Gmod } from ".";
 import { TraversalHandlerResult } from "./types/Gmod";
-import { ParseContext, PathNode } from "./types/GmodPath";
+import { PathNode, ParseContext } from "./types/GmodPath";
 import { isNullOrWhiteSpace } from "./util/util";
 
 export class GmodPath {

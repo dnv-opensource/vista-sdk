@@ -1,15 +1,14 @@
-import { isNullOrWhiteSpace } from "./util/util";
 import {
-    CodebookName,
-    Codebooks,
     Gmod,
+    Codebooks,
+    LocalIdBuilder,
     GmodPath,
-    LocalId,
     MetadataTag,
+    CodebookName,
 } from ".";
 import { LocalIdErrorBuilder } from "./internal/LocalIdErrorBuilder";
-import { LocalIdBuilder } from "./LocalId.Builder";
 import { ParsingState } from "./types/LocalId";
+import { isNullOrWhiteSpace } from "./util/util";
 
 type ParseContext = {
     state: ParsingState;

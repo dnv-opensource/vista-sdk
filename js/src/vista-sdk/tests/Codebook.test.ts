@@ -1,6 +1,6 @@
-import { CodebookName, VisVersion } from "..";
-import { PositionValidationResult } from "../Codebook";
-import { VIS } from "../VIS";
+import { VisVersion, CodebookName } from "../lib";
+import { PositionValidationResult } from "../lib/Codebook";
+import { VIS } from "../lib/VIS";
 
 describe("Codebooks", () => {
     const testPositionData = [

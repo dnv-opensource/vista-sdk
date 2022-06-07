@@ -1,5 +1,5 @@
-import { CodebookName, VisVersion } from "..";
-import { VIS } from "../VIS";
+import { VisVersion, CodebookName } from "../lib";
+import { VIS } from "../lib/VIS";
 
 describe("Codebooks", () => {
     const vis = VIS.instance;

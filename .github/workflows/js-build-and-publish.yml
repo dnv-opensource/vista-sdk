@@ -11,18 +11,6 @@ env:
   CI_BUILD: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      # - run: node js/src/vista-sdk/source-generator/dirtest.js
-      - run: cd js/src/vista-sdk; npm ci; npm run build;
-#      - run: cd js/src/vista-sdk; npm test
-
   publish-npm:
     needs: build
     runs-on: ubuntu-latest

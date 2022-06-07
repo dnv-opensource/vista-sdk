@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import * as zlib from "zlib";
+import { GmodDto } from "..";
 import { CodebooksDto } from "../types/CodebookDto";
-import { GmodDto } from "../types/GmodDto";
 
 export class EmbeddedResource { 
     public static readonly RESOURCE_DIR = "./resources";

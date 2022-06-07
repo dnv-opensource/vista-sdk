@@ -1,4 +1,4 @@
-import { Codebooks, Gmod, GmodDto, VisVersion } from ".";
+import { VisVersion, GmodDto, Gmod, Codebooks } from ".";
 import { EmbeddedResource } from "./source-generator/EmbeddedResource";
 import { CodebooksDto } from "./types/CodebookDto";
 import { VisVersionExtension, VisVersions } from "./VisVersion";

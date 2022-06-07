@@ -1,6 +1,6 @@
 import * as fs from "fs-extra";
-import { EmbeddedResource } from "./source-generator/EmbeddedResource";
-import { VisGenerator } from "./source-generator/VisGenerator";
+import { EmbeddedResource } from "./lib/source-generator/EmbeddedResource";
+import { VisGenerator } from "./lib/source-generator/VisGenerator";
 
 module.exports = (async () => {
     /* Copy resources */

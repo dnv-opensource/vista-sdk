@@ -1,8 +1,6 @@
-import { CodebookName, LocalId, LocalIdBuilder } from "..";
-import { LocalIdErrorBuilder } from "../internal/LocalIdErrorBuilder";
-import { EmbeddedResource } from "../source-generator/EmbeddedResource";
-import { VIS } from "../VIS";
-import { VisVersion } from "../VisVersion";
+import { VisVersion, LocalIdBuilder, CodebookName } from "../lib";
+import { LocalIdErrorBuilder } from "../lib/internal/LocalIdErrorBuilder";
+import { VIS } from "../lib/VIS";
 
 type Input = {
     primaryItem: string;

@@ -1,6 +1,5 @@
-import { Gmod } from "./Gmod";
+import { GmodNodeDto, Gmod } from ".";
 import { GmodNodeMetadata } from "./types/GmodNode";
-import { GmodNodeDto } from "./types/GmodDto";
 import { naturalSort } from "./util/util";
 
 export class GmodNode {

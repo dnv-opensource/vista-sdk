@@ -1,6 +1,5 @@
-import { CodebookName, Codebooks, Gmod, MetadataTag } from ".";
+import { LocalIdBuilder, CodebookName, MetadataTag, Gmod, Codebooks } from ".";
 import { LocalIdErrorBuilder } from "./internal/LocalIdErrorBuilder";
-import { LocalIdBuilder } from "./LocalId.Builder";
 import { LocalIdParser } from "./LocalId.Parsing";
 
 export class LocalId {
