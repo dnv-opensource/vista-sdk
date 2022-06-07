@@ -33,6 +33,7 @@ jobs:
           node-version: 16
           registry-url: https://registry.npmjs.org/          
       - run: cd js/src/vista-sdk; npm ci; npm run build;
+      - run: npm login
 #      - run: cd js/src/vista-sdk; npm test
       - if: ${{ success() && !github.base_ref }}
         run: cd js/src/vista-sdk; npm version $(node -p "require('./package.json').version")-${{ github.run_id }}; npm publish --access public;
