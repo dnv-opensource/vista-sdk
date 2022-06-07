@@ -86,53 +86,53 @@ public class GmodVersioningTests
         Assert.Equal(expectedPath, targetPath?.ToString());
     }
 
-    [Fact]
-    public void SmokeTest_GmodVersioning_ConvertPath()
-    {
-        var (_, vis) = VISTests.GetVis();
+    //[Fact]
+    //public void SmokeTest_GmodVersioning_ConvertPath()
+    //{
+    //    var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
-        var targetGmod = vis.GetGmod(VisVersion.v3_5a);
-        var gmodVersioning = vis.GetGmodVersioning();
+    //    var gmod = vis.GetGmod(VisVersion.v3_4a);
+    //    var targetGmod = vis.GetGmod(VisVersion.v3_5a);
+    //    var gmodVersioning = vis.GetGmodVersioning();
 
-        var counter = 0;
-        GmodPath? targetPath;
-        var failedPaths = new List<Exception>();
+    //    var counter = 0;
+    //    GmodPath? targetPath;
+    //    var failedPaths = new List<Exception>();
 
-        var completed = gmod.Traverse(
-            (parents, node) =>
-            {
-                counter++;
+    //    var completed = gmod.Traverse(
+    //        (parents, node) =>
+    //        {
+    //            counter++;
 
-                if (!GmodPath.IsValid(parents, node))
-                    return TraversalHandlerResult.Continue;
-                try
-                {
-                    var path = new GmodPath(parents, node);
+    //            if (!GmodPath.IsValid(parents, node))
+    //                return TraversalHandlerResult.Continue;
+    //            try
+    //            {
+    //                var path = new GmodPath(parents, node);
 
-                    targetPath = gmodVersioning.ConvertPath(
-                        VisVersion.v3_4a,
-                        path,
-                        VisVersion.v3_5a
-                    );
-                    Assert.NotNull(targetPath);
-                    var parsedPath = targetGmod.TryParsePath(
-                        targetPath.ToString(),
-                        out var parsedTargetPath
-                    );
-                    Assert.True(parsedPath);
-                    Assert.Equal(parsedTargetPath?.ToString(), targetPath.ToString());
-                }
-                catch (Exception e)
-                {
-                    testOutputHelper.WriteLine(e.ToString());
-                    failedPaths.Add(e);
-                }
-                return TraversalHandlerResult.Continue;
-            }
-        );
-        Assert.True(completed);
-    }
+    //                targetPath = gmodVersioning.ConvertPath(
+    //                    VisVersion.v3_4a,
+    //                    path,
+    //                    VisVersion.v3_5a
+    //                );
+    //                Assert.NotNull(targetPath);
+    //                var parsedPath = targetGmod.TryParsePath(
+    //                    targetPath.ToString(),
+    //                    out var parsedTargetPath
+    //                );
+    //                Assert.True(parsedPath);
+    //                Assert.Equal(parsedTargetPath?.ToString(), targetPath.ToString());
+    //            }
+    //            catch (Exception e)
+    //            {
+    //                testOutputHelper.WriteLine(e.ToString());
+    //                failedPaths.Add(e);
+    //            }
+    //            return TraversalHandlerResult.Continue;
+    //        }
+    //    );
+    //    Assert.True(completed);
+    //}
 
     public static IEnumerable<string?[]> Valid_Test_Data_Node =>
         new string?[][]
