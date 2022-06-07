@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -41,14 +41,14 @@ namespace Vista.SDK
                 sourceBuilder.Append(
                     @$"
         [global::System.Runtime.Serialization.EnumMember(Value = ""{version}"")]
-        v{version.Replace('-', '_')},
-    }}
-"
+        v{version.Replace('-', '_')},"
                 );
             }
 
             sourceBuilder.Append(
                 @"
+    }
+
     static partial class VisVersionExtensions
     {
         public static string ToVersionString(this VisVersion version) =>

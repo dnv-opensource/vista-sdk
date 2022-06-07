@@ -4,7 +4,7 @@ namespace Vista.SDK;
 
 public record class GmodNode
 {
-    public string Code { get; }
+    public string Code { get; init; }
 
     public string? Location { get; init; }
 
@@ -57,6 +57,8 @@ public record class GmodNode
     public bool IsProductSelection => Gmod.IsProductSelection(Metadata);
 
     public bool IsAsset => Gmod.IsAsset(Metadata);
+
+    public bool IsProductGroupLevel => Gmod.IsProductGroupLevel(Metadata);
 
     public GmodNode? ProductType
     {
@@ -147,6 +149,10 @@ public record class GmodNode
     public bool IsLeafNode => Gmod.IsLeafNode(Metadata);
 
     public bool IsFunctionNode => Gmod.IsFunctionNode(Metadata);
+
+    public bool IsAssetFunctionNode => Gmod.IsAssetFunctionNode(Metadata);
+
+    public bool IsRoot => Code == "VE";
 }
 
 public sealed record class GmodNodeMetadata(

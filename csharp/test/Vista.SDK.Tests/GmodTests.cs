@@ -130,7 +130,7 @@ public class GmodTests
         var completed = gmod.Traverse(
             (parents, node) =>
             {
-                Assert.True(parents.Count == 0 || parents[0].Code == "VE");
+                Assert.True(parents.Count == 0 || parents[0].IsRoot);
 
                 if (parents.Any(p => p.Code == "HG3") || node.Code == "HG3")
                 {
@@ -156,7 +156,7 @@ public class GmodTests
             state,
             (state, parents, node) =>
             {
-                Assert.True(parents.Count == 0 || parents[0].Code == "VE");
+                Assert.True(parents.Count == 0 || parents[0].IsRoot);
                 if (++state.NodeCount == state.StopAfter)
                     return TraversalHandlerResult.Stop;
                 return TraversalHandlerResult.Continue;

@@ -60,9 +60,13 @@ public class CodebookTests
         var states = codebooks[CodebookName.State];
         Assert.NotNull(states);
 
-        Assert.True(states.HasGroup("Clogged"));
+        Assert.False(states.HasGroup("Clogged"));
 
         Assert.True(states.HasStandardValue("clogged"));
+
+        Assert.True(states.HasGroup("Acknowledged"));
+
+        Assert.True(states.HasStandardValue("acknowledged"));
     }
 
     [Fact]

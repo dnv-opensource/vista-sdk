@@ -43,6 +43,13 @@ public sealed partial class Gmod
 
     public static bool IsAsset(GmodNodeMetadata metadata) => metadata.Category == "ASSET";
 
+    public static bool IsAssetFunctionNode(GmodNodeMetadata metadata) =>
+        metadata.Category.Contains("FUNCTION") && !metadata.Category.Contains("PRODUCT");
+
+    public static bool IsProductGroupLevel(GmodNodeMetadata metadata) =>
+        metadata.Category == "PRODUCT" && metadata.Type == "GROUP LEVEL 1"
+        || metadata.Type == "GROUP LEVEL 2";
+
     internal Gmod(VisVersion version, GmodDto dto)
     {
         VisVersion = version;

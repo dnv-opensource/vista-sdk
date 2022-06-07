@@ -18,9 +18,9 @@ public interface IVIS
 
     IEnumerable<VisVersion> GetVisVersions();
 
-    //GmodNode Convert(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion);
+    GmodVersioningDto GetGmodVersioningDto();
 
-    //GmodPath Convert(VisVersion sourceVersion, GmodPath sourcePath, VisVersion targetVersion);
+    GmodVersioning GetGmodVersioning();
 }
 
 /// <summary>
@@ -34,6 +34,9 @@ public sealed class VIS : IVIS
     private readonly MemoryCache _gmodCache;
     private readonly MemoryCache _codebooksDtoCache;
     private readonly MemoryCache _codebooksCache;
+    private readonly MemoryCache _gmodVersioningDtoCache;
+    private readonly MemoryCache _gmodVersioningCache;
+    private const string _versioning = "versioning";
 
     public static readonly VIS Instance = new VIS();
 
@@ -61,6 +64,20 @@ public sealed class VIS : IVIS
             }
         );
         _codebooksCache = new MemoryCache(
+            new MemoryCacheOptions
+            {
+                SizeLimit = 10,
+                ExpirationScanFrequency = TimeSpan.FromHours(1),
+            }
+        );
+        _gmodVersioningDtoCache = new MemoryCache(
+            new MemoryCacheOptions
+            {
+                SizeLimit = 10,
+                ExpirationScanFrequency = TimeSpan.FromHours(1),
+            }
+        );
+        _gmodVersioningCache = new MemoryCache(
             new MemoryCacheOptions
             {
                 SizeLimit = 10,
@@ -119,6 +136,44 @@ public sealed class VIS : IVIS
         var gmods = versions.Select(v => (Version: v, Gmod: GetGmod(v))).ToArray();
 
         return gmods.ToDictionary(t => t.Version, t => t.Gmod);
+    }
+
+    public GmodVersioningDto GetGmodVersioningDto()
+    {
+        return _gmodVersioningDtoCache.GetOrCreate(
+            _versioning,
+            entry =>
+            {
+                entry.Size = 1;
+                entry.SlidingExpiration = TimeSpan.FromHours(1);
+
+                var dto = EmbeddedResource.GetGmodVersioning();
+
+                if (dto is null)
+                    throw new ArgumentException("Invalid state");
+
+                return dto;
+            }
+        );
+    }
+
+    public GmodVersioning GetGmodVersioning()
+    {
+        return _gmodVersioningCache.GetOrCreate(
+            _versioning,
+            entry =>
+            {
+                entry.Size = 1;
+                entry.SlidingExpiration = TimeSpan.FromHours(1);
+
+                var dto = GetGmodVersioningDto();
+
+                return new GmodVersioning(
+                    dto,
+                    (VisVersion targetVisVersion) => GetGmod(targetVisVersion)
+                );
+            }
+        );
     }
 
     public CodebooksDto GetCodebooksDto(VisVersion visVersion)

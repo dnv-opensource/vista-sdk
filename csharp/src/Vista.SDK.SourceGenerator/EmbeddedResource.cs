@@ -27,7 +27,10 @@ internal static class EmbeddedResource
 
         foreach (var manifestResourceName in manifestResourceNames)
         {
-            if (manifestResourceName.Contains("gmod"))
+            if (
+                manifestResourceName.Contains("gmod")
+                && !manifestResourceName.Contains("versioning")
+            )
             {
                 var stream = GetDecompressedStream(assembly, manifestResourceName);
                 var gmod =
@@ -55,7 +58,33 @@ internal static class EmbeddedResource
 
         using var stream = GetDecompressedStream(assembly, gmodResourceName);
 
-        return JsonSerializer.Deserialize<GmodDto>(stream);
+        var unspeficiedProducts = new HashSet<string>()
+        {
+            "499",
+            "599",
+            "699",
+            "899",
+            "999",
+            "1099"
+        };
+        var gmodDto = JsonSerializer.Deserialize<GmodDto>(stream);
+
+        if (gmodDto is null)
+            return null;
+
+        return new GmodDto(
+            gmodDto.VisVersion,
+            gmodDto.Items.Where(item => !unspeficiedProducts.Contains(item.Code)).ToArray(),
+            gmodDto.Relations
+                .Where(
+                    relation =>
+                        !(
+                            unspeficiedProducts.Contains(relation[0])
+                            || unspeficiedProducts.Contains(relation[1])
+                        )
+                )
+                .ToArray()
+        );
     }
 
     internal static CodebooksDto? GetCodebooks(string visVersion)
@@ -91,5 +120,22 @@ internal static class EmbeddedResource
             );
 
         return new GZipStream(stream, CompressionMode.Decompress, leaveOpen: false);
+    }
+
+    public static GmodVersioningDto? GetGmodVersioning()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var baseName = assembly.GetName().Name;
+        var gmodVersioningResourceName = assembly
+            .GetManifestResourceNames()
+            .SingleOrDefault(x => x == $"{baseName}.resources.gmod-vis-versioning.json.gz");
+
+        if (gmodVersioningResourceName is null)
+            return null;
+
+        using var stream = GetDecompressedStream(assembly, gmodVersioningResourceName);
+
+        var dto = JsonSerializer.Deserialize<GmodVersioningDto>(stream);
+        return dto;
     }
 }
