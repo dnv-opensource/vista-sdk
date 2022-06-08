@@ -6,9 +6,8 @@ namespace Vista.SDK;
 public sealed class GmodVersioning
 {
     private readonly Dictionary<string, GmodVersioningNode> _versioningsMap = new();
-    private readonly Func<VisVersion, Gmod> _gmod;
 
-    internal GmodVersioning(GmodVersioningDto dto, Func<VisVersion, Gmod> gmod)
+    internal GmodVersioning(GmodVersioningDto dto)
     {
         foreach (var versioningDto in dto.Items)
         {
@@ -16,7 +15,6 @@ public sealed class GmodVersioning
             var gmodVersioningNode = new GmodVersioningNode(versioningDto.Value);
             _versioningsMap.Add(visVersion, gmodVersioningNode);
         }
-        _gmod = gmod;
     }
 
     public GmodNode ConvertNode(
@@ -36,7 +34,7 @@ public sealed class GmodVersioning
           ? nodeChanges.NextCode
           : sourceNode.Code;
 
-        var gmod = _gmod(targetVersion);
+        var gmod = VIS.Instance.GetGmod(targetVersion);
 
         if (!gmod.TryGetNode(nextCode, out var targetNode))
             throw new ArgumentException("Couldn't get target node with code: " + nextCode);
@@ -53,7 +51,7 @@ public sealed class GmodVersioning
         if (targetEndNode.IsRoot)
             return new GmodPath(targetEndNode.Parents, targetEndNode);
 
-        var targetGmod = _gmod(targetVersion);
+        var targetGmod = VIS.Instance.GetGmod(targetVersion);
 
         var qualifyingNodes = sourcePath
             .GetFullPath()
@@ -89,7 +87,7 @@ public sealed class GmodVersioning
 
         var targetBaseNode =
             qualifyingNodesWithCorrectPath.LastOrDefault(
-                n => n.TargetNode.IsAssetFunctionNode && !n.TargetNode.IsProductGroupLevel
+                n => n.TargetNode.IsAssetFunctionNode
             ).TargetNode ?? targetGmod.RootNode;
 
         var possiblePaths = new List<GmodPath>();
@@ -105,7 +103,7 @@ public sealed class GmodVersioning
 
                 targetParents.AddRange(
                     parents
-                        .Where(p => p.Code != targetBaseNode.Code && !p.IsProductGroupLevel)
+                        .Where(p => p.Code != targetBaseNode.Code)
                         .Select(
                             p =>
                                 p with
@@ -152,9 +150,9 @@ public sealed class GmodVersioning
         return possiblePaths[0];
     }
 
-    public GmodVersioningNode this[string key] => _versioningsMap[key];
+    private GmodVersioningNode this[string key] => _versioningsMap[key];
 
-    public bool TryGetVersioningNode(
+    private bool TryGetVersioningNode(
         string visVersion,
         [MaybeNullWhen(false)] out GmodVersioningNode versioningNode
     ) => _versioningsMap.TryGetValue(visVersion, out versioningNode);
@@ -183,36 +181,36 @@ public sealed class GmodVersioning
                     + targetVersion.ToVersionString()
             );
     }
-}
 
-public readonly record struct GmodVersioningNode
-{
-    private readonly Dictionary<string, GmodVersioningNodeChanges> _versioningNodeChanges = new();
-
-    internal GmodVersioningNode(IReadOnlyDictionary<string, GmodVersioningNodeChangesDto> dto)
+    private readonly record struct GmodVersioningNode
     {
-        foreach (var versioningNodeDto in dto)
+        private readonly Dictionary<string, GmodVersioningNodeChanges> _versioningNodeChanges = new();
+
+        internal GmodVersioningNode(IReadOnlyDictionary<string, GmodVersioningNodeChangesDto> dto)
         {
-            var code = versioningNodeDto.Key;
-            var versioningNodeChanges = new GmodVersioningNodeChanges(
-                versioningNodeDto.Value.NextVisVersion,
-                versioningNodeDto.Value.NextCode,
-                versioningNodeDto.Value.PreviousVisVersion,
-                versioningNodeDto.Value.PreviousCode
-            );
-            _versioningNodeChanges.Add(code, versioningNodeChanges);
+            foreach (var versioningNodeDto in dto)
+            {
+                var code = versioningNodeDto.Key;
+                var versioningNodeChanges = new GmodVersioningNodeChanges(
+                    versioningNodeDto.Value.NextVisVersion,
+                    versioningNodeDto.Value.NextCode,
+                    versioningNodeDto.Value.PreviousVisVersion,
+                    versioningNodeDto.Value.PreviousCode
+                );
+                _versioningNodeChanges.Add(code, versioningNodeChanges);
+            }
         }
+
+        public bool TryGetCodeChanges(
+            string code,
+            [MaybeNullWhen(false)] out GmodVersioningNodeChanges nodeChanges
+        ) => _versioningNodeChanges.TryGetValue(code, out nodeChanges);
     }
 
-    public bool TryGetCodeChanges(
-        string code,
-        [MaybeNullWhen(false)] out GmodVersioningNodeChanges nodeChanges
-    ) => _versioningNodeChanges.TryGetValue(code, out nodeChanges);
+    private sealed record GmodVersioningNodeChanges(
+        string NextVisVersion,
+        string NextCode,
+        string PreviousVisVersion,
+        string PreviousCode
+    );
 }
-
-public sealed record GmodVersioningNodeChanges(
-    string NextVisVersion,
-    string NextCode,
-    string PreviousVisVersion,
-    string PreviousCode
-);

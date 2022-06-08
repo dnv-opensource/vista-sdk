@@ -4,11 +4,7 @@ namespace Vista.SDK;
 
 public interface IVIS
 {
-    GmodDto GetGmodDto(VisVersion visVersion);
-
     Gmod GetGmod(VisVersion visVersion);
-
-    CodebooksDto GetCodebooksDto(VisVersion visVersion);
 
     Codebooks GetCodebooks(VisVersion visversion);
 
@@ -17,8 +13,6 @@ public interface IVIS
     IReadOnlyDictionary<VisVersion, Gmod> GetGmodsMap(IEnumerable<VisVersion> visVersions);
 
     IEnumerable<VisVersion> GetVisVersions();
-
-    GmodVersioningDto GetGmodVersioningDto();
 
     GmodVersioning GetGmodVersioning();
 }
@@ -86,7 +80,7 @@ public sealed class VIS : IVIS
         );
     }
 
-    public GmodDto GetGmodDto(VisVersion visVersion)
+    private GmodDto GetGmodDto(VisVersion visVersion)
     {
         return _gmodDtoCache.GetOrCreate(
             visVersion,
@@ -138,7 +132,7 @@ public sealed class VIS : IVIS
         return gmods.ToDictionary(t => t.Version, t => t.Gmod);
     }
 
-    public GmodVersioningDto GetGmodVersioningDto()
+    private GmodVersioningDto GetGmodVersioningDto()
     {
         return _gmodVersioningDtoCache.GetOrCreate(
             _versioning,
@@ -176,7 +170,7 @@ public sealed class VIS : IVIS
         );
     }
 
-    public CodebooksDto GetCodebooksDto(VisVersion visVersion)
+    private CodebooksDto GetCodebooksDto(VisVersion visVersion)
     {
         return _codebooksDtoCache.GetOrCreate(
             visVersion,

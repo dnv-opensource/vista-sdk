@@ -39,6 +39,20 @@ public class GmodTests
     }
 
     [Fact]
+    public void Test_Gmod_Node_Types()
+    {
+        var (_, vis) = VISTests.GetVis();
+
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
+
+        var set = new HashSet<string>();
+        foreach (var node in gmod)
+            set.Add($"{node.Metadata.Category} | {node.Metadata.Type}");
+
+        Assert.NotEmpty(set);
+    }
+
+    [Fact]
     public void Test_Gmod_RootNode_Children()
     {
         var (_, vis) = VISTests.GetVis();

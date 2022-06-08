@@ -64,11 +64,6 @@ public sealed partial record class LocalId
                         return false;
                     if (!VisVersions.TryParse(segment.Slice("vis-".Length), out visVersion))
                         return false;
-                    // if (visVersion != gmod.VisVersion)
-                    //     return false;
-                    // if (visVersion != codebooks.VisVersion)
-                    //     return false;
-                    // VIS.Instance.GetGmod((visVersion))
 
                     gmod = VIS.Instance.GetGmod(visVersion);
                     codebooks = VIS.Instance.GetCodebooks(visVersion);

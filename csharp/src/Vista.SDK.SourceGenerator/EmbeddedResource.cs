@@ -58,33 +58,7 @@ internal static class EmbeddedResource
 
         using var stream = GetDecompressedStream(assembly, gmodResourceName);
 
-        var unspeficiedProducts = new HashSet<string>()
-        {
-            "499",
-            "599",
-            "699",
-            "899",
-            "999",
-            "1099"
-        };
-        var gmodDto = JsonSerializer.Deserialize<GmodDto>(stream);
-
-        if (gmodDto is null)
-            return null;
-
-        return new GmodDto(
-            gmodDto.VisVersion,
-            gmodDto.Items.Where(item => !unspeficiedProducts.Contains(item.Code)).ToArray(),
-            gmodDto.Relations
-                .Where(
-                    relation =>
-                        !(
-                            unspeficiedProducts.Contains(relation[0])
-                            || unspeficiedProducts.Contains(relation[1])
-                        )
-                )
-                .ToArray()
-        );
+        return JsonSerializer.Deserialize<GmodDto>(stream);
     }
 
     internal static CodebooksDto? GetCodebooks(string visVersion)
