@@ -184,7 +184,8 @@ public sealed class GmodVersioning
 
     private readonly record struct GmodVersioningNode
     {
-        private readonly Dictionary<string, GmodVersioningNodeChanges> _versioningNodeChanges = new();
+        private readonly Dictionary<string, GmodVersioningNodeChanges> _versioningNodeChanges =
+            new();
 
         internal GmodVersioningNode(IReadOnlyDictionary<string, GmodVersioningNodeChangesDto> dto)
         {

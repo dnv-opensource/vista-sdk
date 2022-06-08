@@ -162,10 +162,7 @@ public sealed class VIS : IVIS
 
                 var dto = GetGmodVersioningDto();
 
-                return new GmodVersioning(
-                    dto,
-                    (VisVersion targetVisVersion) => GetGmod(targetVisVersion)
-                );
+                return new GmodVersioning(dto);
             }
         );
     }

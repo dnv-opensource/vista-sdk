@@ -23,8 +23,6 @@ public class GmodVersioningTests
 
         // Assert
         Assert.NotNull(gmodVersioning);
-        Assert.True(gmodVersioning.TryGetVersioningNode("3-5a", out _));
-        Assert.True(gmodVersioning.TryGetVersioningNode("3-4a", out _));
     }
 
     public static IEnumerable<object[]> Valid_Test_Data_Path =>
