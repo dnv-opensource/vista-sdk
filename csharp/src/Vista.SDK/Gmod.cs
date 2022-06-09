@@ -12,13 +12,13 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
     public GmodNode RootNode => _rootNode;
 
-    public static readonly (string Category, string Type)[] LeafTypes = new[]
+    private static readonly (string Category, string Type)[] LeafTypes = new[]
     {
         ("ASSET FUNCTION", "LEAF"),
         ("PRODUCT FUNCTION", "LEAF"),
     };
 
-    public static bool IsLeafNode(string category, string type)
+    private static bool IsLeafNode(string category, string type)
     {
         foreach (var leafType in LeafTypes)
         {
@@ -32,7 +32,7 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
     public static bool IsLeafNode(GmodNodeMetadata metadata) =>
         IsLeafNode(metadata.Category, metadata.Type);
 
-    public static bool IsFunctionNode(string category) =>
+    private static bool IsFunctionNode(string category) =>
         category != "PRODUCT" && category != "ASSET";
 
     public static bool IsFunctionNode(GmodNodeMetadata metadata) =>

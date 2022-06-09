@@ -96,7 +96,7 @@ internal static class EmbeddedResource
         return new GZipStream(stream, CompressionMode.Decompress, leaveOpen: false);
     }
 
-    public static GmodVersioningDto? GetGmodVersioning()
+    internal static GmodVersioningDto? GetGmodVersioning()
     {
         var assembly = Assembly.GetExecutingAssembly();
         var baseName = assembly.GetName().Name;
@@ -109,7 +109,6 @@ internal static class EmbeddedResource
 
         using var stream = GetDecompressedStream(assembly, gmodVersioningResourceName);
 
-        var dto = JsonSerializer.Deserialize<GmodVersioningDto>(stream);
-        return dto;
+        return JsonSerializer.Deserialize<GmodVersioningDto>(stream);
     }
 }

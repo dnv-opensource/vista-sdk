@@ -7,8 +7,8 @@ public sealed record class Codebook
     private readonly CodebookStandardValues _standardValues;
     private readonly CodebookGroups _groups;
 
-    private static readonly string TagAlphabet = "abcdefghijklmnopqrstuvwxyz0123456789.";
-    private static readonly string PositionTagAlphabet = TagAlphabet + "-";
+    private const string TagAlphabet = "abcdefghijklmnopqrstuvwxyz0123456789.";
+    private const string PositionTagAlphabet = TagAlphabet + "-";
 
     internal Codebook(CodebookDto dto)
     {

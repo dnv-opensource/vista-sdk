@@ -88,7 +88,7 @@ public sealed class GmodVersioning
         var targetBaseNode =
             qualifyingNodesWithCorrectPath.LastOrDefault(
                 n => n.TargetNode.IsAssetFunctionNode
-            ).TargetNode ?? targetGmod.RootNode;
+            ).TargetNode;
 
         var possiblePaths = new List<GmodPath>();
         targetGmod.Traverse(
@@ -149,8 +149,6 @@ public sealed class GmodVersioning
         Debug.Assert(possiblePaths.Count == 1, $"More than one path found for: {sourcePath}");
         return possiblePaths[0];
     }
-
-    private GmodVersioningNode this[string key] => _versioningsMap[key];
 
     private bool TryGetVersioningNode(
         string visVersion,
