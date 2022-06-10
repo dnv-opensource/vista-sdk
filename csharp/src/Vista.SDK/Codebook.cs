@@ -1,4 +1,4 @@
-﻿namespace Vista.SDK;
+namespace Vista.SDK;
 
 public sealed record class Codebook
 {
@@ -143,6 +143,20 @@ public sealed record class Codebook
 
         return validations.Max();
     }
+}
+
+public static class PositionValidationResults
+{
+    public static PositionValidationResult FromString(string name) =>
+        name switch
+        {
+            "Valid" => PositionValidationResult.Valid,
+            "Invalid" => PositionValidationResult.Invalid,
+            "InvalidOrder" => PositionValidationResult.InvalidOrder,
+            "InvalidGrouping" => PositionValidationResult.InvalidGrouping,
+            "Custom" => PositionValidationResult.Custom,
+            _ => throw new ArgumentException($"Unknown position validation result: {name}")
+        };
 }
 
 public enum PositionValidationResult

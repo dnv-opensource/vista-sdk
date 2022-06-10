@@ -1,58 +1,45 @@
-﻿using Vista.SDK;
-
 namespace Vista.SDK.Tests;
 
 public class CodebookTests
 {
-    public static IEnumerable<object[]> Valid_Position_Test_data =>
-        new object[][]
-        {
-            new object[] { "phase.w.u", PositionValidationResult.Valid },
-            new object[] { "outside-phase.w.u", PositionValidationResult.Valid },
-            new object[] { "outside-phase.w.u-1", PositionValidationResult.Valid },
-            new object[] { "outside-phase.w.u-10", PositionValidationResult.Valid },
-            new object[] { "10-outside-phase.w.u", PositionValidationResult.InvalidOrder },
-            new object[] { "10-#", PositionValidationResult.Invalid },
-            new object[] { "#", PositionValidationResult.Invalid },
-            new object[] { "outside!", PositionValidationResult.Invalid },
-            new object[] { "1-centre", PositionValidationResult.InvalidOrder },
-            new object[] { "phas!.w.u-outside-10", PositionValidationResult.Invalid },
-            new object[] { "phase.w.u-outsid!-10", PositionValidationResult.Invalid },
-            new object[] { "outside-phased.w.u-10", PositionValidationResult.Custom },
-            new object[] { "outsidee", PositionValidationResult.Custom },
-            new object[] { "port-starboard", PositionValidationResult.InvalidGrouping },
-            new object[] { "starboard-port", PositionValidationResult.InvalidOrder },
-            new object[] { "port-starboard-1", PositionValidationResult.InvalidGrouping },
-            new object[] { "starboard-port-1", PositionValidationResult.InvalidOrder },
-        };
-
     [Theory]
-    [MemberData(nameof(Valid_Position_Test_data))]
-    public void Test_Position_Validation(string input, PositionValidationResult expectedOutput)
+    [MemberData(
+        nameof(VistaSDKTestData.AddValidPositionData),
+        MemberType = typeof(VistaSDKTestData)
+    )]
+    public void Test_Position_Validation(string input, string expectedOutput)
     {
         var (_, vis) = VISTests.GetVis();
         var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var codebookType = codebooks[CodebookName.Position];
         var validPosition = codebookType.ValidatePosition(input);
+        var parsedExpectedOutput = PositionValidationResults.FromString(expectedOutput);
 
-        Assert.Equal(expectedOutput, validPosition);
+        Assert.Equal(parsedExpectedOutput, validPosition);
     }
 
-    [Fact]
-    public void Test_Positions()
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddPositionsData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_Positions(string invalidStandardValue, string validStandardValue)
     {
         var (_, vis) = VISTests.GetVis();
         var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var positions = codebooks[CodebookName.Position];
 
-        Assert.False(positions.HasStandardValue("<number>"));
-        Assert.True(positions.HasStandardValue("1"));
+        Assert.False(positions.HasStandardValue(invalidStandardValue));
+        Assert.True(positions.HasStandardValue(validStandardValue));
     }
 
-    [Fact]
-    public void Test_States()
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddStatesData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_States(
+        string invalidGroup,
+        string validValue,
+        string validGroup,
+        string secondValidValue
+    )
     {
         var (_, vis) = VISTests.GetVis();
         var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
@@ -60,47 +47,57 @@ public class CodebookTests
         var states = codebooks[CodebookName.State];
         Assert.NotNull(states);
 
-        Assert.False(states.HasGroup("Clogged"));
+        Assert.False(states.HasGroup(invalidGroup));
 
-        Assert.True(states.HasStandardValue("clogged"));
+        Assert.True(states.HasStandardValue(validValue));
 
-        Assert.True(states.HasGroup("Acknowledged"));
+        Assert.True(states.HasGroup(validGroup));
 
-        Assert.True(states.HasStandardValue("acknowledged"));
+        Assert.True(states.HasStandardValue(secondValidValue));
     }
 
-    [Fact]
-    public void Test_Create_Tag()
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddTagData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_Create_Tag(
+        string firstTag,
+        string secondTag,
+        string thirdTag,
+        char thirdTagPrefix,
+        string customTag,
+        char customTagPrefix,
+        string firstInvalidTag,
+        string secondInvalidTag
+    )
     {
         var (_, vis) = VISTests.GetVis();
         var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
         var codebookType = codebooks[CodebookName.Position];
 
-        var metadataTag1 = codebookType.CreateTag("1");
-        Assert.Equal("1", metadataTag1);
+        var metadataTag1 = codebookType.CreateTag(firstTag);
+        Assert.Equal(firstTag, metadataTag1);
         Assert.False(metadataTag1.IsCustom);
-        Assert.Same("1", metadataTag1.Value);
+        Assert.Same(firstTag, metadataTag1.Value);
 
-        var metadataTag2 = codebookType.CreateTag("centre");
-        Assert.Equal("centre", metadataTag2);
+        var metadataTag2 = codebookType.CreateTag(secondTag);
+        Assert.Equal(secondTag, metadataTag2);
         Assert.False(metadataTag2.IsCustom);
 
-        var metadataTag3 = codebookType.CreateTag("centre-1");
-        Assert.Equal("centre-1", metadataTag3);
+        var metadataTag3 = codebookType.CreateTag(thirdTag);
+        Assert.Equal(thirdTag, metadataTag3);
         Assert.False(metadataTag3.IsCustom);
-        Assert.Equal('-', metadataTag3.Prefix);
+        Assert.Equal(thirdTagPrefix, metadataTag3.Prefix);
 
-        var metadataTag4 = codebookType.CreateTag("somethingcustom");
-        Assert.Equal("somethingcustom", metadataTag4);
+        var metadataTag4 = codebookType.CreateTag(customTag);
+        Assert.Equal(customTag, metadataTag4);
         Assert.True(metadataTag4.IsCustom);
-        Assert.Equal('~', metadataTag4.Prefix);
+        Assert.Equal(customTagPrefix, metadataTag4.Prefix);
 
-        Assert.Throws<ArgumentException>(() => codebookType.CreateTag("1-centre"));
-        Assert.Null(codebookType.TryCreateTag("1-centre"));
+        Assert.Throws<ArgumentException>(() => codebookType.CreateTag(firstInvalidTag));
+        Assert.Null(codebookType.TryCreateTag(firstInvalidTag));
 
-        Assert.Throws<ArgumentException>(() => codebookType.CreateTag("centre!"));
-        Assert.Null(codebookType.TryCreateTag("centre!"));
+        Assert.Throws<ArgumentException>(() => codebookType.CreateTag(secondInvalidTag));
+        Assert.Null(codebookType.TryCreateTag(secondInvalidTag));
     }
 
     [Fact]
@@ -113,8 +110,13 @@ public class CodebookTests
         Assert.True(groups.Count > 1);
     }
 
-    [Fact]
-    public void Test_Detail_Tag()
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddDetailTagData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_Detail_Tag(
+        string validCustomTag,
+        string firstInvalidCustomTag,
+        string secondInvalidCustomTag
+    )
     {
         var (_, vis) = VISTests.GetVis();
         var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
@@ -122,11 +124,11 @@ public class CodebookTests
         var codebook = codebooks[CodebookName.Detail];
         Assert.NotNull(codebook);
 
-        Assert.NotNull(codebook.TryCreateTag("something"));
-        Assert.Null(codebook.TryCreateTag("something!"));
-        Assert.Null(codebook.TryCreateTag("something<"));
+        Assert.NotNull(codebook.TryCreateTag(validCustomTag));
+        Assert.Null(codebook.TryCreateTag(firstInvalidCustomTag));
+        Assert.Null(codebook.TryCreateTag(secondInvalidCustomTag));
 
-        Assert.Throws<ArgumentException>(() => codebook.CreateTag("something!"));
-        Assert.Throws<ArgumentException>(() => codebook.CreateTag("something<"));
+        Assert.Throws<ArgumentException>(() => codebook.CreateTag(firstInvalidCustomTag));
+        Assert.Throws<ArgumentException>(() => codebook.CreateTag(secondInvalidCustomTag));
     }
 }

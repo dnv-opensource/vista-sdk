@@ -1,24 +1,27 @@
 {
-    "Codebook": [
-    [ "phase.w.u", {"PositionValidationResult": "Valid"} ],
+    "ValidPosition": [
+    [ "phase.w.u", "Valid"],
 
-    ["outside-phase.w.u", {"PositionValidationResult": "Valid"} ],
-    ["outside-phase.w.u-1", {"PositionValidationResult": "Valid"} ],
-    ["outside-phase.w.u-10", {"PositionValidationResult": "Valid"} ],
-    ["10-outside-phase.w.u", {"PositionValidationResult": "InvalidOrder"} ],
-    ["10-#",{"PositionValidationResult": "Invalid"} ],
-    ["#",{"PositionValidationResult": "Invalid"} ],
-    ["outside!",{"PositionValidationResult": "Invalid"} ],
-    ["1-centre", {"PositionValidationResult": "InvalidOrder"} ],
-    ["phas!.w.u-outside-10",{"PositionValidationResult": "Invalid"} ],
-    ["phase.w.u-outsid!-10",{"PositionValidationResult": "Invalid"} ],
-    ["outside-phased.w.u-10", {"PositionValidationResult": "Custom"} ],
-    ["outsidee", {"PositionValidationResult": "Custom"} ],
-    ["port-starboard",{"PositionValidationResult": "InvalidGrouping"} ],
-    ["starboard-port", {"PositionValidationResult": "InvalidOrder"} ],
-    ["port-starboard-1",{"PositionValidationResult": "InvalidGrouping"} ],
-    ["starboard-port-1", {"PositionValidationResult": "InvalidOrder"} ]
+    ["outside-phase.w.u",   "Valid" ],
+    ["outside-phase.w.u-1",   "Valid" ],
+    ["outside-phase.w.u-10",   "Valid" ],
+    ["10-outside-phase.w.u",   "InvalidOrder" ],
+    ["10-#",  "Invalid" ],
+    ["#",  "Invalid" ],
+    ["outside!",  "Invalid" ],
+    ["1-centre",   "InvalidOrder" ],
+    ["phas!.w.u-outside-10",  "Invalid" ],
+    ["phase.w.u-outsid!-10",  "Invalid" ],
+    ["outside-phased.w.u-10",   "Custom" ],
+    ["outsidee",   "Custom" ],
+    ["port-starboard",  "InvalidGrouping" ],
+    ["starboard-port",   "InvalidOrder" ],
+    ["port-starboard-1",  "InvalidGrouping" ],
+    ["starboard-port-1",   "InvalidOrder" ]
     ],
 
-
+    "Positions": [["<number>", "1"]],
+    "States": [ ["Clogged", "clogged", "Acknowledged", "acknowledged"]],
+    "Tag": [ ["1", "centre", "centre-1", "-", "somethingcustom","~", "1-centre", "centre!"]],
+    "DetailTag": [ ["something", "something!", "something<"]]
 }
