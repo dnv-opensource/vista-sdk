@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -42,9 +42,6 @@ public sealed record GmodPath
                     $"Invalid gmod path - first parent should be root of gmod (VE), but was {parents[0].Code}"
                 );
 
-            if (!parents.Any(p => p.IsLeafNode) && !node.IsLeafNode)
-                throw new ArgumentException($"Invalid gmod path - no leaf node found.");
-
             for (int i = 0; i < parents.Count; i++)
             {
                 var parent = parents[i];
@@ -61,56 +58,12 @@ public sealed record GmodPath
         Node = node;
     }
 
-    internal GmodPath(IEnumerable<GmodNode> nodes)
-    {
-        if (!IsValid(nodes))
-            throw new ArgumentException("Invalid path");
-
-        Parents = nodes.Take(nodes.Count() - 1).ToList();
-        Node = nodes.Last();
-    }
-
-    public static bool IsValid(IEnumerable<GmodNode> nodes)
-    {
-        // Have at least one leaf node
-
-        if (nodes is null)
-            return false;
-
-        int i = 0;
-        GmodNode? prev = null;
-        foreach (var node in nodes)
-        {
-            if (i == 0)
-            {
-                if (!node.IsRoot)
-                    return false;
-            }
-            else
-            {
-                if (prev is null || !prev.IsChild(node))
-                    return false;
-            }
-
-            prev = node;
-            i++;
-        }
-
-        return i != 0;
-    }
-
     public static bool IsValid(IReadOnlyList<GmodNode> parents, GmodNode node)
     {
         if (parents.Count == 0)
             return false;
 
-        if (parents.Count == 0 && !node.IsRoot)
-            return false;
-
         if (parents.Count > 0 && !parents[0].IsRoot)
-            return false;
-
-        if (!parents.Any(p => p.IsLeafNode) && !node.IsLeafNode)
             return false;
 
         for (int i = 0; i < parents.Count; i++)

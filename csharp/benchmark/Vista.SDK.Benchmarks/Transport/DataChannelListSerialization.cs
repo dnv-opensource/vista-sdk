@@ -1,4 +1,4 @@
-﻿using Avro.IO;
+using Avro.IO;
 using Avro.Specific;
 using BenchmarkDotNet.Analysers;
 using BenchmarkDotNet.Columns;

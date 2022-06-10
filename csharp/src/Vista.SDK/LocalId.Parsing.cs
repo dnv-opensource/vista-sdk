@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Vista.SDK;
 
@@ -358,6 +358,8 @@ public sealed partial record class LocalId
                 return false;
 
             var dashIndex = segment.IndexOf('-');
+            if (dashIndex == -1)
+                dashIndex = segment.IndexOf('~');
             if (dashIndex == -1)
                 return false;
 
