@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -51,6 +51,14 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\..\schemas\json\*.sample.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>schemas\json\%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      <Visible>False</Visible>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\..\testdata\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>testdata\%(RecursiveDir)\%(Filename)%(Extension)</Link>
       <Visible>False</Visible>
     </None>
   </ItemGroup>
