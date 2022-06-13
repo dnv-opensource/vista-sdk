@@ -85,9 +85,6 @@ public class LocalIdTests
                     "inlet"
                 ),
                 "dnv-v2/vis-3-4a/411.1_C101.63_S206/411.1_C101.31-5/qty-temperature/cnt-exhaust.gas/_/_/_/_/pos-inlet/_",
-                // dnv-v2/vis-3-4a/411.1_C101.63_S206/_/qty-temperature/_/pos-inlet
-                // dnv-v2/vis-3-4a/411.1_C101.31-5/#
-                // dnv-v2/vis-3-4a/+/411.1_C101.31-5/+/+
             },
         };
 
