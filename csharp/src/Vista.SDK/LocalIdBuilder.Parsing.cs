@@ -12,7 +12,10 @@ public sealed partial record class LocalIdBuilder
         return localId;
     }
 
-    public static bool TryParse(string localIdStr, [MaybeNullWhen(false)] out LocalIdBuilder localId)
+    public static bool TryParse(
+        string localIdStr,
+        [MaybeNullWhen(false)] out LocalIdBuilder localId
+    )
     {
         localId = null;
         if (localIdStr is null)

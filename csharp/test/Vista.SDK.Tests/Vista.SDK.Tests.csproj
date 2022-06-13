@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Vista.SDK.Apache.Avro\Vista.SDK.Apache.Avro.csproj" />
+    <ProjectReference Include="..\..\src\Vista.SDK.Mqtt\Vista.SDK.Mqtt.csproj" />
     <ProjectReference Include="..\..\src\Vista.SDK.System.Text.Json\Vista.SDK.System.Text.Json.csproj" />
     <ProjectReference Include="..\..\src\Vista.SDK.System.Xml\Vista.SDK.System.Xml.csproj" />
     <ProjectReference Include="..\..\src\Vista.SDK\Vista.SDK.csproj" />

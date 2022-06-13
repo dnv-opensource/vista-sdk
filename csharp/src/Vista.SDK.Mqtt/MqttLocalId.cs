@@ -3,15 +3,20 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK.Mqtt;
 
+public static class LocalIdBuilderExtensions
+{
+    public static MqttLocalId BuildMqtt(this LocalIdBuilder builder) => new MqttLocalId(builder);
+}
+
 public class MqttLocalId : LocalId
 {
-    public MqttLocalId(LocalIdBuilder builder) : base(builder)
-    {
-    }
+    private static readonly char _internal_separator = '_';
+
+    public MqttLocalId(ILocalIdBuilder builder) : base(builder) { }
 
     public override string ToString()
     {
-        string namingRule = $"/{NamingRule}/";
+        string namingRule = $"{NamingRule}/";
         using var lease = StringBuilderPool.Get();
 
         var builder = lease.Builder;
@@ -22,24 +27,17 @@ public class MqttLocalId : LocalId
         VisVersion.ToVersionString(builder);
         builder.Append('/');
 
-        var items = new LocalIdItems
-        {
-            PrimaryItem = PrimaryItem,
-            SecondaryItem = SecondaryItem,
-        };
+        AppendPrimaryItem(builder);
+        AppendSecondaryItem(builder);
 
-        items.Append(builder, VerboseMode);
-
-        builder.Append("meta/");
-
-        builder.AppendMeta(Quantity);
-        builder.AppendMeta(Content);
-        builder.AppendMeta(Calculation);
-        builder.AppendMeta(State);
-        builder.AppendMeta(Command);
-        builder.AppendMeta(Type);
-        builder.AppendMeta(Position);
-        builder.AppendMeta(Detail);
+        AppendMeta(builder, Quantity);
+        AppendMeta(builder, Content);
+        AppendMeta(builder, Calculation);
+        AppendMeta(builder, State);
+        AppendMeta(builder, Command);
+        AppendMeta(builder, Type);
+        AppendMeta(builder, Position);
+        AppendMeta(builder, Detail);
 
         if (builder[builder.Length - 1] == '/')
             builder.Remove(builder.Length - 1, 1);
@@ -47,18 +45,27 @@ public class MqttLocalId : LocalId
         return lease.ToString();
     }
 
-    void AppendPrimaryItem(StringBuilder builder)
+    void AppendPath(StringBuilder builder, GmodPath path)
     {
-        for (int i = 0; i < PrimaryItem.Length; i++)
-        {
-            var node = PrimaryItem[i];
-            if (node.IsLeafNode || i == PrimaryItem.Length - 1)
-            {
-                node.ToString(builder);
-                builder.Append('~');
-            }
-        }
-
+        path.ToString(builder, separator: _internal_separator);
         builder.Append('/');
+    }
+
+    void AppendPrimaryItem(StringBuilder builder) => AppendPath(builder, PrimaryItem);
+
+    void AppendSecondaryItem(StringBuilder builder)
+    {
+        if (SecondaryItem is null)
+            builder.Append("_/");
+        else
+            AppendPath(builder, SecondaryItem);
+    }
+
+    void AppendMeta(StringBuilder builder, in MetadataTag? tag)
+    {
+        if (tag is null)
+            builder.Append("_/");
+        else
+            tag.Value.ToString(builder);
     }
 }

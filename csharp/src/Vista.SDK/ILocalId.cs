@@ -25,4 +25,6 @@ public interface ILocalId
     MetadataTag? Position { get; }
 
     MetadataTag? Detail { get; }
+
+    string ToString();
 }

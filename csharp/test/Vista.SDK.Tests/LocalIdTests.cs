@@ -1,4 +1,5 @@
 using Vista.SDK;
+using Vista.SDK.Mqtt;
 
 namespace Vista.SDK.Tests;
 
@@ -61,6 +62,35 @@ public class LocalIdTests
             },
         };
 
+    public static IEnumerable<object[]> Valid_Mqtt_Test_Data =>
+        new object[][]
+        {
+            new object[]
+            {
+                new Input("411.1/C101.31-2", null, "temperature", "exhaust.gas", "inlet"),
+                "dnv-v2/vis-3-4a/411.1_C101.31-2/_/qty-temperature/cnt-exhaust.gas/_/_/_/_/pos-inlet/_",
+            },
+            new object[]
+            {
+                new Input("411.1/C101.63/S206", null, "temperature", "exhaust.gas", "inlet"),
+                "dnv-v2/vis-3-4a/411.1_C101.63_S206/_/qty-temperature/cnt-exhaust.gas/_/_/_/_/pos-inlet/_",
+            },
+            new object[]
+            {
+                new Input(
+                    "411.1/C101.63/S206",
+                    "411.1/C101.31-5",
+                    "temperature",
+                    "exhaust.gas",
+                    "inlet"
+                ),
+                "dnv-v2/vis-3-4a/411.1_C101.63_S206/411.1_C101.31-5/qty-temperature/cnt-exhaust.gas/_/_/_/_/pos-inlet/_",
+                // dnv-v2/vis-3-4a/411.1_C101.63_S206/_/qty-temperature/_/pos-inlet
+                // dnv-v2/vis-3-4a/411.1_C101.31-5/#
+                // dnv-v2/vis-3-4a/+/411.1_C101.31-5/+/+
+            },
+        };
+
     [Theory]
     [MemberData(nameof(Valid_Test_Data))]
     public void Test_LocalId_Build_Valid(Input input, string expectedOutput)
@@ -87,6 +117,37 @@ public class LocalIdTests
             .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.Position, input.Position));
 
         var localIdStr = localId.ToString();
+
+        Assert.Equal(expectedOutput, localIdStr);
+    }
+
+    [Theory]
+    [MemberData(nameof(Valid_Mqtt_Test_Data))]
+    public void Test_Mqtt_LocalId_Build_Valid(Input input, string expectedOutput)
+    {
+        var (_, vis) = VISTests.GetVis();
+
+        var visVersion = VisVersion.v3_4a;
+
+        var gmod = vis.GetGmod(visVersion);
+        var codebooks = vis.GetCodebooks(visVersion);
+
+        var primaryItem = gmod.ParsePath(input.PrimaryItem);
+        var secondaryItem = input.SecondaryItem is not null
+            ? gmod.ParsePath(input.SecondaryItem)
+            : null;
+
+        var localIdBuilder = LocalIdBuilder
+            .Create(visVersion)
+            .WithPrimaryItem(primaryItem)
+            .WithSecondaryItem(secondaryItem)
+            .WithVerboseMode(input.Verbose)
+            .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.Quantity, input.Quantity))
+            .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.Content, input.Content))
+            .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.Position, input.Position));
+        var mqttLocalId = localIdBuilder.BuildMqtt();
+
+        var localIdStr = mqttLocalId.ToString();
 
         Assert.Equal(expectedOutput, localIdStr);
     }
@@ -188,7 +249,8 @@ public class LocalIdTests
 
         var reader = new StreamReader(file);
 
-        var errored = new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception)>();
+        var errored =
+            new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception)>();
 
         string? localIdStr;
         while ((localIdStr = await reader.ReadLineAsync()) is not null)

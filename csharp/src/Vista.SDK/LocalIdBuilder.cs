@@ -1,8 +1,6 @@
-
 using Vista.SDK.Internal;
 
 namespace Vista.SDK;
-
 
 public partial record class LocalIdBuilder : ILocalIdBuilder
 {
@@ -42,7 +40,11 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
 
     public LocalIdBuilder WithVisVersion(VisVersion version) => this with { VisVersion = version };
 
-    public LocalIdBuilder WithVerboseMode(bool verboseMode) => this with { VerboseMode = verboseMode };
+    public LocalIdBuilder WithVerboseMode(bool verboseMode) =>
+        this with
+        {
+            VerboseMode = verboseMode
+        };
 
     public LocalIdBuilder WithPrimaryItem(GmodPath? item) =>
         this with
@@ -77,7 +79,11 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         return WithMetadataTag(metadataTag.Value);
     }
 
-    private LocalIdBuilder WithQuantity(in MetadataTag quantity) => this with { Quantity = quantity, };
+    private LocalIdBuilder WithQuantity(in MetadataTag quantity) =>
+        this with
+        {
+            Quantity = quantity,
+        };
 
     private LocalIdBuilder WithContent(in MetadataTag content) => this with { Content = content, };
 
@@ -93,25 +99,32 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
 
     private LocalIdBuilder WithType(in MetadataTag type) => this with { Type = type, };
 
-    private LocalIdBuilder WithPosition(in MetadataTag position) => this with { Position = position, };
+    private LocalIdBuilder WithPosition(in MetadataTag position) =>
+        this with
+        {
+            Position = position,
+        };
 
     private LocalIdBuilder WithDetail(in MetadataTag detail) => this with { Detail = detail, };
 
-    public static LocalIdBuilder Create(VisVersion version) => new LocalIdBuilder().WithVisVersion(version);
+    public static LocalIdBuilder Create(VisVersion version) =>
+        new LocalIdBuilder().WithVisVersion(version);
 
     public LocalId Build()
     {
         if (IsEmpty)
             throw new InvalidOperationException("Cant build to LocalId from empty LocalIdBuilder");
         if (!IsValid)
-            throw new InvalidOperationException("Cant build to LocalId from invalid LocalIdBuilder");
+            throw new InvalidOperationException(
+                "Cant build to LocalId from invalid LocalIdBuilder"
+            );
 
         return new LocalId(this);
     }
 
     public bool IsValid =>
-        VisVersion is not null &&
-        Items.PrimaryItem is not null
+        VisVersion is not null
+        && Items.PrimaryItem is not null
         && (
             Quantity is not null
             || Calculation is not null
@@ -180,7 +193,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         if (VisVersion is null)
             throw new InvalidOperationException("No VisVersion configured on LocalId");
 
-        const string namingRule = $"/{NamingRule}/";
+        string namingRule = $"/{NamingRule}/";
         using var lease = StringBuilderPool.Get();
 
         var builder = lease.Builder;
@@ -195,6 +208,8 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
 
         builder.Append("meta/");
 
+        // NOTE: order of metadatatags matter,
+        // should not be changed unless changed in the naming rule/standard
         builder.AppendMeta(Quantity);
         builder.AppendMeta(Content);
         builder.AppendMeta(Calculation);

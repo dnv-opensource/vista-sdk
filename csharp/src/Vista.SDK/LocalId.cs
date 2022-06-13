@@ -4,14 +4,16 @@ public class LocalId : ILocalId, IEquatable<LocalId>
 {
     public static readonly string NamingRule = "dnv-v2";
 
-    private readonly LocalIdBuilder _builder;
+    private readonly ILocalIdBuilder _builder;
 
-    internal LocalId(LocalIdBuilder builder)
+    internal LocalId(ILocalIdBuilder builder)
     {
         if (builder.IsEmpty)
             throw new ArgumentException("LocalId cannot be constructed from empty LocalIdBuilder");
         if (!builder.IsValid)
-            throw new ArgumentException("LocalId cannot be constructed from invalid LocalIdBuilder");
+            throw new ArgumentException(
+                "LocalId cannot be constructed from invalid LocalIdBuilder"
+            );
         _builder = builder;
     }
 
@@ -38,7 +40,6 @@ public class LocalId : ILocalId, IEquatable<LocalId>
     public MetadataTag? Position => _builder.Position;
 
     public MetadataTag? Detail => _builder.Detail;
-
 
     public sealed override bool Equals(object? obj) => Equals(obj as LocalId);
 

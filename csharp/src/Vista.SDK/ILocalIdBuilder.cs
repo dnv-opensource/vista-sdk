@@ -45,4 +45,6 @@ public interface ILocalIdBuilder
     bool IsValid { get; }
 
     bool IsEmpty { get; }
+
+    string ToString();
 }

@@ -90,7 +90,7 @@ public sealed record GmodPath
         return lease.ToString();
     }
 
-    public void ToString(StringBuilder builder)
+    public void ToString(StringBuilder builder, char separator = '/')
     {
         foreach (var parent in Parents)
         {
@@ -98,7 +98,7 @@ public sealed record GmodPath
                 continue;
 
             parent.ToString(builder);
-            builder.Append('/');
+            builder.Append(separator);
         }
 
         Node.ToString(builder);

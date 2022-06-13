@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 namespace Vista.SDK;
 
@@ -33,7 +33,7 @@ public readonly record struct MetadataTag
 
     public readonly override string ToString() => Value;
 
-    public readonly void ToString(StringBuilder builder)
+    public readonly void ToString(StringBuilder builder, char separator = '/')
     {
         var prefix = Name switch
         {
@@ -51,6 +51,6 @@ public readonly record struct MetadataTag
         builder.Append(prefix);
         builder.Append(IsCustom ? '~' : '-');
         builder.Append(Value);
-        builder.Append('/');
+        builder.Append(separator);
     }
 }
