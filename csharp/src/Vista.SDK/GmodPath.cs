@@ -181,10 +181,7 @@ public sealed record GmodPath
     {
         private readonly GmodPath _path;
 
-        public void Reset()
-        {
-            throw new NotImplementedException();
-        }
+        public void Reset() { }
 
         object IEnumerator.Current => Current;
 

@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+    <InternalsVisibleTo Include="$(AssemblyName).Mqtt" />
   </ItemGroup>
 
   <ItemGroup>

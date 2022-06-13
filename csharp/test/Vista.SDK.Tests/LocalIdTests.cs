@@ -77,7 +77,7 @@ public class LocalIdTests
             ? gmod.ParsePath(input.SecondaryItem)
             : null;
 
-        var localId = LocalId
+        var localId = LocalIdBuilder
             .Create(visVersion)
             .WithPrimaryItem(primaryItem)
             .WithSecondaryItem(secondaryItem)
@@ -109,7 +109,7 @@ public class LocalIdTests
             ? gmod.ParsePath(input.SecondaryItem)
             : null;
 
-        var localId = LocalId
+        var localId = LocalIdBuilder
             .Create(visVersion)
             .WithPrimaryItem(primaryItem)
             .WithSecondaryItem(secondaryItem)
@@ -159,7 +159,7 @@ public class LocalIdTests
     )]
     public void Test_Parsing(string localIdStr)
     {
-        var parsed = LocalId.TryParse(localIdStr, out var localId);
+        var parsed = LocalIdBuilder.TryParse(localIdStr, out var localId);
         Assert.True(parsed);
         Assert.Equal(localIdStr, localId!.ToString());
     }
@@ -168,7 +168,7 @@ public class LocalIdTests
     [InlineData("/dnv-v2/vis-3-4a/1021.1i-3AC/H121/meta/qty-temperature/cnt-cargo/cal")]
     public void Test_Faulty_Parsing(string localIdStr)
     {
-        var parsed = LocalId.TryParse(localIdStr, out _);
+        var parsed = LocalIdBuilder.TryParse(localIdStr, out _);
         Assert.False(parsed);
     }
 
@@ -178,7 +178,7 @@ public class LocalIdTests
         var localIdAsString =
             "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet";
 
-        var localId = LocalId.Parse(localIdAsString);
+        var localId = LocalIdBuilder.Parse(localIdAsString);
     }
 
     [Fact]
@@ -188,14 +188,14 @@ public class LocalIdTests
 
         var reader = new StreamReader(file);
 
-        var errored = new List<(string LocalIdStr, LocalId? LocalId, Exception? Exception)>();
+        var errored = new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception)>();
 
         string? localIdStr;
         while ((localIdStr = await reader.ReadLineAsync()) is not null)
         {
             try
             {
-                if (!LocalId.TryParse(localIdStr, out var localId))
+                if (!LocalIdBuilder.TryParse(localIdStr, out var localId))
                     errored.Add((localIdStr, localId, null));
                 else if (localId.IsEmpty || !localId.IsValid)
                     errored.Add((localIdStr, localId, null));

@@ -2,9 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Vista.SDK;
 
-public sealed partial record class LocalId
+public sealed partial record class LocalIdBuilder
 {
-    public static LocalId Parse(string localIdStr)
+    public static LocalIdBuilder Parse(string localIdStr)
     {
         if (!TryParse(localIdStr, out var localId))
             throw new ArgumentException("Could not parse local ID: " + localIdStr);
@@ -12,7 +12,7 @@ public sealed partial record class LocalId
         return localId;
     }
 
-    public static bool TryParse(string localIdStr, [MaybeNullWhen(false)] out LocalId localId)
+    public static bool TryParse(string localIdStr, [MaybeNullWhen(false)] out LocalIdBuilder localId)
     {
         localId = null;
         if (localIdStr is null)

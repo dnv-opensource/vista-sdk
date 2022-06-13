@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vista.SDK.Benchmarks", "ben
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vista.SDK.Simulator", "test\Vista.SDK.Simulator\Vista.SDK.Simulator.csproj", "{01B7D138-619C-4693-AB05-EE640CCF1240}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vista.SDK.Mqtt", "src\Vista.SDK.Mqtt\Vista.SDK.Mqtt.csproj", "{BF1C3D9F-2A43-4F90-866C-623BD65176E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{01B7D138-619C-4693-AB05-EE640CCF1240}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01B7D138-619C-4693-AB05-EE640CCF1240}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01B7D138-619C-4693-AB05-EE640CCF1240}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF1C3D9F-2A43-4F90-866C-623BD65176E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF1C3D9F-2A43-4F90-866C-623BD65176E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF1C3D9F-2A43-4F90-866C-623BD65176E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF1C3D9F-2A43-4F90-866C-623BD65176E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,6 +92,7 @@ Global
 		{04C3E604-AEC3-47F0-8EF9-9E180022CD41} = {A70BCD8E-E1DB-49FF-855D-AD8ED1179080}
 		{CBACE153-372D-479A-9663-529846C16DB9} = {95D04DE8-37F5-4D86-9D0B-D0819DAA0E7A}
 		{01B7D138-619C-4693-AB05-EE640CCF1240} = {A70BCD8E-E1DB-49FF-855D-AD8ED1179080}
+		{BF1C3D9F-2A43-4F90-866C-623BD65176E2} = {093029D2-21CA-4470-B16A-0291ABA2109F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {38D68A49-09CB-45C0-ACDC-AFC7207B4486}

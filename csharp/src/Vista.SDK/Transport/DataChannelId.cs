@@ -3,10 +3,10 @@
 public readonly record struct DataChannelId
 {
     private readonly int _tag;
-    private readonly LocalId? _localId;
+    private readonly LocalIdBuilder? _localId;
     private readonly ShortId _shortId;
 
-    public DataChannelId(LocalId value)
+    public DataChannelId(LocalIdBuilder value)
     {
         _tag = 1;
         _localId = value;
