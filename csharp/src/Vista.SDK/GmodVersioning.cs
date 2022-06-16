@@ -63,9 +63,10 @@ internal sealed class GmodVersioning
             return null;
 
         if (targetEndNode.IsRoot)
-            return new GmodPath(targetEndNode.Parents, targetEndNode);
+            return new GmodPath(targetEndNode.Parents, targetEndNode, skipVerify: true);
 
         var targetGmod = VIS.Instance.GetGmod(targetVersion);
+        var sourceGmod = VIS.Instance.GetGmod(sourceVersion);
 
         var qualifyingNodes = sourcePath
             .GetFullPath()
@@ -85,21 +86,15 @@ internal sealed class GmodVersioning
             .Take(qualifyingNodes.Length - 1)
             .ToArray();
         if (GmodPath.IsValid(potentialParents, targetEndNode))
-            return new GmodPath(potentialParents, targetEndNode);
+            return new GmodPath(potentialParents, targetEndNode, skipVerify: true);
 
-        var qualifyingNodesWithCorrectPath = new List<GmodNode>();
+        var path = new List<GmodNode>();
         for (int i = 0; i <= qualifyingNodes.Length - 1; i++)
         {
             var qualifyingNode = qualifyingNodes[i];
-            //qualifyingNodesWithCorrectPath.Add(qualifyingNode);
-            //if (
-            //    !targetGmod.PathExistsBetween(
-            //        qualifyingNodesWithCorrectPath.Select(n => n.TargetNode),
-            //        targetEndNode
-            //    )
-            //)
-            //    qualifyingNodesWithCorrectPath.RemoveAt(qualifyingNodesWithCorrectPath.Count - 1);
 
+            if (i > 0 && qualifyingNode.TargetNode.Code == qualifyingNodes[i - 1].TargetNode.Code)
+                continue;
 
             // path - s101
             // newPath - converted(s101)
@@ -122,214 +117,88 @@ internal sealed class GmodVersioning
 
             var selectionChanged = false;
 
-            if (codeChanged)
+            static void AddToPath(Gmod targetGmod, List<GmodNode> path, GmodNode node)
             {
-                normalAssignmentChanged =
-                    (
-                        sourceNormalAssignment = ConvertNode(
-                            targetVersion,
-                            qualifyingNode.TargetNode,
-                            sourceVersion
-                        )?.ProductType
-                    )?.Code != targetNormalAssignment?.Code;
-
-                for (int j = qualifyingNodesWithCorrectPath.Count - 1; j >= 0; j--)
+                if (path.Count > 0)
                 {
-                    var parent = qualifyingNodesWithCorrectPath[j];
-                    if (
-                        !targetGmod.PathExistsBetween(
-                            qualifyingNodesWithCorrectPath.Take(j + 1),
-                            qualifyingNode.TargetNode,
-                            out var remaining
-                        )
-                    )
+                    var prev = path[path.Count - 1];
+                    if (!prev.IsChild(node))
                     {
-                        qualifyingNodesWithCorrectPath.RemoveAt(j);
-                    }
-                    else
-                    {
-                        qualifyingNodesWithCorrectPath.AddRange(remaining);
-                        qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode);
-                        break;
+                        for (int j = path.Count - 1; j >= 0; j--)
+                        {
+                            var parent = path[j];
+                            var currentParents = path.Take(j + 1).ToArray();
+                            if (
+                                !targetGmod.PathExistsBetween(
+                                    currentParents,
+                                    node,
+                                    out var remaining
+                                )
+                            )
+                            {
+                                if (
+                                    !currentParents.Any(
+                                        n => n.IsAssetFunctionNode && n.Code != parent.Code
+                                    )
+                                )
+                                    throw new Exception("Tried to remove last asset function node");
+                                path.RemoveAt(j);
+                            }
+                            else
+                            {
+                                path.AddRange(remaining);
+                                break;
+                            }
+                        }
                     }
                 }
+
+                path.Add(node);
             }
 
-            if (normalAssignmentChanged) // AC || AN || AD
+            if (codeChanged)
+            {
+                AddToPath(targetGmod, path, qualifyingNode.TargetNode);
+            }
+            else if (normalAssignmentChanged) // AC || AN || AD
             {
                 var wasDeleted =
                     sourceNormalAssignment is not null && targetNormalAssignment is null;
 
                 if (!codeChanged)
-                    qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode);
+                    AddToPath(targetGmod, path, qualifyingNode.TargetNode);
 
                 if (wasDeleted)
                 {
-                    throw new Exception(
-                        "Unvalid command - Deleted normal assignment from "
-                            + qualifyingNode.TargetNode
-                            + " with "
-                            + targetNormalAssignment
-                    );
+                    if (qualifyingNode.TargetNode.Code == targetEndNode.Code)
+                        throw new Exception("Normal assignment end node was deleted");
+                    i++;
                 }
-                else
+                else if (qualifyingNode.TargetNode.Code != targetEndNode.Code)
                 {
-                    qualifyingNodesWithCorrectPath.Add(targetNormalAssignment!);
+                    AddToPath(targetGmod, path, targetNormalAssignment!);
+                    i++; // Holy moly
                 }
             }
             if (selectionChanged) // SC || SN || SD
             { }
 
-            if (qualifyingNodesWithCorrectPath.Count > 0)
+            if (!codeChanged && !normalAssignmentChanged)
             {
-                var baseNode = qualifyingNodesWithCorrectPath.Last();
+                AddToPath(targetGmod, path, qualifyingNode.TargetNode);
+            }
 
-                var pathExists = targetGmod.PathExistsBetween(
-                    qualifyingNodesWithCorrectPath.Take(qualifyingNodesWithCorrectPath.Count - 1),
-                    qualifyingNode.TargetNode,
-                    out var remaining
-                );
-                if (pathExists && remaining.Count() > 0)
-                {
-                    foreach (var node in remaining)
-                        qualifyingNodesWithCorrectPath.Insert(qualifyingNodesWithCorrectPath.IndexOf(baseNode), node);
-                }
-                qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode);
-            }
-            else if (!normalAssignmentChanged && !selectionChanged && !codeChanged)
-            {
-                qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode);
-            }
+            if (path[path.Count - 1].Code == targetEndNode.Code)
+                break;
         }
 
-        //if (i == qualifyingNodes.Length - 1) { }
+        potentialParents = path.Take(path.Count - 1).ToArray();
+        targetEndNode = path.Last();
 
-        potentialParents = qualifyingNodesWithCorrectPath
-            .Take(qualifyingNodesWithCorrectPath.Count - 1)
-            .ToArray();
-        targetEndNode = qualifyingNodesWithCorrectPath.Last();
+        if (!GmodPath.IsValid(potentialParents, targetEndNode, out var missinkLinkAt))
+            Debugger.Break();
 
-        Debug.Assert(
-            GmodPath.IsValid(potentialParents, targetEndNode, out var missinkLinkAt),
-            "Should be correct"
-        );
         return new GmodPath(potentialParents, targetEndNode);
-
-        //var baseNode = qualifyingNodesWithCorrectPath[missinkLinkAt];
-        //var reachedEnd = targetGmod.Traverse(
-        //    baseNode.TargetNode,
-        //    (parents, node) =>
-        //    {
-        //        if (node.Code != targetEndNode.Code)
-        //            return TraversalHandlerResult.Continue;
-
-        //        var insertAt = missinkLinkAt + 1;
-        //        for (int i = 1; i < parents.Count; i++)
-        //        {
-        //            var parent = parents[i];
-        //            var missingNode = (ConvertNode(targetVersion, parent, sourceVersion), parent);
-        //            qualifyingNodesWithCorrectPath.Insert(insertAt++, missingNode);
-        //        }
-        //        return TraversalHandlerResult.Stop;
-        //    }
-        //);
-
-        //if (reachedEnd)
-        //{
-        //    if (
-        //        baseNode.SourceNode?.ProductType?.Code == sourcePath.Node.Code
-        //        && baseNode.TargetNode.ProductType is not null
-        //        && GmodPath.IsValid(potentialParents, baseNode.TargetNode.ProductType)
-        //    )
-        //    {
-        //        return new GmodPath(potentialParents, baseNode.TargetNode.ProductType);
-        //    }
-        //}
-
-        //Debug.Assert(!reachedEnd, "Should find the path and stop traversing");
-        //potentialParents = qualifyingNodesWithCorrectPath
-        //    .Take(qualifyingNodesWithCorrectPath.Count - 1)
-        //    .ToArray();
-        //Debug.Assert(
-        //    GmodPath.IsValid(potentialParents, targetEndNode, out missinkLinkAt),
-        //    "Should have a valid path now"
-        //);
-        //return new GmodPath(potentialParents, targetEndNode);
-
-        //var locations = qualifyingNodesWithCorrectPath
-        //    .Select(kvp => (Code: kvp.TargetNode.Code, Location: kvp.TargetNode.Location))
-        //    .GroupBy(t => t.Code)
-        //    .Select(grp => grp.First())
-        //    .ToDictionary(kvp => kvp.Code, kvp => kvp.Location);
-
-        //var targetBaseNode =
-        //    qualifyingNodesWithCorrectPath.LastOrDefault(
-        //        n => n.TargetNode.IsAssetFunctionNode && n.TargetNode.Code != targetEndNode.Code
-        //    ).TargetNode
-        //    ?? qualifyingNodesWithCorrectPath.LastOrDefault().TargetNode
-        //    ?? targetGmod.RootNode;
-
-        //var possiblePaths = new List<GmodPath>();
-        //targetGmod.Traverse(
-        //    possiblePaths,
-        //    rootNode: targetBaseNode,
-        //    handler: (possiblePaths, parents, node) =>
-        //    {
-        //        if (node.Code != targetEndNode.Code)
-        //            return TraversalHandlerResult.Continue;
-
-        //        var targetParents = new List<GmodNode>(parents.Count);
-
-        //        targetParents.AddRange(
-        //            parents
-        //                .Where(p => p.Code != targetBaseNode.Code)
-        //                .Select(
-        //                    p =>
-        //                        p with
-        //                        {
-        //                            Location = locations.TryGetValue(p.Code, out var location)
-        //                              ? location
-        //                              : null
-        //                        }
-        //                )
-        //                .ToList()
-        //        );
-
-        //        var currentTargetBaseNode = targetBaseNode;
-        //        Debug.Assert(
-        //            currentTargetBaseNode.Parents.Count == 1,
-        //            $"More than one path to root found for: {sourcePath}"
-        //        );
-        //        while (currentTargetBaseNode.Parents.Count == 1)
-        //        {
-        //            // Traversing upwards to get to VE, since we until now have traversed from first leaf node.
-        //            targetParents.Insert(0, currentTargetBaseNode);
-        //            currentTargetBaseNode = currentTargetBaseNode.Parents[0];
-        //        }
-
-        //        targetParents.Insert(0, targetGmod.RootNode);
-
-        //        var qualifiedParents = qualifyingNodesWithCorrectPath
-        //            .Where(n => !targetParents.Any(t => t.Code == n.TargetNode.Code))
-        //            .ToList();
-
-        //        if (
-        //            !qualifyingNodesWithCorrectPath
-        //                .Take(qualifyingNodesWithCorrectPath.Count - 1)
-        //                .All(cn => targetParents.Any(p => p.Code == cn.TargetNode.Code))
-        //        )
-        //            return TraversalHandlerResult.Continue;
-
-        //        possiblePaths.Add(new GmodPath(targetParents, node));
-        //        return TraversalHandlerResult.Continue;
-        //    }
-        //);
-
-        //Debug.Assert(
-        //    possiblePaths.Count == 1,
-        //    $"Expected exactly one possible target path for: {sourcePath}. Got: {(possiblePaths.Count == 0 ? "0" : string.Join("\n", possiblePaths))}"
-        //);
-        //return possiblePaths[0];
     }
 
     private bool TryGetVersioningNode(

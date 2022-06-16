@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Threading.Channels;
 using Xunit.Abstractions;
 
 namespace Vista.SDK.Tests;
@@ -49,11 +50,32 @@ public class GmodVersioningTests
                 "1012.21/C1147.221/C1051.7/C101.661i/C624",
                 "1012.21/C1147.221/C1051.7/C101.661i/C621",
             },
-            new string[] // Parent code change and different depth
+            new string[] // Parent code change and different depth. What's correct? avoid cycle?
             {
                 "1012.22/S201.1/C151.2/S110.2/C101.61/S203.2/S101",
                 "1012.22/S201.1/C151.2/S110.2/C101.61/S203.3/S110.1/S101",
-            }
+            },
+            new string[]
+            {
+                "1012.22/S201.1/C151.2/S110.2/C101.64i",
+                "1012.22/S201.1/C151.2/S110.2/C101.64",
+            },
+            new string[]
+            {
+                "632.32i/S110.2/C111.42/G203.31/S90.5/C401",
+                "632.32i/S110.2/C111.42/G203.31/S90.5/C401",
+            },
+            new string[]
+            {
+                "864.11/G71.21/C101.64i/S201.1/C151.31/S110.2/C111.42/G204.41/S90.2/S51",
+                "864.11/G71.21/C101.64/S201.1/C151.31/S110.2/C111.42/G204.41/S90.2/S51",
+            },
+            new string[]
+            {
+                "864.11/G71.21/C101.64i/S201.1/C151.31/S110.2/C111.41/G240.1/G242.2/S90.5/C401",
+                "864.11/G71.21/C101.64/S201.1/C151.31/S110.2/C111.41/G240.1/G242.2/S90.5/C401",
+            },
+            new string[] { "221.31/C1141.41/C664.2/C471", "221.31/C1141.41/C664.2/C471", } // F221 bug?
         };
 
     [Theory]
@@ -88,60 +110,6 @@ public class GmodVersioningTests
 
         Assert.NotNull(targetPath);
         Assert.Equal(expectedPath, targetPath?.ToString());
-    }
-
-    [Fact]
-    public void SmokeTest_GmodVersioning_ConvertPath()
-    {
-        var gmod = VIS.Instance.GetGmod(VisVersion.v3_4a);
-        var targetGmod = VIS.Instance.GetGmod(VisVersion.v3_5a);
-
-        var context = new SmokeTestContext(targetGmod);
-
-        var completed = gmod.Traverse(
-            context,
-            (context, parents, node) =>
-            {
-                context.Counter++;
-
-                if (!GmodPath.IsValid(parents, node))
-                    return TraversalHandlerResult.Continue;
-
-                GmodPath? path;
-
-                try
-                {
-                    path = new GmodPath(parents, node);
-
-                    context.TargetPath = VIS.Instance.ConvertPath(
-                        VisVersion.v3_4a,
-                        path,
-                        VisVersion.v3_5a
-                    );
-                    Assert.NotNull(context.TargetPath);
-                    var parsedPath = context.TargetGmod.TryParsePath(
-                        context.TargetPath!.ToString(),
-                        out var parsedTargetPath
-                    );
-                    Assert.True(parsedPath);
-                    Assert.Equal(parsedTargetPath?.ToString(), context.TargetPath.ToString());
-                }
-                catch (Exception e)
-                {
-                    testOutputHelper.WriteLine(e.ToString());
-                    context.FailedPaths.Add(e);
-                }
-                return TraversalHandlerResult.Continue;
-            }
-        );
-        Assert.True(completed);
-    }
-
-    private record SmokeTestContext(Gmod TargetGmod)
-    {
-        public GmodPath? TargetPath;
-        public int Counter;
-        public List<Exception> FailedPaths = new();
     }
 
     public static IEnumerable<string?[]> Valid_Test_Data_Node =>
