@@ -56,7 +56,9 @@ public sealed record GmodPath
                     );
 
                 if (!set.Add(child.Code))
-                    throw new ArgumentException("Recursion in gmod path argument");
+                    throw new ArgumentException(
+                        $"Recursion in gmod path argument for code: {child.Code}"
+                    );
             }
         }
 
