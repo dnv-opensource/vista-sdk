@@ -101,9 +101,10 @@ internal sealed class GmodVersioning
             //    qualifyingNodesWithCorrectPath.RemoveAt(qualifyingNodesWithCorrectPath.Count - 1);
 
             var codeChanged = qualifyingNode.SourceNode.Code != qualifyingNode.TargetNode.Code;
-            var normalAssignmentChanged =
+            var normalAssignmentChanged = !codeChanged ?
                 qualifyingNode.SourceNode.ProductType?.Code
-                != qualifyingNode.TargetNode.ProductType?.Code;
+                != qualifyingNode.TargetNode.ProductType?.Code :
+                ();
             var selectionChanged = false;
 
             if (codeChanged)
