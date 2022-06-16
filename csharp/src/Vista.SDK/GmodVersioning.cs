@@ -100,15 +100,39 @@ internal sealed class GmodVersioning
             //)
             //    qualifyingNodesWithCorrectPath.RemoveAt(qualifyingNodesWithCorrectPath.Count - 1);
 
+
+            // path - s101
+            // newPath - converted(s101)
+
+            //  for each node in path, var currNode
+            //
+            //      code change
+            //      ANDOR normal assingment change
+            //      ANDOR selection change
+            //
+            //      guarantee converted(currNode)
+
             var codeChanged = qualifyingNode.SourceNode.Code != qualifyingNode.TargetNode.Code;
-            var normalAssignmentChanged = !codeChanged ?
-                qualifyingNode.SourceNode.ProductType?.Code
-                != qualifyingNode.TargetNode.ProductType?.Code :
-                ();
+
+            var sourceNormalAssignment = qualifyingNode.SourceNode.ProductType;
+            var targetNormalAssignment = qualifyingNode.TargetNode.ProductType;
+
+            var normalAssignmentChanged =
+                sourceNormalAssignment?.Code != targetNormalAssignment?.Code;
+
             var selectionChanged = false;
 
             if (codeChanged)
             {
+                normalAssignmentChanged =
+                    (
+                        sourceNormalAssignment = ConvertNode(
+                            targetVersion,
+                            qualifyingNode.TargetNode,
+                            sourceVersion
+                        )?.ProductType
+                    )?.Code != targetNormalAssignment?.Code;
+
                 for (int j = qualifyingNodesWithCorrectPath.Count - 1; j >= 0; j--)
                 {
                     var parent = qualifyingNodesWithCorrectPath[j];
@@ -130,77 +154,55 @@ internal sealed class GmodVersioning
                     }
                 }
             }
-            else
-            {
-                //if (qualifyingNodesWithCorrectPath.Count > 0)
-                //{
-                //    var pathExists = targetGmod.PathExistsBetween(
-                //        qualifyingNodesWithCorrectPath.Select(n => n.TargetNode),
-                //        qualifyingNode.TargetNode,
-                //        out var remaining
-                //    );
-                //    if (pathExists && remaining.Count() > 0)
-                //    {
-                //        qualifyingNodesWithCorrectPath.AddRange(
-                //            remaining.Select(
-                //                n =>
-                //                    (
-                //                        SourceNode: ConvertNode(targetVersion, n, sourceVersion),
-                //                        TargetNode: n
-                //                    )
-                //            )
-                //        );
-                //    }
-                //    else if (!pathExists)
-                //    {
-                //        var baseNode = qualifyingNodesWithCorrectPath[
-                //            qualifyingNodesWithCorrectPath.Count - 1
-                //        ];
-                //        if (
-                //            baseNode.SourceNode?.ProductType?.Code == sourcePath.Node.Code
-                //            && baseNode.TargetNode.ProductType is not null
-                //            && GmodPath.IsValid(potentialParents, baseNode.TargetNode.ProductType)
-                //        )
-                //        {
-                //            return new GmodPath(potentialParents, baseNode.TargetNode.ProductType);
-                //        }
-                //    }
-                //}
-                qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode);
-            }
 
             if (normalAssignmentChanged) // AC || AN || AD
             {
-                var wasCreated =
-                    qualifyingNode.SourceNode.ProductType is null
-                    && qualifyingNode.TargetNode.ProductType is not null;
                 var wasDeleted =
-                    qualifyingNode.SourceNode.ProductType is not null
-                    && qualifyingNode.TargetNode.ProductType is null;
-                if (wasCreated)
+                    sourceNormalAssignment is not null && targetNormalAssignment is null;
+
+                if (!codeChanged)
+                    qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode);
+
+                if (wasDeleted)
                 {
-                    qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode.ProductType!);
-                }
-                else if (wasDeleted)
-                {
-                    i++;
+                    throw new Exception(
+                        "Unvalid command - Deleted normal assignment from "
+                            + qualifyingNode.TargetNode
+                            + " with "
+                            + targetNormalAssignment
+                    );
                 }
                 else
                 {
-                    //qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode.ProductType!);
-                    //i++;
-
-                    qualifyingNodes[i + 1] = (
-                        qualifyingNode.SourceNode.ProductType!,
-                        qualifyingNode.TargetNode.ProductType!
-                    );
+                    qualifyingNodesWithCorrectPath.Add(targetNormalAssignment!);
                 }
             }
             if (selectionChanged) // SC || SN || SD
             { }
 
-            if (i == qualifyingNodes.Length - 1) { }
+            if (qualifyingNodesWithCorrectPath.Count > 0)
+            {
+                var baseNode = qualifyingNodesWithCorrectPath.Last();
+
+                var pathExists = targetGmod.PathExistsBetween(
+                    qualifyingNodesWithCorrectPath.Take(qualifyingNodesWithCorrectPath.Count - 1),
+                    qualifyingNode.TargetNode,
+                    out var remaining
+                );
+                if (pathExists && remaining.Count() > 0)
+                {
+                    foreach (var node in remaining)
+                        qualifyingNodesWithCorrectPath.Insert(qualifyingNodesWithCorrectPath.IndexOf(baseNode), node);
+                }
+                qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode);
+            }
+            else if (!normalAssignmentChanged && !selectionChanged && !codeChanged)
+            {
+                qualifyingNodesWithCorrectPath.Add(qualifyingNode.TargetNode);
+            }
         }
+
+        //if (i == qualifyingNodes.Length - 1) { }
 
         potentialParents = qualifyingNodesWithCorrectPath
             .Take(qualifyingNodesWithCorrectPath.Count - 1)
