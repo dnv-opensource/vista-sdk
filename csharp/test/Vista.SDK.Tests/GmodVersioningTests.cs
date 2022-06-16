@@ -44,12 +44,12 @@ public class GmodVersioningTests
                 "1012.21/C1147.221/C1051.7/C101.61/S203.2/S101",
                 "1012.21/C1147.221/C1051.7/C101.61/S203.3/S110.1/S101",
             },
-            new string[]
+            new string[] // Normal assignment change
             {
                 "1012.21/C1147.221/C1051.7/C101.661i/C624",
                 "1012.21/C1147.221/C1051.7/C101.661i/C621",
             },
-            new string[]
+            new string[] // Parent code change and different depth
             {
                 "1012.22/S201.1/C151.2/S110.2/C101.61/S203.2/S101",
                 "1012.22/S201.1/C151.2/S110.2/C101.61/S203.3/S110.1/S101",
