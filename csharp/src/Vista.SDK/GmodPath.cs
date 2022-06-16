@@ -42,6 +42,9 @@ public sealed record GmodPath
                     $"Invalid gmod path - first parent should be root of gmod (VE), but was {parents[0].Code}"
                 );
 
+            var set = new HashSet<string>();
+
+            set.Add("VE");
             for (int i = 0; i < parents.Count; i++)
             {
                 var parent = parents[i];
@@ -51,6 +54,9 @@ public sealed record GmodPath
                     throw new ArgumentException(
                         $"Invalid gmod path - {child.Code} not child of {parent.Code}"
                     );
+
+                if (!set.Add(child.Code))
+                    throw new ArgumentException("Recursion in gmod path argument");
             }
         }
 
@@ -58,13 +64,26 @@ public sealed record GmodPath
         Node = node;
     }
 
-    public static bool IsValid(IReadOnlyList<GmodNode> parents, GmodNode node)
+    public static bool IsValid(IReadOnlyList<GmodNode> parents, GmodNode node) =>
+        IsValid(parents, node, out _);
+
+    internal static bool IsValid(
+        IReadOnlyList<GmodNode> parents,
+        GmodNode node,
+        out int missingLinkAt
+    )
     {
+        missingLinkAt = -1;
+
         if (parents.Count == 0)
             return false;
 
         if (parents.Count > 0 && !parents[0].IsRoot)
             return false;
+
+        var set = new HashSet<string>();
+
+        set.Add("VE");
 
         for (int i = 0; i < parents.Count; i++)
         {
@@ -72,6 +91,12 @@ public sealed record GmodPath
             var nextIndex = i + 1;
             var child = nextIndex < parents.Count ? parents[nextIndex] : node;
             if (!parent.IsChild(child))
+            {
+                missingLinkAt = i;
+                return false;
+            }
+
+            if (!set.Add(child.Code))
                 return false;
             if (!IsValidLocation(parent.Location))
                 return false;

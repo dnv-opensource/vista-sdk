@@ -14,9 +14,9 @@ public interface IVIS
 
     IEnumerable<VisVersion> GetVisVersions();
 
-    GmodNode ConvertNode(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion);
+    GmodNode? ConvertNode(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion);
 
-    GmodPath ConvertPath(VisVersion sourceVersion, GmodPath sourcePath, VisVersion targetVersion);
+    GmodPath? ConvertPath(VisVersion sourceVersion, GmodPath sourcePath, VisVersion targetVersion);
 }
 
 /// <summary>
@@ -225,13 +225,13 @@ public sealed class VIS : IVIS
         return (VisVersion[])Enum.GetValues(typeof(VisVersion));
     }
 
-    public GmodNode ConvertNode(
+    public GmodNode? ConvertNode(
         VisVersion sourceVersion,
         GmodNode sourceNode,
         VisVersion targetVersion
     ) => GetGmodVersioning().ConvertNode(sourceVersion, sourceNode, targetVersion);
 
-    public GmodPath ConvertPath(
+    public GmodPath? ConvertPath(
         VisVersion sourceVersion,
         GmodPath sourcePath,
         VisVersion targetVersion
