@@ -196,7 +196,7 @@ internal sealed class GmodVersioning
         targetEndNode = path.Last();
 
         if (!GmodPath.IsValid(potentialParents, targetEndNode, out var missinkLinkAt))
-            Debugger.Break();
+            throw new Exception($"Didnt end up with valid path for {sourcePath}");
 
         return new GmodPath(potentialParents, targetEndNode);
     }

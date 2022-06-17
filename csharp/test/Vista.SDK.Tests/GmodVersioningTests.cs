@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Threading.Channels;
 using Xunit.Abstractions;
 
 namespace Vista.SDK.Tests;
@@ -110,6 +108,46 @@ public class GmodVersioningTests
 
         Assert.NotNull(targetPath);
         Assert.Equal(expectedPath, targetPath?.ToString());
+    }
+
+    [Fact]
+    public void Test_Finds_Path()
+    {
+        var gmod = VIS.Instance.GetGmod(VisVersion.v3_4a);
+        var completed = gmod.Traverse(
+            (parents, node) =>
+            {
+                if (parents.Count == 0)
+                    return TraversalHandlerResult.Continue;
+
+                var path = new GmodPath(parents.ToArray(), node);
+                if (path.ToString() == "1012.22/S201.1/C151.2/S110.2/C101.61/S203.2/S101")
+                    return TraversalHandlerResult.Stop;
+
+                return TraversalHandlerResult.Continue;
+            }
+        );
+
+        Assert.False(completed);
+    }
+
+    [Fact]
+    public void Test_One_Path_To_Root_For_Asset_Functions()
+    {
+        static bool OnePathToRoot(GmodNode node) =>
+            node.IsRoot || (node.Parents.Count == 1 && OnePathToRoot(node.Parents[0]));
+
+        foreach (var version in VisVersions.All)
+        {
+            var gmod = VIS.Instance.GetGmod(version);
+            foreach (var node in gmod)
+            {
+                if (!node.IsAssetFunctionNode)
+                    continue;
+
+                Assert.True(OnePathToRoot(node));
+            }
+        }
     }
 
     public static IEnumerable<string?[]> Valid_Test_Data_Node =>
