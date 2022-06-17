@@ -7,7 +7,7 @@ module.exports = (async () => {
     const resourceDir = "../../../resources";
     if (fs.existsSync(resourceDir)) {
         console.log("> Copy resource dir");
-        fs.copySync(resourceDir, "./lib/resources", {
+        fs.copySync(resourceDir, EmbeddedResource.RESOURCE_DIR, {
             overwrite: true,
         });
     }

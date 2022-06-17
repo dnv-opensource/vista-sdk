@@ -6,7 +6,7 @@
     "scripts": {
         "test": "jest --silent=false --verbose=true",
         "prebuild": "ts-node ./prebuild.ts",
-        "build": "rimraf rm -rf dist && tsc && cp -r ./lib/resources ./dist"
+        "build": "rimraf rm -rf dist && tsc && cp -r ../resources ./lib/resources && cp -r ./lib/resources ./dist"
     },
     "keywords": [],
     "author": "",
