@@ -28,64 +28,40 @@ public sealed partial class Gmod
     public bool Traverse(GmodNode rootNode, TraverseHandler handler) =>
         Traverse(handler, rootNode, (handler, parents, node) => handler(parents, node));
 
-    public bool PathExistsBetween(GmodNode from, GmodNode to)
-    {
-        if (from.Code == to.Code)
-            return true;
-
-        var reachedEnd = this.Traverse(
-            to,
-            from,
-            (to, parents, node) =>
-            {
-                if (node.Code == to.Code)
-                    return TraversalHandlerResult.Stop;
-
-                return TraversalHandlerResult.Continue;
-            }
-        );
-
-        return !reachedEnd;
-    }
-
-    public bool PathExistsBetween(IEnumerable<GmodNode> fromPath, GmodNode to)
-    {
-        var lastNode = fromPath.Last();
-
-        var reachedEnd = this.Traverse(
-            to,
-            (to, parents, node) =>
-            {
-                if (node.Code != to.Code)
-                    return TraversalHandlerResult.Continue;
-
-                if (fromPath.All(qn => parents.Any(p => p.Code == qn.Code)))
-                    return TraversalHandlerResult.Stop;
-
-                return TraversalHandlerResult.Continue;
-            }
-        );
-
-        return !reachedEnd;
-    }
-
-    public bool PathExistsBetween(
+    internal bool PathExistsBetween(
         IEnumerable<GmodNode> fromPath,
         GmodNode to,
         out IEnumerable<GmodNode> remainingParents
     )
     {
-        var lastNode = fromPath.Last();
+        var lastAssetFunction = fromPath.LastOrDefault(n => n.IsAssetFunctionNode);
         remainingParents = Enumerable.Empty<GmodNode>();
 
-        var state = new Thingy(to) { RemainingParents = remainingParents, };
+        var state = new PathExistsContext(to) { RemainingParents = remainingParents, };
 
         var reachedEnd = this.Traverse(
-            state, // TODO use lastNode?
+            state,
+            lastAssetFunction ?? RootNode,
             (state, parents, node) =>
             {
                 if (node.Code != state.To.Code)
                     return TraversalHandlerResult.Continue;
+
+                List<GmodNode>? actualParents = null;
+                while (!parents[0].IsRoot)
+                {
+                    if (actualParents is null)
+                    {
+                        actualParents = new(parents);
+                        parents = actualParents;
+                    }
+
+                    var parent = parents[0];
+                    if (parent.Parents.Count != 1)
+                        throw new Exception("Invalid state - expected one parent");
+
+                    actualParents.Insert(0, parent.Parents[0]);
+                }
 
                 if (fromPath.All(qn => parents.Any(p => p.Code == qn.Code)))
                 {
@@ -104,7 +80,7 @@ public sealed partial class Gmod
         return !reachedEnd;
     }
 
-    record Thingy(GmodNode To)
+    record PathExistsContext(GmodNode To)
     {
         public IEnumerable<GmodNode> RemainingParents = Enumerable.Empty<GmodNode>();
     }
