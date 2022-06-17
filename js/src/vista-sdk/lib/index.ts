@@ -12,14 +12,22 @@ import { GmodDto, GmodNodeDto } from "./types/GmodDto";
 import { UniversalId } from "./UniversalId";
 import { UniversalIdBuilder } from "./UniversalId.Builder";
 import { VisVersion } from "./VisVersion";
+import { VIS } from "./VIS";
+import  {EmbeddedResource}  from "./source-generator/EmbeddedResource";
+
 
 // Types
 export type { GmodDto, GmodNodeDto };
-// VIS
+// VisVersion
 export { VisVersion };
+// VIS
+export { VIS };
 // Codebooks and metadata
 export { CodebookName, CodebookNames, Codebook, Codebooks, MetadataTag };
 // LocalId
 export { LocalId, LocalIdBuilder, UniversalIdBuilder, UniversalId, ImoNumber };
 // Gmod
 export { Gmod, GmodNode, GmodPath };
+
+// EmbeddedResource
+export {EmbeddedResource}

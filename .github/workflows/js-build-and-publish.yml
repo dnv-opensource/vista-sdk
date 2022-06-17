@@ -22,6 +22,7 @@ jobs:
                   registry-url: https://registry.npmjs.org/
             - run: cd js/src/vista-sdk; npm ci; npm run build;
             - if: ${{ success() && !github.base_ref }}
-              run: cd js/src/vista-sdk; npm version $(node -p "require('./package.json').version")-${{ github.run_number }}; npm publish --access public;
+              run: cd js/src/vista-sdk; npm version $(node -p "require('./package.json').version")-${{ github.run_number }}; npm publish "./dist" --access public;
               env:
                   NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+
