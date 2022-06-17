@@ -4,7 +4,7 @@ import { GmodDto } from "..";
 import { CodebooksDto } from "../types/CodebookDto";
 
 export class EmbeddedResource {
-    public static readonly RESOURCE_DIR = "../resources";
+    public static readonly RESOURCE_DIR = "../resources"; // ./resources
 
     public static async getGmodVisVersions(apiUrl?: string) {
         return this.isNode()
