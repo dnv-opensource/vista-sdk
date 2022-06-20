@@ -13,7 +13,7 @@ module.exports = (async () => {
     }
 
     /* Generate VisVersion.ts */
-    const out_path = "./VisVersion.ts";
+    const out_path = "./lib/VisVersion.ts";
     // Remove existing file
     if (fs.existsSync(out_path)) fs.unlinkSync(out_path);
 
