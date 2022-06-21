@@ -8,15 +8,13 @@ import { ImoNumber } from "./ImoNumber";
 import { LocalId } from "./LocalId";
 import { LocalIdBuilder } from "./LocalId.Builder";
 import { MetadataTag } from "./MetadataTag";
-import { GmodDto, GmodNodeDto } from "./types/GmodDto";
+
 import { UniversalId } from "./UniversalId";
 import { UniversalIdBuilder } from "./UniversalId.Builder";
 import { VisVersion } from "./VisVersion";
 import { VIS } from "./VIS";
 import { ResourceFiles } from "./source-generator/ResourceFiles";
 
-// Types
-export type { GmodDto, GmodNodeDto };
 // VisVersion
 export { VisVersion };
 // VIS

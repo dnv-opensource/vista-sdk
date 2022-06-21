@@ -2,12 +2,13 @@
     "name": "dnv-vista-sdk",
     "version": "0.0.1-preview",
     "description": "In this repository we codify the rules and principles of VIS and related ISO-standards to enable and support users and implementers of the standards.",
-    "main": "index.js",
+    "main": "./dist/index.js",
     "scripts": {
         "test": "jest --silent=false --verbose=true",
         "prebuild": "ts-node ./prebuild.ts",
-        "build": "rimraf rm -rf dist && tsc && cp -r ./lib/resources ./dist/lib"
+        "build": "rimraf rm -rf dist && tsc && cp -r ./lib/resources ./dist"
     },
+    "files": ["dist/"],
     "keywords": [],
     "author": "",
     "license": "ISC",
