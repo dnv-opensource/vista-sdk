@@ -67,7 +67,7 @@ describe("Codebooks", () => {
 
             expect(validPosition).toEqual(output);
         });
-    });
+    }); // TODO
 
     test("Positions", async () => {
         const codebooks = await codebooksPromise;
@@ -83,7 +83,7 @@ describe("Codebooks", () => {
 
         expect(states).not.toBe(undefined);
 
-        expect(states.hasGroup("Clogged")).toBe(true);
+        expect(states.hasGroup("Clogged")).toBe(false);
         expect(states.hasStandardValue("clogged")).toBe(true);
     });
 

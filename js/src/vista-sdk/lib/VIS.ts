@@ -1,47 +1,36 @@
 import { VisVersion, GmodDto, Gmod, Codebooks } from ".";
-import { EmbeddedResource } from "./source-generator/EmbeddedResource";
 import { CodebooksDto } from "./types/CodebookDto";
 import { VisVersionExtension, VisVersions } from "./VisVersion";
+import { ResourceFiles } from "./source-generator/ResourceFiles";
 
 export class VIS {
-    public constructor() {
-        // TODO Cache
-    }
-
+    public constructor() {}
     public static get instance() {
         return new VIS();
     }
 
-    public async getGmodDto(
-        visVersion: VisVersion,
-        apiUrl?: string
-    ): Promise<GmodDto> {
-        const dto = await EmbeddedResource.getGmod(
-            VisVersionExtension.toVersionString(visVersion),
-            apiUrl
+    private async getGmodDto(visVersion: VisVersion): Promise<GmodDto> {
+        const dto = await ResourceFiles.readGmodFile<GmodDto>(
+            VisVersionExtension.toVersionString(visVersion)
         );
-
         return dto;
     }
 
-    public async getGmod(
-        visVersion: VisVersion,
-        apiUrl?: string
-    ): Promise<Gmod> {
-        const dto = await this.getGmodDto(visVersion, apiUrl);
-
+    public async getGmod(visVersion: VisVersion): Promise<Gmod> {
+        const dto = await this.getGmodDto(visVersion);
         return new Gmod(visVersion, dto);
     }
 
     public async getGmodsMap(
         visVersions: VisVersion[]
     ): Promise<Map<VisVersion, Gmod>> {
-        var invalidVersions = visVersions.filter(
+        var invalidVisVersions = visVersions.filter(
             (v) => !VisVersionExtension.isValid(v)
         );
-        if (invalidVersions.length > 0) {
+        if (invalidVisVersions.length > 0) {
             throw new Error(
-                "Invalid VIS versions provided: " + invalidVersions.join(", ")
+                "Invalid VIS versions provided: " +
+                    invalidVisVersions.join(", ")
             );
         }
 
@@ -58,44 +47,44 @@ export class VIS {
         );
     }
 
-    public async getCodebooksDto(
-        visVersion: string,
-        apiUrl?: string
+    private async getCodebooksDto(
+        visVersion: VisVersion
     ): Promise<CodebooksDto> {
-        const dto = await EmbeddedResource.getCodebooks(visVersion, apiUrl);
+        const dto = await ResourceFiles.readCodebooksFile<CodebooksDto>(
+            VisVersionExtension.toString(visVersion)
+        );
         return dto;
     }
 
-    public async getCodebooks(visVersion: VisVersion, apiUrl?: string) {
-        const dto = await this.getCodebooksDto(visVersion, apiUrl);
-
+    public async getCodebooks(visVersion: VisVersion): Promise<Codebooks> {
+        const dto = await this.getCodebooksDto(visVersion);
         return new Codebooks(visVersion, dto);
     }
 
     public async getCodebooksMap(
         visVersions: VisVersion[]
     ): Promise<Map<VisVersion, Codebooks>> {
-        var invalidVersions = visVersions.filter(
+        var invalidVisVersions = visVersions.filter(
             (v) => !VisVersionExtension.isValid(v)
         );
-        if (invalidVersions.length > 0) {
+        if (invalidVisVersions.length > 0) {
             throw new Error(
-                "Invalid VIS versions provided: " + invalidVersions.join(", ")
+                "Invalid VIS versions provided: " +
+                    invalidVisVersions.join(", ")
             );
         }
 
         const versions = new Set(visVersions);
         const codebookPromises = Array.from(versions).map(async (v) => ({
             visVersion: v,
-            gmod: await this.getCodebooks(v),
+            codebooks: await this.getCodebooks(v),
         }));
-
         const codebooks = await Promise.all(codebookPromises);
 
         return new Map(
             Object.assign(
                 {},
-                ...codebooks.map((g) => ({ [g.visVersion]: g.gmod }))
+                ...codebooks.map((c) => ({ [c.visVersion]: c.codebooks }))
             )
         );
     }
