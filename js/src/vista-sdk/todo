@@ -1,0 +1,53 @@
+1. Legg inn resources inn i dist folder med script
+2. Få EmbeddedResources til å peke mot resources
+3. Oppdatere github workflow til å bare exportere dist folder
+4. få package.json til å peke mot "main": "./dist/index.js"
+
+
+util-funksjon som abstraherer
+
+const readFile (filepath: string) {
+ if (window == undefined) {
+    return fs.createReadStream(file)
+  }
+  return someOtherWayOfLoading(file)
+}
+
+webpack til å importere json filer
+app til å teste npm pakken lokalt
+- memoryMapped file, runtime.
+- code splitting slik at ting importeres async
+##################################################
+-  Lage API-kall i EmbeddedResources
+- laste package.json som to forskjellige filer
+    - en for node
+    - en for browser
+- lage VIS-instans
+Redis er jo relevant vanlig evt kan man holde det i memory
+
+
+
+######
+FIXME:
+i index.ts fjern ResourceFiles.
+- GetTheFilesGenerator
+FIXME: Fjern dist inkludering, bruk lib også. Bruk også Webpack
+
+ Vi ønsker jo å laste inn alle versjoner slik at vi kan kalle vis.getGmod(visVersion). I tillegg, hvordan kan man bruke dette ift endring av version.
+ Det du viser her er kun en versjon, så da må du jo manuelt importere alle versjoner og lage en egen wrapper som skal håndtere det
+
+Men jeg tror vi bør gjøre om litt på strukturen i js-sdken slik at det blir noe som dette
+
+js
+    common (som er domenet)
+    node
+    web
+
+api/cdn: request til backenden for å hente ut hvilken data som finnes
+
+Når det gjelder å lage api så trenger vi bare å slenge en express server foran det vi hadde skrevet for backend og returnere basert på query params,
+og lage et endpoint som eventuelt lister ut hvilke versjoner og typer som finnes.
+
+
+
+

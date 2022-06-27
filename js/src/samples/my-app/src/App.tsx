@@ -1,30 +1,31 @@
 import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
-import gmodjson from 'dnv-vista-sdk/dist/resources/gmod-vis-3-4a.json'
-import {VIS, VisVersion} from 'dnv-vista-sdk'
 
 
-const gmod = VIS.instance.getGmod(VisVersion.v3_5a);
+// const gmod = VIS.instance.getGmod(VisVersion.v3_5a);
 function App() {
+    const url =  "https://mavista.azureedge.net/vis/gmod-vis-3-4a.json";
+    const options: RequestInit = {
+        method: "GET",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "application/json",
+            // "Cache-Control": "public, max-age=3600, must-revalidate"
+    }, cache: 'force-cache'
+    };
+    setTimeout(() => {
+    const response = fetch(url, options);
+    response.then(r => {
+        console.log(r.headers);
+    });
+    }, 200);
   return (
 <div>
 
-{JSON.stringify(Promise.resolve(gmod))}
 </div>
+
+
   );
 }
 export default App;
-
-// class LocalFileRead extends Component {
-//     constructor(props) {
-//         super(props);
-//     }
-//     render() {
-//         return <div>
-
-//             {JSON.stringify(gmod)}
-//             </div>
-//     }
-// }
-// export default LocalFileRead;

@@ -13,8 +13,8 @@ export class Client {
         const options: RequestInit = {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-            },
+                "Content-Type": "application/json"
+            }
         };
         const response = await fetch(url, options);
         if (response.ok) {
