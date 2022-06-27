@@ -55,31 +55,4 @@ export class EmbeddedResource {
         });
         return JSON.parse(jsonStr);
     }
-
-    public static async writeJsonGzip(file: string): Promise<void> {
-        if (!file.endsWith(".gz")) throw new Error("Invalid resource file");
-
-        const jsonStr = await new Promise<string>((res) => {
-            const unzip = zlib.createUnzip();
-            const inputStream = fs.createReadStream(
-                EmbeddedResource.RESOURCE_DIR + "/" + file
-            );
-            const stream = inputStream.pipe(unzip);
-
-            const segments: Set<Buffer> = new Set();
-
-            stream.on("data", (data) => {
-                segments.add(data);
-            });
-
-            stream.on("end", () => {
-                const result = Buffer.concat(Array.from(segments)).toString();
-                res(result);
-            });
-        });
-        fs.writeFileSync(
-            EmbeddedResource.RESOURCE_DIR + "/" + file.slice(0, -3),
-            jsonStr
-        );
-    }
 }

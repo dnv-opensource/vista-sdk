@@ -1,7 +1,7 @@
 import { VisVersion, GmodDto, Gmod, Codebooks } from ".";
 import { CodebooksDto } from "./types/CodebookDto";
 import { VisVersionExtension, VisVersions } from "./VisVersion";
-import { ResourceFiles } from "./source-generator/ResourceFiles";
+import { Client } from "./Client";
 
 export class VIS {
     public constructor() {}
@@ -10,10 +10,7 @@ export class VIS {
     }
 
     private async getGmodDto(visVersion: VisVersion): Promise<GmodDto> {
-        const dto = await ResourceFiles.readGmodFile<GmodDto>(
-            VisVersionExtension.toVersionString(visVersion)
-        );
-        return dto;
+        return await Client.visGetGmod(visVersion);
     }
 
     public async getGmod(visVersion: VisVersion): Promise<Gmod> {
@@ -50,9 +47,7 @@ export class VIS {
     private async getCodebooksDto(
         visVersion: VisVersion
     ): Promise<CodebooksDto> {
-        const dto = await ResourceFiles.readCodebooksFile<CodebooksDto>(
-            VisVersionExtension.toString(visVersion)
-        );
+        const dto = await Client.visGetCodebooks(visVersion);
         return dto;
     }
 

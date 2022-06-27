@@ -23,15 +23,6 @@ module.exports = (async () => {
     console.log("> Write VisVersion.ts");
 
     fs.writeFileSync(out_path, file);
-
-    /* Generate VIS json files*/
-    fs.readdir(resourceDir).then(files => {
-        console.log(files)
-            files.forEach(async file => {
-                await EmbeddedResource.writeJsonGzip(`${file}`);
-            })
-            fs.writeFileSync("./lib/resources/files.json", JSON.stringify(files.map((x) => x.slice(0,-3))))
-        });
 })();
 
 

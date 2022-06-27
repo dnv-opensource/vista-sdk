@@ -14,7 +14,6 @@ import { UniversalId } from "./UniversalId";
 import { UniversalIdBuilder } from "./UniversalId.Builder";
 import { VisVersion } from "./VisVersion";
 import { VIS } from "./VIS";
-import { ResourceFiles } from "./source-generator/ResourceFiles";
 
 // Types
 export type { GmodDto, GmodNodeDto };
@@ -29,5 +28,4 @@ export { CodebookName, CodebookNames, Codebook, Codebooks, MetadataTag };
 export { LocalId, LocalIdBuilder, UniversalIdBuilder, UniversalId, ImoNumber };
 // Gmod
 export { Gmod, GmodNode, GmodPath };
-// ResourceFiles
-export { ResourceFiles };
+
