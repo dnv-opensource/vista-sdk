@@ -29,7 +29,8 @@ export class VIS {
     };
 
     private async getGmodDto(visVersion: VisVersion): Promise<GmodDto> {
-        let gmodDto: Promise<GmodDto> | undefined = this._gmodDtoCache.get(visVersion);
+        let gmodDto: Promise<GmodDto> | undefined =
+            this._gmodDtoCache.get(visVersion);
         if (gmodDto != undefined) {
             return await gmodDto;
         }
@@ -46,7 +47,7 @@ export class VIS {
         }
 
         gmod = new Gmod(visVersion, await this.getGmodDto(visVersion));
-        this._gmodCache.set(visVersion, gmod );
+        this._gmodCache.set(visVersion, gmod);
         return gmod;
     }
 
@@ -68,7 +69,6 @@ export class VIS {
             visVersion: v,
             gmod: await this.getGmod(v),
         }));
-
 
         const gmods = await Promise.all(gmodPromises);
 
@@ -103,7 +103,10 @@ export class VIS {
             this._codebooksCache.get(visVersion);
         if (codebooks != undefined) return await codebooks;
 
-        codebooks =  new Codebooks(visVersion, await this.getCodebooksDto(visVersion));
+        codebooks = new Codebooks(
+            visVersion,
+            await this.getCodebooksDto(visVersion)
+        );
 
         this._codebooksCache.set(visVersion, codebooks);
         return codebooks;
