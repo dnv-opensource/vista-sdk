@@ -28,4 +28,3 @@ export { CodebookName, CodebookNames, Codebook, Codebooks, MetadataTag };
 export { LocalId, LocalIdBuilder, UniversalIdBuilder, UniversalId, ImoNumber };
 // Gmod
 export { Gmod, GmodNode, GmodPath };
-
