@@ -555,11 +555,14 @@ export class LocalIdParser {
         tag?: MetadataTag,
         errorBuilder?: LocalIdErrorBuilder
     ): MetadataTag | undefined {
-        const dashIndex =
-            segment.indexOf("-") === -1
-                ? segment.indexOf("~")
-                : segment.indexOf("-");
-        if (dashIndex === -1) {
+        if (!codebooks)
+            return;
+
+        let dashIndex = segment.indexOf("-");
+        if (dashIndex === -1)
+            dashIndex = segment.indexOf('~');
+        if (dashIndex === -1)
+        {
             if (errorBuilder) {
                 errorBuilder.push({
                     type: state,

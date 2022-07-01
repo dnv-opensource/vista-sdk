@@ -133,12 +133,12 @@ export class LocalIdBuilder {
 
         builder.push("meta/");
         this.quantity?.append(builder);
-        this.calculation?.append(builder);
         this.content?.append(builder);
-        this.position?.append(builder);
+        this.calculation?.append(builder);
         this.state?.append(builder);
         this.command?.append(builder);
         this.type?.append(builder);
+        this.position?.append(builder);
         this.detail?.append(builder);
 
         if (builder[builder.length - 1].endsWith("/")) {
