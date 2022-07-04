@@ -39,7 +39,7 @@ export class LocalId {
         return this._builder;
     }
 
-    public static parse(
+public static parse(
         localIdStr: string,
         gmod: Gmod,
         codebooks: Codebooks,

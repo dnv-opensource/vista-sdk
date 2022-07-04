@@ -1,47 +1,44 @@
-namespace Vista.SDK.Common;
+namespace Vista.SDK.Internal;
 
-//public record Error(ParsingState State, string Message);
-
-//public sealed record LocalIdError(IEnumerable<Error> Errors)
+//public sealed record LocalIdError(IEnumerable<string> Errors)
 //{
-//    public static implicit operator LocalIdError(Error error) =>
-//        new LocalIdError(new [] { error });
+//    public static implicit operator LocalIdError(string error) => new LocalIdError(new[] { error });
 //}
-
-public sealed record LocalIdError(IEnumerable<string> Errors)
+public sealed record LocalIdError(IEnumerable<(ParsingState, string)> Errors)
 {
-    public static implicit operator LocalIdError(string error) =>
-        new LocalIdError(new[] { error });
+    public static implicit operator LocalIdError((ParsingState type, string message) error) =>
+        new LocalIdError(new[] { (error.type, error.message) });
 }
-
 
 public sealed record LocalIdErrorBuilder
 {
-    //private readonly List<Error> _errors;
-    //public LocalIdErrorBuilder() => _errors = new List<Error>();
+    //private readonly List<string> _errors;
+    private readonly List<(ParsingState type, string message)> _errors;
+    private static Dictionary<ParsingState, string> _predefinedErrorMessages =>
+        SetPredefinedMessages();
 
-    private readonly List<string> _errors;
-    public LocalIdErrorBuilder() => _errors = new List<string>();
-    private static Dictionary<ParsingState, string> _predefinedErrorMessages => SetPredefinedMessages();
+    //public LocalIdErrorBuilder() => _errors = new List<string>();
+    public LocalIdErrorBuilder() => _errors = new List<(ParsingState, string)>();
 
-    public LocalIdErrorBuilder AddError(ParsingState state, string? message)
+    public IReadOnlyCollection<(ParsingState type, string message)> ErrorMessages => _errors;
+
+    public LocalIdErrorBuilder AddError(ParsingState state, string message)
     {
-        if (message is not null)
-        {
-            //_errors.Add(new Error(state, message));
-            _errors.Add($"Type: {state}" + message);
-            return this;
-        }
+        _errors.Add((state, message));
+        return this;
+    }
 
+    public LocalIdErrorBuilder AddError(ParsingState state)
+    {
         if (!_predefinedErrorMessages.TryGetValue(state, out var predefinedMessage))
             throw new Exception("Couldn't find predefined message for: " + state.ToString());
 
-        //_errors.Add(new Error(state, predefinedMessage));
-        _errors.Add($"Type: {state}" + predefinedMessage);
+        _errors.Add((state, predefinedMessage));
         return this;
     }
 
     public bool HasError => _errors.Count > 0;
+
     public LocalIdError Build() => new LocalIdError(_errors);
 
     public void ThrowOnError()
@@ -51,8 +48,6 @@ public sealed record LocalIdErrorBuilder
     }
 
     public static LocalIdErrorBuilder Create() => new LocalIdErrorBuilder();
-
-
 
     private static Dictionary<ParsingState, string> SetPredefinedMessages()
     {
@@ -74,4 +69,3 @@ public sealed record LocalIdErrorBuilder
         return parsingMap;
     }
 }
-

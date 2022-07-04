@@ -1,4 +1,5 @@
 using Vista.SDK;
+using Vista.SDK.Internal;
 using Vista.SDK.Mqtt;
 
 namespace Vista.SDK.Tests;
@@ -217,17 +218,22 @@ public class LocalIdTests
     )]
     public void Test_Parsing(string localIdStr)
     {
-        var parsed = LocalIdBuilder.TryParse(localIdStr, out var localId);
+        LocalIdErrorBuilder? errorBuilder = null;
+        var parsed = LocalIdBuilder.TryParse(localIdStr, ref errorBuilder, out var localId);
         Assert.True(parsed);
         Assert.Equal(localIdStr, localId!.ToString());
+        Assert.Null(errorBuilder);
     }
 
     [Theory]
     [InlineData("/dnv-v2/vis-3-4a/1021.1i-3AC/H121/meta/qty-temperature/cnt-cargo/cal")]
     public void Test_Faulty_Parsing(string localIdStr)
     {
-        var parsed = LocalIdBuilder.TryParse(localIdStr, out _);
+        LocalIdErrorBuilder? errorBuilder = null;
+        var parsed = LocalIdBuilder.TryParse(localIdStr, ref errorBuilder, out _);
         Assert.False(parsed);
+        Assert.NotNull(errorBuilder);
+        Assert.Throws<LocalIdException>(() => errorBuilder?.ThrowOnError());
     }
 
     [Fact]
@@ -235,8 +241,10 @@ public class LocalIdTests
     {
         var localIdAsString =
             "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet";
+        LocalIdErrorBuilder? errorBuilder = null;
 
-        var localId = LocalIdBuilder.Parse(localIdAsString);
+        var localId = LocalIdBuilder.Parse(localIdAsString, ref errorBuilder);
+        Assert.Null(errorBuilder);
     }
 
     [Fact]
@@ -250,11 +258,12 @@ public class LocalIdTests
             new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception)>();
 
         string? localIdStr;
+        LocalIdErrorBuilder? errorBuilder = null;
         while ((localIdStr = await reader.ReadLineAsync()) is not null)
         {
             try
             {
-                if (!LocalIdBuilder.TryParse(localIdStr, out var localId))
+                if (!LocalIdBuilder.TryParse(localIdStr, ref errorBuilder, out var localId))
                     errored.Add((localIdStr, localId, null));
                 else if (localId.IsEmpty || !localId.IsValid)
                     errored.Add((localIdStr, localId, null));
@@ -266,7 +275,7 @@ public class LocalIdTests
                 errored.Add((localIdStr, null, ex));
             }
         }
-
+        Assert.Null(errorBuilder);
         Assert.Empty(errored);
     }
 }

@@ -1,11 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Vista.SDK.Common;
+namespace Vista.SDK.Internal;
 
 public sealed class LocalIdException : Exception
 {
-    public LocalIdException(LocalIdError localIdError) : base("LocalId error")
-        => LocalIdError = localIdError;
+    public LocalIdException(LocalIdError localIdError) : base("LocalId error") =>
+        LocalIdError = localIdError;
 
     public LocalIdError LocalIdError { get; }
 

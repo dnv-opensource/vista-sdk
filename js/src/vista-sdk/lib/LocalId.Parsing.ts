@@ -30,7 +30,7 @@ export class LocalIdParser {
             errorBuilder
         );
         if (!localId)
-            throw new Error("Couldnt parse local ID from: " + localIdStr);
+            throw new Error("Couldn't parse local ID from: " + localIdStr);
         return localId;
     }
 
@@ -184,7 +184,7 @@ export class LocalIdParser {
                                         errorBuilder.push({
                                             type: ParsingState.PrimaryItem,
                                             message:
-                                                "Invalid GmodPath: Primary item " +
+                                                "Invalid GmodPath in Primary item: " +
                                                 path,
                                         });
                                         this.advanceParser(
@@ -288,9 +288,9 @@ export class LocalIdParser {
                                 if (!gmodPath) {
                                     if (errorBuilder) {
                                         errorBuilder.push({
-                                            type: ParsingState.PrimaryItem,
+                                            type: ParsingState.SecondaryItem,
                                             message:
-                                                "Invalid GmodPath: Secondary item " +
+                                                "Invalid GmodPath in Secondary item: " +
                                                 path,
                                         });
                                         this.advanceParser(
@@ -328,7 +328,7 @@ export class LocalIdParser {
                             if (!gmod.tryGetNode(code)) {
                                 if (errorBuilder)
                                     errorBuilder.push({
-                                        type: ParsingState.PrimaryItem,
+                                        type: ParsingState.SecondaryItem,
                                         message:
                                             "Invalid GmodNode in Secondary item: " +
                                             code,
@@ -588,6 +588,17 @@ export class LocalIdParser {
             return;
         }
 
+        if (actualState > state) {
+            this.advanceParser(
+                context,
+                undefined,
+                undefined,
+                state,
+                actualState
+            );
+            return tag;
+        }
+
         const value = segment.slice(dashIndex + 1);
         if (value.length === 0) {
             if (errorBuilder)
@@ -602,17 +613,6 @@ export class LocalIdParser {
             return;
         }
 
-        if (actualState > state) {
-            this.advanceParser(
-                context,
-                undefined,
-                undefined,
-                state,
-                actualState
-            );
-            return tag;
-        }
-
         const res = codebooks.tryCreateTag(codebookName, value);
         if (!res) {
             if (errorBuilder)
@@ -621,7 +621,7 @@ export class LocalIdParser {
                     message:
                         "Invalid " +
                         CodebookName[codebookName] +
-                        " metadata tag: failed to create",
+                        " metadata tag: failed to create " + value,
                 });
         }
         this.advanceParser(context, i, segment, state);

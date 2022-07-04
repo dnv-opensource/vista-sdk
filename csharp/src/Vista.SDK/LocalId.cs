@@ -1,3 +1,5 @@
+using Vista.SDK.Internal;
+
 namespace Vista.SDK;
 
 public class LocalId : ILocalId, IEquatable<LocalId>
@@ -70,5 +72,27 @@ public class LocalId : ILocalId, IEquatable<LocalId>
 
     public override string ToString() => _builder.ToString();
 
-    public static LocalId Parse(string localIdStr) => LocalIdBuilder.Parse(localIdStr).Build();
+    public static LocalId Parse(string localIdStr, ref LocalIdErrorBuilder? errorBuilder) =>
+        LocalIdBuilder.Parse(localIdStr, ref errorBuilder).Build();
+}
+
+public enum ParsingState
+{
+    NamingRule,
+    VisVersion,
+    PrimaryItem,
+    SecondaryItem,
+    ItemDescription,
+    MetaQty,
+    MetaCnt,
+    MetaCalc,
+    MetaState,
+    MetaCmd,
+    MetaType,
+    MetaPos,
+    MetaDetail,
+
+    // For "other" errors
+    EmptyState = 100,
+    Formatting = 101
 }

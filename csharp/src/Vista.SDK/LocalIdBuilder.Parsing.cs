@@ -1,19 +1,20 @@
 using System.Diagnostics.CodeAnalysis;
+using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
 public sealed partial record class LocalIdBuilder
 {
-    public static LocalIdBuilder Parse(string localIdStr)
+    public static LocalIdBuilder Parse(string localIdStr, ref LocalIdErrorBuilder? errorBuilder)
     {
-        if (!TryParse(localIdStr, out var localId))
-            throw new ArgumentException("Could not parse local ID: " + localIdStr);
-
+        if (!TryParse(localIdStr, ref errorBuilder, out var localId))
+            throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
         return localId;
     }
 
     public static bool TryParse(
         string localIdStr,
+        ref LocalIdErrorBuilder? errorBuilder,
         [MaybeNullWhen(false)] out LocalIdBuilder localId
     )
     {
@@ -23,7 +24,14 @@ public sealed partial record class LocalIdBuilder
         if (localIdStr.Length == 0)
             return false;
         if (localIdStr[0] != '/')
+        {
+            errorBuilder ??= LocalIdErrorBuilder.Create();
+            errorBuilder.AddError(
+                ParsingState.Formatting,
+                message: "Invalid format: missing '/' as first character"
+            );
             return false;
+        }
 
         ReadOnlySpan<char> span = localIdStr.AsSpan();
 
@@ -58,15 +66,28 @@ public sealed partial record class LocalIdBuilder
             {
                 case ParsingState.NamingRule:
                     if (!segment.SequenceEqual(NamingRule.AsSpan()))
+                    {
+                        errorBuilder ??= LocalIdErrorBuilder.Create();
+                        errorBuilder.AddError(ParsingState.NamingRule);
                         return false;
+                    }
 
                     AdvanceParser(ref i, in segment, ref state);
                     break;
                 case ParsingState.VisVersion:
                     if (!segment.StartsWith("vis-".AsSpan()))
+                    {
+                        errorBuilder ??= LocalIdErrorBuilder.Create();
+                        errorBuilder.AddError(ParsingState.VisVersion);
                         return false;
+                    }
+
                     if (!VisVersions.TryParse(segment.Slice("vis-".Length), out visVersion))
+                    {
+                        errorBuilder ??= LocalIdErrorBuilder.Create();
+                        errorBuilder.AddError(ParsingState.VisVersion);
                         return false;
+                    }
 
                     gmod = VIS.Instance.GetGmod(visVersion);
                     codebooks = VIS.Instance.GetCodebooks(visVersion);
@@ -128,7 +149,14 @@ public sealed partial record class LocalIdBuilder
                             {
                                 var path = span.Slice(primaryItemStart, i - 1 - primaryItemStart);
                                 if (!gmod.TryParsePath(path.ToString(), out primaryItem))
+                                {
+                                    errorBuilder ??= LocalIdErrorBuilder.Create();
+                                    errorBuilder.AddError(
+                                        ParsingState.PrimaryItem,
+                                        $"Invalid GmodPath in Primary item: {path.ToString()}"
+                                    );
                                     return false;
+                                }
 
                                 if (segment[0] == '~')
                                     AdvanceParser(ref state, nextState);
@@ -138,7 +166,14 @@ public sealed partial record class LocalIdBuilder
                             }
 
                             if (!gmod.TryGetNode(code, out _))
+                            {
+                                errorBuilder ??= LocalIdErrorBuilder.Create();
+                                errorBuilder.AddError(
+                                    ParsingState.PrimaryItem,
+                                    $"Invalid GmodNode in Primary item: {code.ToString()}"
+                                );
                                 return false;
+                            }
 
                             AdvanceParser(ref i, in segment);
                         }
@@ -157,6 +192,11 @@ public sealed partial record class LocalIdBuilder
                         {
                             if (!gmod.TryGetNode(code, out _))
                             {
+                                errorBuilder ??= LocalIdErrorBuilder.Create();
+                                errorBuilder.AddError(
+                                    ParsingState.SecondaryItem,
+                                    $"Invalid GmodNode in Secondary item: {code.ToString()}"
+                                );
                                 return false;
                             }
 
@@ -183,7 +223,14 @@ public sealed partial record class LocalIdBuilder
                                     i - 1 - secondaryItemStart
                                 );
                                 if (!gmod.TryParsePath(path.ToString(), out secondaryItem))
+                                {
+                                    errorBuilder ??= LocalIdErrorBuilder.Create();
+                                    errorBuilder.AddError(
+                                        ParsingState.SecondaryItem,
+                                        $"Invalid GmodPath in Secondary item: {path.ToString()}"
+                                    );
                                     return false;
+                                }
 
                                 if (segment[0] == '~')
                                     AdvanceParser(ref state, nextState);
@@ -204,7 +251,14 @@ public sealed partial record class LocalIdBuilder
 
                     var metaIndex = span.IndexOf("/meta".AsSpan());
                     if (metaIndex == -1)
+                    {
+                        errorBuilder ??= LocalIdErrorBuilder.Create();
+                        errorBuilder.AddError(
+                            ParsingState.ItemDescription,
+                            "Could not /meta in string"
+                        );
                         return false;
+                    }
 
                     segment = span.Slice(i, (metaIndex + "/meta".Length) - i);
 
@@ -219,7 +273,8 @@ public sealed partial record class LocalIdBuilder
                             ref i,
                             in segment,
                             ref qty,
-                            codebooks
+                            codebooks,
+                            ref errorBuilder
                         );
                         if (!result)
                             return false;
@@ -234,7 +289,8 @@ public sealed partial record class LocalIdBuilder
                             ref i,
                             in segment,
                             ref cnt,
-                            codebooks
+                            codebooks,
+                            ref errorBuilder
                         );
                         if (!result)
                             return false;
@@ -249,7 +305,8 @@ public sealed partial record class LocalIdBuilder
                             ref i,
                             in segment,
                             ref calc,
-                            codebooks
+                            codebooks,
+                            ref errorBuilder
                         );
                         if (!result)
                             return false;
@@ -264,7 +321,8 @@ public sealed partial record class LocalIdBuilder
                             ref i,
                             in segment,
                             ref stateTag,
-                            codebooks
+                            codebooks,
+                            ref errorBuilder
                         );
                         if (!result)
                             return false;
@@ -279,7 +337,8 @@ public sealed partial record class LocalIdBuilder
                             ref i,
                             in segment,
                             ref cmd,
-                            codebooks
+                            codebooks,
+                            ref errorBuilder
                         );
                         if (!result)
                             return false;
@@ -294,7 +353,8 @@ public sealed partial record class LocalIdBuilder
                             ref i,
                             in segment,
                             ref type,
-                            codebooks
+                            codebooks,
+                            ref errorBuilder
                         );
                         if (!result)
                             return false;
@@ -309,7 +369,8 @@ public sealed partial record class LocalIdBuilder
                             ref i,
                             in segment,
                             ref pos,
-                            codebooks
+                            codebooks,
+                            ref errorBuilder
                         );
                         if (!result)
                             return false;
@@ -324,7 +385,8 @@ public sealed partial record class LocalIdBuilder
                             ref i,
                             in segment,
                             ref detail,
-                            codebooks
+                            codebooks,
+                            ref errorBuilder
                         );
                         if (!result)
                             return false;
@@ -354,7 +416,8 @@ public sealed partial record class LocalIdBuilder
             ref int i,
             in ReadOnlySpan<char> segment,
             ref MetadataTag? tag,
-            Codebooks? codebooks
+            Codebooks? codebooks,
+            ref LocalIdErrorBuilder? errorBuilder
         )
         {
             if (codebooks is null)
@@ -364,15 +427,27 @@ public sealed partial record class LocalIdBuilder
             if (dashIndex == -1)
                 dashIndex = segment.IndexOf('~');
             if (dashIndex == -1)
+            {
+                errorBuilder ??= LocalIdErrorBuilder.Create();
+                errorBuilder.AddError(
+                    state,
+                    $"Invalid metadata tag: missing '-' in {segment.ToString()} "
+                );
                 return false;
+            }
 
             var actualPrefix = segment.Slice(0, dashIndex);
 
             var actualState = MetaPrefixToState(actualPrefix);
-            if (actualState is null)
+            if (actualState is null || actualState < state)
+            {
+                errorBuilder ??= LocalIdErrorBuilder.Create();
+                errorBuilder.AddError(
+                    state,
+                    $"Invalid metadata tag: unknown prefix {actualPrefix.ToString()}"
+                );
                 return false;
-            if (actualState < state)
-                return false;
+            }
 
             if (actualState > state)
             {
@@ -382,11 +457,22 @@ public sealed partial record class LocalIdBuilder
 
             var value = segment.Slice(dashIndex + 1);
             if (value.Length == 0)
+            {
+                errorBuilder ??= LocalIdErrorBuilder.Create();
+                errorBuilder.AddError(state, $"Invalid {codebookName} metadata tag: missing value");
                 return false;
+            }
 
             tag = codebooks.TryCreateTag(codebookName, value.ToString());
             if (tag is null)
+            {
+                errorBuilder ??= LocalIdErrorBuilder.Create();
+                errorBuilder.AddError(
+                    state,
+                    $"Invalid {codebookName} metadata tag: failed to create {value.ToString()}"
+                );
                 return false;
+            }
             AdvanceParser(ref i, in segment, ref state);
 
             return true;
@@ -434,22 +520,5 @@ public sealed partial record class LocalIdBuilder
     {
         i += segment.Length + 1;
         state = to;
-    }
-
-    enum ParsingState
-    {
-        NamingRule,
-        VisVersion,
-        PrimaryItem,
-        SecondaryItem,
-        ItemDescription,
-        MetaQty,
-        MetaCnt,
-        MetaCalc,
-        MetaState,
-        MetaCmd,
-        MetaType,
-        MetaPos,
-        MetaDetail,
     }
 }
