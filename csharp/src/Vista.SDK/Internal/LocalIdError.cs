@@ -1,9 +1,5 @@
 namespace Vista.SDK.Internal;
 
-//public sealed record LocalIdError(IEnumerable<string> Errors)
-//{
-//    public static implicit operator LocalIdError(string error) => new LocalIdError(new[] { error });
-//}
 public sealed record LocalIdError(IEnumerable<(ParsingState, string)> Errors)
 {
     public static implicit operator LocalIdError((ParsingState type, string message) error) =>
@@ -12,19 +8,20 @@ public sealed record LocalIdError(IEnumerable<(ParsingState, string)> Errors)
 
 public sealed record LocalIdErrorBuilder
 {
-    //private readonly List<string> _errors;
     private readonly List<(ParsingState type, string message)> _errors;
     private static Dictionary<ParsingState, string> _predefinedErrorMessages =>
         SetPredefinedMessages();
 
-    //public LocalIdErrorBuilder() => _errors = new List<string>();
+    public static readonly LocalIdErrorBuilder Empty = new LocalIdErrorBuilder();
+
     public LocalIdErrorBuilder() => _errors = new List<(ParsingState, string)>();
 
-    public IReadOnlyCollection<(ParsingState type, string message)> ErrorMessages => _errors;
-
-    public LocalIdErrorBuilder AddError(ParsingState state, string message)
+    public LocalIdErrorBuilder AddError(ParsingState state, string? message)
     {
-        _errors.Add((state, message));
+        if (string.IsNullOrWhiteSpace(message))
+            return AddError(state);
+
+        _errors.Add((state, message!));
         return this;
     }
 
@@ -41,13 +38,15 @@ public sealed record LocalIdErrorBuilder
 
     public LocalIdError Build() => new LocalIdError(_errors);
 
+    public static LocalIdErrorBuilder Create() => new LocalIdErrorBuilder();
+
+    public IReadOnlyCollection<(ParsingState type, string message)> ErrorMessages => _errors;
+
     public void ThrowOnError()
     {
         if (HasError)
             LocalIdException.Throw(Build());
     }
-
-    public static LocalIdErrorBuilder Create() => new LocalIdErrorBuilder();
 
     private static Dictionary<ParsingState, string> SetPredefinedMessages()
     {
@@ -56,7 +55,7 @@ public sealed record LocalIdErrorBuilder
         parsingMap.Add(ParsingState.VisVersion, "Missing or invalid vis version");
         parsingMap.Add(ParsingState.PrimaryItem, "Missing or invalid primary item");
         parsingMap.Add(ParsingState.SecondaryItem, "Invalid secondary item");
-        parsingMap.Add(ParsingState.ItemDescription, "Could not /meta in string");
+        parsingMap.Add(ParsingState.ItemDescription, "Missing or invalid /meta prefix");
         parsingMap.Add(ParsingState.MetaQty, "Invalid metadata tag: Quantity");
         parsingMap.Add(ParsingState.MetaCnt, "Invalid metadata tag: Content");
         parsingMap.Add(ParsingState.MetaCmd, "Invalid metadata tag: Command");

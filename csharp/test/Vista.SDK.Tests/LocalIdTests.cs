@@ -218,22 +218,9 @@ public class LocalIdTests
     )]
     public void Test_Parsing(string localIdStr)
     {
-        LocalIdErrorBuilder? errorBuilder = null;
-        var parsed = LocalIdBuilder.TryParse(localIdStr, ref errorBuilder, out var localId);
+        var parsed = LocalIdBuilder.TryParse(localIdStr, out var localId);
         Assert.True(parsed);
         Assert.Equal(localIdStr, localId!.ToString());
-        Assert.Null(errorBuilder);
-    }
-
-    [Theory]
-    [InlineData("/dnv-v2/vis-3-4a/1021.1i-3AC/H121/meta/qty-temperature/cnt-cargo/cal")]
-    public void Test_Faulty_Parsing(string localIdStr)
-    {
-        LocalIdErrorBuilder? errorBuilder = null;
-        var parsed = LocalIdBuilder.TryParse(localIdStr, ref errorBuilder, out _);
-        Assert.False(parsed);
-        Assert.NotNull(errorBuilder);
-        Assert.Throws<LocalIdException>(() => errorBuilder?.ThrowOnError());
     }
 
     [Fact]
@@ -241,10 +228,8 @@ public class LocalIdTests
     {
         var localIdAsString =
             "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet";
-        LocalIdErrorBuilder? errorBuilder = null;
 
-        var localId = LocalIdBuilder.Parse(localIdAsString, ref errorBuilder);
-        Assert.Null(errorBuilder);
+        var localId = LocalIdBuilder.Parse(localIdAsString);
     }
 
     [Fact]
@@ -258,12 +243,12 @@ public class LocalIdTests
             new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception)>();
 
         string? localIdStr;
-        LocalIdErrorBuilder? errorBuilder = null;
+        LocalIdErrorBuilder errorBuilder = LocalIdErrorBuilder.Create();
         while ((localIdStr = await reader.ReadLineAsync()) is not null)
         {
             try
             {
-                if (!LocalIdBuilder.TryParse(localIdStr, ref errorBuilder, out var localId))
+                if (!LocalIdBuilder.TryParse(localIdStr, out errorBuilder, out var localId))
                     errored.Add((localIdStr, localId, null));
                 else if (localId.IsEmpty || !localId.IsValid)
                     errored.Add((localIdStr, localId, null));
@@ -275,7 +260,63 @@ public class LocalIdTests
                 errored.Add((localIdStr, null, ex));
             }
         }
-        Assert.Null(errorBuilder);
+        Assert.True(errorBuilder.ErrorMessages.Count == 0);
         Assert.Empty(errored);
+    }
+
+    public static IEnumerable<object[]> Invalid_Test_Data =>
+        new object[][]
+        {
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/652.31/Sf90.3/S61/sec/652.1i-1P/meta/cnt-sea.water/state-opened",
+                new[]
+                {
+                    "Invalid GmodNode in Primary item: Sf90.3",
+                    "Invalid GmodPath in Primary item: 652.31/Sf90.3/S61",
+                }
+            },
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/se/652.1i-1P/meta/cnt-sea.water/state-opened",
+                new[]
+                {
+                    "Invalid GmodNode in Primary item: se",
+                    "Invalid GmodPath part in Primary item: se/652.1i-1P",
+                }
+            },
+            //new object[]
+            //{
+            //    "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/met/cnt-sea.water/state-opened",
+            //    new[]
+            //    {
+            //        "Invalid GmodNode in Primary item: se",
+            //        "Invalid GmodPath in Primary item 652.31/S90.3/S61/se/652.1i-1P",
+            //    }
+            //},
+
+
+        };
+
+    [Theory]
+    //[InlineData("/dnv-v2/vis-3-4a/1021.1i-3AC/H121/meta/qty-temperature/cnt-cargo/cal")]
+    [MemberData(nameof(Invalid_Test_Data))]
+    public void Test_Faulty_Parsing(string localIdStr, string[] expectedErrorMessages)
+    {
+        var parsed = LocalIdBuilder.TryParse(
+            localIdStr,
+            out LocalIdErrorBuilder errorBuilder,
+            out _
+        );
+
+        foreach (var error in errorBuilder.ErrorMessages)
+        {
+            Assert.Contains(error.message, expectedErrorMessages);
+        }
+
+        Assert.False(parsed);
+        Assert.NotNull(errorBuilder);
+        Assert.Equal(expectedErrorMessages.Count(), errorBuilder.ErrorMessages.Count);
+        Assert.Throws<LocalIdException>(() => errorBuilder.ThrowOnError());
     }
 }
