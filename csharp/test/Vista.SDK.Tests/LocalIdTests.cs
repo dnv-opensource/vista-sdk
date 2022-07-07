@@ -304,12 +304,30 @@ public class LocalIdTests
                     "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
                 }
             },
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/f652.1i-1P/meta/cnt-sea.water/state-opened",
+                new[]
+                {
+                    "Invalid start GmodNode in Secondary item: f652.1i",
+                    "Invalid GmodPath in Secondary item: f652.1i-1P"
+                }
+            },
+            //new object[]
+            //{
+            //    "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/met/cnt-sea.water/state-opened",
+            //    new[]
+            //    {
+            //        "Invalid start GmodNode in Primary item: f652.31",
+            //        "Invalid GmodNode in Primary item: se",
+            //        "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
+            //    }
+            //},
         };
 
     [Theory]
-    //[InlineData("/dnv-v2/vis-3-4a/1021.1i-3AC/H121/meta/qty-temperature/cnt-cargo/cal")]
     [MemberData(nameof(Invalid_Test_Data))]
-    public void Test_Faulty_Parsing(string localIdStr, string[] expectedErrorMessages)
+    public void Test_Parsing_Validation(string localIdStr, string[] expectedErrorMessages)
     {
         var parsed = LocalIdBuilder.TryParse(
             localIdStr,
