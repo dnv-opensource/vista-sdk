@@ -122,46 +122,54 @@ public sealed partial record class LocalIdBuilder
                         {
                             if (!gmod.TryGetNode(code, out _))
                             {
-                                //var nextState = (
-                                //    segment.StartsWith("sec".AsSpan()),
-                                //    segment.StartsWith("meta".AsSpan())
-                                //) switch
-                                //{
-                                //    (false, false) => state,
-                                //    (true, false) => ParsingState.SecondaryItem,
-                                //    (false, true) => ParsingState.MetaQty,
-                                //    _ => throw new Exception("Inconsistent parsing state"),
-                                //};
                                 AddError(
                                     ref errorBuilder,
                                     ParsingState.PrimaryItem,
-                                    $"Invalid GmodNode in Primary item: {code.ToString()} "
-                                );
-                                (var nextStateIndex, var endOfNextStateIndex) = GetNextStateIndexes(
-                                    span,
-                                    state
+                                    $"Invalid start GmodNode in Primary item: {code.ToString()}"
                                 );
 
-                                var nextSegment = span.Slice(nextStateIndex + 1);
+                                primaryItemStart = i;
+                                AdvanceParser(ref i, in segment);
 
-                                var nextState = (
-                                    nextSegment.StartsWith("sec".AsSpan()),
-                                    nextSegment.StartsWith("meta".AsSpan()),
-                                    nextSegment[0] == '~'
-                                ) switch
-                                {
-                                    (false, false, false) => state,
-                                    (true, false, false) => ParsingState.SecondaryItem,
-                                    (false, true, false) => ParsingState.MetaQty,
-                                    (false, false, true) => ParsingState.ItemDescription,
-                                    _ => throw new Exception("Inconsistent parsing state"),
-                                };
-                                // can't advance further
-                                if (nextState == state)
-                                    return false;
+                                //(var nextStateIndex, var endOfNextStateIndex) = GetNextStateIndexes(
+                                //    span,
+                                //    state
+                                //);
+                                //var nextSegment = span.Slice(nextStateIndex + 1);
 
-                                // FIX
-                                AdvanceParser(ref i, in segment, ref state, nextState);
+                                //var nextState = (
+                                //    nextSegment.StartsWith("sec".AsSpan()),
+                                //    nextSegment.StartsWith("meta".AsSpan()),
+                                //    nextSegment[0] == '~'
+                                //) switch
+                                //{
+                                //    (false, false, false) => state,
+                                //    (true, false, false) => ParsingState.SecondaryItem,
+                                //    (false, true, false) => ParsingState.MetaQty,
+                                //    (false, false, true) => ParsingState.ItemDescription,
+                                //    _ => throw new Exception("Inconsistent parsing state"),
+                                //};
+                                //if (nextState == state)
+                                //{
+                                //    AddError(
+                                //        ref errorBuilder,
+                                //        ParsingState.PrimaryItem,
+                                //        "Invalid or missing '/meta' prefix after Primary item"
+                                //    );
+                                //    return false;
+                                //}
+
+                                //var primaryItemPath = span.Slice(i, nextStateIndex - i);
+
+                                //AddError(
+                                //    ref errorBuilder,
+                                //    ParsingState.PrimaryItem,
+                                //    $"Invalid GmodPath in Primary item: {primaryItemPath.ToString()}"
+                                //);
+
+                                //i = endOfNextStateIndex;
+                                //AdvanceParser(ref state, nextState);
+                                //break;
                             }
                             else
                             {
@@ -189,12 +197,43 @@ public sealed partial record class LocalIdBuilder
                                 var path = span.Slice(primaryItemStart, i - 1 - primaryItemStart);
                                 if (!gmod.TryParsePath(path.ToString(), out primaryItem))
                                 {
+                                    // Displays the full GmodPath when first part of PrimaryItem is invalid
                                     AddError(
                                         ref errorBuilder,
                                         ParsingState.PrimaryItem,
                                         $"Invalid GmodPath in Primary item: {path.ToString()}"
                                     );
-                                    return false;
+
+                                    (var nextStateIndex, var endOfNextStateIndex) =
+                                        GetNextStateIndexes(span, state);
+
+                                    var nextSegment = span.Slice(nextStateIndex + 1);
+
+                                    nextState = (
+                                        nextSegment.StartsWith("sec".AsSpan()),
+                                        nextSegment.StartsWith("meta".AsSpan()),
+                                        nextSegment[0] == '~'
+                                    ) switch
+                                    {
+                                        (false, false, false) => state,
+                                        (true, false, false) => ParsingState.SecondaryItem,
+                                        (false, true, false) => ParsingState.MetaQty,
+                                        (false, false, true) => ParsingState.ItemDescription,
+                                        _ => throw new Exception("Inconsistent parsing state"),
+                                    };
+
+                                    if (nextState == state)
+                                    {
+                                        AddError(
+                                            ref errorBuilder,
+                                            ParsingState.PrimaryItem,
+                                            "Invalid or missing '/meta' prefix after Primary item"
+                                        );
+                                        return false;
+                                    }
+                                    i = endOfNextStateIndex;
+                                    AdvanceParser(ref state, nextState);
+                                    break; //return false;
                                 }
 
                                 if (segment[0] == '~')
@@ -230,7 +269,16 @@ public sealed partial record class LocalIdBuilder
                                     (false, false, true) => ParsingState.ItemDescription,
                                     _ => throw new Exception("Inconsistent parsing state"),
                                 };
-                                // can't advance further
+                                // Displays the invalid middle parts of secondaryItem and not the whole GmodPath
+
+                                var invalidPrimaryItemPath = span.Slice(i, nextStateIndex - i);
+
+                                AddError(
+                                    ref errorBuilder,
+                                    ParsingState.PrimaryItem,
+                                    $"Invalid GmodPath: Last part in Primary item: {invalidPrimaryItemPath.ToString()}"
+                                );
+
                                 if (nextState == state)
                                 {
                                     AddError(
@@ -241,44 +289,7 @@ public sealed partial record class LocalIdBuilder
                                     return false;
                                 }
 
-                                if (nextState != ParsingState.SecondaryItem)
-                                {
-                                    // Check if there are invalid secondary items
-                                    var primaryItemPath = span.Slice(primaryItemStart, i - 1);
-                                    var validPrimaryItem = span.Slice(
-                                        primaryItemStart,
-                                        i - primaryItemStart - 1
-                                    );
-                                    var invalidPrimaryItemPath = span.Slice(i, nextStateIndex - i);
-
-                                    AddError(
-                                        ref errorBuilder,
-                                        ParsingState.PrimaryItem,
-                                        $"Invalid GmodPath part in Primary item: {invalidPrimaryItemPath.ToString()}"
-                                    );
-                                    // Should we display the whole invalid GmodPath?
-                                    //AddError(
-                                    //    ref errorBuilder,
-                                    //    ParsingState.PrimaryItem,
-                                    //    $"Invalid GmodPath in Primary item: {primaryItemPath.ToString()}"
-                                    //);
-                                }
-                                else
-                                {
-                                    var primaryItemPath = span.Slice(
-                                        primaryItemStart,
-                                        nextStateIndex - primaryItemStart
-                                    );
-
-                                    AddError(
-                                        ref errorBuilder,
-                                        ParsingState.SecondaryItem,
-                                        $"Invalid GmodPath in Primary item: {primaryItemPath.ToString()}"
-                                    );
-                                }
-
                                 i = endOfNextStateIndex;
-
                                 AdvanceParser(ref state, nextState);
                                 break; //return false;
                             }
@@ -330,7 +341,6 @@ public sealed partial record class LocalIdBuilder
                                     ParsingState.SecondaryItem,
                                     $"Invalid GmodPath in Secondary item: {path.ToString()}"
                                 );
-                                // can't advance further
                                 if (nextState == state)
                                 {
                                     AddError(
@@ -424,7 +434,6 @@ public sealed partial record class LocalIdBuilder
                                     ParsingState.SecondaryItem,
                                     $"Invalid GmodPath in Secondary item: {path.ToString()}"
                                 );
-                                // can't advance further
                                 if (nextState == state)
                                 {
                                     AddError(

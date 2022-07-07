@@ -273,7 +273,7 @@ public class LocalIdTests
                 new[]
                 {
                     "Invalid GmodNode in Primary item: Sf90.3",
-                    "Invalid GmodPath in Primary item: 652.31/Sf90.3/S61",
+                    "Invalid GmodPath: Last part in Primary item: Sf90.3/S61"
                 }
             },
             new object[]
@@ -282,20 +282,28 @@ public class LocalIdTests
                 new[]
                 {
                     "Invalid GmodNode in Primary item: se",
-                    "Invalid GmodPath part in Primary item: se/652.1i-1P",
+                    "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
                 }
             },
-            //new object[]
-            //{
-            //    "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/met/cnt-sea.water/state-opened",
-            //    new[]
-            //    {
-            //        "Invalid GmodNode in Primary item: se",
-            //        "Invalid GmodPath in Primary item 652.31/S90.3/S61/se/652.1i-1P",
-            //    }
-            //},
-
-
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/f652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-sea.water/state-opened",
+                new[]
+                {
+                    "Invalid start GmodNode in Primary item: f652.31",
+                    "Invalid GmodPath in Primary item: f652.31/S90.3/S61",
+                }
+            },
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/f652.31/S90.3/S61/se/652.1i-1P/meta/cnt-sea.water/state-opened",
+                new[]
+                {
+                    "Invalid start GmodNode in Primary item: f652.31",
+                    "Invalid GmodNode in Primary item: se",
+                    "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
+                }
+            },
         };
 
     [Theory]
