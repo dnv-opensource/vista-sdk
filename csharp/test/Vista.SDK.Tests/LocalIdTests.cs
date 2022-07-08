@@ -219,6 +219,8 @@ public class LocalIdTests
     public void Test_Parsing(string localIdStr)
     {
         var parsed = LocalIdBuilder.TryParse(localIdStr, out var localId);
+        var t = localId?.IsValid;
+
         Assert.True(parsed);
         Assert.Equal(localIdStr, localId!.ToString());
     }
@@ -313,16 +315,40 @@ public class LocalIdTests
                     "Invalid GmodPath in Secondary item: f652.1i-1P"
                 }
             },
-            //new object[]
-            //{
-            //    "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/met/cnt-sea.water/state-opened",
-            //    new[]
-            //    {
-            //        "Invalid start GmodNode in Primary item: f652.31",
-            //        "Invalid GmodNode in Primary item: se",
-            //        "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
-            //    }
-            //},
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/ff/met/cnt-sea.water/state-opened",
+                new[]
+                {
+                    "Invalid GmodNode in Secondary item: ff",
+                    "Invalid or missing '/meta' prefix after Secondary item"
+                }
+            },
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/f652.1i-1P/met/cnt-sea.water/state-opened",
+                new[]
+                {
+                    "Invalid start GmodNode in Secondary item: f652.1i",
+                    "Invalid GmodNode in Secondary item: met",
+                    "Invalid or missing '/meta' prefix after Secondary item"
+                }
+            },
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/acnt-sea.water/state-opened",
+                new[] { "Invalid metadata tag: unknown prefix acnt" }
+            },
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-seaXX.water/state-opened",
+                new[] { "Invalid Content metadata tag: failed to create seaXX.water" }
+            },
+            new object[]
+            {
+                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cntsea.XXwaters/state-opened",
+                new[] { "Invalid metadata tag: missing '-' in cntsea.XXwaters" }
+            },
         };
 
     [Theory]

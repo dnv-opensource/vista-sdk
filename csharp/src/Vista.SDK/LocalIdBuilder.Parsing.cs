@@ -205,8 +205,10 @@ public sealed partial record class LocalIdBuilder
                                         $"Invalid GmodPath in Primary item: {path.ToString()}"
                                     );
 
-                                    (var nextStateIndex, var endOfNextStateIndex) =
-                                        GetNextStateIndexes(span, state);
+                                    (var _, var endOfNextStateIndex) = GetNextStateIndexes(
+                                        span,
+                                        state
+                                    );
 
                                     //var nextSegment = span.Slice(nextStateIndex + 1);
 
@@ -234,7 +236,7 @@ public sealed partial record class LocalIdBuilder
                                     //}
                                     i = endOfNextStateIndex;
                                     AdvanceParser(ref state, nextState);
-                                    break; //return false;
+                                    break;
                                 }
 
                                 if (segment[0] == '~')
@@ -256,6 +258,16 @@ public sealed partial record class LocalIdBuilder
                                     state
                                 );
 
+                                if (nextStateIndex == -1)
+                                {
+                                    AddError(
+                                        ref errorBuilder,
+                                        ParsingState.PrimaryItem,
+                                        "Invalid or missing '/meta' prefix after Primary item"
+                                    );
+                                    return false;
+                                }
+
                                 var nextSegment = span.Slice(nextStateIndex + 1);
 
                                 nextState = (
@@ -264,12 +276,12 @@ public sealed partial record class LocalIdBuilder
                                     nextSegment[0] == '~'
                                 ) switch
                                 {
-                                    (false, false, false) => state,
                                     (true, false, false) => ParsingState.SecondaryItem,
                                     (false, true, false) => ParsingState.MetaQty,
                                     (false, false, true) => ParsingState.ItemDescription,
                                     _ => throw new Exception("Inconsistent parsing state"),
                                 };
+
                                 // Displays the invalid middle parts of PrimaryItem and not the whole GmodPath
 
                                 var invalidPrimaryItemPath = span.Slice(i, nextStateIndex - i);
@@ -280,19 +292,9 @@ public sealed partial record class LocalIdBuilder
                                     $"Invalid GmodPath: Last part in Primary item: {invalidPrimaryItemPath.ToString()}"
                                 );
 
-                                if (nextState == state)
-                                {
-                                    AddError(
-                                        ref errorBuilder,
-                                        ParsingState.PrimaryItem,
-                                        "Invalid or missing '/meta' prefix after Primary item"
-                                    );
-                                    return false;
-                                }
-
                                 i = endOfNextStateIndex;
                                 AdvanceParser(ref state, nextState);
-                                break; //return false;
+                                break;
                             }
 
                             AdvanceParser(ref i, in segment);
@@ -357,7 +359,15 @@ public sealed partial record class LocalIdBuilder
                                     (var nextStateIndex, var endOfNextStateIndex) =
                                         GetNextStateIndexes(span, state);
 
-                                    
+                                    //if (nextStateIndex == -1)
+                                    //{
+                                    //    AddError(
+                                    //        ref errorBuilder,
+                                    //        ParsingState.SecondaryItem,
+                                    //        "Invalid or missing '/meta' prefix after Secondary item"
+                                    //    );
+                                    //    return false;
+                                    //}
                                     //var nextSegment = span.Slice(nextStateIndex + 1);
 
                                     //nextState = (
@@ -395,7 +405,6 @@ public sealed partial record class LocalIdBuilder
 
                             if (!gmod.TryGetNode(code, out _))
                             {
-                                invalidSecondaryItem = true;
                                 AddError(
                                     ref errorBuilder,
                                     ParsingState.SecondaryItem,
@@ -406,6 +415,15 @@ public sealed partial record class LocalIdBuilder
                                     span,
                                     state
                                 );
+                                if (nextStateIndex == -1)
+                                {
+                                    AddError(
+                                        ref errorBuilder,
+                                        ParsingState.SecondaryItem,
+                                        "Invalid or missing '/meta' prefix after Secondary item"
+                                    );
+                                    return false;
+                                }
 
                                 var nextSegment = span.Slice(nextStateIndex + 1);
 
@@ -414,7 +432,6 @@ public sealed partial record class LocalIdBuilder
                                     nextSegment[0] == '~'
                                 ) switch
                                 {
-                                    (false, false) => state,
                                     (true, false) => ParsingState.MetaQty,
                                     (false, true) => ParsingState.ItemDescription,
                                     _ => throw new Exception("Inconsistent parsing state"),
@@ -427,20 +444,12 @@ public sealed partial record class LocalIdBuilder
                                     ParsingState.SecondaryItem,
                                     $"Invalid GmodPath: Last part in Secondary item: {invalidSecondaryItemPath.ToString()}"
                                 );
-                                if (nextState == state)
-                                {
-                                    AddError(
-                                        ref errorBuilder,
-                                        ParsingState.SecondaryItem,
-                                        "Invalid or missing '/meta' prefix after Secondary item"
-                                    );
-                                    return false;
-                                }
 
+                                invalidSecondaryItem = true;
                                 i = endOfNextStateIndex;
 
                                 AdvanceParser(ref state, nextState);
-                                break; //return false;
+                                break;
                             }
                             AdvanceParser(ref i, in segment);
                         }
@@ -627,7 +636,7 @@ public sealed partial record class LocalIdBuilder
                 AddError(
                     ref errorBuilder,
                     state,
-                    $"Invalid metadata tag: missing '-' in {segment.ToString()} "
+                    $"Invalid metadata tag: missing '-' in {segment.ToString()}"
                 );
                 return false;
             }
