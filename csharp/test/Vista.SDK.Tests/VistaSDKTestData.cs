@@ -6,36 +6,63 @@ namespace Vista.SDK.Tests;
 public class VistaSDKTestData
 {
     public static IEnumerable<object[]> AddValidPositionData() =>
-        AddData(CodebookTestData.ValidPosition);
+        AddCodebookData(CodebookTestData.ValidPosition);
 
-    public static IEnumerable<object[]> AddStatesData() => AddData(CodebookTestData.States);
+    public static IEnumerable<object[]> AddStatesData() => AddCodebookData(CodebookTestData.States);
 
-    public static IEnumerable<object[]> AddPositionsData() => AddData(CodebookTestData.Positions);
+    public static IEnumerable<object[]> AddPositionsData() =>
+        AddCodebookData(CodebookTestData.Positions);
 
-    public static IEnumerable<object[]> AddTagData() => AddData(CodebookTestData.Tag);
+    public static IEnumerable<object[]> AddTagData() => AddCodebookData(CodebookTestData.Tag);
 
-    public static IEnumerable<object[]> AddDetailTagData() => AddData(CodebookTestData.DetailTag);
+    public static IEnumerable<object[]> AddDetailTagData() =>
+        AddCodebookData(CodebookTestData.DetailTag);
 
-    private static VistaTestData CodebookTestData => GetData("Codebook");
+    public static IEnumerable<object[]> AddInvalidLocalIdsData() =>
+        AddInvalidLocalId(LocalIdTestData);
 
-    private static VistaTestData GetData(string testName)
+    private static CodebookTestData CodebookTestData => GetData<CodebookTestData>("Codebook");
+    private static LocalIdTestData LocalIdTestData => GetData<LocalIdTestData>("InvalidLocalIds");
+
+    private static T GetData<T>(string testName)
     {
         var path = $"testdata/{testName}.json";
         var testDataJson = File.ReadAllText(path);
 
-        return JsonSerializer.Deserialize<VistaTestData>(testDataJson)!;
+        return JsonSerializer.Deserialize<T>(testDataJson)!;
     }
 
-    public static IEnumerable<object[]> AddData(string[][] data)
+    public static IEnumerable<object[]> AddCodebookData(string[][] data)
     {
         foreach (var state in data)
         {
             yield return state;
         }
     }
+
+    public static IEnumerable<object[]> AddInvalidLocalId(LocalIdTestData data)
+    {
+        foreach (var invalidLocalIdItem in data.InvalidLocalIds)
+        {
+            yield return new object[]
+            {
+                invalidLocalIdItem.localIdStr,
+                invalidLocalIdItem.ExpectedErrormessages
+            };
+        }
+    }
 }
 
-public record VistaTestData(
+public record InvalidLocalIds(
+    [property: JsonPropertyName("input")] string localIdStr,
+    [property: JsonPropertyName("expectedErrorMessages")] string[] ExpectedErrormessages
+);
+
+public record LocalIdTestData(
+    [property: JsonPropertyName("InvalidLocalIds")] InvalidLocalIds[] InvalidLocalIds
+);
+
+public record CodebookTestData(
     [property: JsonPropertyName("ValidPosition")] string[][] ValidPosition,
     [property: JsonPropertyName("Positions")] string[][] Positions,
     [property: JsonPropertyName("States")] string[][] States,

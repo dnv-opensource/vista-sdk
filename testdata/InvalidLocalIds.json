@@ -1,0 +1,103 @@
+{
+    "InvalidLocalIds": [
+        {
+            "input": "dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt~sea.waters/state-opened",
+            "expectedErrorMessages": [
+                "Invalid format: missing '/' as first character"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/Sf90.3/S61/sec/652.1i-1P/meta/cnt-sea.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid GmodNode in Primary item: Sf90.3",
+                "Invalid GmodPath: Last part in Primary item: Sf90.3/S61"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/se/652.1i-1P/meta/cnt-sea.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid GmodNode in Primary item: se",
+                "Invalid GmodPath: Last part in Primary item: se/652.1i-1P"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/f652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-sea.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid start GmodNode in Primary item: f652.31",
+                "Invalid GmodPath in Primary item: f652.31/S90.3/S61"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/f652.31/S90.3/S61/se/652.1i-1P/meta/cnt-sea.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid start GmodNode in Primary item: f652.31",
+                "Invalid GmodNode in Primary item: se",
+                "Invalid GmodPath: Last part in Primary item: se/652.1i-1P"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/f652.1i-1P/meta/cnt-sea.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid start GmodNode in Secondary item: f652.1i",
+                "Invalid GmodPath in Secondary item: f652.1i-1P"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/ff/met/cnt-sea.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid GmodNode in Secondary item: ff",
+                "Invalid or missing '/meta' prefix after Secondary item"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/f652.1i-1P/met/cnt-sea.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid start GmodNode in Secondary item: f652.1i",
+                "Invalid GmodNode in Secondary item: met",
+                "Invalid or missing '/meta' prefix after Secondary item"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/acnt-sea.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid metadata tag: unknown prefix acnt"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-seaXX.water/state-opened",
+            "expectedErrorMessages": [
+                "Invalid Content metadata tag: failed to create seaXX.water"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cntsea.XXwaters/state-opened",
+            "expectedErrorMessages": [
+                "Invalid metadata tag: missing prefix '-' or '~' in cntsea.XXwaters"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt~customSeaWater/state~opened",
+            "expectedErrorMessages": [
+                "Invalid custom Content metadata tag: failed to create customSeaWater"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-custom.waters/state~custom.opened",
+            "expectedErrorMessages": [
+                "Invalid Content metadata tag: 'custom.waters'. Use prefix '~' for custom values"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/411.1/C101.31/meta/qty-content/cnt-oil.mist/state-high/detail-no.1.to.6",
+            "expectedErrorMessages": [
+                "Invalid Quantity metadata tag: 'content'. Use prefix '~' for custom values"
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/612.21-P/C701.13/S93/meta/qty-content/cnt-exhaust.gas/pos-outlet",
+            "expectedErrorMessages": [
+                "Invalid Quantity metadata tag: 'content'. Use prefix '~' for custom values"
+            ]
+        }
+    ]
+}

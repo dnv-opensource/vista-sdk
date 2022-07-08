@@ -46,7 +46,7 @@ public sealed partial record class LocalIdBuilder
                 ParsingState.Formatting,
                 "Invalid format: missing '/' as first character"
             );
-            //return false;
+            return false;
         }
 
         ReadOnlySpan<char> span = localIdStr.AsSpan();
@@ -131,46 +131,6 @@ public sealed partial record class LocalIdBuilder
 
                                 primaryItemStart = i;
                                 AdvanceParser(ref i, in segment);
-
-                                //(var nextStateIndex, var endOfNextStateIndex) = GetNextStateIndexes(
-                                //    span,
-                                //    state
-                                //);
-                                //var nextSegment = span.Slice(nextStateIndex + 1);
-
-                                //var nextState = (
-                                //    nextSegment.StartsWith("sec".AsSpan()),
-                                //    nextSegment.StartsWith("meta".AsSpan()),
-                                //    nextSegment[0] == '~'
-                                //) switch
-                                //{
-                                //    (false, false, false) => state,
-                                //    (true, false, false) => ParsingState.SecondaryItem,
-                                //    (false, true, false) => ParsingState.MetaQty,
-                                //    (false, false, true) => ParsingState.ItemDescription,
-                                //    _ => throw new Exception("Inconsistent parsing state"),
-                                //};
-                                //if (nextState == state)
-                                //{
-                                //    AddError(
-                                //        ref errorBuilder,
-                                //        ParsingState.PrimaryItem,
-                                //        "Invalid or missing '/meta' prefix after Primary item"
-                                //    );
-                                //    return false;
-                                //}
-
-                                //var primaryItemPath = span.Slice(i, nextStateIndex - i);
-
-                                //AddError(
-                                //    ref errorBuilder,
-                                //    ParsingState.PrimaryItem,
-                                //    $"Invalid GmodPath in Primary item: {primaryItemPath.ToString()}"
-                                //);
-
-                                //i = endOfNextStateIndex;
-                                //AdvanceParser(ref state, nextState);
-                                //break;
                             }
                             else
                             {
@@ -209,31 +169,6 @@ public sealed partial record class LocalIdBuilder
                                         span,
                                         state
                                     );
-
-                                    //var nextSegment = span.Slice(nextStateIndex + 1);
-
-                                    //nextState = (
-                                    //    nextSegment.StartsWith("sec".AsSpan()),
-                                    //    nextSegment.StartsWith("meta".AsSpan()),
-                                    //    nextSegment[0] == '~'
-                                    //) switch
-                                    //{
-                                    //    (false, false, false) => state,
-                                    //    (true, false, false) => ParsingState.SecondaryItem,
-                                    //    (false, true, false) => ParsingState.MetaQty,
-                                    //    (false, false, true) => ParsingState.ItemDescription,
-                                    //    _ => throw new Exception("Inconsistent parsing state"),
-                                    //};
-
-                                    //if (nextState == state)
-                                    //{
-                                    //    AddError(
-                                    //        ref errorBuilder,
-                                    //        ParsingState.PrimaryItem,
-                                    //        "Invalid or missing '/meta' prefix after Primary item"
-                                    //    );
-                                    //    return false;
-                                    //}
                                     i = endOfNextStateIndex;
                                     AdvanceParser(ref state, nextState);
                                     break;
@@ -283,7 +218,6 @@ public sealed partial record class LocalIdBuilder
                                 };
 
                                 // Displays the invalid middle parts of PrimaryItem and not the whole GmodPath
-
                                 var invalidPrimaryItemPath = span.Slice(i, nextStateIndex - i);
 
                                 AddError(
@@ -356,41 +290,10 @@ public sealed partial record class LocalIdBuilder
                                         $"Invalid GmodPath in Secondary item: {path.ToString()}"
                                     );
 
-                                    (var nextStateIndex, var endOfNextStateIndex) =
-                                        GetNextStateIndexes(span, state);
-
-                                    //if (nextStateIndex == -1)
-                                    //{
-                                    //    AddError(
-                                    //        ref errorBuilder,
-                                    //        ParsingState.SecondaryItem,
-                                    //        "Invalid or missing '/meta' prefix after Secondary item"
-                                    //    );
-                                    //    return false;
-                                    //}
-                                    //var nextSegment = span.Slice(nextStateIndex + 1);
-
-                                    //nextState = (
-                                    //    nextSegment.StartsWith("meta".AsSpan()),
-                                    //    nextSegment[0] == '~'
-                                    //) switch
-                                    //{
-                                    //    (false, false) => state,
-                                    //    (true, false) => ParsingState.MetaQty,
-                                    //    (false, true) => ParsingState.ItemDescription,
-                                    //    _ => throw new Exception("Inconsistent parsing state"),
-                                    //};
-
-
-                                    //if (nextState == state)
-                                    //{
-                                    //    AddError(
-                                    //        ref errorBuilder,
-                                    //        ParsingState.SecondaryItem,
-                                    //        "Invalid or missing '/meta' prefix after Secondary item"
-                                    //    );
-                                    //    return false;
-                                    //}
+                                    (var _, var endOfNextStateIndex) = GetNextStateIndexes(
+                                        span,
+                                        state
+                                    );
                                     i = endOfNextStateIndex;
                                     AdvanceParser(ref state, nextState);
                                     break;
@@ -613,7 +516,7 @@ public sealed partial record class LocalIdBuilder
             .TryWithMetadataTag(in pos)
             .TryWithMetadataTag(in detail);
 
-        return (localId.IsValid && !invalidSecondaryItem);
+        return (!errorBuilder.HasError && !invalidSecondaryItem);
 
         static bool ParseMetatag(
             CodebookName codebookName,
@@ -629,19 +532,20 @@ public sealed partial record class LocalIdBuilder
                 return false;
 
             var dashIndex = segment.IndexOf('-');
-            if (dashIndex == -1)
-                dashIndex = segment.IndexOf('~');
-            if (dashIndex == -1)
+            var tildeIndex = segment.IndexOf('~');
+            var prefixIndex = dashIndex == -1 ? tildeIndex : dashIndex;
+            if (prefixIndex == -1)
             {
                 AddError(
                     ref errorBuilder,
                     state,
-                    $"Invalid metadata tag: missing '-' in {segment.ToString()}"
+                    $"Invalid metadata tag: missing prefix '-' or '~' in {segment.ToString()}"
                 );
-                return false;
+                AdvanceParser(ref i, in segment, ref state);
+                return true;
             }
 
-            var actualPrefix = segment.Slice(0, dashIndex);
+            var actualPrefix = segment.Slice(0, prefixIndex);
 
             var actualState = MetaPrefixToState(actualPrefix);
             if (actualState is null || actualState < state)
@@ -660,7 +564,7 @@ public sealed partial record class LocalIdBuilder
                 return true;
             }
 
-            var value = segment.Slice(dashIndex + 1);
+            var value = segment.Slice(prefixIndex + 1);
             if (value.Length == 0)
             {
                 AddError(
@@ -674,15 +578,31 @@ public sealed partial record class LocalIdBuilder
             tag = codebooks.TryCreateTag(codebookName, value.ToString());
             if (tag is null)
             {
+                if (prefixIndex == tildeIndex)
+                    AddError(
+                        ref errorBuilder,
+                        state,
+                        $"Invalid custom {codebookName} metadata tag: failed to create {value.ToString()}"
+                    );
+                else
+                    AddError(
+                        ref errorBuilder,
+                        state,
+                        $"Invalid {codebookName} metadata tag: failed to create {value.ToString()}"
+                    );
+
+                AdvanceParser(ref i, in segment, ref state);
+                return true;
+            }
+
+            if (prefixIndex == dashIndex && tag.Value.Prefix == '~')
                 AddError(
                     ref errorBuilder,
                     state,
-                    $"Invalid {codebookName} metadata tag: failed to create {value.ToString()}"
+                    $"Invalid {codebookName} metadata tag: '{value.ToString()}'. Use prefix '~' for custom values"
                 );
-                return false;
-            }
-            AdvanceParser(ref i, in segment, ref state);
 
+            AdvanceParser(ref i, in segment, ref state);
             return true;
         }
 

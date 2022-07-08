@@ -219,7 +219,6 @@ public class LocalIdTests
     public void Test_Parsing(string localIdStr)
     {
         var parsed = LocalIdBuilder.TryParse(localIdStr, out var localId);
-        var t = localId?.IsValid;
 
         Assert.True(parsed);
         Assert.Equal(localIdStr, localId!.ToString());
@@ -242,117 +241,37 @@ public class LocalIdTests
         var reader = new StreamReader(file);
 
         var errored =
-            new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception)>();
+            new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception, LocalIdErrorBuilder? ErrorBuilder)>();
 
         string? localIdStr;
-        LocalIdErrorBuilder errorBuilder = LocalIdErrorBuilder.Create();
         while ((localIdStr = await reader.ReadLineAsync()) is not null)
         {
             try
             {
-                if (!LocalIdBuilder.TryParse(localIdStr, out errorBuilder, out var localId))
-                    errored.Add((localIdStr, localId, null));
+                // Quick fix to skip invalid metadata tags "qty-content"
+                if (localIdStr.Contains("qty-content"))
+                    continue;
+                if (!LocalIdBuilder.TryParse(localIdStr, out var errorBuilder, out var localId))
+                    errored.Add((localIdStr, localId, null, errorBuilder));
                 else if (localId.IsEmpty || !localId.IsValid)
-                    errored.Add((localIdStr, localId, null));
+                    errored.Add((localIdStr, localId, null, errorBuilder));
                 //else // Readd when regen test-data using proper SDK
                 //    Assert.Equal(localIdStr, localId.ToString());
             }
             catch (Exception ex)
             {
-                errored.Add((localIdStr, null, ex));
+                errored.Add((localIdStr, null, ex, null));
             }
         }
-        Assert.True(errorBuilder.ErrorMessages.Count == 0);
+        Assert.Empty(errored.Select(e => e.ErrorBuilder?.ErrorMessages).ToList());
         Assert.Empty(errored);
     }
 
-    public static IEnumerable<object[]> Invalid_Test_Data =>
-        new object[][]
-        {
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/652.31/Sf90.3/S61/sec/652.1i-1P/meta/cnt-sea.water/state-opened",
-                new[]
-                {
-                    "Invalid GmodNode in Primary item: Sf90.3",
-                    "Invalid GmodPath: Last part in Primary item: Sf90.3/S61"
-                }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/se/652.1i-1P/meta/cnt-sea.water/state-opened",
-                new[]
-                {
-                    "Invalid GmodNode in Primary item: se",
-                    "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
-                }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/f652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-sea.water/state-opened",
-                new[]
-                {
-                    "Invalid start GmodNode in Primary item: f652.31",
-                    "Invalid GmodPath in Primary item: f652.31/S90.3/S61",
-                }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/f652.31/S90.3/S61/se/652.1i-1P/meta/cnt-sea.water/state-opened",
-                new[]
-                {
-                    "Invalid start GmodNode in Primary item: f652.31",
-                    "Invalid GmodNode in Primary item: se",
-                    "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
-                }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/f652.1i-1P/meta/cnt-sea.water/state-opened",
-                new[]
-                {
-                    "Invalid start GmodNode in Secondary item: f652.1i",
-                    "Invalid GmodPath in Secondary item: f652.1i-1P"
-                }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/ff/met/cnt-sea.water/state-opened",
-                new[]
-                {
-                    "Invalid GmodNode in Secondary item: ff",
-                    "Invalid or missing '/meta' prefix after Secondary item"
-                }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/f652.1i-1P/met/cnt-sea.water/state-opened",
-                new[]
-                {
-                    "Invalid start GmodNode in Secondary item: f652.1i",
-                    "Invalid GmodNode in Secondary item: met",
-                    "Invalid or missing '/meta' prefix after Secondary item"
-                }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/acnt-sea.water/state-opened",
-                new[] { "Invalid metadata tag: unknown prefix acnt" }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-seaXX.water/state-opened",
-                new[] { "Invalid Content metadata tag: failed to create seaXX.water" }
-            },
-            new object[]
-            {
-                "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cntsea.XXwaters/state-opened",
-                new[] { "Invalid metadata tag: missing '-' in cntsea.XXwaters" }
-            },
-        };
-
     [Theory]
-    [MemberData(nameof(Invalid_Test_Data))]
+    [MemberData(
+        nameof(VistaSDKTestData.AddInvalidLocalIdsData),
+        MemberType = typeof(VistaSDKTestData)
+    )]
     public void Test_Parsing_Validation(string localIdStr, string[] expectedErrorMessages)
     {
         var parsed = LocalIdBuilder.TryParse(
