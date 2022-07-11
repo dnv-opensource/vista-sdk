@@ -1,0 +1,60 @@
+﻿namespace Vista.SDK;
+
+public readonly record struct ImoNumber
+{
+    private readonly int _value;
+
+    public ImoNumber(int value, bool skipVerification = false)
+    {
+        if (!skipVerification && !IsValid(value))
+            throw new ArgumentException("Invalid IMO number");
+        _value = value;
+    }
+
+    public static bool IsValid(int imoNumber)
+    {
+        // https://en.wikipedia.org/wiki/IMO_number
+        // An IMO number is made of the three letters "IMO" followed by a seven-digit number.
+        // This consists of a six-digit sequential unique number followed by a check digit.
+        // The integrity of an IMO number can be verified using its check digit.
+        // This is done by multiplying each of the first six digits by a factor
+        // of 2 to 7 corresponding to their position from right to left.
+        // The rightmost digit of this sum is the check digit.
+        // For example, for IMO 9074729: (9×7) + (0×6) + (7×5) + (4×4) + (7×3) + (2×2) = 139
+        if (imoNumber < 1000000 || imoNumber > 9999999)
+            return false;
+
+        Span<byte> digits = stackalloc byte[7];
+        GetDigits(imoNumber, digits);
+
+        var checkDigit = 0;
+        for (int i = 1; i < digits.Length; i++)
+            checkDigit += (i + 1) * digits[i];
+
+        return imoNumber % 10 == checkDigit % 10;
+    }
+
+    private static void GetDigits(int number, Span<byte> digits)
+    {
+        var current = number;
+        var index = 0;
+        while (current > 0)
+        {
+            if (current < 10)
+            {
+                digits[index++] = (byte)current;
+                break;
+            }
+            var next = current / 10;
+            var digit = current - next * 10;
+            digits[index++] = (byte)digit;
+            current = next;
+        }
+    }
+
+    public static explicit operator int(ImoNumber n) => n._value;
+
+    public override ToString() => _value.ToString();
+
+
+}
