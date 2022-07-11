@@ -54,7 +54,5 @@ public readonly record struct ImoNumber
 
     public static explicit operator int(ImoNumber n) => n._value;
 
-    public override ToString() => _value.ToString();
-
-
+    public override string ToString() => _value.ToString();
 }
