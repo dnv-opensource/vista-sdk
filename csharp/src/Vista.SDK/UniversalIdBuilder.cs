@@ -39,7 +39,7 @@ public sealed record class UniversalIdBuilder : IUniversalIdBuilder
         if (ImoNumber is null)
             errorBuilder.AddError(ParsingState.EmptyState, "Missing or invalid IMO number");
 
-        _localId?.Validate(ref errorBuilder);
+        _localId?.Validate(out errorBuilder);
         return errorBuilder;
     }
 

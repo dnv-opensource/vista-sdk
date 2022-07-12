@@ -72,8 +72,8 @@ public class LocalId : ILocalId, IEquatable<LocalId>
 
     public override string ToString() => _builder.ToString();
 
-    public static LocalId Parse(string localIdStr, ref LocalIdErrorBuilder errorBuilder) =>
-        LocalIdBuilder.Parse(localIdStr, ref errorBuilder).Build();
+    public static LocalId Parse(string localIdStr, out LocalIdErrorBuilder errorBuilder) =>
+        LocalIdBuilder.Parse(localIdStr, out errorBuilder).Build();
 
     public static LocalId Parse(string localIdStr) => LocalIdBuilder.Parse(localIdStr).Build();
 }

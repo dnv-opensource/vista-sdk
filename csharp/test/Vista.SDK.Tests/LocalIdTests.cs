@@ -288,6 +288,5 @@ public class LocalIdTests
         Assert.False(parsed);
         Assert.NotNull(errorBuilder);
         Assert.Equal(expectedErrorMessages.Count(), errorBuilder.ErrorMessages.Count);
-        Assert.Throws<LocalIdException>(() => errorBuilder.ThrowOnError());
     }
 }

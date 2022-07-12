@@ -12,7 +12,7 @@ public sealed partial record class LocalIdBuilder
         return localId;
     }
 
-    public static LocalIdBuilder Parse(string localIdStr, ref LocalIdErrorBuilder errorBuilder)
+    public static LocalIdBuilder Parse(string localIdStr, out LocalIdErrorBuilder errorBuilder)
     {
         if (!TryParse(localIdStr, out errorBuilder, out var localId))
             throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);

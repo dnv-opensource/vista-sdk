@@ -14,9 +14,9 @@ public sealed record LocalIdErrorBuilder
 
     public static readonly LocalIdErrorBuilder Empty = new LocalIdErrorBuilder();
 
-    public LocalIdErrorBuilder() => _errors = new List<(ParsingState, string)>();
+    internal LocalIdErrorBuilder() => _errors = new List<(ParsingState, string)>();
 
-    public LocalIdErrorBuilder AddError(ParsingState state, string? message)
+    internal LocalIdErrorBuilder AddError(ParsingState state, string? message)
     {
         if (string.IsNullOrWhiteSpace(message))
             return AddError(state);
@@ -25,7 +25,7 @@ public sealed record LocalIdErrorBuilder
         return this;
     }
 
-    public LocalIdErrorBuilder AddError(ParsingState state)
+    internal LocalIdErrorBuilder AddError(ParsingState state)
     {
         if (!_predefinedErrorMessages.TryGetValue(state, out var predefinedMessage))
             throw new Exception("Couldn't find predefined message for: " + state.ToString());
@@ -36,17 +36,9 @@ public sealed record LocalIdErrorBuilder
 
     public bool HasError => _errors.Count > 0;
 
-    public LocalIdError Build() => new LocalIdError(_errors);
-
-    public static LocalIdErrorBuilder Create() => new LocalIdErrorBuilder();
+    internal static LocalIdErrorBuilder Create() => new LocalIdErrorBuilder();
 
     public IReadOnlyCollection<(ParsingState type, string message)> ErrorMessages => _errors;
-
-    public void ThrowOnError()
-    {
-        if (HasError)
-            LocalIdException.Throw(Build());
-    }
 
     private static Dictionary<ParsingState, string> SetPredefinedMessages()
     {
