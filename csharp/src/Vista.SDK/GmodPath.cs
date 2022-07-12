@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-
+using System.Text.RegularExpressions;
 using Vista.SDK.Internal;
 
 namespace Vista.SDK;
@@ -73,9 +73,19 @@ public sealed record GmodPath
             var child = nextIndex < parents.Count ? parents[nextIndex] : node;
             if (!parent.IsChild(child))
                 return false;
+            if (!IsValidLocation(parent.Location))
+                return false;
         }
-
+        if (!IsValidLocation(node.Location))
+            return false;
         return true;
+    }
+
+    private static bool IsValidLocation(string? location)
+    {
+        if (location is null)
+            return false;
+        return !string.IsNullOrWhiteSpace(location) && Regex.IsMatch(location, "/^[A-Z0-9]/");
     }
 
     public GmodPath(IReadOnlyList<GmodNode> parents, GmodNode node) : this(parents, node, false) { }

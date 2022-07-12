@@ -1,0 +1,75 @@
+using Vista.SDK.Internal;
+
+namespace Vista.SDK;
+
+public sealed record class UniversalIdBuilder : IUniversalIdBuilder
+{
+    public static readonly string NamingEntity = "data.dnv.com";
+    internal LocalIdBuilder? _localId;
+    public ImoNumber? ImoNumber { get; private init; }
+
+    public LocalIdBuilder? LocalId { get; private init; }
+
+    public bool IsValid => ImoNumber is not null && _localId is not null && _localId.IsValid;
+
+    public static UniversalIdBuilder Create(VisVersion version) =>
+        new UniversalIdBuilder().WithLocalId(LocalIdBuilder.Create(version));
+
+    public bool Equals(UniversalIdBuilder? other)
+    {
+        if (other is null)
+            return false;
+        return ImoNumber == other.ImoNumber && LocalId == other.LocalId;
+    }
+
+    public UniversalIdBuilder WithLocalId(LocalIdBuilder localId) =>
+        this with
+        {
+            LocalId = localId
+        };
+
+    public UniversalIdBuilder WithImoNumber(ImoNumber? imoNumber) =>
+        this with
+        {
+            ImoNumber = imoNumber
+        };
+
+    public LocalIdErrorBuilder Validate(ref LocalIdErrorBuilder errorBuilder)
+    {
+        if (ImoNumber is null)
+            errorBuilder.AddError(ParsingState.EmptyState, "Missing or invalid IMO number");
+
+        _localId?.Validate(ref errorBuilder);
+        return errorBuilder;
+    }
+
+    public sealed override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(ImoNumber);
+        hashCode.Add(LocalId);
+        return hashCode.ToHashCode();
+    }
+
+    public override string ToString()
+    {
+        if (ImoNumber is null)
+            throw new InvalidOperationException("Invalid Universal Id state: Missing IMO Number");
+        if (LocalId is null)
+            throw new InvalidOperationException("Invalid Universal Id state: Missing LocalId");
+
+        string namingEntity = $"{NamingEntity}";
+        using var lease = StringBuilderPool.Get();
+
+        var builder = lease.Builder;
+
+        builder.Append(namingEntity);
+        builder.Append("/");
+        builder.Append("IMO");
+        builder.Append(ImoNumber.ToString());
+        builder.Append("/");
+        LocalId.ToString();
+
+        return lease.ToString();
+    }
+}
