@@ -122,21 +122,13 @@ public sealed partial record class LocalIdBuilder
                         if (primaryItemStart == -1)
                         {
                             if (!gmod.TryGetNode(code, out _))
-                            {
                                 AddError(
                                     ref errorBuilder,
                                     ParsingState.PrimaryItem,
                                     $"Invalid start GmodNode in Primary item: {code.ToString()}"
                                 );
-
-                                primaryItemStart = i;
-                                AdvanceParser(ref i, in segment);
-                            }
-                            else
-                            {
-                                primaryItemStart = i;
-                                AdvanceParser(ref i, in segment);
-                            }
+                            primaryItemStart = i;
+                            AdvanceParser(ref i, in segment);
                         }
                         else
                         {
@@ -246,17 +238,11 @@ public sealed partial record class LocalIdBuilder
                         if (secondaryItemStart == -1)
                         {
                             if (!gmod.TryGetNode(code, out _))
-                            {
                                 AddError(
                                     ref errorBuilder,
                                     ParsingState.SecondaryItem,
                                     $"Invalid start GmodNode in Secondary item: {code.ToString()}"
                                 );
-
-                                secondaryItemStart = i;
-                                AdvanceParser(ref i, in segment);
-                                break;
-                            }
 
                             secondaryItemStart = i;
                             AdvanceParser(ref i, in segment);
@@ -640,7 +626,7 @@ public sealed partial record class LocalIdBuilder
             errorBuilder.AddError(state, message);
         }
 
-        static (int NextIndex, int NextStateIndex) GetNextStateIndexes(
+        static (int NextIndex, int EndOfNextStateIndex) GetNextStateIndexes(
             ReadOnlySpan<char> span,
             ParsingState state
         )
