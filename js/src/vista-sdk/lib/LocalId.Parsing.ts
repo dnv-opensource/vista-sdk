@@ -9,6 +9,12 @@ import {
 import { LocalIdErrorBuilder } from "./internal/LocalIdErrorBuilder";
 import { ParsingState } from "./types/LocalId";
 import { isNullOrWhiteSpace } from "./util/util";
+import { VisVersionExtension, VisVersions } from "./VisVersion";
+
+type NextStateIndexTuple = {
+    nextStateIndex: number;
+    endOfNextStateIndex: number;
+};
 
 type ParseContext = {
     state: ParsingState;
@@ -16,6 +22,7 @@ type ParseContext = {
     segment?: string;
     span: string;
 };
+
 export class LocalIdParser {
     public static parse(
         localIdStr: string | undefined,
@@ -40,21 +47,21 @@ export class LocalIdParser {
         codebooks: Codebooks,
         errorBuilder?: LocalIdErrorBuilder
     ): LocalIdBuilder | undefined {
+        if (!errorBuilder) errorBuilder = LocalIdErrorBuilder.Empty;
         if (!localIdStr || isNullOrWhiteSpace(localIdStr))
             throw new Error("Invalid LocalId string");
         if (localIdStr.length === 0) return;
-        if (localIdStr.charAt(0) !== "/") {
-            if (errorBuilder)
-                errorBuilder.push({
-                    type: ParsingState.Formatting,
-                    message: "Invalid format: missing '/' as first character",
-                });
-            else return;
+        if (localIdStr.charAt(0) !== '/') {
+            errorBuilder.push({
+                type: ParsingState.Formatting,
+                message: "Invalid format: missing '/' as first character",
+            });
+            return;
         }
 
         const namingRule: string = LocalIdBuilder.namingRule;
         const visVersion = gmod.visVersion;
-        let verbose = false;
+
         let primaryItem: GmodPath | undefined = undefined;
         let secondaryItem: GmodPath | undefined = undefined;
 
@@ -66,6 +73,8 @@ export class LocalIdParser {
         let cmd: MetadataTag | undefined = undefined;
         let type: MetadataTag | undefined = undefined;
         let detail: MetadataTag | undefined = undefined;
+        let verbose = false;
+        let invalidSecondaryItem = false;
 
         let primaryItemStart = -1;
         let secondaryItemStart = -1;
@@ -87,11 +96,9 @@ export class LocalIdParser {
             switch (context.state) {
                 case ParsingState.NamingRule:
                     if (context.segment !== namingRule) {
-                        if (errorBuilder)
-                            errorBuilder.push(ParsingState.NamingRule);
-                        else return;
+                        errorBuilder.push(ParsingState.NamingRule);
+                        return;
                     }
-
                     this.advanceParser(
                         context,
                         context.i,
@@ -101,10 +108,18 @@ export class LocalIdParser {
                     break;
                 case ParsingState.VisVersion:
                     if (!context.segment.startsWith("vis-")) {
-                        if (errorBuilder)
-                            errorBuilder.push(ParsingState.VisVersion);
-                        else return;
+                        errorBuilder.push(ParsingState.VisVersion);
+                        return;
                     }
+                    const version = VisVersions.tryParse(
+                        context.segment.slice("vis-".length)
+                    );
+
+                    if (!version) {
+                        errorBuilder.push(ParsingState.VisVersion);
+                        return;
+                    }
+
                     this.advanceParser(
                         context,
                         context.i,
@@ -121,37 +136,19 @@ export class LocalIdParser {
                                 : context.segment.slice(0, dashIndex);
                         if (primaryItemStart === -1) {
                             if (!gmod.tryGetNode(code)) {
-                                let nextState: ParsingState = context.state;
-
-                                const [sec, meta] = [
-                                    context.segment.startsWith("sec"),
-                                    context.segment.startsWith("meta"),
-                                ];
-                                switch (true) {
-                                    case !sec && !meta:
-                                        break;
-                                    case sec && !meta:
-                                        nextState = ParsingState.SecondaryItem;
-                                        break;
-                                    case !sec && meta:
-                                        nextState = ParsingState.MetaQty;
-                                        break;
-                                }
-                                this.advanceParser(
-                                    context,
-                                    context.i,
-                                    context.segment,
-                                    context.state,
-                                    nextState
-                                );
-                            } else {
-                                primaryItemStart = context.i;
-                                this.advanceParser(
-                                    context,
-                                    context.i,
-                                    context.segment
-                                );
+                                errorBuilder.push({
+                                    type: ParsingState.PrimaryItem,
+                                    message:
+                                        "Invalid start GmodNode in Primary item: " +
+                                        code,
+                                });
                             }
+                            primaryItemStart = context.i;
+                            this.advanceParser(
+                                context,
+                                context.i,
+                                context.segment
+                            );
                         } else {
                             let nextState: ParsingState = context.state;
                             const [sec, meta, tilde] = [
@@ -177,28 +174,37 @@ export class LocalIdParser {
                                 const path = context.span.slice(
                                     primaryItemStart,
                                     context.i - 1
-                                );
+                                ); // context.i - 1
+
                                 const gmodPath = gmod.tryParsePath(path);
-                                if (!gmodPath) {
-                                    if (errorBuilder) {
-                                        errorBuilder.push({
-                                            type: ParsingState.PrimaryItem,
-                                            message:
-                                                "Invalid GmodPath in Primary item: " +
-                                                path,
-                                        });
-                                        this.advanceParser(
-                                            context,
-                                            context.i,
-                                            context.segment
-                                        );
-                                        continue;
-                                    } else {
-                                        return;
-                                    }
-                                } else {
-                                    primaryItem = gmodPath;
+                                if (gmodPath === undefined) {
+                                    // Displays the full GmodPath when first part of PrimaryItem is invalid
+                                    errorBuilder.push({
+                                        type: ParsingState.PrimaryItem,
+                                        message:
+                                            "Invalid GmodPath in Primary item: " +
+                                            path,
+                                    });
+
+                                    const {
+                                        nextStateIndex,
+                                        endOfNextStateIndex,
+                                    } = this.getNextStateIndexes(
+                                        context.span,
+                                        context.state
+                                    );
+
+                                    context.i = endOfNextStateIndex;
+                                    this.advanceParser(
+                                        context,
+                                        undefined,
+                                        undefined,
+                                        context.state,
+                                        nextState
+                                    );
+                                    break;
                                 }
+                                primaryItem = gmodPath;
 
                                 if (context.segment[0] === "~")
                                     this.advanceParser(
@@ -219,14 +225,71 @@ export class LocalIdParser {
                                 break;
                             }
                             if (!gmod.tryGetNode(code)) {
-                                if (errorBuilder)
+                                errorBuilder.push({
+                                    type: ParsingState.PrimaryItem,
+                                    message:
+                                        "Invalid GmodNode in Primary item: " +
+                                        code,
+                                });
+
+                                const { nextStateIndex, endOfNextStateIndex } =
+                                    this.getNextStateIndexes(
+                                        context.span,
+                                        context.state
+                                    );
+                                if (nextStateIndex === -1) {
                                     errorBuilder.push({
                                         type: ParsingState.PrimaryItem,
                                         message:
-                                            "Invalid GmodNode in Primary item: " +
-                                            code,
+                                            "Invalid or missing '/meta' prefix after Primary item",
                                     });
-                                else return;
+                                    return;
+                                }
+                                const nextSegment = context.span.slice(
+                                    nextStateIndex + 1
+                                );
+
+                                const [sec, meta, tilde] = [
+                                    nextSegment.startsWith("sec"),
+                                    nextSegment.startsWith("meta"),
+                                    nextSegment[0] === "~",
+                                ];
+                                switch (true) {
+                                    case !sec && !meta && !tilde:
+                                        break;
+                                    case sec && !meta && !tilde:
+                                        nextState = ParsingState.SecondaryItem;
+                                        break;
+                                    case !sec && meta && !tilde:
+                                        nextState = ParsingState.MetaQty;
+                                        break;
+                                    case !sec && !meta && tilde:
+                                        nextState =
+                                            ParsingState.ItemDescription;
+                                        break;
+                                }
+                                // Displays the invalid middle parts of PrimaryItem and not the whole GmodPath
+                                const invalidPrimaryItemPath =
+                                    context.span.slice(
+                                        context.i,
+                                        nextStateIndex
+                                    ); // - context.i
+                                errorBuilder.push({
+                                    type: ParsingState.PrimaryItem,
+                                    message:
+                                        "Invalid GmodPath: Last part in Primary item: " +
+                                        invalidPrimaryItemPath,
+                                });
+
+                                context.i = endOfNextStateIndex;
+                                this.advanceParser(
+                                    context,
+                                    undefined,
+                                    undefined,
+                                    context.state,
+                                    nextState
+                                );
+                                break;
                             }
                             this.advanceParser(
                                 context,
@@ -245,14 +308,12 @@ export class LocalIdParser {
                                 : context.segment.slice(0, dashIndex);
                         if (secondaryItemStart === -1) {
                             if (!gmod.tryGetNode(code)) {
-                                if (errorBuilder)
-                                    errorBuilder.push({
-                                        type: ParsingState.SecondaryItem,
-                                        message:
-                                            "Invalid GmodNode in Secondary item: " +
-                                            code,
-                                    });
-                                else return;
+                                errorBuilder.push({
+                                    type: ParsingState.SecondaryItem,
+                                    message:
+                                        "Invalid start GmodNode in Secondary item: " +
+                                        code,
+                                });
                             }
 
                             secondaryItemStart = context.i;
@@ -282,29 +343,37 @@ export class LocalIdParser {
                             if (nextState !== context.state) {
                                 const path = context.span.slice(
                                     secondaryItemStart,
-                                    context.i - 1
+                                    context.i - 1 // context.i - 1- secondaryItemStart
                                 );
                                 const gmodPath = gmod.tryParsePath(path);
-                                if (!gmodPath) {
-                                    if (errorBuilder) {
-                                        errorBuilder.push({
-                                            type: ParsingState.SecondaryItem,
-                                            message:
-                                                "Invalid GmodPath in Secondary item: " +
-                                                path,
-                                        });
-                                        this.advanceParser(
-                                            context,
-                                            context.i,
-                                            context.segment
-                                        );
-                                        continue;
-                                    } else {
-                                        return;
-                                    }
-                                } else {
-                                    secondaryItem = gmodPath;
+                                if (gmodPath === undefined) {
+                                    // Displays the full GmodPath when first part of SecondaryItem is invalid
+                                    invalidSecondaryItem = true;
+                                    errorBuilder.push({
+                                        type: ParsingState.SecondaryItem,
+                                        message:
+                                            "Invalid GmodPath in Secondary item: " +
+                                            path,
+                                    });
+
+                                    const {
+                                        nextStateIndex,
+                                        endOfNextStateIndex,
+                                    } = this.getNextStateIndexes(
+                                        context.span,
+                                        context.state
+                                    );
+                                    context.i = endOfNextStateIndex;
+                                    this.advanceParser(
+                                        context,
+                                        undefined,
+                                        undefined,
+                                        context.state,
+                                        nextState
+                                    );
+                                    break;
                                 }
+                                secondaryItem = gmodPath;
 
                                 if (context.segment[0] === "~")
                                     this.advanceParser(
@@ -326,14 +395,67 @@ export class LocalIdParser {
                                 break;
                             }
                             if (!gmod.tryGetNode(code)) {
-                                if (errorBuilder)
+                                errorBuilder.push({
+                                    type: ParsingState.SecondaryItem,
+                                    message:
+                                        "Invalid GmodNode in Secondary item: " +
+                                        code,
+                                });
+
+                                const { nextStateIndex, endOfNextStateIndex } =
+                                    this.getNextStateIndexes(
+                                        context.span,
+                                        context.state
+                                    );
+                                if (nextStateIndex === -1) {
                                     errorBuilder.push({
                                         type: ParsingState.SecondaryItem,
                                         message:
-                                            "Invalid GmodNode in Secondary item: " +
-                                            code,
+                                            "Invalid or missing '/meta' prefix after Secondary item",
                                     });
-                                else return;
+                                    return;
+                                }
+
+                                const nextSegment = context.span.slice(
+                                    nextStateIndex + 1
+                                );
+                                const [meta, tilde] = [
+                                    nextSegment.startsWith("meta"),
+                                    nextSegment[0] === "~",
+                                ];
+                                switch (true) {
+                                    // case !meta && !tilde:
+                                    //     break;
+                                    case meta && !tilde:
+                                        nextState = ParsingState.MetaQty;
+                                        break;
+                                    case !meta && tilde:
+                                        nextState =
+                                            ParsingState.ItemDescription;
+                                        break;
+                                }
+                                const invalidSecondaryItemPath =
+                                    context.span.slice(
+                                        context.i,
+                                        nextStateIndex
+                                    ); //  - context.i
+                                errorBuilder.push({
+                                    type: ParsingState.SecondaryItem,
+                                    message:
+                                        "Invalid GmodPath: Last part in Secondary item: " +
+                                        invalidSecondaryItemPath,
+                                });
+
+                                invalidSecondaryItem = true;
+                                context.i = endOfNextStateIndex;
+                                this.advanceParser(
+                                    context,
+                                    undefined,
+                                    undefined,
+                                    context.state,
+                                    nextState
+                                );
+                                break;
                             }
                             this.advanceParser(
                                 context,
@@ -347,18 +469,17 @@ export class LocalIdParser {
                     verbose = true;
 
                     const metaStr = "/meta";
+
                     const metaIndex = context.span.indexOf(metaStr);
                     if (metaIndex === -1) {
-                        if (errorBuilder)
-                            errorBuilder.push({
-                                type: ParsingState.ItemDescription,
-                                message: "Could not /meta in string",
-                            });
-                        else return;
+                        errorBuilder.push(ParsingState.ItemDescription);
+
+                        return;
                     }
+
                     context.segment = context.span.slice(
                         context.i,
-                        metaIndex + metaStr.length
+                        metaIndex + metaStr.length // - context.i
                     );
                     this.advanceParser(
                         context,
@@ -376,13 +497,11 @@ export class LocalIdParser {
                             context.i,
                             context.segment,
                             codebooks,
-                            qty,
-                            errorBuilder
+                            errorBuilder,
+
+                            qty
                         );
-                        if (!res) {
-                            if (errorBuilder) continue;
-                            else return;
-                        }
+                        if (!res) continue;
                         qty = res;
                     }
                     break;
@@ -395,13 +514,10 @@ export class LocalIdParser {
                             context.i,
                             context.segment,
                             codebooks,
-                            cnt,
-                            errorBuilder
+                            errorBuilder,
+                            cnt
                         );
-                        if (!res) {
-                            if (errorBuilder) continue;
-                            else return;
-                        }
+                        if (!res) continue;
                         cnt = res;
                     }
                     break;
@@ -414,13 +530,11 @@ export class LocalIdParser {
                             context.i,
                             context.segment,
                             codebooks,
-                            calc,
-                            errorBuilder
+                            errorBuilder,
+
+                            calc
                         );
-                        if (!res) {
-                            if (errorBuilder) continue;
-                            else return;
-                        }
+                        if (!res) continue;
                         calc = res;
                     }
                     break;
@@ -433,13 +547,11 @@ export class LocalIdParser {
                             context.i,
                             context.segment,
                             codebooks,
-                            stateTag,
-                            errorBuilder
+                            errorBuilder,
+
+                            stateTag
                         );
-                        if (!res) {
-                            if (errorBuilder) continue;
-                            else return;
-                        }
+                        if (!res) continue;
                         stateTag = res;
                     }
                     break;
@@ -452,13 +564,11 @@ export class LocalIdParser {
                             context.i,
                             context.segment,
                             codebooks,
-                            cmd,
-                            errorBuilder
+                            errorBuilder,
+
+                            cmd
                         );
-                        if (!res) {
-                            if (errorBuilder) continue;
-                            else return;
-                        }
+                        if (!res) continue;
                         cmd = res;
                     }
                     break;
@@ -471,13 +581,11 @@ export class LocalIdParser {
                             context.i,
                             context.segment,
                             codebooks,
-                            type,
-                            errorBuilder
+                            errorBuilder,
+
+                            type
                         );
-                        if (!res) {
-                            if (errorBuilder) continue;
-                            else return;
-                        }
+                        if (!res) continue;
                         type = res;
                     }
                     break;
@@ -490,13 +598,11 @@ export class LocalIdParser {
                             context.i,
                             context.segment,
                             codebooks,
-                            pos,
-                            errorBuilder
+
+                            errorBuilder,
+                            pos
                         );
-                        if (!res) {
-                            if (errorBuilder) continue;
-                            else return;
-                        }
+                        if (!res) continue;
                         pos = res;
                     }
                     break;
@@ -509,13 +615,11 @@ export class LocalIdParser {
                             context.i,
                             context.segment,
                             codebooks,
-                            detail,
-                            errorBuilder
+                            errorBuilder,
+
+                            detail
                         );
-                        if (!res) {
-                            if (errorBuilder) continue;
-                            else return;
-                        }
+                        if (!res) continue;
                         detail = res;
                     }
                     break;
@@ -535,15 +639,18 @@ export class LocalIdParser {
             .tryWithMetadataTag(pos)
             .tryWithMetadataTag(detail);
 
-        if (builder.isEmptyMetadata) {
-            errorBuilder?.push({
-                type: ParsingState.EmptyState,
-                message: "Missing at least one metadata tag",
-            });
-        }
-
-        return builder;
+        // if (builder.isEmptyMetadata) {
+        //     errorBuilder?.push({
+        //         type: ParsingState.EmptyState,
+        //         message: "Missing at least one metadata tag",
+        //     });
+        // }
+        // errorBuilder.errors.length > 0
+        return !errorBuilder.hasError && !invalidSecondaryItem
+            ? builder
+            : undefined;
     }
+
 
     private static parseMetatag(
         codebookName: CodebookName,
@@ -552,39 +659,37 @@ export class LocalIdParser {
         i: number,
         segment: string,
         codebooks: Codebooks,
-        tag?: MetadataTag,
-        errorBuilder?: LocalIdErrorBuilder
+        errorBuilder: LocalIdErrorBuilder,
+        tag?: MetadataTag
     ): MetadataTag | undefined {
-        if (!codebooks)
-            return;
+        if (!codebooks) return;
 
-        let dashIndex = segment.indexOf("-");
-        if (dashIndex === -1)
-            dashIndex = segment.indexOf('~');
-        if (dashIndex === -1)
-        {
-            if (errorBuilder) {
-                errorBuilder.push({
-                    type: state,
-                    message: 'Invalid metadata tag: missing "-" in ' + segment,
-                });
-            }
+        const dashIndex = segment.indexOf("-");
+        const tildeIndex = segment.indexOf("~");
+        const prefixIndex = dashIndex === -1 ? tildeIndex : dashIndex;
+
+        if (prefixIndex === -1) {
+            errorBuilder.push({
+                type: state,
+                message:
+                    "Invalid metadata tag: missing prefix '-' or '~' in " +
+                    segment,
+            });
             this.advanceParser(context, i, segment, state);
             return;
         }
 
-        const actualPrefix = segment.slice(0, dashIndex);
+        const actualPrefix = segment.slice(0, prefixIndex);
 
         const actualState = this.metaPrefixToState(actualPrefix);
 
         if (actualState === undefined || actualState < state) {
-            if (errorBuilder)
-                errorBuilder.push({
-                    type: state,
-                    message:
-                        "Invalid metadata tag: unknown prefix " + actualPrefix,
-                });
+            errorBuilder.push({
+                type: state,
+                message: "Invalid metadata tag: unknown prefix " + actualPrefix,
+            });
             this.advanceParser(context, i, segment, state);
+            // TODO: FIX INFINITE LOOP HERE
             return;
         }
 
@@ -596,36 +701,58 @@ export class LocalIdParser {
                 state,
                 actualState
             );
-            return tag;
+            return;
         }
 
-        const value = segment.slice(dashIndex + 1);
+        const value = segment.slice(prefixIndex + 1);
         if (value.length === 0) {
-            if (errorBuilder)
-                errorBuilder.push({
-                    type: state,
-                    message:
-                        "Invalid " +
-                        CodebookName[codebookName] +
-                        " metadata tag: missing value",
-                });
+            errorBuilder.push({
+                type: state,
+                message:
+                    "Invalid " +
+                    CodebookName[codebookName] +
+                    " metadata tag: missing value",
+            });
             this.advanceParser(context, i, segment, state);
             return;
         }
 
-        const res = codebooks.tryCreateTag(codebookName, value);
-        if (!res) {
-            if (errorBuilder)
+        tag = codebooks.tryCreateTag(codebookName, value);
+        if (tag === undefined) {
+            if (prefixIndex === tildeIndex)
+                errorBuilder.push({
+                    type: state,
+                    message:
+                        "Invalid custom " +
+                        CodebookName[codebookName] +
+                        " metadata tag: failed to create " +
+                        value,
+                });
+            else
                 errorBuilder.push({
                     type: state,
                     message:
                         "Invalid " +
                         CodebookName[codebookName] +
-                        " metadata tag: failed to create " + value,
+                        " metadata tag: failed to create " +
+                        value,
                 });
+            this.advanceParser(context, i, segment, state);
+            return;
         }
+        if (prefixIndex === dashIndex && tag.prefix === "~")
+            errorBuilder.push({
+                type: state,
+                message:
+                    "Invalid " +
+                    CodebookName[codebookName] +
+                    " metadata tag: '" +
+                    value +
+                    "'. Use prefix '~' for custom values",
+            });
+
         this.advanceParser(context, i, segment, state);
-        return res;
+        return tag;
     }
 
     static metaPrefixToState(prefix: string): ParsingState | undefined {
@@ -640,16 +767,78 @@ export class LocalIdParser {
                 return ParsingState.MetaState;
             case "cmd":
                 return ParsingState.MetaCmd;
-            case "pos":
-                return ParsingState.MetaPos;
             case "type":
                 return ParsingState.MetaType;
+            case "pos":
+                return ParsingState.MetaPos;
             case "detail":
                 return ParsingState.MetaDetail;
             default:
                 return;
         }
     }
+
+    static getNextStateIndexes(
+        span: string,
+        state: ParsingState
+    ): NextStateIndexTuple {
+        const customIndex = span.indexOf("~");
+        const endOfCustomIndex = customIndex + "~".length + 1;
+
+        const metaIndex = span.indexOf("/meta");
+        const endOfMetaIndex = metaIndex + "/meta".length + 1;
+
+        switch (state) {
+            case ParsingState.PrimaryItem: {
+                const secIndex = span.indexOf("/sec");
+                const endOfSecIndex = secIndex + "/sec".length + 1;
+                return secIndex != -1
+                    ? {
+                          nextStateIndex: secIndex,
+                          endOfNextStateIndex: endOfSecIndex,
+                      }
+                    : customIndex != -1
+                    ? {
+                          nextStateIndex: customIndex,
+                          endOfNextStateIndex: endOfCustomIndex,
+                      }
+                    : {
+                          nextStateIndex: metaIndex,
+                          endOfNextStateIndex: endOfMetaIndex,
+                      };
+            }
+            case ParsingState.SecondaryItem:
+                return customIndex != -1
+                    ? {
+                          nextStateIndex: customIndex,
+                          endOfNextStateIndex: endOfCustomIndex,
+                      }
+                    : {
+                          nextStateIndex: metaIndex,
+                          endOfNextStateIndex: endOfMetaIndex,
+                      };
+            default:
+                return {
+                    nextStateIndex: metaIndex,
+                    endOfNextStateIndex: endOfMetaIndex,
+                };
+        }
+    }
+
+    // static pushError(
+    //     errorBuilder: LocalIdErrorBuilder,
+    //     state: ParsingState,
+    //     message?: string
+    // ) {
+    //     if (!errorBuilder.hasError) errorBuilder = LocalIdErrorBuilder.Create();
+    //     if (message !== undefined)
+    //     {
+    //         errorBuilder.push({ type: state, message: message });
+    //         return errorBuilder;
+    //     }
+    //     errorBuilder.push(state);
+    //     return errorBuilder;
+    // }
 
     static advanceParser(
         context: ParseContext,

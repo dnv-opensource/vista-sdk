@@ -4,7 +4,7 @@
     "description": "In this repository we codify the rules and principles of VIS and related ISO-standards to enable and support users and implementers of the standards.",
     "main": "index.js",
     "scripts": {
-        "test": "jest --silent=false --verbose=true",
+        "test": "jest --silent=false --verbose=true --logHeapUsage",
         "prebuild": "ts-node ./prebuild.ts",
         "build": "rimraf rm -rf dist && tsc"
     },

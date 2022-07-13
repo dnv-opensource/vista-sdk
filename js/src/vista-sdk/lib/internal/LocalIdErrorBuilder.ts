@@ -1,12 +1,22 @@
+import { LocalId } from "../LocalId";
 import { ParsingState } from "../types/LocalId";
 import { Error, ErrorBuilder } from "./ErrorBuilder";
 
 export class LocalIdErrorBuilder extends ErrorBuilder<ParsingState> {
     readonly predefinedMessages: Map<ParsingState, string>;
 
+    public static readonly Empty : LocalIdErrorBuilder = new LocalIdErrorBuilder();
+
+    public static Create() : LocalIdErrorBuilder{
+        return new LocalIdErrorBuilder();
+    }
     constructor(errors?: Error<ParsingState>[]) {
         super(errors);
         this.predefinedMessages = this.setPredefinedMessages();
+    }
+
+    public get hasError(): boolean {
+        return this.errors.length > 0;
     }
 
     private setPredefinedMessages(): Map<ParsingState, string> {
@@ -16,6 +26,7 @@ export class LocalIdErrorBuilder extends ErrorBuilder<ParsingState> {
         map.set(ParsingState.VisVersion, "Missing or invalid vis version");
         map.set(ParsingState.PrimaryItem, "Missing or invalid primary item");
         map.set(ParsingState.SecondaryItem, "Invalid secondary item");
+        map.set(ParsingState.ItemDescription, "Missing or invalid /meta prefix");
         map.set(ParsingState.MetaQty, "Invalid metadata tag: Quantity");
         map.set(ParsingState.MetaCnt, "Invalid metadata tag: Content");
         map.set(ParsingState.MetaCmd, "Invalid metadata tag: Command");
