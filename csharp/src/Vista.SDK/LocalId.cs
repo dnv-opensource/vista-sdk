@@ -72,26 +72,26 @@ public class LocalId : ILocalId, IEquatable<LocalId>
 
     public override string ToString() => _builder.ToString();
 
-    public static LocalId Parse(string localIdStr, out LocalIdErrorBuilder errorBuilder) =>
+    public static LocalId Parse(string localIdStr, out LocalIdParsingErrorBuilder errorBuilder) =>
         LocalIdBuilder.Parse(localIdStr, out errorBuilder).Build();
 
     public static LocalId Parse(string localIdStr) => LocalIdBuilder.Parse(localIdStr).Build();
 }
 
-public enum ParsingState
+internal enum ParsingState
 {
     NamingRule,
     VisVersion,
     PrimaryItem,
     SecondaryItem,
     ItemDescription,
-    MetaQty,
-    MetaCnt,
-    MetaCalc,
+    MetaQuantity,
+    MetaContent,
+    MetaCalculation,
     MetaState,
-    MetaCmd,
+    MetaCommand,
     MetaType,
-    MetaPos,
+    MetaPosition,
     MetaDetail,
 
     // For "other" errors

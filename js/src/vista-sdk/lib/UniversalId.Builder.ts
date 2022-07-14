@@ -1,5 +1,5 @@
 import { LocalIdBuilder, ImoNumber, VisVersion } from ".";
-import { LocalIdErrorBuilder } from "./internal/LocalIdErrorBuilder";
+import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { ParsingState } from "./types/LocalId";
 
 export class UniversalIdBuilder {
@@ -34,8 +34,8 @@ export class UniversalIdBuilder {
     }
 
     public validate(
-        errorBuilder = new LocalIdErrorBuilder()
-    ): LocalIdErrorBuilder {
+        errorBuilder = new LocalIdParsingErrorBuilder()
+    ): LocalIdParsingErrorBuilder {
         if (!this.imoNumber?.isValid) {
             errorBuilder.push({
                 type: ParsingState.EmptyState,

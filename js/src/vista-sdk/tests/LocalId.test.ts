@@ -1,5 +1,5 @@
 import { VisVersion, LocalIdBuilder, CodebookName } from "../lib";
-import { LocalIdErrorBuilder } from "../lib/internal/LocalIdErrorBuilder";
+import { LocalIdParsingErrorBuilder } from "../lib/internal/LocalIdParsingErrorBuilder";
 import { VIS } from "../lib/VIS";
 import * as fs from "fs-extra";
 import * as InvalidData from "../../../../testdata/InvalidLocalIds.json";
@@ -18,7 +18,7 @@ type Errored = {
     localIdStr: string;
     parsedLocalIdStr?: string;
     error?: any;
-    errorBuilder?: LocalIdErrorBuilder;
+    errorBuilder?: LocalIdParsingErrorBuilder;
 };
 
 describe("LocalId", () => {
@@ -45,111 +45,6 @@ describe("LocalId", () => {
             verbose,
         };
     };
-
-    const invalidTestData: {
-        input: string;
-        expectedErrorMessages: string[];
-    }[] = [
-        {
-            input: "dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt~sea.waters/state-opened",
-            expectedErrorMessages: [
-                "Invalid format: missing '/' as first character",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/Sf90.3/S61/sec/652.1i-1P/meta/cnt-sea.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid GmodNode in Primary item: Sf90.3",
-                "Invalid GmodPath: Last part in Primary item: Sf90.3/S61",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/se/652.1i-1P/meta/cnt-sea.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid GmodNode in Primary item: se",
-                "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/f652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-sea.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid start GmodNode in Primary item: f652.31",
-                "Invalid GmodPath in Primary item: f652.31/S90.3/S61",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/f652.31/S90.3/S61/se/652.1i-1P/meta/cnt-sea.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid start GmodNode in Primary item: f652.31",
-                "Invalid GmodNode in Primary item: se",
-                "Invalid GmodPath: Last part in Primary item: se/652.1i-1P",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/f652.1i-1P/meta/cnt-sea.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid start GmodNode in Secondary item: f652.1i",
-                "Invalid GmodPath in Secondary item: f652.1i-1P",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/ff/met/cnt-sea.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid GmodNode in Secondary item: ff",
-                "Invalid or missing '/meta' prefix after Secondary item",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/f652.1i-1P/met/cnt-sea.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid start GmodNode in Secondary item: f652.1i",
-                "Invalid GmodNode in Secondary item: met",
-                "Invalid or missing '/meta' prefix after Secondary item",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/acnt-sea.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid metadata tag: unknown prefix acnt",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-seaXX.water/state-opened",
-            expectedErrorMessages: [
-                "Invalid Content metadata tag: failed to create seaXX.water",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cntsea.XXwaters/state-opened",
-            expectedErrorMessages: [
-                "Invalid metadata tag: missing prefix '-' or '~' in cntsea.XXwaters",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt~customSeaWater/state~opened",
-            expectedErrorMessages: [
-                "Invalid custom Content metadata tag: failed to create customSeaWater",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/652.31/S90.3/S61/sec/652.1i-1P/meta/cnt-custom.waters/state~custom.opened",
-            expectedErrorMessages: [
-                "Invalid Content metadata tag: 'custom.waters'. Use prefix '~' for custom values",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/411.1/C101.31/meta/qty-content/cnt-oil.mist/state-high/detail-no.1.to.6",
-            expectedErrorMessages: [
-                "Invalid Quantity metadata tag: 'content'. Use prefix '~' for custom values",
-            ],
-        },
-        {
-            input: "/dnv-v2/vis-3-4a/612.21-P/C701.13/S93/meta/qty-content/cnt-exhaust.gas/pos-outlet",
-            expectedErrorMessages: [
-                "Invalid Quantity metadata tag: 'content'. Use prefix '~' for custom values",
-            ],
-        },
-    ];
 
     const testData: { input: Input; output: string }[] = [
         {
@@ -283,7 +178,7 @@ describe("LocalId", () => {
         const codebooks = await codebooksPromise;
 
         parseTestData.forEach((s) => {
-            const errorBuilder = new LocalIdErrorBuilder();
+            const errorBuilder = new LocalIdParsingErrorBuilder();
             const localId = LocalIdBuilder.parse(
                 s,
                 gmod,
@@ -296,26 +191,21 @@ describe("LocalId", () => {
         });
     });
 
+    const invalidParseTestData: string =
+        "/dnv-v2/vis-3-4a/1021.1i-3AC/H121/meta/qty-temperature/cnt-cargo/cal";
     test("LocalId invalid parsing", async () => {
         const gmod = await gmodPromise;
         const codebooks = await codebooksPromise;
 
-        invalidTestData.forEach(({ input, expectedErrorMessages }) => {
-            const errorBuilder = new LocalIdErrorBuilder();
-            const localId = LocalIdBuilder.tryParse(
-                input,
-                gmod,
-                codebooks,
-                errorBuilder
-            );
-            expect(errorBuilder.errors.length).not.toBe(0);
-            errorBuilder.errors.forEach((error) => {
-                expect(
-                    expectedErrorMessages.includes(error.message)
-                ).toBeTruthy();
-            });
-        });
-    });
+        const errorBuilder = new LocalIdParsingErrorBuilder();
+        const localId = LocalIdBuilder.tryParse(
+            invalidParseTestData,
+            gmod,
+            codebooks,
+            errorBuilder
+        );
+        expect(errorBuilder.hasError).toBeTruthy();
+        expect(localId).toBeUndefined();});
 
     test("LocalId smoketest parsing", async () => {
         const gmod = await gmodPromise;
@@ -330,7 +220,7 @@ describe("LocalId", () => {
         const errored: Errored[] = [];
         for await (let localIdStr of rl) {
             try {
-                const errorBuilder = new LocalIdErrorBuilder();
+                const errorBuilder = new LocalIdParsingErrorBuilder();
                 if (
                     localIdStr.includes("qty-content") ||
                     localIdStr.includes(
@@ -369,7 +259,7 @@ describe("LocalId", () => {
         const codeBooks = await codebooksPromise;
         InvalidData.InvalidLocalIds.forEach(
             ({ input, expectedErrorMessages }) => {
-                const errorBuilder = new LocalIdErrorBuilder();
+                const errorBuilder = new LocalIdParsingErrorBuilder();
                 const localId = LocalIdBuilder.tryParse(
                     input,
                     gmod,

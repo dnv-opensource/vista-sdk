@@ -1,5 +1,5 @@
 import { LocalIdBuilder, CodebookName, MetadataTag, Gmod, Codebooks } from ".";
-import { LocalIdErrorBuilder } from "./internal/LocalIdErrorBuilder";
+import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { LocalIdParser } from "./LocalId.Parsing";
 
 export class LocalId {
@@ -43,7 +43,7 @@ public static parse(
         localIdStr: string,
         gmod: Gmod,
         codebooks: Codebooks,
-        errorBuilder?: LocalIdErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         return LocalIdParser.parse(
             localIdStr,

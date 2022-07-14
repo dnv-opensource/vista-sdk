@@ -34,15 +34,6 @@ public sealed record class UniversalIdBuilder : IUniversalIdBuilder
             ImoNumber = imoNumber
         };
 
-    public LocalIdErrorBuilder Validate(ref LocalIdErrorBuilder errorBuilder)
-    {
-        if (ImoNumber is null)
-            errorBuilder.AddError(ParsingState.EmptyState, "Missing or invalid IMO number");
-
-        _localId?.Validate(out errorBuilder);
-        return errorBuilder;
-    }
-
     public sealed override int GetHashCode()
     {
         var hashCode = new HashCode();

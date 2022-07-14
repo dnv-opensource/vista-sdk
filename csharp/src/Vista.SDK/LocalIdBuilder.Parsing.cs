@@ -12,7 +12,10 @@ public sealed partial record class LocalIdBuilder
         return localId;
     }
 
-    public static LocalIdBuilder Parse(string localIdStr, out LocalIdErrorBuilder errorBuilder)
+    public static LocalIdBuilder Parse(
+        string localIdStr,
+        out LocalIdParsingErrorBuilder errorBuilder
+    )
     {
         if (!TryParse(localIdStr, out errorBuilder, out var localId))
             throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
@@ -29,12 +32,12 @@ public sealed partial record class LocalIdBuilder
 
     public static bool TryParse(
         string localIdStr,
-        out LocalIdErrorBuilder errorBuilder,
+        out LocalIdParsingErrorBuilder errorBuilder,
         [MaybeNullWhen(false)] out LocalIdBuilder localId
     )
     {
         localId = null;
-        errorBuilder = LocalIdErrorBuilder.Empty;
+        errorBuilder = LocalIdParsingErrorBuilder.Empty;
         if (localIdStr is null)
             throw new ArgumentNullException(nameof(localIdStr));
         if (localIdStr.Length == 0)
@@ -140,7 +143,7 @@ public sealed partial record class LocalIdBuilder
                             {
                                 (false, false, false) => state,
                                 (true, false, false) => ParsingState.SecondaryItem,
-                                (false, true, false) => ParsingState.MetaQty,
+                                (false, true, false) => ParsingState.MetaQuantity,
                                 (false, false, true) => ParsingState.ItemDescription,
                                 _ => throw new Exception("Inconsistent parsing state"),
                             };
@@ -204,7 +207,7 @@ public sealed partial record class LocalIdBuilder
                                 ) switch
                                 {
                                     (true, false, false) => ParsingState.SecondaryItem,
-                                    (false, true, false) => ParsingState.MetaQty,
+                                    (false, true, false) => ParsingState.MetaQuantity,
                                     (false, false, true) => ParsingState.ItemDescription,
                                     _ => throw new Exception("Inconsistent parsing state"),
                                 };
@@ -255,7 +258,7 @@ public sealed partial record class LocalIdBuilder
                             ) switch
                             {
                                 (false, false) => state,
-                                (true, false) => ParsingState.MetaQty,
+                                (true, false) => ParsingState.MetaQuantity,
                                 (false, true) => ParsingState.ItemDescription,
                                 _ => throw new Exception("Inconsistent parsing state"),
                             };
@@ -294,6 +297,7 @@ public sealed partial record class LocalIdBuilder
 
                             if (!gmod.TryGetNode(code, out _))
                             {
+                                invalidSecondaryItem = true;
                                 AddError(
                                     ref errorBuilder,
                                     ParsingState.SecondaryItem,
@@ -321,7 +325,7 @@ public sealed partial record class LocalIdBuilder
                                     nextSegment[0] == '~'
                                 ) switch
                                 {
-                                    (true, false) => ParsingState.MetaQty,
+                                    (true, false) => ParsingState.MetaQuantity,
                                     (false, true) => ParsingState.ItemDescription,
                                     _ => throw new Exception("Inconsistent parsing state"),
                                 };
@@ -334,7 +338,6 @@ public sealed partial record class LocalIdBuilder
                                     $"Invalid GmodPath: Last part in Secondary item: {invalidSecondaryItemPath.ToString()}"
                                 );
 
-                                invalidSecondaryItem = true;
                                 i = endOfNextStateIndex;
 
                                 AdvanceParser(ref state, nextState);
@@ -358,7 +361,7 @@ public sealed partial record class LocalIdBuilder
 
                     AdvanceParser(ref i, in segment, ref state);
                     break;
-                case ParsingState.MetaQty:
+                case ParsingState.MetaQuantity:
 
                     {
                         var result = ParseMetatag(
@@ -374,7 +377,7 @@ public sealed partial record class LocalIdBuilder
                             return false;
                     }
                     break;
-                case ParsingState.MetaCnt:
+                case ParsingState.MetaContent:
 
                     {
                         var result = ParseMetatag(
@@ -390,7 +393,7 @@ public sealed partial record class LocalIdBuilder
                             return false;
                     }
                     break;
-                case ParsingState.MetaCalc:
+                case ParsingState.MetaCalculation:
 
                     {
                         var result = ParseMetatag(
@@ -422,7 +425,7 @@ public sealed partial record class LocalIdBuilder
                             return false;
                     }
                     break;
-                case ParsingState.MetaCmd:
+                case ParsingState.MetaCommand:
 
                     {
                         var result = ParseMetatag(
@@ -454,7 +457,7 @@ public sealed partial record class LocalIdBuilder
                             return false;
                     }
                     break;
-                case ParsingState.MetaPos:
+                case ParsingState.MetaPosition:
 
                     {
                         var result = ParseMetatag(
@@ -511,7 +514,7 @@ public sealed partial record class LocalIdBuilder
             in ReadOnlySpan<char> segment,
             ref MetadataTag? tag,
             Codebooks? codebooks,
-            ref LocalIdErrorBuilder errorBuilder
+            ref LocalIdParsingErrorBuilder errorBuilder
         )
         {
             if (codebooks is null)
@@ -595,19 +598,19 @@ public sealed partial record class LocalIdBuilder
         static ParsingState? MetaPrefixToState(ReadOnlySpan<char> prefix)
         {
             if (prefix.SequenceEqual("qty".AsSpan()))
-                return ParsingState.MetaQty;
+                return ParsingState.MetaQuantity;
             if (prefix.SequenceEqual("cnt".AsSpan()))
-                return ParsingState.MetaCnt;
+                return ParsingState.MetaContent;
             if (prefix.SequenceEqual("calc".AsSpan()))
-                return ParsingState.MetaCalc;
+                return ParsingState.MetaCalculation;
             if (prefix.SequenceEqual("state".AsSpan()))
                 return ParsingState.MetaState;
             if (prefix.SequenceEqual("cmd".AsSpan()))
-                return ParsingState.MetaCmd;
+                return ParsingState.MetaCommand;
             if (prefix.SequenceEqual("type".AsSpan()))
                 return ParsingState.MetaType;
             if (prefix.SequenceEqual("pos".AsSpan()))
-                return ParsingState.MetaPos;
+                return ParsingState.MetaPosition;
             if (prefix.SequenceEqual("detail".AsSpan()))
                 return ParsingState.MetaDetail;
 
@@ -615,13 +618,13 @@ public sealed partial record class LocalIdBuilder
         }
 
         static void AddError(
-            ref LocalIdErrorBuilder errorBuilder,
+            ref LocalIdParsingErrorBuilder errorBuilder,
             ParsingState state,
             string? message
         )
         {
             if (!errorBuilder.HasError)
-                errorBuilder = LocalIdErrorBuilder.Create();
+                errorBuilder = LocalIdParsingErrorBuilder.Create();
 
             errorBuilder.AddError(state, message);
         }

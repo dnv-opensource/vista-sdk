@@ -7,7 +7,7 @@ import {
     Gmod,
     Codebooks,
 } from ".";
-import { LocalIdErrorBuilder } from "./internal/LocalIdErrorBuilder";
+import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { LocalIdItems } from "./LocalId.Items";
 import { LocalIdParser } from "./LocalId.Parsing";
 import { ParsingState } from "./types/LocalId";
@@ -82,8 +82,8 @@ export class LocalIdBuilder {
     }
 
     public validate(
-        errorBuilder = new LocalIdErrorBuilder()
-    ): LocalIdErrorBuilder {
+        errorBuilder = new LocalIdParsingErrorBuilder()
+    ): LocalIdParsingErrorBuilder {
         if (!this.primaryItem || !this.primaryItem.isValid()) {
             errorBuilder.push(ParsingState.PrimaryItem);
         }
@@ -264,7 +264,7 @@ export class LocalIdBuilder {
         localIdStr: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
-        errorBuilder?: LocalIdErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         return LocalIdParser.parse(localIdStr, gmod, codebooks, errorBuilder);
     }
@@ -273,7 +273,7 @@ export class LocalIdBuilder {
         localIdStr: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
-        errorBuilder?: LocalIdErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         return LocalIdParser.tryParse(
             localIdStr,

@@ -84,7 +84,7 @@ public sealed record GmodPath
     private static bool IsValidLocation(string? location)
     {
         if (location is null)
-            return false;
+            return true;
         return !string.IsNullOrWhiteSpace(location) && Regex.IsMatch(location, "/^[A-Z0-9]/");
     }
 

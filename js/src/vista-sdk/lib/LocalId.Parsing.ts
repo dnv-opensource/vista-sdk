@@ -6,7 +6,7 @@ import {
     MetadataTag,
     CodebookName,
 } from ".";
-import { LocalIdErrorBuilder } from "./internal/LocalIdErrorBuilder";
+import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { ParsingState } from "./types/LocalId";
 import { isNullOrWhiteSpace } from "./util/util";
 import { VisVersionExtension, VisVersions } from "./VisVersion";
@@ -28,7 +28,7 @@ export class LocalIdParser {
         localIdStr: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
-        errorBuilder?: LocalIdErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder
     ): LocalIdBuilder {
         const localId = LocalIdParser.tryParse(
             localIdStr,
@@ -45,9 +45,9 @@ export class LocalIdParser {
         localIdStr: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
-        errorBuilder?: LocalIdErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder
     ): LocalIdBuilder | undefined {
-        if (!errorBuilder) errorBuilder = LocalIdErrorBuilder.Empty;
+        if (!errorBuilder) errorBuilder = LocalIdParsingErrorBuilder.Empty;
         if (!localIdStr || isNullOrWhiteSpace(localIdStr))
             throw new Error("Invalid LocalId string");
         if (localIdStr.length === 0) return;
@@ -163,7 +163,7 @@ export class LocalIdParser {
                                     nextState = ParsingState.SecondaryItem;
                                     break;
                                 case !sec && meta && !tilde:
-                                    nextState = ParsingState.MetaQty;
+                                    nextState = ParsingState.MetaQuantity;
                                     break;
                                 case !sec && !meta && tilde:
                                     nextState = ParsingState.ItemDescription;
@@ -261,7 +261,7 @@ export class LocalIdParser {
                                         nextState = ParsingState.SecondaryItem;
                                         break;
                                     case !sec && meta && !tilde:
-                                        nextState = ParsingState.MetaQty;
+                                        nextState = ParsingState.MetaQuantity;
                                         break;
                                     case !sec && !meta && tilde:
                                         nextState =
@@ -333,7 +333,7 @@ export class LocalIdParser {
                                 case !meta && !tilde:
                                     break;
                                 case meta && !tilde:
-                                    nextState = ParsingState.MetaQty;
+                                    nextState = ParsingState.MetaQuantity;
                                     break;
                                 case !meta && tilde:
                                     nextState = ParsingState.ItemDescription;
@@ -427,7 +427,7 @@ export class LocalIdParser {
                                     case !meta && !tilde:
                                         break;
                                     case meta && !tilde:
-                                        nextState = ParsingState.MetaQty;
+                                        nextState = ParsingState.MetaQuantity;
                                         break;
                                     case !meta && tilde:
                                         nextState =
@@ -488,7 +488,7 @@ export class LocalIdParser {
                         context.state
                     );
                     break;
-                case ParsingState.MetaQty:
+                case ParsingState.MetaQuantity:
                     {
                         const res = this.parseMetatag(
                             CodebookName.Quantity,
@@ -505,7 +505,7 @@ export class LocalIdParser {
                         qty = res;
                     }
                     break;
-                case ParsingState.MetaCnt:
+                case ParsingState.MetaContent:
                     {
                         const res = this.parseMetatag(
                             CodebookName.Content,
@@ -521,7 +521,7 @@ export class LocalIdParser {
                         cnt = res;
                     }
                     break;
-                case ParsingState.MetaCalc:
+                case ParsingState.MetaCalculation:
                     {
                         const res = this.parseMetatag(
                             CodebookName.Calculation,
@@ -555,7 +555,7 @@ export class LocalIdParser {
                         stateTag = res;
                     }
                     break;
-                case ParsingState.MetaCmd:
+                case ParsingState.MetaCommand:
                     {
                         const res = this.parseMetatag(
                             CodebookName.Command,
@@ -589,7 +589,7 @@ export class LocalIdParser {
                         type = res;
                     }
                     break;
-                case ParsingState.MetaPos:
+                case ParsingState.MetaPosition:
                     {
                         const res = this.parseMetatag(
                             CodebookName.Position,
@@ -651,7 +651,7 @@ export class LocalIdParser {
         i: number,
         segment: string,
         codebooks: Codebooks,
-        errorBuilder: LocalIdErrorBuilder,
+        errorBuilder: LocalIdParsingErrorBuilder,
         tag?: MetadataTag
     ): MetadataTag | undefined {
         if (!codebooks) return;
@@ -749,19 +749,19 @@ export class LocalIdParser {
     static metaPrefixToState(prefix: string): ParsingState | undefined {
         switch (prefix) {
             case "qty":
-                return ParsingState.MetaQty;
+                return ParsingState.MetaQuantity;
             case "cnt":
-                return ParsingState.MetaCnt;
+                return ParsingState.MetaContent;
             case "calc":
-                return ParsingState.MetaCalc;
+                return ParsingState.MetaCalculation;
             case "state":
                 return ParsingState.MetaState;
             case "cmd":
-                return ParsingState.MetaCmd;
+                return ParsingState.MetaCommand;
             case "type":
                 return ParsingState.MetaType;
             case "pos":
-                return ParsingState.MetaPos;
+                return ParsingState.MetaPosition;
             case "detail":
                 return ParsingState.MetaDetail;
             default:

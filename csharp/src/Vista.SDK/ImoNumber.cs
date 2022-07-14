@@ -1,12 +1,12 @@
-﻿namespace Vista.SDK;
+namespace Vista.SDK;
 
 public readonly record struct ImoNumber
 {
     private readonly int _value;
 
-    public ImoNumber(int value, bool skipVerification = false)
+    public ImoNumber(int value)
     {
-        if (!skipVerification && !IsValid(value))
+        if (!IsValid(value))
             throw new ArgumentException("Invalid IMO number");
         _value = value;
     }

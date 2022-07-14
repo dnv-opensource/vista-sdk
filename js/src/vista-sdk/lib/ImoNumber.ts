@@ -1,8 +1,8 @@
 export class ImoNumber {
   private readonly _value: number;
 
-  public constructor(value: number, skipVerification = false) {
-    if (!skipVerification && !ImoNumber.isValid(value)) throw new Error('Invalid IMO number');
+  public constructor(value: number) {
+    if (!ImoNumber.isValid(value)) throw new Error('Invalid IMO number');
     this._value = value;
   }
 

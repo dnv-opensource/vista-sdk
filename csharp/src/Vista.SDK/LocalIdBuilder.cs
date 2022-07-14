@@ -122,27 +122,6 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         return new LocalId(this);
     }
 
-    public LocalIdErrorBuilder Validate(out LocalIdErrorBuilder errorBuilder)
-    {
-        errorBuilder = LocalIdErrorBuilder.Empty;
-        if (PrimaryItem is null || !GmodPath.IsValid(PrimaryItem.Parents, PrimaryItem.Node))
-        {
-            if (!errorBuilder.HasError)
-                errorBuilder = LocalIdErrorBuilder.Create();
-            errorBuilder.AddError(ParsingState.PrimaryItem);
-        }
-
-        if (IsEmpty)
-        {
-            if (!errorBuilder.HasError)
-                errorBuilder = LocalIdErrorBuilder.Create();
-            errorBuilder.AddError(ParsingState.EmptyState);
-            return errorBuilder;
-        }
-
-        return errorBuilder;
-    }
-
     public bool IsValid =>
         VisVersion is not null
         && Items.PrimaryItem is not null

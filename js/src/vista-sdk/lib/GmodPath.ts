@@ -313,7 +313,7 @@ export class GmodPath {
     }
 
     private isValidLocation(location?: string): boolean {
-        if (!location) return false; //true
+        if (!location) return true;
         return !isNullOrWhiteSpace(location) && /^[A-Z0-9]/g.test(location);
     }
 
