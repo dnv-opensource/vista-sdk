@@ -51,7 +51,7 @@ export class LocalIdParser {
         if (!localIdStr || isNullOrWhiteSpace(localIdStr))
             throw new Error("Invalid LocalId string");
         if (localIdStr.length === 0) return;
-        if (localIdStr.charAt(0) !== '/') {
+        if (localIdStr.charAt(0) !== "/") {
             errorBuilder.push({
                 type: ParsingState.Formatting,
                 message: "Invalid format: missing '/' as first character",
@@ -273,7 +273,7 @@ export class LocalIdParser {
                                     context.span.slice(
                                         context.i,
                                         nextStateIndex
-                                    ); // - context.i
+                                    );
                                 errorBuilder.push({
                                     type: ParsingState.PrimaryItem,
                                     message:
@@ -343,7 +343,7 @@ export class LocalIdParser {
                             if (nextState !== context.state) {
                                 const path = context.span.slice(
                                     secondaryItemStart,
-                                    context.i - 1 // context.i - 1- secondaryItemStart
+                                    context.i - 1
                                 );
                                 const gmodPath = gmod.tryParsePath(path);
                                 if (gmodPath === undefined) {
@@ -424,8 +424,8 @@ export class LocalIdParser {
                                     nextSegment[0] === "~",
                                 ];
                                 switch (true) {
-                                    // case !meta && !tilde:
-                                    //     break;
+                                    case !meta && !tilde:
+                                        break;
                                     case meta && !tilde:
                                         nextState = ParsingState.MetaQty;
                                         break;
@@ -438,7 +438,7 @@ export class LocalIdParser {
                                     context.span.slice(
                                         context.i,
                                         nextStateIndex
-                                    ); //  - context.i
+                                    );
                                 errorBuilder.push({
                                     type: ParsingState.SecondaryItem,
                                     message:
@@ -479,7 +479,7 @@ export class LocalIdParser {
 
                     context.segment = context.span.slice(
                         context.i,
-                        metaIndex + metaStr.length // - context.i
+                        metaIndex + metaStr.length
                     );
                     this.advanceParser(
                         context,
@@ -639,18 +639,10 @@ export class LocalIdParser {
             .tryWithMetadataTag(pos)
             .tryWithMetadataTag(detail);
 
-        // if (builder.isEmptyMetadata) {
-        //     errorBuilder?.push({
-        //         type: ParsingState.EmptyState,
-        //         message: "Missing at least one metadata tag",
-        //     });
-        // }
-        // errorBuilder.errors.length > 0
         return !errorBuilder.hasError && !invalidSecondaryItem
             ? builder
             : undefined;
     }
-
 
     private static parseMetatag(
         codebookName: CodebookName,
@@ -689,7 +681,6 @@ export class LocalIdParser {
                 message: "Invalid metadata tag: unknown prefix " + actualPrefix,
             });
             this.advanceParser(context, i, segment, state);
-            // TODO: FIX INFINITE LOOP HERE
             return;
         }
 
@@ -824,21 +815,6 @@ export class LocalIdParser {
                 };
         }
     }
-
-    // static pushError(
-    //     errorBuilder: LocalIdErrorBuilder,
-    //     state: ParsingState,
-    //     message?: string
-    // ) {
-    //     if (!errorBuilder.hasError) errorBuilder = LocalIdErrorBuilder.Create();
-    //     if (message !== undefined)
-    //     {
-    //         errorBuilder.push({ type: state, message: message });
-    //         return errorBuilder;
-    //     }
-    //     errorBuilder.push(state);
-    //     return errorBuilder;
-    // }
 
     static advanceParser(
         context: ParseContext,
