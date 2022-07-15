@@ -9,7 +9,7 @@ import {
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { ParsingState } from "./types/LocalId";
 import { isNullOrWhiteSpace } from "./util/util";
-import { VisVersionExtension, VisVersions } from "./VisVersion";
+import { VisVersions } from "./VisVersion";
 
 type NextStateIndexTuple = {
     nextStateIndex: number;

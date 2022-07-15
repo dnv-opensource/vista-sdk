@@ -1,9 +1,11 @@
-import { VisVersion, GmodDto, Gmod, Codebooks } from ".";
 import { CodebooksDto } from "./types/CodebookDto";
-import { VisVersionExtension, VisVersions } from "./VisVersion";
+import { VisVersion, VisVersionExtension, VisVersions } from "./VisVersion";
 import { Client } from "./Client";
 
 import LRUCache from "lru-cache";
+import { GmodDto } from "./types/GmodDto";
+import { Gmod } from "./Gmod";
+import { Codebooks } from "./Codebooks";
 
 export class VIS {
     private readonly _gmodDtoCache: LRUCache<VisVersion, Promise<GmodDto>>;

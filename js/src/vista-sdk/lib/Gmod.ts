@@ -1,4 +1,5 @@
-import { VisVersion, GmodNode, GmodDto, GmodPath } from ".";
+import { GmodNode } from "./GmodNode";
+import { GmodPath } from "./GmodPath";
 import {
     GmodTuple,
     TraversalHandler,
@@ -6,8 +7,10 @@ import {
     TraversalContext,
     TraversalHandlerResult,
 } from "./types/Gmod";
+import { GmodDto } from "./types/GmodDto";
 import { GmodNodeMetadata } from "./types/GmodNode";
 import { Parents } from "./util/Parents";
+import { VisVersion } from "./VisVersion";
 
 export class Gmod {
     public visVersion: VisVersion;

@@ -1,4 +1,6 @@
-import { Gmod, GmodDto, GmodNodeDto, ImoNumber } from ".";
+import { Gmod } from "./Gmod";
+import { ImoNumber } from "./ImoNumber";
+import { GmodDto, GmodNodeDto } from "./types/GmodDto";
 import { PmodInfo } from "./types/Pmod";
 import { PmodDto } from "./types/PmodDto";
 
