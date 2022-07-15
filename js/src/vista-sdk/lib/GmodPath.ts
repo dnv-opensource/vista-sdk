@@ -1,4 +1,5 @@
-import { GmodNode, Gmod } from ".";
+import { Gmod } from "./Gmod";
+import { GmodNode } from "./GmodNode";
 import { TraversalHandlerResult } from "./types/Gmod";
 import { PathNode, ParseContext } from "./types/GmodPath";
 import { isNullOrWhiteSpace } from "./util/util";

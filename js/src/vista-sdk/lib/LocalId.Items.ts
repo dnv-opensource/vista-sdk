@@ -1,4 +1,4 @@
-import { GmodPath } from ".";
+import { GmodPath } from "./GmodPath";
 
 export class LocalIdItems {
     public primaryItem?: GmodPath;

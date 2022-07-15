@@ -1,12 +1,11 @@
-import {
-    Gmod,
-    Codebooks,
-    LocalIdBuilder,
-    GmodPath,
-    MetadataTag,
-    CodebookName,
-} from ".";
+
+import { CodebookName } from "./CodebookName";
+import { Codebooks } from "./Codebooks";
+import { Gmod } from "./Gmod";
+import { GmodPath } from "./GmodPath";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
+import { LocalIdBuilder } from "./LocalId.Builder";
+import { MetadataTag } from "./MetadataTag";
 import { ParsingState } from "./types/LocalId";
 import { isNullOrWhiteSpace } from "./util/util";
 import { VisVersions } from "./VisVersion";

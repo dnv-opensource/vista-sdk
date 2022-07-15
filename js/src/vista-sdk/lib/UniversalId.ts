@@ -1,4 +1,4 @@
-import { UniversalIdBuilder } from ".";
+import { UniversalIdBuilder } from "./UniversalId.Builder";
 
 export class UniversalId {
     private _builder: UniversalIdBuilder;

@@ -1,4 +1,5 @@
-import { CodebookName, CodebookNames, MetadataTag } from ".";
+import { CodebookName, CodebookNames } from "./CodebookName";
+import { MetadataTag } from "./MetadataTag";
 import { CodebookDto } from "./types/CodebookDto";
 import { isNullOrWhiteSpace, tryParseInt } from "./util/util";
 

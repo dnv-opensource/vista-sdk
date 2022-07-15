@@ -1,6 +1,10 @@
-import { LocalIdBuilder, CodebookName, MetadataTag, Gmod, Codebooks } from ".";
+import { CodebookName } from "./CodebookName";
+import { Codebooks } from "./Codebooks";
+import { Gmod } from "./Gmod";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
+import { LocalIdBuilder } from "./LocalId.Builder";
 import { LocalIdParser } from "./LocalId.Parsing";
+import { MetadataTag } from "./MetadataTag";
 
 export class LocalId {
     protected _builder: LocalIdBuilder;

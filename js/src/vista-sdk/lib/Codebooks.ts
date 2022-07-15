@@ -1,5 +1,8 @@
-import { VisVersion, CodebookName, Codebook, MetadataTag } from ".";
+import { Codebook } from "./Codebook";
+import { CodebookName } from "./CodebookName";
+import { MetadataTag } from "./MetadataTag";
 import { CodebooksDto, CodebookDto } from "./types/CodebookDto";
+import { VisVersion } from "./VisVersion";
 
 export class Codebooks {
     public visVersion: VisVersion;

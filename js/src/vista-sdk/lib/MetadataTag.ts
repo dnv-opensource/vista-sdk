@@ -1,4 +1,4 @@
-import { CodebookName, CodebookNames } from ".";
+import { CodebookName, CodebookNames } from "./CodebookName";
 
 export class MetadataTag {
     public readonly name: CodebookName;

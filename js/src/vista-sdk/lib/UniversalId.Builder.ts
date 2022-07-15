@@ -1,6 +1,8 @@
-import { LocalIdBuilder, ImoNumber, VisVersion } from ".";
+import { ImoNumber } from "./ImoNumber";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
+import { LocalIdBuilder } from "./LocalId.Builder";
 import { ParsingState } from "./types/LocalId";
+import { VisVersion } from "./VisVersion";
 
 export class UniversalIdBuilder {
     public readonly namingEntity = "data.dnv.com";

@@ -18,6 +18,7 @@ import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilde
 import { GmodNodeMetadata } from "./types/GmodNode";
 import { ParsingState } from "./types/LocalId";
 import { PmodInfo } from "./types/Pmod";
+import { Client } from "./Client";
 // Types
 export type { GmodNodeMetadata, ParsingState, PmodInfo  };
 // VisVersion
@@ -32,3 +33,5 @@ export { LocalId, LocalIdBuilder, UniversalIdBuilder, UniversalId, ImoNumber, Lo
 export { Gmod, GmodNode, GmodPath };
 // Pmod
 export { Pmod };
+// CLient
+export {Client}

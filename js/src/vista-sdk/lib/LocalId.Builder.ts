@@ -1,16 +1,15 @@
-import {
-    VisVersion,
-    MetadataTag,
-    LocalId,
-    CodebookName,
-    GmodPath,
-    Gmod,
-    Codebooks,
-} from ".";
+
+import { CodebookName } from "./CodebookName";
+import { Codebooks } from "./Codebooks";
+import { Gmod } from "./Gmod";
+import { GmodPath } from "./GmodPath";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
+import { LocalId } from "./LocalId";
 import { LocalIdItems } from "./LocalId.Items";
 import { LocalIdParser } from "./LocalId.Parsing";
+import { MetadataTag } from "./MetadataTag";
 import { ParsingState } from "./types/LocalId";
+import { VisVersion } from "./VisVersion";
 
 export class LocalIdBuilder {
     public static readonly namingRule = "dnv-v2";
