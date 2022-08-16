@@ -1,5 +1,5 @@
 
-import { CodebookName } from "./CodebookName";
+import { CodebookName, CodebookNames } from "./CodebookName";
 import { Codebooks } from "./Codebooks";
 import { Gmod } from "./Gmod";
 import { GmodPath } from "./GmodPath";
@@ -252,6 +252,13 @@ export class LocalIdBuilder {
                 );
         }
     }
+
+    public withoutMetadataTag(tagName: CodebookName): LocalIdBuilder {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        return this.with((s) => (s[CodebookNames.toString(tagName)] = undefined));
+    }
+
 
     public with(u: { (state: LocalIdBuilder): void }): LocalIdBuilder {
         const n = this.clone();
