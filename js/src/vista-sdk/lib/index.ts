@@ -21,6 +21,14 @@ import { PmodInfo } from "./types/Pmod";
 import { Client } from "./Client";
 import { Defaults } from "./Defaults";
 import { PmodNode } from "./PmodNode";
+import {
+    isNullOrWhiteSpace,
+    tryParseInt,
+    getEnumValueByStringKey,
+    parseValue,
+    naturalSort,
+} from "./util/util";
+
 // Types
 export type { GmodNodeMetadata, ParsingState, PmodInfo };
 // VisVersion
@@ -42,9 +50,16 @@ export {
 // Gmod
 export { Gmod, GmodNode, GmodPath };
 // Pmod
-
 export { Pmod, PmodNode };
-// CLient
+// Client
 export { Client };
 // Defaults
 export { Defaults };
+// Util
+export {
+    isNullOrWhiteSpace,
+    tryParseInt,
+    getEnumValueByStringKey,
+    parseValue,
+    naturalSort,
+};
