@@ -136,12 +136,12 @@ public class GmodVersioningTests
             Share = FileShare.Read,
         };
         await using var changedSources = new StreamWriter(
-            $"changed-source-paths-{sourceGmod.VisVersion}.txt",
+            $"changed-source-paths-{sourceGmod.VisVersion}-{targetGmod.VisVersion}.txt",
             Encoding.UTF8,
             opts
         );
         await using var changedTargets = new StreamWriter(
-            $"changed-target-paths-{sourceGmod.VisVersion}.txt",
+            $"changed-target-paths-{sourceGmod.VisVersion}-{targetGmod.VisVersion}.txt",
             Encoding.UTF8,
             opts
         );
