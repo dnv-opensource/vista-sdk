@@ -96,5 +96,9 @@ internal enum ParsingState
 
     // For "other" errors
     EmptyState = 100,
-    Formatting = 101
+    Formatting = 101,
+
+    // UniversalId
+    NamingEntity = 200,
+    IMONumber = 201
 }

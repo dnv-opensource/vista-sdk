@@ -1,4 +1,3 @@
-
 import { CodebookName } from "./CodebookName";
 import { Codebooks } from "./Codebooks";
 import { Gmod } from "./Gmod";
@@ -46,12 +45,11 @@ export class LocalIdParser {
         codebooks: Codebooks,
         errorBuilder?: LocalIdParsingErrorBuilder
     ): LocalIdBuilder | undefined {
-        if (!errorBuilder) errorBuilder = LocalIdParsingErrorBuilder.Empty;
         if (!localIdStr || isNullOrWhiteSpace(localIdStr))
             throw new Error("Invalid LocalId string");
         if (localIdStr.length === 0) return;
         if (localIdStr.charAt(0) !== "/") {
-            errorBuilder.push({
+            errorBuilder?.push({
                 type: ParsingState.Formatting,
                 message: "Invalid format: missing '/' as first character",
             });
@@ -95,7 +93,7 @@ export class LocalIdParser {
             switch (context.state) {
                 case ParsingState.NamingRule:
                     if (context.segment !== namingRule) {
-                        errorBuilder.push(ParsingState.NamingRule);
+                        errorBuilder?.push(ParsingState.NamingRule);
                         return;
                     }
                     this.advanceParser(
@@ -107,7 +105,7 @@ export class LocalIdParser {
                     break;
                 case ParsingState.VisVersion:
                     if (!context.segment.startsWith("vis-")) {
-                        errorBuilder.push(ParsingState.VisVersion);
+                        errorBuilder?.push(ParsingState.VisVersion);
                         return;
                     }
                     const version = VisVersions.tryParse(
@@ -115,7 +113,7 @@ export class LocalIdParser {
                     );
 
                     if (!version) {
-                        errorBuilder.push(ParsingState.VisVersion);
+                        errorBuilder?.push(ParsingState.VisVersion);
                         return;
                     }
 
@@ -135,7 +133,7 @@ export class LocalIdParser {
                                 : context.segment.slice(0, dashIndex);
                         if (primaryItemStart === -1) {
                             if (!gmod.tryGetNode(code)) {
-                                errorBuilder.push({
+                                errorBuilder?.push({
                                     type: ParsingState.PrimaryItem,
                                     message:
                                         "Invalid start GmodNode in Primary item: " +
@@ -178,7 +176,7 @@ export class LocalIdParser {
                                 const gmodPath = gmod.tryParsePath(path);
                                 if (gmodPath === undefined) {
                                     // Displays the full GmodPath when first part of PrimaryItem is invalid
-                                    errorBuilder.push({
+                                    errorBuilder?.push({
                                         type: ParsingState.PrimaryItem,
                                         message:
                                             "Invalid GmodPath in Primary item: " +
@@ -224,7 +222,7 @@ export class LocalIdParser {
                                 break;
                             }
                             if (!gmod.tryGetNode(code)) {
-                                errorBuilder.push({
+                                errorBuilder?.push({
                                     type: ParsingState.PrimaryItem,
                                     message:
                                         "Invalid GmodNode in Primary item: " +
@@ -237,7 +235,7 @@ export class LocalIdParser {
                                         context.state
                                     );
                                 if (nextStateIndex === -1) {
-                                    errorBuilder.push({
+                                    errorBuilder?.push({
                                         type: ParsingState.PrimaryItem,
                                         message:
                                             "Invalid or missing '/meta' prefix after Primary item",
@@ -273,7 +271,7 @@ export class LocalIdParser {
                                         context.i,
                                         nextStateIndex
                                     );
-                                errorBuilder.push({
+                                errorBuilder?.push({
                                     type: ParsingState.PrimaryItem,
                                     message:
                                         "Invalid GmodPath: Last part in Primary item: " +
@@ -307,7 +305,7 @@ export class LocalIdParser {
                                 : context.segment.slice(0, dashIndex);
                         if (secondaryItemStart === -1) {
                             if (!gmod.tryGetNode(code)) {
-                                errorBuilder.push({
+                                errorBuilder?.push({
                                     type: ParsingState.SecondaryItem,
                                     message:
                                         "Invalid start GmodNode in Secondary item: " +
@@ -348,7 +346,7 @@ export class LocalIdParser {
                                 if (gmodPath === undefined) {
                                     // Displays the full GmodPath when first part of SecondaryItem is invalid
                                     invalidSecondaryItem = true;
-                                    errorBuilder.push({
+                                    errorBuilder?.push({
                                         type: ParsingState.SecondaryItem,
                                         message:
                                             "Invalid GmodPath in Secondary item: " +
@@ -394,7 +392,7 @@ export class LocalIdParser {
                                 break;
                             }
                             if (!gmod.tryGetNode(code)) {
-                                errorBuilder.push({
+                                errorBuilder?.push({
                                     type: ParsingState.SecondaryItem,
                                     message:
                                         "Invalid GmodNode in Secondary item: " +
@@ -407,7 +405,7 @@ export class LocalIdParser {
                                         context.state
                                     );
                                 if (nextStateIndex === -1) {
-                                    errorBuilder.push({
+                                    errorBuilder?.push({
                                         type: ParsingState.SecondaryItem,
                                         message:
                                             "Invalid or missing '/meta' prefix after Secondary item",
@@ -438,7 +436,7 @@ export class LocalIdParser {
                                         context.i,
                                         nextStateIndex
                                     );
-                                errorBuilder.push({
+                                errorBuilder?.push({
                                     type: ParsingState.SecondaryItem,
                                     message:
                                         "Invalid GmodPath: Last part in Secondary item: " +
@@ -471,7 +469,7 @@ export class LocalIdParser {
 
                     const metaIndex = context.span.indexOf(metaStr);
                     if (metaIndex === -1) {
-                        errorBuilder.push(ParsingState.ItemDescription);
+                        errorBuilder?.push(ParsingState.ItemDescription);
 
                         return;
                     }
@@ -638,7 +636,7 @@ export class LocalIdParser {
             .tryWithMetadataTag(pos)
             .tryWithMetadataTag(detail);
 
-        return !errorBuilder.hasError && !invalidSecondaryItem
+        return !errorBuilder?.hasError && !invalidSecondaryItem
             ? builder
             : undefined;
     }
@@ -650,7 +648,7 @@ export class LocalIdParser {
         i: number,
         segment: string,
         codebooks: Codebooks,
-        errorBuilder: LocalIdParsingErrorBuilder,
+        errorBuilder?: LocalIdParsingErrorBuilder,
         tag?: MetadataTag
     ): MetadataTag | undefined {
         if (!codebooks) return;
@@ -660,7 +658,7 @@ export class LocalIdParser {
         const prefixIndex = dashIndex === -1 ? tildeIndex : dashIndex;
 
         if (prefixIndex === -1) {
-            errorBuilder.push({
+            errorBuilder?.push({
                 type: state,
                 message:
                     "Invalid metadata tag: missing prefix '-' or '~' in " +
@@ -675,7 +673,7 @@ export class LocalIdParser {
         const actualState = this.metaPrefixToState(actualPrefix);
 
         if (actualState === undefined || actualState < state) {
-            errorBuilder.push({
+            errorBuilder?.push({
                 type: state,
                 message: "Invalid metadata tag: unknown prefix " + actualPrefix,
             });
@@ -696,7 +694,7 @@ export class LocalIdParser {
 
         const value = segment.slice(prefixIndex + 1);
         if (value.length === 0) {
-            errorBuilder.push({
+            errorBuilder?.push({
                 type: state,
                 message:
                     "Invalid " +
@@ -710,7 +708,7 @@ export class LocalIdParser {
         tag = codebooks.tryCreateTag(codebookName, value);
         if (tag === undefined) {
             if (prefixIndex === tildeIndex)
-                errorBuilder.push({
+                errorBuilder?.push({
                     type: state,
                     message:
                         "Invalid custom " +
@@ -719,7 +717,7 @@ export class LocalIdParser {
                         value,
                 });
             else
-                errorBuilder.push({
+                errorBuilder?.push({
                     type: state,
                     message:
                         "Invalid " +
@@ -731,7 +729,7 @@ export class LocalIdParser {
             return;
         }
         if (prefixIndex === dashIndex && tag.prefix === "~")
-            errorBuilder.push({
+            errorBuilder?.push({
                 type: state,
                 message:
                     "Invalid " +

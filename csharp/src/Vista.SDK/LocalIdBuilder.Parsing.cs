@@ -36,8 +36,18 @@ public sealed partial record class LocalIdBuilder
         [MaybeNullWhen(false)] out LocalIdBuilder localId
     )
     {
-        localId = null;
         errorBuilder = LocalIdParsingErrorBuilder.Empty;
+
+        return TryParseInternal(localIdStr, ref errorBuilder, out localId);
+    }
+
+    internal static bool TryParseInternal(
+        string localIdStr,
+        ref LocalIdParsingErrorBuilder errorBuilder,
+        [MaybeNullWhen(false)] out LocalIdBuilder localId
+    )
+    {
+        localId = null;
         if (localIdStr is null)
             throw new ArgumentNullException(nameof(localIdStr));
         if (localIdStr.Length == 0)

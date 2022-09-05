@@ -23,9 +23,9 @@ export class Pmod {
         this._nodeMap = nodeMap;
     }
 
-    public static createFromLocalIds(
+    public static createFromPaths(
         visVersion: VisVersion,
-        localIds: LocalId[] | LocalIdBuilder[],
+        paths: GmodPath[],
         info?: PmodInfo
     ) {
         const nodeMap = new Map<string, PmodNode>();
@@ -36,10 +36,6 @@ export class Pmod {
                 .withId(key);
             nodeMap.set(key, pmodNode);
         };
-
-        const paths = localIds
-            .flatMap((localId) => [localId.primaryItem, localId.secondaryItem])
-            .filter((l) => l) as GmodPath[];
 
         for (const path of paths) {
             const fullPath = path.getFullPath();
@@ -97,6 +93,18 @@ export class Pmod {
         if (!rootNode) throw Error("Failed to get rootNode 'VE'");
 
         return new Pmod(visVersion, rootNode, nodeMap, info);
+    }
+
+    public static createFromLocalIds(
+        visVersion: VisVersion,
+        localIds: LocalId[] | LocalIdBuilder[],
+        info?: PmodInfo
+    ) {
+        const paths = localIds
+            .flatMap((localId) => [localId.primaryItem, localId.secondaryItem])
+            .filter((l) => l) as GmodPath[];
+
+        return this.createFromPaths(visVersion, paths, info);
     }
 
     public get info() {

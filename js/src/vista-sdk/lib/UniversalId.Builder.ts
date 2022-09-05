@@ -1,11 +1,13 @@
+import { Codebooks, Gmod, UniversalId } from ".";
 import { ImoNumber } from "./ImoNumber";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { LocalIdBuilder } from "./LocalId.Builder";
 import { ParsingState } from "./types/LocalId";
+import { UniversalIdParser } from "./UniversalId.Parsing";
 import { VisVersion } from "./VisVersion";
 
 export class UniversalIdBuilder {
-    public readonly namingEntity = "data.dnv.com";
+    public static readonly namingEntity = "data.dnv.com";
     private _localId?: LocalIdBuilder;
     public imoNumber?: ImoNumber;
 
@@ -48,6 +50,38 @@ export class UniversalIdBuilder {
         return errorBuilder;
     }
 
+    public static parse(
+        universalId: string,
+        gmod: Gmod,
+        codebooks: Codebooks,
+        errorBuilder?: LocalIdParsingErrorBuilder
+    ) {
+        return UniversalIdParser.parse(
+            universalId,
+            gmod,
+            codebooks,
+            errorBuilder
+        );
+    }
+
+    public static tryParse(
+        universalId: string,
+        gmod: Gmod,
+        codebooks: Codebooks,
+        errorBuilder?: LocalIdParsingErrorBuilder
+    ): UniversalIdBuilder | undefined {
+        return UniversalIdParser.tryParse(
+            universalId,
+            gmod,
+            codebooks,
+            errorBuilder
+        );
+    }
+
+    public build(): UniversalId {
+        return new UniversalId(this);
+    }
+
     public toString() {
         const builder: string[] = [];
 
@@ -56,7 +90,7 @@ export class UniversalIdBuilder {
         if (!this.localId)
             throw new Error("Invalid Universal Id state: Missing LocalId");
 
-        builder.push(this.namingEntity);
+        builder.push(UniversalIdBuilder.namingEntity);
         builder.push("/");
         builder.push("IMO");
         builder.push(this.imoNumber.toString());

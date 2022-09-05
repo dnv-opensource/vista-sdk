@@ -21,9 +21,10 @@ import { PmodInfo } from "./types/Pmod";
 import { Client } from "./Client";
 import { Defaults } from "./Defaults";
 import { PmodNode } from "./PmodNode";
+import { UniversalIdParser } from "./UniversalId.Parsing";
 
 // Types
-export type { GmodNodeMetadata, ParsingState, PmodInfo };
+export type { GmodNodeMetadata, PmodInfo };
 // VisVersion
 export { VisVersion, VisVersionExtension, VisVersions };
 // VIS
@@ -34,12 +35,14 @@ export { CodebookName, CodebookNames, Codebook, Codebooks, MetadataTag };
 export {
     LocalId,
     LocalIdBuilder,
-    UniversalIdBuilder,
-    UniversalId,
+    ParsingState,
     ImoNumber,
     LocalIdParser,
     LocalIdParsingErrorBuilder,
 };
+// UniversalId
+export { UniversalIdParser, UniversalIdBuilder, UniversalId };
+
 // Gmod
 export { Gmod, GmodNode, GmodPath };
 // Pmod

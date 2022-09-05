@@ -11,6 +11,21 @@ public readonly record struct ImoNumber
         _value = value;
     }
 
+    public ImoNumber(string value)
+    {
+        if (!value.StartsWith("IMO"))
+            throw new ArgumentException("Value does not start with IMO");
+
+        int? num = int.TryParse(value.Substring(3), out var n) ? n : null;
+
+        if (num is null)
+            throw new ArgumentException("Failed to retreive number from value");
+        if (!IsValid(num.Value))
+            throw new ArgumentException("Invalid IMO number");
+
+        _value = num.Value;
+    }
+
     public static bool IsValid(int imoNumber)
     {
         // https://en.wikipedia.org/wiki/IMO_number
