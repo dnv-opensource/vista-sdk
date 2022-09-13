@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Vista.SDK.Transport.Apache.Avro;
 using Vista.SDK.Transport.Avro.DataChannel;
 using Vista.SDK.Transport.Avro.TimeSeriesData;

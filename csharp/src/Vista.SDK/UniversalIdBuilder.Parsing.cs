@@ -91,7 +91,7 @@ public sealed partial record UniversalIdBuilder
             switch (state)
             {
                 case ParsingState.NamingEntity:
-                    if (segment.ToString() != NamingEntity)
+                    if (!NamingEntity.AsSpan().SequenceEqual(segment))
                     {
                         AddError(
                             ref errorBuilder,
@@ -102,16 +102,16 @@ public sealed partial record UniversalIdBuilder
                     }
                     break;
                 case ParsingState.IMONumber:
-                    try
+                    if (!SDK.ImoNumber.TryParse(segment, out var imo))
                     {
-                        imoNumber = new ImoNumber(segment.ToString());
+                        AddError(ref errorBuilder, state, "Invalid IMO number segment");
                         break;
                     }
-                    catch (Exception e)
+                    else
                     {
-                        AddError(ref errorBuilder, state, e.Message);
-                        break;
+                        imoNumber = imo;
                     }
+                    break;
             }
             state++;
             i += segment.Length + 1;

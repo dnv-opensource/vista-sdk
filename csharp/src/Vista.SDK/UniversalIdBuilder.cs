@@ -61,7 +61,6 @@ public sealed partial record class UniversalIdBuilder : IUniversalIdBuilder
 
         builder.Append(namingEntity);
         builder.Append("/");
-        builder.Append("IMO");
         builder.Append(ImoNumber.ToString());
 
         LocalId.ToString(builder);

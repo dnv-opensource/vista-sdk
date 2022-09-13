@@ -1,4 +1,6 @@
-﻿using Vista.SDK.Transport.DataChannel;
+﻿using FluentAssertions;
+using Vista.SDK.Transport;
+using Vista.SDK.Transport.DataChannel;
 
 namespace Vista.SDK.Tests.Transport;
 
@@ -8,7 +10,7 @@ public partial class IsoMessageTests
         new DataChannelListPackage(
             new Package(
                 new Header(
-                    "IMO1234567",
+                    ShipId.Parse("IMO1234567"),
                     new ConfigurationReference(
                         "DataChannelList.xml",
                         "1.0",
@@ -26,8 +28,10 @@ public partial class IsoMessageTests
                     new DataChannel[]
                     {
                         new DataChannel(
-                            new DataChannelId(
-                                "/Naming_Rule/MainEngine/AirCooler1/CoolingFreshWater/Outlet/Temp",
+                            new SDK.Transport.DataChannel.DataChannelId(
+                                LocalId.Parse(
+                                    "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air"
+                                ),
                                 "0010",
                                 new NameObject(
                                     "Naming_Rule",
@@ -83,5 +87,16 @@ public partial class IsoMessageTests
         var message = TestDataChannelListPackage;
 
         Assert.NotNull(message);
+    }
+
+    [Fact]
+    public void Test_DataChannelList_Json()
+    {
+        var message = TestDataChannelListPackage;
+
+        var dto = SDK.Transport.Json.DataChannel.Extensions.ToJsonDto(message);
+        var message2 = SDK.Transport.Json.DataChannel.Extensions.ToDomainModel(dto);
+
+        message.Should().BeEquivalentTo(message2);
     }
 }

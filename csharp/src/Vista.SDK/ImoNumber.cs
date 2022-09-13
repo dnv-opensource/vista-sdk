@@ -9,35 +9,50 @@ public readonly record struct ImoNumber
     public ImoNumber(int value)
     {
         if (!IsValid(value))
-            throw new ArgumentException("Invalid IMO number");
+            throw new ArgumentException("Invalid IMO number: " + value);
         _value = value;
     }
 
-    public ImoNumber(string value)
+    public ImoNumber(ReadOnlySpan<char> value)
     {
         if (!TryParse(value, out this))
-            throw new ArgumentException("Invalid IMO number");
+            throw new ArgumentException("Invalid IMO number: " + value.ToString());
     }
 
-    public static ImoNumber Parse(string value)
+    private ImoNumber(int value, bool skipValidate)
+    {
+        if (!skipValidate && !IsValid(value))
+            throw new ArgumentException("Invalid IMO number: " + value);
+        _value = value;
+    }
+
+    public static ImoNumber Parse(ReadOnlySpan<char> value)
     {
         if (!TryParse(value, out var imo))
-            throw new ArgumentException("Failed to parse ImoNumber " + value);
+            throw new ArgumentException("Failed to parse ImoNumber: " + value.ToString());
         return imo;
     }
 
-    public static bool TryParse(string value, out ImoNumber imoNumber)
+    public static bool TryParse(ReadOnlySpan<char> value, out ImoNumber imoNumber)
     {
         imoNumber = default;
-        if (!value.StartsWith("IMO"))
-            return false;
+        var startsWithImo = value.StartsWith("IMO".AsSpan(), StringComparison.OrdinalIgnoreCase);
 
-        int num = int.TryParse(value.Substring(3), out var n) ? n : 0;
+#if NETCOREAPP3_1_OR_GREATER
+        int num = int.TryParse(startsWithImo ? value.Slice(3) : value, out var n) ? n : 0;
+#else
+        int num = int.TryParse(
+            startsWithImo ? value.Slice(3).ToString() : value.ToString(),
+            out var n
+        )
+          ? n
+          : 0;
+#endif
 
         if (num == 0 || !IsValid(num))
             return false;
 
-        imoNumber = new ImoNumber(num);
+        imoNumber = new ImoNumber(num, true);
 
         return true;
     }
@@ -83,5 +98,5 @@ public readonly record struct ImoNumber
         }
     }
 
-    public override string ToString() => _value.ToString();
+    public override string ToString() => $"IMO{_value}";
 }

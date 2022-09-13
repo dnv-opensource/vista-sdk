@@ -84,41 +84,16 @@ export class UniversalIdParser {
                     namingEntity = segment;
                     break;
                 case ParsingState.IMONumber:
-                    if (!segment.startsWith("IMO")) {
+                    const parsedImo = ImoNumber.tryParse(segment);
+                    if (!parsedImo) {
                         errorBuilder?.push({
                             type: ParsingState.IMONumber,
-                            message: "Couldnt find IMO in segment",
+                            message: "Couldnt parse IMO number segment",
                         });
                         break;
                     }
 
-                    const numberMatch = /\d+/.exec(segment);
-                    if (!numberMatch || numberMatch.length !== 1) {
-                        errorBuilder?.push({
-                            type: ParsingState.IMONumber,
-                            message: "Couldnt find valid numbers in segment",
-                        });
-                        break;
-                    }
-
-                    const numbersToCheck = +numberMatch[0];
-
-                    if (isNaN(numbersToCheck)) {
-                        errorBuilder?.push({
-                            type: ParsingState.IMONumber,
-                            message: "Failed to parse numbers from segment",
-                        });
-                        break;
-                    }
-                    try {
-                        const imo = new ImoNumber(numbersToCheck);
-                        imoNumber = imo;
-                    } catch (error) {
-                        errorBuilder?.push({
-                            type: ParsingState.IMONumber,
-                            message: (error as unknown as Error).message,
-                        });
-                    }
+                    imoNumber = parsedImo;
                     break;
             }
             universalIdSegment.splice(0, 1);

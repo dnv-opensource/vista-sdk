@@ -1,4 +1,4 @@
-﻿using Domain = Vista.SDK.Transport.DataChannel;
+using Domain = Vista.SDK.Transport.DataChannel;
 
 namespace Vista.SDK.Transport.Json.DataChannel;
 
@@ -83,7 +83,7 @@ public static class Extensions
                         package.Package.Header.DataChannelListId.Version
                     ),
                     package.Package.Header.DateCreated,
-                    package.Package.Header.ShipId,
+                    package.Package.Header.ShipId.ToString(),
                     package.Package.Header.VersionInformation is null
                       ? null
                       : new VersionInformation(
@@ -105,7 +105,7 @@ public static class Extensions
         return new Domain.DataChannelListPackage(
             new Domain.Package(
                 new Domain.Header(
-                    p.Header.ShipID,
+                    ShipId.Parse(p.Header.ShipID),
                     new Domain.ConfigurationReference(
                         p.Header.DataChannelListID.ID,
                         p.Header.DataChannelListID.Version,
@@ -128,15 +128,11 @@ public static class Extensions
                             c =>
                                 new Domain.DataChannel(
                                     new Domain.DataChannelId(
-                                        // c.DataChannelID.LocalID is null
-                                        //   ? throw new Exception()
-                                        //   : LocalId.TryParse(
-                                        //         c.DataChannelID.LocalID,
-                                        //         out var localId
-                                        //     )
-                                        //       ? localId
-                                        //       : throw new Exception(),
-                                        c.DataChannelID.LocalID,
+                                        c.DataChannelID.LocalID is null
+                                          ? throw new InvalidOperationException(
+                                                "DataChannelPackage local ID was null"
+                                            )
+                                          : LocalId.Parse(c.DataChannelID.LocalID),
                                         c.DataChannelID.ShortID,
                                         c.DataChannelID.NameObject is null
                                           ? null

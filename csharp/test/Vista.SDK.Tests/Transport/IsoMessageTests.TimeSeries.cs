@@ -1,4 +1,6 @@
-﻿using Vista.SDK.Transport.TimeSeries;
+using FluentAssertions;
+using Vista.SDK.Transport;
+using Vista.SDK.Transport.TimeSeries;
 
 namespace Vista.SDK.Tests.Transport;
 
@@ -8,8 +10,8 @@ public partial class IsoMessageTests
         new TimeSeriesDataPackage(
             new Package(
                 new Header(
-                    "IMO1234567",
-                    new Vista.SDK.Transport.TimeSeries.TimeSpan(
+                    ShipId.Parse("IMO1234567"),
+                    new SDK.Transport.TimeSeries.TimeSpan(
                         DateTimeOffset.Parse("2016-01-01T12:00:00Z"),
                         DateTimeOffset.Parse("2016-01-03T12:00:00Z")
                     ),
@@ -41,7 +43,7 @@ public partial class IsoMessageTests
                             new TabularData(
                                 "2",
                                 "2",
-                                new[] { "0010", "0020" },
+                                new[] { DataChannelId.Parse("0010"), DataChannelId.Parse("0020") },
                                 new[]
                                 {
                                     new TabularDataSet(
@@ -59,7 +61,7 @@ public partial class IsoMessageTests
                             new TabularData(
                                 "3",
                                 "1",
-                                new[] { "0110" },
+                                new[] { DataChannelId.Parse("0110") },
                                 new[]
                                 {
                                     new TabularDataSet(
@@ -86,19 +88,19 @@ public partial class IsoMessageTests
                             {
                                 new EventDataSet(
                                     DateTimeOffset.Parse("2016-01-01T12:00:01Z"),
-                                    "0011",
+                                    DataChannelId.Parse("0011"),
                                     "HIGH",
                                     "0"
                                 ),
                                 new EventDataSet(
                                     DateTimeOffset.Parse("2016-01-01T12:00:01Z"),
-                                    "0021",
+                                    DataChannelId.Parse("0021"),
                                     "HIGH",
                                     "0"
                                 ),
                                 new EventDataSet(
                                     DateTimeOffset.Parse("2016-01-01T12:00:23Z"),
-                                    "0011",
+                                    DataChannelId.Parse("0011"),
                                     "NORMAL",
                                     "0"
                                 ),
@@ -116,7 +118,7 @@ public partial class IsoMessageTests
                             new TabularData(
                                 "1",
                                 "2",
-                                new[] { "0010", "0020", },
+                                new[] { DataChannelId.Parse("0010"), DataChannelId.Parse("0020"), },
                                 new[]
                                 {
                                     new TabularDataSet(
@@ -129,7 +131,7 @@ public partial class IsoMessageTests
                             new TabularData(
                                 "2",
                                 "1",
-                                new[] { "0110", },
+                                new[] { DataChannelId.Parse("0110"), },
                                 new[]
                                 {
                                     new TabularDataSet(
@@ -158,5 +160,16 @@ public partial class IsoMessageTests
         var message = TestTimeSeriesDataPackage;
 
         Assert.NotNull(message);
+    }
+
+    [Fact]
+    public void Test_TimeSeriesData_Json()
+    {
+        var message = TestTimeSeriesDataPackage;
+
+        var dto = SDK.Transport.Json.TimeSeriesData.Extensions.ToJsonDto(message);
+        var message2 = SDK.Transport.Json.TimeSeriesData.Extensions.ToDomainModel(dto);
+
+        message.Should().BeEquivalentTo(message2);
     }
 }

@@ -1,11 +1,11 @@
-﻿namespace Vista.SDK.Transport.DataChannel;
+namespace Vista.SDK.Transport.DataChannel;
 
 public sealed record DataChannelListPackage(Package Package);
 
 public sealed record Package(Header Header, DataChannelList DataChannelList);
 
 public sealed record Header(
-    string ShipId,
+    ShipId ShipId,
     ConfigurationReference DataChannelListId,
     VersionInformation? VersionInformation,
     string? Author,
@@ -25,7 +25,7 @@ public sealed record DataChannelList(IReadOnlyList<DataChannel> DataChannel);
 
 public sealed record DataChannel(DataChannelId DataChannelId, Property Property);
 
-public sealed record DataChannelId(string LocalId, string? ShortId, NameObject? NameObject);
+public sealed record DataChannelId(LocalId LocalId, string? ShortId, NameObject? NameObject);
 
 public sealed record NameObject(
     string NamingRule,

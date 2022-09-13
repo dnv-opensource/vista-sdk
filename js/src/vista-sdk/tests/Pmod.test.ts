@@ -22,7 +22,7 @@ describe("Pmod", () => {
         );
 
         const pmod = Pmod.createFromLocalIds(VisVersion.v3_4a, localIds, {
-            imoNumber: new ImoNumber(1234567),
+            imoNumber: ImoNumber.create(1234567),
         });
 
         const cs1Instances = pmod.getNodesByCode("CS1");

@@ -3,32 +3,45 @@ import { tryParseInt } from "./util/util";
 export class ImoNumber {
     private readonly _value: number;
 
-    public constructor(value: number | string, skipVerification = false) {
-        if (typeof value === "string") {
-            let parsedValue = skipVerification
-                ? tryParseInt(/\+d/.exec(value)?.[0]) ?? 0
-                : ImoNumber.parse(value).value;
-            this._value = parsedValue;
+    private constructor(value: number) {
+        this._value = value;
+    }
+
+    public static create(value: string | number) {
+        let num: number;
+        if (typeof value === 'string') {
+            const parsedValue = ImoNumber.tryParseInternal(value);
+            if (parsedValue === undefined)
+                throw new Error("Invalid IMO number: " + value);
+            num = parsedValue;
         } else {
-            if (!skipVerification && !ImoNumber.isValid(value))
-                throw new Error("Invalid IMO number");
-            this._value = value;
+            num = value;
         }
+
+        if (!this.isValid(num))
+            throw new Error("Invalid IMO number: " + value);
+
+        return new ImoNumber(num);
     }
 
     public static parse(value: string): ImoNumber {
-        const imo = this.tryParse(value);
-        if (!imo) throw new Error("Invalid IMO number");
+        const imo = ImoNumber.tryParse(value);
+        if (!imo) throw new Error("Invalid IMO number: " + value);
         return imo;
     }
 
     public static tryParse(value: string): ImoNumber | undefined {
-        if (!value.startsWith("IMO")) return;
+        const num = ImoNumber.tryParseInternal(value);
+        return num !== undefined ? new ImoNumber(num) : undefined;
+    }
 
-        const num = tryParseInt(value.substring(3));
-        if (!num || !this.isValid(num)) return;
+    private static tryParseInternal(value: string): number | undefined {
+        const startsWithImo = value.startsWith("IMO");
 
-        return new ImoNumber(num);
+        const num = tryParseInt(startsWithImo ? value.substring(3) : value);
+        if (!num || !ImoNumber.isValid(num)) return;
+
+        return num;
     }
 
     public get value() {
@@ -65,6 +78,6 @@ export class ImoNumber {
     }
 
     public toString() {
-        return this._value.toString();
+        return `IMO${this._value}`;
     }
 }

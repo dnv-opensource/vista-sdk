@@ -1,11 +1,11 @@
-﻿namespace Vista.SDK.Transport.TimeSeries;
+namespace Vista.SDK.Transport.TimeSeries;
 
 public sealed record TimeSeriesDataPackage(Package Package);
 
 public sealed record Package(Header? Header, IReadOnlyList<TimeSeriesData> TimeSeriesData);
 
 public sealed record Header(
-    string ShipId,
+    ShipId ShipId,
     TimeSpan? TimeSpan,
     DateTimeOffset? DateCreated,
     DateTimeOffset? DateModified,
@@ -28,7 +28,7 @@ public sealed record TimeSeriesData(
 public sealed record TabularData(
     string? NumberOfDataSet,
     string? NumberOfDataChannel,
-    IReadOnlyList<string>? DataChannelId,
+    IReadOnlyList<DataChannelId>? DataChannelId,
     IReadOnlyList<TabularDataSet>? DataSet
 );
 
@@ -42,7 +42,7 @@ public sealed record EventData(string? NumberOfDataSet, IReadOnlyList<EventDataS
 
 public sealed record EventDataSet(
     DateTimeOffset TimeStamp,
-    string DataChannelId,
+    DataChannelId DataChannelId,
     string Value,
     string? Quality
 );

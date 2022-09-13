@@ -1,4 +1,4 @@
-﻿using Domain = Vista.SDK.Transport.TimeSeries;
+using Domain = Vista.SDK.Transport.TimeSeries;
 
 namespace Vista.SDK.Transport.Json.TimeSeriesData;
 
@@ -16,7 +16,7 @@ public static class Extensions
                         h.Author,
                         h.DateCreated,
                         h.DateModified,
-                        h.ShipId,
+                        h.ShipId.ToString(),
                         h.SystemConfiguration is null
                           ? null
                           : h.SystemConfiguration
@@ -44,7 +44,7 @@ public static class Extensions
                                             ?.Select(
                                                 d =>
                                                     new EventDataSet(
-                                                        d.DataChannelId,
+                                                        d.DataChannelId.ToString(),
                                                         d.Quality,
                                                         d.TimeStamp,
                                                         d.Value
@@ -57,7 +57,7 @@ public static class Extensions
                                     ?.Select(
                                         d =>
                                             new TabularData(
-                                                d.DataChannelId?.ToList(),
+                                                d.DataChannelId?.Select(i => i.ToString()).ToList(),
                                                 d.DataSet
                                                     ?.Select(
                                                         td =>
@@ -92,7 +92,7 @@ public static class Extensions
                 h is null
                   ? null
                   : new Domain.Header(
-                        h.ShipID,
+                        ShipId.Parse(h.ShipID),
                         h.TimeSpan is null
                           ? null
                           : new Domain.TimeSpan(h.TimeSpan.Start, h.TimeSpan.End),
@@ -120,7 +120,9 @@ public static class Extensions
                                             new Domain.TabularData(
                                                 td.NumberOfDataSet,
                                                 td.NumberOfDataChannel,
-                                                td.DataChannelID?.ToList(),
+                                                td.DataChannelID
+                                                    ?.Select(i => DataChannelId.Parse(i))
+                                                    .ToList(),
                                                 td.DataSet
                                                     ?.Select(
                                                         tds =>
@@ -143,7 +145,7 @@ public static class Extensions
                                                 ed =>
                                                     new Domain.EventDataSet(
                                                         ed.TimeStamp,
-                                                        ed.DataChannelID,
+                                                        DataChannelId.Parse(ed.DataChannelID),
                                                         ed.Value,
                                                         ed.Quality
                                                     )

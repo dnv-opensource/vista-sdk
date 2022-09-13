@@ -1,0 +1,20 @@
+{
+    "imoNumbers": [
+        { "value": "-1", "success": false, "output": null },
+        { "value": "0", "success": false, "output": null },
+        { "value": "1", "success": false , "output": null},
+        { "value": "123412034", "success": false, "output": null },
+        { "value": "1234507", "success": false, "output": null },
+
+        { "value": "9074729", "success": true, "output": "IMO9074729" },
+        { "value": "9785811", "success": true, "output": "IMO9785811" },
+        { "value": "9704611", "success": true, "output": "IMO9704611" },
+        { "value": "9368302", "success": true, "output": "IMO9368302" },
+        { "value": "9387762", "success": true, "output": "IMO9387762" },
+        { "value": "9370537", "success": true, "output": "IMO9370537" },
+        { "value": "9680102", "success": true, "output": "IMO9680102" },
+        { "value": "9735048", "success": true, "output": "IMO9735048" },
+        { "value": "9785823", "success": true, "output": "IMO9785823" },
+        { "value": "1234567", "success": true, "output": "IMO1234567" }
+    ]
+}
