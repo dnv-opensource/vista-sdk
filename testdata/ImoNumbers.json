@@ -15,6 +15,17 @@
         { "value": "9680102", "success": true, "output": "IMO9680102" },
         { "value": "9735048", "success": true, "output": "IMO9735048" },
         { "value": "9785823", "success": true, "output": "IMO9785823" },
-        { "value": "1234567", "success": true, "output": "IMO1234567" }
+        { "value": "1234567", "success": true, "output": "IMO1234567" },
+
+        { "value": "IMO9074729", "success": true, "output": "IMO9074729" },
+        { "value": "IMO9785811", "success": true, "output": "IMO9785811" },
+        { "value": "IMO9704611", "success": true, "output": "IMO9704611" },
+        { "value": "IMO9368302", "success": true, "output": "IMO9368302" },
+        { "value": "IMO9387762", "success": true, "output": "IMO9387762" },
+        { "value": "IMO9370537", "success": true, "output": "IMO9370537" },
+        { "value": "IMO9680102", "success": true, "output": "IMO9680102" },
+        { "value": "IMO9735048", "success": true, "output": "IMO9735048" },
+        { "value": "IMO9785823", "success": true, "output": "IMO9785823" },
+        { "value": "IMO1234567", "success": true, "output": "IMO1234567" }
     ]
 }
