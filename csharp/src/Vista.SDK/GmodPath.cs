@@ -100,20 +100,20 @@ public sealed record GmodPath
 
             if (!set.Add(child.Code))
                 return false;
-            if (!IsValidLocation(parent.Location))
-                return false;
+            //if (!IsValidLocation(parent.Location))
+            //    return false;
         }
-        if (!IsValidLocation(node.Location))
-            return false;
+        //if (!IsValidLocation(node.Location))
+        //    return false;
         return true;
     }
 
-    private static bool IsValidLocation(string? location)
-    {
-        if (location is null)
-            return true;
-        return !string.IsNullOrWhiteSpace(location) && Regex.IsMatch(location, "/^[A-Z0-9]/");
-    }
+    //private static bool IsValidLocation(string? location)
+    //{
+    //    if (location is null)
+    //        return true;
+    //    return !string.IsNullOrWhiteSpace(location) && Regex.IsMatch(location, "/^[A-Z0-9]/");
+    //}
 
     public GmodPath(IReadOnlyList<GmodNode> parents, GmodNode node) : this(parents, node, false) { }
 
