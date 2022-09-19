@@ -48,7 +48,7 @@ public class GmodVersioningTests
                 "1012.21/C1147.221/C1051.7/C101.661i/C624",
                 "1012.21/C1147.221/C1051.7/C101.661i/C621",
             },
-            //new string[] // Parent code change and different depth. What's correct? avoid cycle?
+            //new string[] // Parent code change and different depth, which introduced cycle
             //{
             //    "1012.22/S201.1/C151.2/S110.2/C101.61/S203.2/S101",
             //    "1012.22/S201.1/C151.2/S110.2/C101.61/S203.3/S110.1/S101",
@@ -73,7 +73,9 @@ public class GmodVersioningTests
                 "864.11/G71.21/C101.64i/S201.1/C151.31/S110.2/C111.41/G240.1/G242.2/S90.5/C401",
                 "864.11/G71.21/C101.64/S201.1/C151.31/S110.2/C111.41/G240.1/G242.2/S90.5/C401",
             },
-            new string[] { "221.31/C1141.41/C664.2/C471", "221.31/C1141.41/C664.2/C471", }
+            new string[] { "221.31/C1141.41/C664.2/C471", "221.31/C1141.41/C664.2/C471", },
+            //new string[] { "354.2/C1096", "354.2/C1096" }, // Was deleted, as path to root is gone
+            new string[] { "514/E15", "514" },
         };
 
     [Theory]
@@ -86,6 +88,7 @@ public class GmodVersioningTests
         var sourcePath = GmodPath.Parse(inputPath, gmod);
         var parsedPath = targetGmod.TryParsePath(expectedPath, out var parsedTargetPath);
         var targetPath = VIS.Instance.ConvertPath(VisVersion.v3_4a, sourcePath, VisVersion.v3_5a);
+        Assert.NotNull(targetPath);
 
         var nodesWithLocation = sourcePath
             .GetFullPath()

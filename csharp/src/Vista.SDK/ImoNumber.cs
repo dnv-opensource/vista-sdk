@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Vista.SDK;
 
@@ -19,10 +19,8 @@ public readonly record struct ImoNumber
             throw new ArgumentException("Invalid IMO number: " + value.ToString());
     }
 
-    private ImoNumber(int value, bool skipValidate)
+    private ImoNumber(int value, bool _) // Just to disambiguate from the public constructor
     {
-        if (!skipValidate && !IsValid(value))
-            throw new ArgumentException("Invalid IMO number: " + value);
         _value = value;
     }
 
@@ -52,7 +50,7 @@ public readonly record struct ImoNumber
         if (num == 0 || !IsValid(num))
             return false;
 
-        imoNumber = new ImoNumber(num, true);
+        imoNumber = new ImoNumber(num, default);
 
         return true;
     }

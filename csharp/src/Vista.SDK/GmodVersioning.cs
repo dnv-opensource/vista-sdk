@@ -96,17 +96,6 @@ internal sealed class GmodVersioning
             if (i > 0 && qualifyingNode.TargetNode.Code == qualifyingNodes[i - 1].TargetNode.Code)
                 continue;
 
-            // path - s101
-            // newPath - converted(s101)
-
-            //  for each node in path, var currNode
-            //
-            //      code change
-            //      ANDOR normal assingment change
-            //      ANDOR selection change
-            //
-            //      guarantee converted(currNode)
-
             var codeChanged = qualifyingNode.SourceNode.Code != qualifyingNode.TargetNode.Code;
 
             var sourceNormalAssignment = qualifyingNode.SourceNode.ProductType;
@@ -171,7 +160,11 @@ internal sealed class GmodVersioning
                 if (wasDeleted)
                 {
                     if (qualifyingNode.TargetNode.Code == targetEndNode.Code)
-                        throw new Exception("Normal assignment end node was deleted");
+                    {
+                        var next = qualifyingNodes[i + 1];
+                        if (next.TargetNode.Code != qualifyingNode.TargetNode.Code)
+                            throw new Exception("Normal assignment end node was deleted");
+                    }
                     i++;
                 }
                 else if (qualifyingNode.TargetNode.Code != targetEndNode.Code)
