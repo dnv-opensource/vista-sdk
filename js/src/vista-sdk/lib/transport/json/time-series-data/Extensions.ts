@@ -1,4 +1,3 @@
-import { Defaults, VIS } from "../../..";
 import { DataChannelId, ShipId, TimeSeries } from "../../domain";
 import { TimeSeriesDto } from "./TimeSeriesData";
 

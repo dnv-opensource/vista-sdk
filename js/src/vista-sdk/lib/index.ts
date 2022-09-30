@@ -19,7 +19,6 @@ import { GmodNodeMetadata } from "./types/GmodNode";
 import { ParsingState } from "./types/LocalId";
 import { PmodInfo } from "./types/Pmod";
 import { Client } from "./Client";
-import { Defaults } from "./Defaults";
 import { PmodNode } from "./PmodNode";
 import { UniversalIdParser } from "./UniversalId.Parsing";
 import {
@@ -61,8 +60,6 @@ export { Gmod, GmodNode, GmodPath };
 export { Pmod, PmodNode };
 // Client
 export { Client };
-// Defaults
-export { Defaults };
 
 // Transport
 export {
