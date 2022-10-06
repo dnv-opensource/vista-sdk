@@ -1,40 +1,27 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
-using Vista.SDK;
+namespace Vista.SDK.Tests;
 
-namespace Vista.SDK.Tests
+public class CodebooksTests
 {
-    public class CodebooksTests
+    [Fact]
+    public void Test_Codebooks_Loads()
     {
-        public static (IServiceProvider ServiceProvider, IVIS Vis) GetVis()
-        {
-            var services = new ServiceCollection();
-            services.AddVIS();
-            var sp = services.BuildServiceProvider();
+        var (_, vis) = VISTests.GetVis();
 
-            var vis = sp.GetRequiredService<IVIS>();
-            return (sp, vis);
-        }
+        var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
+        Assert.NotNull(codebooks);
 
-        [Fact]
-        public void Test_Codebooks_Loads()
-        {
-            var (_, vis) = GetVis();
+        Assert.NotNull(codebooks.GetCodebook(CodebookName.Position));
+    }
 
-            var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
-            Assert.NotNull(codebooks);
+    [Fact]
+    public void Test_Codebooks_Equality()
+    {
+        var (_, vis) = VISTests.GetVis();
 
-            Assert.NotNull(codebooks.GetCodebook(CodebookName.Position));
-        }
+        var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
 
-        [Fact]
-        public void Test_Codebooks_Equality()
-        {
-            var (_, vis) = GetVis();
-
-            var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
-
-            Assert.True(codebooks[CodebookName.Position].HasStandardValue("centre"));
-        }
+        Assert.True(codebooks[CodebookName.Position].HasStandardValue("centre"));
     }
 }

@@ -8,6 +8,8 @@ public interface IVIS
 
     Codebooks GetCodebooks(VisVersion visversion);
 
+    Locations GetLocations(VisVersion visversion);
+
     IReadOnlyDictionary<VisVersion, Codebooks> GetCodebooksMap(IEnumerable<VisVersion> visVersions);
 
     IReadOnlyDictionary<VisVersion, Gmod> GetGmodsMap(IEnumerable<VisVersion> visVersions);
@@ -32,6 +34,8 @@ public sealed class VIS : IVIS
     private readonly MemoryCache _gmodCache;
     private readonly MemoryCache _codebooksDtoCache;
     private readonly MemoryCache _codebooksCache;
+    private readonly MemoryCache _locationsDtoCache;
+    private readonly MemoryCache _locationsCache;
     private readonly MemoryCache _gmodVersioningDtoCache;
     private readonly MemoryCache _gmodVersioningCache;
     private const string _versioning = "versioning";
@@ -68,6 +72,21 @@ public sealed class VIS : IVIS
                 ExpirationScanFrequency = TimeSpan.FromHours(1),
             }
         );
+        _locationsDtoCache = new MemoryCache(
+            new MemoryCacheOptions
+            {
+                SizeLimit = 10,
+                ExpirationScanFrequency = TimeSpan.FromHours(1),
+            }
+        );
+        _locationsCache = new MemoryCache(
+            new MemoryCacheOptions
+            {
+                SizeLimit = 10,
+                ExpirationScanFrequency = TimeSpan.FromHours(1),
+            }
+        );
+
         _gmodVersioningDtoCache = new MemoryCache(
             new MemoryCacheOptions
             {
@@ -220,6 +239,41 @@ public sealed class VIS : IVIS
         var codebooks = versions.Select(v => (Version: v, Codebooks: GetCodebooks(v))).ToArray();
 
         return codebooks.ToDictionary(t => t.Version, t => t.Codebooks);
+    }
+
+    private LocationsDto GetLocationsDto(VisVersion visVersion)
+    {
+        return _locationsDtoCache.GetOrCreate(
+            visVersion,
+            entry =>
+            {
+                entry.Size = 1;
+                entry.SlidingExpiration = TimeSpan.FromHours(1);
+
+                var dto = EmbeddedResource.GetLocations(visVersion.ToVersionString());
+
+                if (dto is null)
+                    throw new Exception("Invalid state");
+
+                return dto;
+            }
+        );
+    }
+
+    public Locations GetLocations(VisVersion visversion)
+    {
+        return _locationsCache.GetOrCreate(
+            visversion,
+            entry =>
+            {
+                entry.Size = 1;
+                entry.SlidingExpiration = TimeSpan.FromHours(1);
+
+                var dto = GetLocationsDto(visversion);
+
+                return new Locations(visversion, dto);
+            }
+        );
     }
 
     public IEnumerable<VisVersion> GetVisVersions()
