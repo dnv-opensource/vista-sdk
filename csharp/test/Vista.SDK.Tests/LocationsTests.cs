@@ -30,8 +30,10 @@ public class LocationsTests
 
         var node = gmod[code] with { Location = location };
 
-        var validLocation = locations.IsValid(node);
+        var validLocation = locations.IsValid(node.Location);
 
         Assert.Equal(isValid, validLocation);
     }
+
+    
 }
