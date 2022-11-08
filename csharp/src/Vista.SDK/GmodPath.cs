@@ -66,10 +66,8 @@ public sealed record GmodPath
         Node = node;
     }
 
-    public static bool IsValid(
-        IReadOnlyList<GmodNode> parents,
-        GmodNode node
-    ) => IsValid(parents, node, out _);
+    public static bool IsValid(IReadOnlyList<GmodNode> parents, GmodNode node) =>
+        IsValid(parents, node, out _);
 
     internal static bool IsValid(
         IReadOnlyList<GmodNode> parents,
@@ -102,7 +100,6 @@ public sealed record GmodPath
 
             if (!set.Add(child.Code))
                 return false;
-
         }
         return true;
     }
@@ -318,12 +315,12 @@ public sealed record GmodPath
         }
     }
 
-    private readonly record struct PathNode(string Code, string? Location = null);
+    private readonly record struct PathNode(string Code, Location? Location = null);
 
     private sealed record ParseContext(Queue<PathNode> Parts)
     {
         public PathNode ToFind;
-        public Dictionary<string, string>? Locations;
+        public Dictionary<string, Location?>? Locations;
         public GmodPath? Path;
     }
 
@@ -349,7 +346,7 @@ public sealed record GmodPath
             if (partStr.Contains('-'))
             {
                 var split = partStr.Split('-');
-                parts.Enqueue(new PathNode(split[0], split[1]));
+                parts.Enqueue(new PathNode(split[0], new Location(split[1])));
             }
             else
             {

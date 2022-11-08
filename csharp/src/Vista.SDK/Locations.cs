@@ -1,15 +1,15 @@
-using System.Collections;
-
 namespace Vista.SDK;
 
 public readonly record struct Location
 {
-    private readonly string _value;
+    private readonly string? _value;
 
-    internal Location(string value)
+    internal Location(string? value)
     {
         _value = value;
     }
+
+    public readonly override string? ToString() => _value;
 }
 
 public sealed class Locations
@@ -70,13 +70,22 @@ public sealed class Locations
         return true;
     }
 
-    public bool TryParse(string value, out Location location)
+    public Location? TryCreateLocation(string? value)
     {
-        location = default;
         if (!IsValid(value))
-            return false;
-        location = new Location(value); 
-        return true;
+            return null;
+
+        return new Location(value);
+    }
+
+    public Location CreateLocation(string? value)
+    {
+        var location = TryCreateLocation(value);
+
+        if (location is null)
+            throw new ArgumentException($"Invalid value for location: {value}");
+
+        return location.Value;
     }
 }
 

@@ -1,12 +1,11 @@
-﻿using System.Text;
+using System.Text;
 
 namespace Vista.SDK;
 
 public record class GmodNode
 {
     public string Code { get; init; }
-
-    public string? Location { get; init; }
+    public Location? Location { get; init; }
 
     public GmodNodeMetadata Metadata { get; }
 
@@ -35,6 +34,8 @@ public record class GmodNode
     }
 
     public GmodNode WithoutLocation() => Location is null ? this : this with { Location = null };
+
+    public GmodNode WithLocation(Location? location) => this with { Location = location };
 
     public bool IsMappable
     {
