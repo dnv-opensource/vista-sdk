@@ -5,7 +5,7 @@ namespace Vista.SDK;
 public record class GmodNode
 {
     public string Code { get; init; }
-    public Location? Location { get; internal init; }
+    public Location? Location { get; private init; }
 
     public VisVersion VisVersion { get; }
 
@@ -38,14 +38,32 @@ public record class GmodNode
 
     public GmodNode WithoutLocation() => Location is null ? this : this with { Location = null };
 
-    public GmodNode WithLocation(string? value)
+    public GmodNode WithLocation(string location)
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
 
         return this with
         {
-            Location = locations.TryCreateLocation(value)
+            Location = locations.CreateLocation(location)
         };
+    }
+
+    public GmodNode TryWithLocation(string? location)
+    {
+        if (string.IsNullOrWhiteSpace(location))
+            return this;
+
+        var locations = VIS.Instance.GetLocations(VisVersion);
+        return this with { Location = locations.TryCreateLocation(location) };
+    }
+
+    public GmodNode WithLocation(in Location location) => this with { Location = location };
+
+    public GmodNode TryWithLocation(in Location? location)
+    {
+        if (location is null)
+            return this;
+        return WithLocation(location.Value);
     }
 
     public bool IsMappable

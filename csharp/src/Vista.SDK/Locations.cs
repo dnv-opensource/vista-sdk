@@ -2,16 +2,16 @@ namespace Vista.SDK;
 
 public readonly record struct Location
 {
-    public readonly string? Value { get; private init; }
+    public readonly string Value { get; private init; }
 
-    internal Location(string? value)
+    internal Location(string value)
     {
         Value = value;
     }
 
-    public readonly override string? ToString() => Value;
+    public readonly override string ToString() => Value;
 
-    public static implicit operator string?(Location n) => n.Value;
+    public static implicit operator string(Location n) => n.Value;
 }
 
 public sealed class Locations
@@ -46,21 +46,21 @@ public sealed class Locations
     public bool IsValid(string? location)
     {
         if (location is null || string.IsNullOrWhiteSpace(location))
-            return true;
+            return false;
 
         if (location.Trim().Length != location.Length)
             return false;
 
         var locationWithoutNumber = location.Where(l => !char.IsDigit(l)).ToList();
+
         var invalidLocationCode = locationWithoutNumber.Any(
             l => !_locationCodes.Contains(l) || l == 'N'
         );
         if (invalidLocationCode)
             return false;
 
-        var numberNotAtStart = location
-            .Where((lValue, lIndex) => int.TryParse(lValue.ToString(), out _) && lIndex > 0)
-            .Any();
+        var numberNotAtStart =
+            location.Any(l => char.IsDigit(l)) && !int.TryParse(location[0].ToString(), out _);
 
         var alphabeticallySorted = locationWithoutNumber.OrderBy(l => l).ToList();
         var notAlphabeticallySorted = !locationWithoutNumber.SequenceEqual(alphabeticallySorted);
@@ -77,10 +77,10 @@ public sealed class Locations
         if (!IsValid(value))
             return null;
 
-        return new Location(value);
+        return new Location(value!);
     }
 
-    public Location CreateLocation(string? value)
+    public Location CreateLocation(string value)
     {
         var location = TryCreateLocation(value);
         if (location is null)
