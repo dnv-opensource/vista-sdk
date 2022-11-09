@@ -315,12 +315,12 @@ public sealed record GmodPath
         }
     }
 
-    private readonly record struct PathNode(string Code, Location? Location = null);
+    private readonly record struct PathNode(string Code, string? Location = null);
 
     private sealed record ParseContext(Queue<PathNode> Parts)
     {
         public PathNode ToFind;
-        public Dictionary<string, Location?>? Locations;
+        public Dictionary<string, string>? Locations;
         public GmodPath? Path;
     }
 
@@ -346,7 +346,7 @@ public sealed record GmodPath
             if (partStr.Contains('-'))
             {
                 var split = partStr.Split('-');
-                parts.Enqueue(new PathNode(split[0], new Location(split[1])));
+                parts.Enqueue(new PathNode(split[0], split[1]));
             }
             else
             {
@@ -395,15 +395,12 @@ public sealed record GmodPath
                 foreach (var parent in parents)
                 {
                     if (context.Locations?.TryGetValue(parent.Code, out var location) ?? false)
-                        pathParents.Add(parent with { Location = location });
+                        pathParents.Add(parent.WithLocation(location));
                     else
                         pathParents.Add(parent);
                 }
                 var endNode = toFind.Location is not null
-                    ? current with
-                      {
-                          Location = toFind.Location
-                      }
+                    ? current.WithLocation(toFind.Location)
                     : current;
 
                 var startNode =

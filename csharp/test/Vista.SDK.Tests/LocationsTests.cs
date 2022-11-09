@@ -36,11 +36,10 @@ public class LocationsTests
         var (_, vis) = VISTests.GetVis();
 
         var gmod = vis.GetGmod(VisVersion.v3_4a);
-        var locations = vis.GetLocations(VisVersion.v3_5a);
 
-        var node1 = gmod["C101.663"].WithLocation(locations.CreateLocation("FIPU"));
+        var node1 = gmod["C101.663"].WithLocation("FIPU");
 
-        var node2 = gmod["C101.663"].WithLocation(locations.CreateLocation("FIPU"));
+        var node2 = gmod["C101.663"].WithLocation("FIPU");
 
         Assert.Equal(node1, node2);
         Assert.NotSame(node1, node2);

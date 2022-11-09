@@ -2,14 +2,16 @@ namespace Vista.SDK;
 
 public readonly record struct Location
 {
-    private readonly string? _value;
+    public readonly string? Value { get; private init; }
 
     internal Location(string? value)
     {
-        _value = value;
+        Value = value;
     }
 
-    public readonly override string? ToString() => _value;
+    public readonly override string? ToString() => Value;
+
+    public static implicit operator string?(Location n) => n.Value;
 }
 
 public sealed class Locations
@@ -43,7 +45,7 @@ public sealed class Locations
 
     public bool IsValid(string? location)
     {
-        if (location is null)
+        if (location is null || string.IsNullOrWhiteSpace(location))
             return true;
 
         if (location.Trim().Length != location.Length)
@@ -81,7 +83,6 @@ public sealed class Locations
     public Location CreateLocation(string? value)
     {
         var location = TryCreateLocation(value);
-
         if (location is null)
             throw new ArgumentException($"Invalid value for location: {value}");
 

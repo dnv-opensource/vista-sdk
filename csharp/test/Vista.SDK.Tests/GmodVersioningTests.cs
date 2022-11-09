@@ -180,12 +180,9 @@ public class GmodVersioningTests
 
         var gmod = vis.GetGmod(VisVersion.v3_4a);
         var targetGmod = vis.GetGmod(VisVersion.v3_5a);
-        var locations = vis.GetLocations(VisVersion.v3_4a);
 
-        var sourceNode = gmod[inputCode].WithLocation(locations.CreateLocation(location));
-        var expectedNode = targetGmod[expectedCode].WithLocation(
-            locations.CreateLocation(location)
-        );
+        var sourceNode = gmod[inputCode].WithLocation(location);
+        var expectedNode = targetGmod[expectedCode].WithLocation(location);
 
         var targetNode = vis.ConvertNode(VisVersion.v3_4a, sourceNode, VisVersion.v3_5a);
 
