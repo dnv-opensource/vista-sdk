@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Vista.SDK;
@@ -54,7 +54,7 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
         foreach (var nodeDto in dto.Items)
         {
-            var node = new GmodNode(nodeDto);
+            var node = new GmodNode(VisVersion, nodeDto);
             _nodeMap.Add(nodeDto.Code, node);
         }
 

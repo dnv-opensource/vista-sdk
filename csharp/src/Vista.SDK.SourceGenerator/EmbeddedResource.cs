@@ -1,4 +1,4 @@
-﻿// Copyright @kzu
+// Copyright @kzu
 // License MIT
 // copied from https://github.com/devlooped/ThisAssembly/blob/main/src/EmbeddedResource.cs
 
@@ -110,5 +110,22 @@ internal static class EmbeddedResource
         using var stream = GetDecompressedStream(assembly, gmodVersioningResourceName);
 
         return JsonSerializer.Deserialize<GmodVersioningDto>(stream);
+    }
+
+    internal static LocationsDto? GetLocations(string visVersion)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var locationsResourceName = GetResourceNames(assembly)
+            .Where(x => x.Contains("locations") && x.EndsWith(".gz"))
+            .Where(x => x.Contains(visVersion))
+            .SingleOrDefault();
+
+        if (locationsResourceName is null)
+            return null;
+
+        using var stream = GetDecompressedStream(assembly, locationsResourceName);
+
+        return JsonSerializer.Deserialize<LocationsDto>(stream);
     }
 }

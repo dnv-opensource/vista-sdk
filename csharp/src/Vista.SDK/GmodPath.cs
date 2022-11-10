@@ -100,20 +100,9 @@ public sealed record GmodPath
 
             if (!set.Add(child.Code))
                 return false;
-            //if (!IsValidLocation(parent.Location))
-            //    return false;
         }
-        //if (!IsValidLocation(node.Location))
-        //    return false;
         return true;
     }
-
-    //private static bool IsValidLocation(string? location)
-    //{
-    //    if (location is null)
-    //        return true;
-    //    return !string.IsNullOrWhiteSpace(location) && Regex.IsMatch(location, "/^[A-Z0-9]/");
-    //}
 
     public GmodPath(IReadOnlyList<GmodNode> parents, GmodNode node) : this(parents, node, false) { }
 
@@ -406,15 +395,12 @@ public sealed record GmodPath
                 foreach (var parent in parents)
                 {
                     if (context.Locations?.TryGetValue(parent.Code, out var location) ?? false)
-                        pathParents.Add(parent with { Location = location });
+                        pathParents.Add(parent.WithLocation(location));
                     else
                         pathParents.Add(parent);
                 }
                 var endNode = toFind.Location is not null
-                    ? current with
-                      {
-                          Location = toFind.Location
-                      }
+                    ? current.WithLocation(toFind.Location)
                     : current;
 
                 var startNode =

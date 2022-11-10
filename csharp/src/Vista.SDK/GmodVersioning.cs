@@ -44,11 +44,7 @@ internal sealed class GmodVersioning
 
         if (!gmod.TryGetNode(nextCode, out var targetNode))
             return null;
-
-        return targetNode with
-        {
-            Location = sourceNode.Location
-        };
+        return targetNode.TryWithLocation(sourceNode.Location);
     }
 
     public LocalIdBuilder? ConvertLocalId(LocalIdBuilder sourceLocalId, VisVersion targetVersion)

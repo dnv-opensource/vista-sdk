@@ -34,7 +34,7 @@ internal readonly record struct LocalIdItems
                 {
                     builder.Append('~');
                     var location = PrimaryItem[depth].Location;
-                    AppendCommonName(builder, name, location);
+                    AppendCommonName(builder, name, location?.ToString());
                     builder.Append('/');
                 }
             }
@@ -49,7 +49,7 @@ internal readonly record struct LocalIdItems
                         prefix = "~";
 
                     var location = SecondaryItem[depth].Location;
-                    AppendCommonName(builder, name, location);
+                    AppendCommonName(builder, name, location?.ToString());
                     builder.Append('/');
                 }
             }

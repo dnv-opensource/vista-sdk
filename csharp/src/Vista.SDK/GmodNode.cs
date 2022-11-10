@@ -1,12 +1,13 @@
-﻿using System.Text;
+using System.Text;
 
 namespace Vista.SDK;
 
 public record class GmodNode
 {
     public string Code { get; init; }
+    public Location? Location { get; private init; }
 
-    public string? Location { get; init; }
+    public VisVersion VisVersion { get; }
 
     public GmodNodeMetadata Metadata { get; }
 
@@ -17,8 +18,9 @@ public record class GmodNode
 
     public IReadOnlyList<GmodNode> Parents => _parents;
 
-    internal GmodNode(GmodNodeDto dto)
+    internal GmodNode(VisVersion version, GmodNodeDto dto)
     {
+        VisVersion = version;
         Code = dto.Code;
         Metadata = new(
             dto.Category,
@@ -35,6 +37,34 @@ public record class GmodNode
     }
 
     public GmodNode WithoutLocation() => Location is null ? this : this with { Location = null };
+
+    public GmodNode WithLocation(string location)
+    {
+        var locations = VIS.Instance.GetLocations(VisVersion);
+
+        return this with
+        {
+            Location = locations.CreateLocation(location)
+        };
+    }
+
+    public GmodNode TryWithLocation(string? location)
+    {
+        if (string.IsNullOrWhiteSpace(location))
+            return this;
+
+        var locations = VIS.Instance.GetLocations(VisVersion);
+        return this with { Location = locations.TryCreateLocation(location) };
+    }
+
+    public GmodNode WithLocation(in Location location) => this with { Location = location };
+
+    public GmodNode TryWithLocation(in Location? location)
+    {
+        if (location is null)
+            return this;
+        return WithLocation(location.Value);
+    }
 
     public bool IsMappable
     {

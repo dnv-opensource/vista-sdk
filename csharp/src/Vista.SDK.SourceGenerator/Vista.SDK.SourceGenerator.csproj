@@ -30,6 +30,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Include="..\Vista.SDK\LocationsDto.cs">
+          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Include="..\Vista.SDK\GmodVersioningDto.cs">
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
         </Compile>

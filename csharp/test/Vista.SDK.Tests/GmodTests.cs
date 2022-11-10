@@ -1,4 +1,4 @@
-﻿using Vista.SDK;
+using Vista.SDK;
 
 namespace Vista.SDK.Tests;
 
@@ -29,7 +29,7 @@ public class GmodTests
         Assert.Equal(node1, node2);
         Assert.Same(node1, node2);
 
-        var node3 = node2 with { Location = "1" };
+        var node3 = node2.WithLocation("1");
         Assert.NotEqual(node1, node3);
         Assert.NotSame(node1, node3);
 
