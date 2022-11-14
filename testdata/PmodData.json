@@ -1139,7 +1139,7 @@
         "/dnv-v2/vis-3-4a/1014.211-1S/S110/meta/cmd-start",
         "/dnv-v2/vis-3-4a/1014.211-1S/S110/meta/cmd-stop",
         "/dnv-v2/vis-3-4a/1014.211-1S/S110.2/E31/meta/cmd-trip",
-        "/dnv-v2/vis-3-4a/1014.211-2p/S110.2/E31/meta/qty-electric.current/state-low/cmd-trip",
+        "/dnv-v2/vis-3-4a/1014.211-2P/S110.2/E31/meta/qty-electric.current/state-low/cmd-trip",
         "/dnv-v2/vis-3-4a/1021.31-2P/H203/meta/cmd-shut.down",
         "/dnv-v2/vis-3-4a/1021.31-2P/H203/meta/cmd-auto.stop",
         "/dnv-v2/vis-3-4a/1014.211-2P/S110.1/S101/meta/cmd-start",

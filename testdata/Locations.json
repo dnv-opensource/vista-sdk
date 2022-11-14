@@ -1,0 +1,12 @@
+{
+    "locations": [
+        { "value": "0", "success": true, "output": "0" },
+        { "value": "FIPU", "success": true, "output": "FIPU" },
+        { "value": "1FIPU", "success": true, "output": "1FIPU" },
+        { "value": "F1IPU", "success": false, "output": null },
+        { "value": "1IFPU", "success": false, "output": null },
+        { "value": "I1FPU", "success": false, "output": null },
+        { "value": "1aFPU", "success": false, "output": null },
+        { "value": "1BFPU", "success": false, "output": null }
+    ]
+}
