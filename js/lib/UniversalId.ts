@@ -1,4 +1,5 @@
 import { Gmod, Codebooks, LocalIdParsingErrorBuilder, LocalId } from ".";
+import { Locations } from "./Location";
 import { UniversalIdBuilder } from "./UniversalId.Builder";
 
 export class UniversalId {
@@ -36,10 +37,17 @@ export class UniversalId {
         universalId: string,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         return new UniversalId(
-            UniversalIdBuilder.parse(universalId, gmod, codebooks, errorBuilder)
+            UniversalIdBuilder.parse(
+                universalId,
+                gmod,
+                codebooks,
+                locations,
+                errorBuilder
+            )
         );
     }
 

@@ -6,6 +6,7 @@ describe("Gmod", () => {
     const vis = VIS.instance;
     const version = VisVersion.v3_4a;
     const gmodPromise = vis.getGmod(version);
+    const locationsPromise = vis.getLocations(version);
 
     test("Gmod loads", async () => {
         const gmod = await gmodPromise;
@@ -16,6 +17,7 @@ describe("Gmod", () => {
 
     test("Gmod node equality", async () => {
         const gmod = await gmodPromise;
+        const locations = await locationsPromise;
 
         const node1 = gmod.getNode("400a");
         const node2 = gmod.getNode("400a");
@@ -23,7 +25,7 @@ describe("Gmod", () => {
         expect(node1).toEqual(node2);
         expect(node1).toBe(node2);
 
-        const node3 = node2.withLocation("1");
+        const node3 = node2.withLocation("1", locations);
         expect(node1).not.toEqual(node3);
         expect(node1).not.toBe(node3);
 

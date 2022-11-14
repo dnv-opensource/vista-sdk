@@ -26,7 +26,11 @@ export class LocalIdItems {
                 } of this.primaryItem.getCommonNames()) {
                     builder.push("~");
                     const location = this.primaryItem.getNode(depth).location;
-                    LocalIdItems.appendCommonName(builder, name, location);
+                    LocalIdItems.appendCommonName(
+                        builder,
+                        name,
+                        location?.toString()
+                    );
                     builder.push("/");
                 }
             }
@@ -40,7 +44,11 @@ export class LocalIdItems {
                     builder.push(prefix);
                     if (prefix !== "~") prefix = "~";
                     const location = this.secondaryItem.getNode(depth).location;
-                    LocalIdItems.appendCommonName(builder, name, location);
+                    LocalIdItems.appendCommonName(
+                        builder,
+                        name,
+                        location?.toString()
+                    );
                     builder.push("/");
                 }
             }

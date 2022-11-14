@@ -63,6 +63,7 @@ export class PmodNode {
         return new PmodNode(
             GmodNode.create(
                 id,
+                this._node.visVersion,
                 this._node.code,
                 this._node.metadata,
                 this._node.location,

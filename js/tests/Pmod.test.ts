@@ -6,13 +6,15 @@ describe("Pmod", () => {
     const version = VisVersion.v3_4a;
     const gmodPromise = vis.getGmod(version);
     const codebooksPromise = vis.getCodebooks(version);
+    const locationsPromise = vis.getLocations(version);
 
     test("From LocalIds", async () => {
         const gmod = await gmodPromise;
         const codeBooks = await codebooksPromise;
+        const locations = await locationsPromise;
 
         const localIds = testData.localIds.map((localIdStr) =>
-            LocalId.parse(localIdStr, gmod, codeBooks)
+            LocalId.parse(localIdStr, gmod, codeBooks, locations)
         );
 
         const maxDepth = Math.max(

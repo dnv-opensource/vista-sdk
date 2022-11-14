@@ -6,6 +6,7 @@ import { GmodPath } from "./GmodPath";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { parseVisVersion } from "./internal/Parsing";
 import { LocalIdBuilder } from "./LocalId.Builder";
+import { Locations } from "./Location";
 import { MetadataTag } from "./MetadataTag";
 import { ParsingState } from "./types/LocalId";
 import { isNullOrWhiteSpace } from "./util/util";
@@ -28,12 +29,14 @@ export class LocalIdParser {
         localIdStr: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ): LocalIdBuilder {
         const localId = LocalIdParser.tryParse(
             localIdStr,
             gmod,
             codebooks,
+            locations,
             errorBuilder
         );
         if (!localId)
@@ -56,6 +59,7 @@ export class LocalIdParser {
         localIdStr: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ): LocalIdBuilder | undefined {
         if (!localIdStr || isNullOrWhiteSpace(localIdStr))
@@ -186,7 +190,10 @@ export class LocalIdParser {
                                     context.i - 1
                                 ); // context.i - 1
 
-                                const gmodPath = gmod.tryParsePath(path);
+                                const gmodPath = gmod.tryParsePath(
+                                    path,
+                                    locations
+                                );
                                 if (gmodPath === undefined) {
                                     // Displays the full GmodPath when first part of PrimaryItem is invalid
                                     errorBuilder?.push({
@@ -355,7 +362,10 @@ export class LocalIdParser {
                                     secondaryItemStart,
                                     context.i - 1
                                 );
-                                const gmodPath = gmod.tryParsePath(path);
+                                const gmodPath = gmod.tryParsePath(
+                                    path,
+                                    locations
+                                );
                                 if (gmodPath === undefined) {
                                     // Displays the full GmodPath when first part of SecondaryItem is invalid
                                     invalidSecondaryItem = true;
@@ -653,7 +663,7 @@ export class LocalIdParser {
             errorBuilder?.push({
                 type: ParsingState.Completeness,
                 message:
-                "No metadata tags specified. Local IDs require atleast 1 metadata tag.",
+                    "No metadata tags specified. Local IDs require atleast 1 metadata tag.",
             });
         }
 
@@ -667,13 +677,19 @@ export class LocalIdParser {
         errorBuilder?: LocalIdParsingErrorBuilder
     ): Promise<LocalIdBuilder | undefined> {
         const version = parseVisVersion(localIdStr, errorBuilder);
-        if (!version)
-            return;
+        if (!version) return;
 
         const gmod = await VIS.instance.getGmod(version);
         const codebooks = await VIS.instance.getCodebooks(version);
+        const locations = await VIS.instance.getLocations(version);
 
-        return this.tryParse(localIdStr, gmod, codebooks, errorBuilder);
+        return this.tryParse(
+            localIdStr,
+            gmod,
+            codebooks,
+            locations,
+            errorBuilder
+        );
     }
 
     private static parseMetatag(

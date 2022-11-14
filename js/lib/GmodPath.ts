@@ -1,6 +1,7 @@
 import { VIS, VisVersion } from ".";
 import { Gmod } from "./Gmod";
 import { GmodNode } from "./GmodNode";
+import { Locations } from "./Location";
 import { TraversalHandlerResult } from "./types/Gmod";
 import { PathNode, ParseContext } from "./types/GmodPath";
 import { isNullOrWhiteSpace } from "./util/util";
@@ -161,8 +162,12 @@ export class GmodPath {
         }
         return commonNames;
     }
-    public static parse(item: string, gmod: Gmod): GmodPath {
-        const path = this.tryParse(item, gmod);
+    public static parse(
+        item: string,
+        locations: Locations,
+        gmod: Gmod
+    ): GmodPath {
+        const path = this.tryParse(item, locations, gmod);
         if (!path) throw new Error("Couldnt parse GmodPath from item");
 
         return path;
@@ -170,10 +175,11 @@ export class GmodPath {
 
     public static tryParse(
         item: string | undefined,
+        locations: Locations,
         gmod: Gmod
     ): GmodPath | undefined {
         const ERROR_IDENTIFIER = "GModPath - TryParse: ";
-        if (!item || !gmod) return;
+        if (!item || !gmod || !locations) return;
         if (isNullOrWhiteSpace(item)) return;
 
         item = item.trim();
@@ -232,14 +238,16 @@ export class GmodPath {
                 for (const parent of parents) {
                     const location = context.locations.get(parent.code);
                     if (location) {
-                        pathParents.push(parent.withLocation(location));
+                        pathParents.push(
+                            parent.withLocation(location, locations)
+                        );
                     } else {
                         pathParents.push(parent);
                     }
                 }
 
                 const endNode = toFind.location
-                    ? current.withLocation(toFind.location)
+                    ? current.withLocation(toFind.location, locations)
                     : current;
 
                 let startNode =
@@ -334,8 +342,9 @@ export class GmodPath {
 
     public static async tryParseAsync(item: string, visVersion: VisVersion) {
         const gmod = await VIS.instance.getGmod(visVersion);
+        const locations = await VIS.instance.getLocations(visVersion);
 
-        return this.tryParse(item, gmod);
+        return this.tryParse(item, locations, gmod);
     }
 
     public static async tryParseFromFullPathAsync(
@@ -347,18 +356,18 @@ export class GmodPath {
         return this.tryParseFromFullPath(item, gmod);
     }
 
-    public isValid(): boolean {
-        // so far only validates the location
-        return (
-            this.isValidLocation(this.node.location) &&
-            !this.parents.find((p) => !this.isValidLocation(p.location))
-        );
-    }
+    // public isValid(): boolean {
+    //     // so far only validates the location
+    //     return (
+    //         this.isValidLocation(this.node.location) &&
+    //         !this.parents.find((p) => !this.isValidLocation(p.location))
+    //     );
+    // }
 
-    private isValidLocation(location?: string): boolean {
-        if (!location) return true;
-        return !isNullOrWhiteSpace(location) && /^[A-Z0-9]/g.test(location);
-    }
+    // private isValidLocation(location?: string): boolean {
+    //     if (!location) return true;
+    //     return !isNullOrWhiteSpace(location) && /^[A-Z0-9]/g.test(location);
+    // }
 
     public clone(): GmodPath {
         return new GmodPath(

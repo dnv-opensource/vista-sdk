@@ -2,6 +2,7 @@ import { Codebooks, Gmod, UniversalId } from ".";
 import { ImoNumber } from "./ImoNumber";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { LocalIdBuilder } from "./LocalId.Builder";
+import { Locations } from "./Location";
 import { ParsingState } from "./types/LocalId";
 import { UniversalIdParser } from "./UniversalId.Parsing";
 import { VisVersion } from "./VisVersion";
@@ -54,12 +55,14 @@ export class UniversalIdBuilder {
         universalId: string,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         return UniversalIdParser.parse(
             universalId,
             gmod,
             codebooks,
+            locations,
             errorBuilder
         );
     }
@@ -75,12 +78,14 @@ export class UniversalIdBuilder {
         universalId: string,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ): UniversalIdBuilder | undefined {
         return UniversalIdParser.tryParse(
             universalId,
             gmod,
             codebooks,
+            locations,
             errorBuilder
         );
     }

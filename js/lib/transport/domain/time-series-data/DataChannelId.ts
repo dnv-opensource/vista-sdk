@@ -5,6 +5,7 @@ import {
     LocalIdBuilder,
     LocalIdParsingErrorBuilder,
 } from "../../..";
+import { Locations } from "../../../Location";
 import { isNullOrWhiteSpace } from "../../../util/util";
 
 export class DataChannelId {
@@ -83,6 +84,7 @@ export class DataChannelId {
         value: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ): DataChannelId {
         if (isNullOrWhiteSpace(value))
@@ -95,6 +97,7 @@ export class DataChannelId {
                 value,
                 gmod,
                 codebooks,
+                locations,
                 errorBuilder
             ))
         ) {

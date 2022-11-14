@@ -9,18 +9,21 @@ import {
     VIS,
 } from ".";
 import { parseVisVersion } from "./internal/Parsing";
+import { Locations } from "./Location";
 
 export class UniversalIdParser {
     public static parse(
         universalId: string,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         const result = this.tryParse(
             universalId,
             gmod,
             codebooks,
+            locations,
             errorBuilder
         );
         if (!result) {
@@ -34,6 +37,7 @@ export class UniversalIdParser {
         universalId: string,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ): UniversalIdBuilder | undefined {
         const localIdStartIndex = universalId.indexOf("/dnv-v");
@@ -61,6 +65,7 @@ export class UniversalIdParser {
                 localIdSegment,
                 gmod,
                 codebooks,
+                locations,
                 errorBuilder
             );
 
@@ -114,10 +119,15 @@ export class UniversalIdParser {
         universalIdString: string | undefined,
         errorBuilder?: LocalIdParsingErrorBuilder
     ) {
-        var universalId = await this.tryParseAsync(universalIdString, errorBuilder);
+        var universalId = await this.tryParseAsync(
+            universalIdString,
+            errorBuilder
+        );
 
         if (!universalId)
-            throw new Error("Couldn't parse local ID from: " + universalIdString);
+            throw new Error(
+                "Couldn't parse local ID from: " + universalIdString
+            );
 
         return universalId;
     }
@@ -127,12 +137,18 @@ export class UniversalIdParser {
         errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         const version = parseVisVersion(universalIdString, errorBuilder);
-        if (!version)
-            return;
+        if (!version) return;
 
         const gmod = await VIS.instance.getGmod(version);
         const codebooks = await VIS.instance.getCodebooks(version);
+        const locations = await VIS.instance.getLocations(version);
 
-        return this.tryParse(universalIdString!, gmod, codebooks, errorBuilder);
+        return this.tryParse(
+            universalIdString!,
+            gmod,
+            codebooks,
+            locations,
+            errorBuilder
+        );
     }
 }

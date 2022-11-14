@@ -12,6 +12,7 @@ describe("UniversalId", () => {
     const visVersion = VisVersion.v3_4a;
     const gmodPromise = vis.getGmod(visVersion);
     const codebooksPromise = vis.getCodebooks(visVersion);
+    const locationsPromise = vis.getLocations(visVersion);
 
     const validTestData = [
         "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
@@ -20,12 +21,13 @@ describe("UniversalId", () => {
         "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/411.1/C101.63/S206/~propulsion.engine/~cooling.system/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
         "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/411.1/C101.63/S206/sec/411.1/C101.31-5/~propulsion.engine/~cooling.system/~for.propulsion.engine/~cylinder.5/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
         "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/411.1/C101.313-4/C469/meta/qty-temperature/state-high/pos-intake.side",
-        "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/411.1/C101/meta/qty-temperature"
+        "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/411.1/C101/meta/qty-temperature",
     ];
 
     test("Valid parsing", async () => {
         const gmod = await gmodPromise;
         const codebooks = await codebooksPromise;
+        const locations = await locationsPromise;
 
         validTestData.forEach((testData) => {
             console.log(testData);
@@ -34,6 +36,7 @@ describe("UniversalId", () => {
                 testData,
                 gmod,
                 codebooks,
+                locations,
                 errorBuilder
             );
 
@@ -71,6 +74,7 @@ describe("UniversalId", () => {
     test("Invalid parsing", async () => {
         const gmod = await gmodPromise;
         const codebooks = await codebooksPromise;
+        const locations = await locationsPromise;
 
         invalidTestData.forEach((data) => {
             const errorBuilder = LocalIdParsingErrorBuilder.create();
@@ -79,6 +83,7 @@ describe("UniversalId", () => {
                 data.testString,
                 gmod,
                 codebooks,
+                locations,
                 errorBuilder
             );
 

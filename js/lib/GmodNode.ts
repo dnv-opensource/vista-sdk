@@ -1,34 +1,40 @@
 import { Gmod } from "./Gmod";
+import { Location, Locations } from "./Location";
 import { GmodNodeDto } from "./types/GmodDto";
 import { GmodNodeMetadata } from "./types/GmodNode";
 import { naturalSort } from "./util/util";
+import { VIS } from "./VIS";
+import { VisVersion } from "./VisVersion";
 
 export class GmodNode {
     private _id: string;
+    public visVersion: VisVersion;
     public code: string;
     public metadata: GmodNodeMetadata;
-    private _location: string;
+    public location?: Location;
     private _children: GmodNode[];
     private _parents: GmodNode[];
 
     private constructor(
         id: string,
+        visVersion: VisVersion,
         code: string,
         metadata: GmodNodeMetadata,
-        location?: string,
+        location?: Location,
         parents?: GmodNode[],
         children?: GmodNode[]
     ) {
         this._id = id;
+        this.visVersion = visVersion;
         this.code = code;
-        this._location = location || "";
+        this.location = location || undefined;
         this.metadata = metadata;
 
         this._children = children ?? [];
         this._parents = parents ?? [];
     }
 
-    public static createFromDto(dto: GmodNodeDto) {
+    public static createFromDto(visVersion: VisVersion, dto: GmodNodeDto) {
         const {
             code,
             category,
@@ -39,12 +45,12 @@ export class GmodNode {
             definition,
             installSubstructure,
             normalAssignmentNames,
-            location,
             id = code,
         } = dto;
 
         return new GmodNode(
             id,
+            visVersion,
             code,
             {
                 category,
@@ -58,46 +64,34 @@ export class GmodNode {
                     Object.entries(normalAssignmentNames ?? {})
                 ),
             },
-            location
+            undefined
         );
     }
 
     public static create(
         id: string,
+        visVersion: VisVersion,
         code: string,
         metadata: GmodNodeMetadata,
-        location?: string,
+        location?: Location,
         parents?: GmodNode[],
         children?: GmodNode[]
     ) {
-        return new GmodNode(id, code, metadata, location, parents, children);
-    }
-
-    public withLocation(_location: string) {
         return new GmodNode(
-            this._id,
-            this.code,
-            this.metadata,
-            _location,
-            this.parents,
-            this.children
-        );
-    }
-
-    public withoutLocation(): GmodNode {
-        return new GmodNode(
-            this._id,
-            this.code,
-            this.metadata,
-            undefined,
-            this.parents,
-            this.children
+            id,
+            visVersion,
+            code,
+            metadata,
+            location,
+            parents,
+            children
         );
     }
 
     public withEmptyRelations(): GmodNode {
         return new GmodNode(
             this._id,
+            this.visVersion,
             this.code,
             this.metadata,
             this.location,
@@ -106,16 +100,37 @@ export class GmodNode {
         );
     }
 
+    public withoutLocation(): GmodNode {
+        return this.with((s) => (s.location = undefined));
+    }
+
+    public withLocation(location: string, locations: Locations): GmodNode {
+        const parsedLocation = locations.parse(location);
+        return this.with((s) => (s.location = parsedLocation));
+    }
+
+    public tryWithLocation(
+        location: string | undefined,
+        locations: Locations
+    ): GmodNode {
+        const parsedLocation = locations.tryParse(location);
+        return !parsedLocation
+            ? this.withoutLocation()
+            : this.withLocation(location!, locations);
+    }
+
+    public async withLocationAsync(location: string) {
+        const locations = await VIS.instance.getLocations(this.visVersion);
+
+        return this.withLocation(location, locations);
+    }
+    public async tryWithLocationAsync(location?: string): Promise<GmodNode> {
+        const locations = await VIS.instance.getLocations(this.visVersion);
+        return this.tryWithLocation(location, locations);
+    }
+
     public get id() {
         return this._id;
-    }
-
-    public set location(location: string) {
-        this._location = location;
-    }
-
-    public get location(): string {
-        return this._location;
     }
 
     public get children() {
@@ -185,11 +200,11 @@ export class GmodNode {
 
     public equals(other?: GmodNode): boolean {
         if (!other) return false;
-        return this.code === other.code && this._location === other._location;
+        return this.code === other.code && this.location === other.location;
     }
 
     public toString(): string {
-        return this._location ? `${this.code}-${this._location}` : this.code;
+        return this.location ? `${this.code}-${this.location}` : this.code;
     }
 
     public addChild(child: GmodNode) {
@@ -216,14 +231,25 @@ export class GmodNode {
     public get isFunctionNode(): boolean {
         return Gmod.isFunctionNode(this.metadata);
     }
+
+    public with(u: { (state: GmodNode): void }): GmodNode {
+        const n = this.clone();
+        u && u(n);
+        return n;
+    }
+
     public clone(): GmodNode {
-        return new GmodNode(
-            this._id,
-            this.code,
-            { ...this.metadata },
-            this._location,
-            [...this._parents],
-            [...this._children]
+        return Object.assign(
+            new GmodNode(
+                this._id,
+                this.visVersion,
+                this.code,
+                { ...this.metadata },
+                this.location,
+                [...this._parents],
+                [...this._children]
+            ),
+            this
         );
     }
 }

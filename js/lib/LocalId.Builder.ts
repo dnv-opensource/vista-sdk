@@ -6,6 +6,7 @@ import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilde
 import { LocalId } from "./LocalId";
 import { LocalIdItems } from "./LocalId.Items";
 import { LocalIdParser } from "./LocalId.Parsing";
+import { Locations } from "./Location";
 import { MetadataTag } from "./MetadataTag";
 import { ParsingState } from "./types/LocalId";
 import { VisVersion } from "./VisVersion";
@@ -86,7 +87,8 @@ export class LocalIdBuilder {
     public validate(
         errorBuilder = new LocalIdParsingErrorBuilder()
     ): LocalIdParsingErrorBuilder {
-        if (!this.primaryItem || !this.primaryItem.isValid()) {
+        // Add validation for primaryItem
+        if (!this.primaryItem) {
             errorBuilder.push(ParsingState.PrimaryItem);
         }
         if (this.isEmptyMetadata) {
@@ -275,9 +277,16 @@ export class LocalIdBuilder {
         localIdStr: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ) {
-        return LocalIdParser.parse(localIdStr, gmod, codebooks, errorBuilder);
+        return LocalIdParser.parse(
+            localIdStr,
+            gmod,
+            codebooks,
+            locations,
+            errorBuilder
+        );
     }
 
     public static async parseAsync(
@@ -291,12 +300,14 @@ export class LocalIdBuilder {
         localIdStr: string | undefined,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         return LocalIdParser.tryParse(
             localIdStr,
             gmod,
             codebooks,
+            locations,
             errorBuilder
         );
     }

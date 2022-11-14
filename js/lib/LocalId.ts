@@ -5,6 +5,7 @@ import { GmodPath } from "./GmodPath";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { LocalIdBuilder } from "./LocalId.Builder";
 import { LocalIdParser } from "./LocalId.Parsing";
+import { Locations } from "./Location";
 import { MetadataTag } from "./MetadataTag";
 
 export class LocalId {
@@ -57,12 +58,14 @@ export class LocalId {
         localIdStr: string,
         gmod: Gmod,
         codebooks: Codebooks,
+        locations: Locations,
         errorBuilder?: LocalIdParsingErrorBuilder
     ) {
         return LocalIdParser.parse(
             localIdStr,
             gmod,
             codebooks,
+            locations,
             errorBuilder
         ).build();
     }

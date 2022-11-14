@@ -1,5 +1,6 @@
 import { GmodNode } from "./GmodNode";
 import { GmodPath } from "./GmodPath";
+import { Locations } from "./Location";
 import {
     GmodTuple,
     TraversalHandler,
@@ -23,7 +24,7 @@ export class Gmod {
         this._nodeMap = new Map<string, GmodNode>();
         let rootNodeId: string | undefined = undefined;
         for (const nodeDto of dto.items) {
-            const node = GmodNode.createFromDto(nodeDto);
+            const node = GmodNode.createFromDto(visVersion, nodeDto);
             if (node.code === "VE") {
                 rootNodeId = node.id;
             }
@@ -124,8 +125,24 @@ export class Gmod {
         return true;
     }
 
-    public getNode(key: string, location?: string): GmodNode {
-        const node = this.tryGetNode(key, location);
+    // public getNode(key: string, location?: string): GmodNode {
+    //     const node = this.tryGetNode(key, location);
+
+    //     if (!node) {
+    //         throw new Error("Couldn't get GmodNode");
+    //     }
+
+    //     return node;
+    // }
+
+    // public tryGetNode(key: string, location?: string): GmodNode | undefined {
+    //     const node = this._nodeMap.get(key);
+    //     if (!node) return;
+    //     return location ? node.withLocation(location) : node;
+    // }
+
+    public getNode(key: string): GmodNode {
+        const node = this.tryGetNode(key);
 
         if (!node) {
             throw new Error("Couldn't get GmodNode");
@@ -137,12 +154,12 @@ export class Gmod {
     public tryGetNode(key: string, location?: string): GmodNode | undefined {
         const node = this._nodeMap.get(key);
         if (!node) return;
-        return location ? node.withLocation(location) : node;
+        return node;
     }
 
     // Parsing
-    public parsePath(item: string): GmodPath {
-        const path = this.tryParsePath(item);
+    public parsePath(item: string, locations: Locations): GmodPath {
+        const path = this.tryParsePath(item, locations);
 
         if (!path) {
             throw new Error("Couldn't parse GmodPath");
@@ -150,8 +167,11 @@ export class Gmod {
         return path;
     }
 
-    public tryParsePath(item: string): GmodPath | undefined {
-        return GmodPath.tryParse(item, this);
+    public tryParsePath(
+        item: string,
+        locations: Locations
+    ): GmodPath | undefined {
+        return GmodPath.tryParse(item, locations, this);
     }
 
     // Traversal
