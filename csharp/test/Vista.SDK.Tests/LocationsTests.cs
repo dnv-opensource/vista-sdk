@@ -1,7 +1,13 @@
+using System.Text.Json;
+
 namespace Vista.SDK.Tests;
 
 public class LocationsTests
 {
+    private sealed record class TestData(TestDataItem[] Locations);
+
+    private sealed record class TestDataItem(string Value, bool Success, string? Output);
+
     [Fact]
     public void Test_Locations_Loads()
     {
@@ -11,23 +17,25 @@ public class LocationsTests
         Assert.NotNull(locations);
     }
 
-    [Theory]
-    [InlineData("FIPU", "FIPU")]
-    [InlineData("1FIPU", "1FIPU")]
-    [InlineData("F1IPU", null)]
-    [InlineData("1IFPU", null)]
-    [InlineData("I1FPU", null)]
-    [InlineData("1aFPU", null)]
-    [InlineData("1BFPU", null)]
-    public void Test_Locations(string input, string? output)
+    [Fact]
+    public async void Test_Locations()
     {
+        var text = await File.ReadAllTextAsync("testdata/Locations.json");
+
+        var data = JsonSerializer.Deserialize<TestData>(
+            text,
+            new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        );
+
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
         var locations = vis.GetLocations(VisVersion.v3_4a);
 
-        var createdLocation = locations.TryCreateLocation(input);
-        Assert.Equal(output, createdLocation?.ToString());
+        foreach (var (value, _, output) in data!.Locations)
+        {
+            var parsedLocation = locations.TryParse(value);
+            Assert.Equal(output, parsedLocation?.ToString());
+        }
     }
 
     [Fact]

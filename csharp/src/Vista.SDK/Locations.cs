@@ -72,7 +72,7 @@ public sealed class Locations
         return true;
     }
 
-    public Location? TryCreateLocation(string? value)
+    public Location? TryParse(string? value)
     {
         if (!IsValid(value))
             return null;
@@ -80,9 +80,9 @@ public sealed class Locations
         return new Location(value!);
     }
 
-    public Location CreateLocation(string value)
+    public Location Parse(string value)
     {
-        var location = TryCreateLocation(value);
+        var location = TryParse(value);
         if (location is null)
             throw new ArgumentException($"Invalid value for location: {value}");
 
