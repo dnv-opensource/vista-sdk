@@ -44,17 +44,17 @@ public record class GmodNode
 
         return this with
         {
-            Location = locations.CreateLocation(location)
+            Location = locations.Parse(location)
         };
     }
 
     public GmodNode TryWithLocation(string? location)
     {
-        if (string.IsNullOrWhiteSpace(location))
-            return this;
-
         var locations = VIS.Instance.GetLocations(VisVersion);
-        return this with { Location = locations.TryCreateLocation(location) };
+        var parsedLocation = locations.TryParse(location);
+        if (parsedLocation is null)
+            return this;
+        return WithLocation(parsedLocation.Value);
     }
 
     public GmodNode WithLocation(in Location location) => this with { Location = location };
