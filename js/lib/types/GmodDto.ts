@@ -15,5 +15,4 @@ export interface GmodNodeDto {
     commonDefinition?: string | null;
     installSubstructure?: boolean | null;
     normalAssignmentNames?: { [key: string]: string };
-    location?: string;
 }

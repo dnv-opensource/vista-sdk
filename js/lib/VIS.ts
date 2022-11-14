@@ -6,6 +6,8 @@ import LRUCache from "lru-cache";
 import { GmodDto } from "./types/GmodDto";
 import { Gmod } from "./Gmod";
 import { Codebooks } from "./Codebooks";
+import { LocationsDto } from "./types/LocationDto";
+import { Locations } from "./Location";
 
 export class VIS {
     public static readonly instance = new VIS();
@@ -19,12 +21,19 @@ export class VIS {
         Promise<CodebooksDto>
     >;
     private readonly _codebooksCache: LRUCache<VisVersion, Codebooks>;
+    private readonly _locationDtoCache: LRUCache<
+        VisVersion,
+        Promise<LocationsDto>
+    >;
+    private readonly _locationCache: LRUCache<VisVersion, Locations>;
 
     public constructor() {
         this._gmodDtoCache = new LRUCache(this.options);
         this._gmodCache = new LRUCache(this.options);
         this._codebooksDtoCache = new LRUCache(this.options);
         this._codebooksCache = new LRUCache(this.options);
+        this._locationDtoCache = new LRUCache(this.options);
+        this._locationCache = new LRUCache(this.options);
     }
 
     private readonly options = {
@@ -109,7 +118,7 @@ export class VIS {
     public async getCodebooks(visVersion: VisVersion): Promise<Codebooks> {
         let codebooks: Codebooks | undefined =
             this._codebooksCache.get(visVersion);
-        if (codebooks) return await codebooks;
+        if (codebooks) return codebooks;
 
         codebooks = new Codebooks(
             visVersion,
@@ -146,6 +155,33 @@ export class VIS {
                 ...codebooks.map((c) => ({ [c.visVersion]: c.codebooks }))
             )
         );
+    }
+
+    private async getLocationsDto(
+        visVersion: VisVersion
+    ): Promise<LocationsDto> {
+        let locationDto: Promise<LocationsDto> | undefined =
+            this._locationDtoCache.get(visVersion);
+
+        if (locationDto) return await locationDto;
+
+        locationDto = Client.visGetLocation(visVersion);
+
+        this._locationDtoCache.set(visVersion, locationDto);
+        return locationDto;
+    }
+
+    public async getLocations(visVersion: VisVersion): Promise<Locations> {
+        let location: Locations | undefined =
+            this._locationCache.get(visVersion);
+        if (location) return location;
+
+        location = new Locations(
+            visVersion,
+            await this.getLocationsDto(visVersion)
+        );
+
+        return location;
     }
 
     public getVisVersions() {
