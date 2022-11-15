@@ -239,7 +239,7 @@ export class GmodPath {
                     const location = context.locations.get(parent.code);
                     if (location) {
                         pathParents.push(
-                            parent.withLocation(location, locations)
+                            parent.withLocation(locations.parse(location))
                         );
                     } else {
                         pathParents.push(parent);
@@ -247,7 +247,7 @@ export class GmodPath {
                 }
 
                 const endNode = toFind.location
-                    ? current.withLocation(toFind.location, locations)
+                    ? current.withLocation(locations.parse(toFind.location))
                     : current;
 
                 let startNode =

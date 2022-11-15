@@ -25,7 +25,7 @@ describe("Gmod", () => {
         expect(node1).toEqual(node2);
         expect(node1).toBe(node2);
 
-        const node3 = node2.withLocation("1", locations);
+        const node3 = node2.withLocation(locations.parse("1"));
         expect(node1).not.toEqual(node3);
         expect(node1).not.toBe(node3);
 

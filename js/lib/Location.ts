@@ -61,7 +61,21 @@ export class Locations {
             (l) => l === l.toLowerCase()
         );
 
-        if (numberNotAtStart || notAlphabeticallySorted || notUpperCase)
+        const locationWithNumber = [...location].filter(
+            (l) => typeof tryParseInt(l) === "number"
+        );
+        const alphaNumericLocation =
+            locationWithNumber.concat(alphabeticallySorted);
+
+        const notNumericalSorted =
+            JSON.stringify([...location]) !==
+            JSON.stringify(alphaNumericLocation);
+        if (
+            numberNotAtStart ||
+            notAlphabeticallySorted ||
+            notUpperCase ||
+            notNumericalSorted
+        )
             return false;
 
         return true;

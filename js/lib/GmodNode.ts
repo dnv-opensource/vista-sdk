@@ -104,9 +104,8 @@ export class GmodNode {
         return this.with((s) => (s.location = undefined));
     }
 
-    public withLocation(location: string, locations: Locations): GmodNode {
-        const parsedLocation = locations.parse(location);
-        return this.with((s) => (s.location = parsedLocation));
+    public withLocation(location: Location): GmodNode {
+        return this.with((s) => (s.location = location));
     }
 
     public tryWithLocation(
@@ -116,13 +115,13 @@ export class GmodNode {
         const parsedLocation = locations.tryParse(location);
         return !parsedLocation
             ? this.withoutLocation()
-            : this.withLocation(location!, locations);
+            : this.withLocation(parsedLocation);
     }
 
     public async withLocationAsync(location: string) {
         const locations = await VIS.instance.getLocations(this.visVersion);
-
-        return this.withLocation(location, locations);
+        const parsedLocation = locations.parse(location);
+        return this.withLocation(parsedLocation);
     }
     public async tryWithLocationAsync(location?: string): Promise<GmodNode> {
         const locations = await VIS.instance.getLocations(this.visVersion);
