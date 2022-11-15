@@ -356,19 +356,6 @@ export class GmodPath {
         return this.tryParseFromFullPath(item, gmod);
     }
 
-    // public isValid(): boolean {
-    //     // so far only validates the location
-    //     return (
-    //         this.isValidLocation(this.node.location) &&
-    //         !this.parents.find((p) => !this.isValidLocation(p.location))
-    //     );
-    // }
-
-    // private isValidLocation(location?: string): boolean {
-    //     if (!location) return true;
-    //     return !isNullOrWhiteSpace(location) && /^[A-Z0-9]/g.test(location);
-    // }
-
     public clone(): GmodPath {
         return new GmodPath(
             this.parents.map((p) => p.clone()),

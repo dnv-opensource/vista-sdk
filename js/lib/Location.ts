@@ -13,6 +13,9 @@ export class Location {
     public toString(): string {
         return this.value;
     }
+    public clone() {
+        return new Location(this.value);
+    }
 }
 
 export class Locations {

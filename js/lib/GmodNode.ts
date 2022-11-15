@@ -244,7 +244,7 @@ export class GmodNode {
                 this.visVersion,
                 this.code,
                 { ...this.metadata },
-                this.location,
+                this.location?.clone(),
                 [...this._parents],
                 [...this._children]
             ),
