@@ -66,7 +66,10 @@ public sealed class Locations
         var notAlphabeticallySorted = !locationWithoutNumber.SequenceEqual(alphabeticallySorted);
         var notUpperCase = locationWithoutNumber.Any(l => !char.IsUpper(l));
 
-        if (numberNotAtStart || notAlphabeticallySorted || notUpperCase)
+        var locationNumbersFirst = location.OrderBy(l => !char.IsDigit(l)).ToList();
+        var notNumericalSorted = !location.ToList().SequenceEqual(locationNumbersFirst);
+
+        if (numberNotAtStart || notAlphabeticallySorted || notUpperCase || notNumericalSorted)
             return false;
 
         return true;
