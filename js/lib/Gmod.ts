@@ -125,22 +125,6 @@ export class Gmod {
         return true;
     }
 
-    // public getNode(key: string, location?: string): GmodNode {
-    //     const node = this.tryGetNode(key, location);
-
-    //     if (!node) {
-    //         throw new Error("Couldn't get GmodNode");
-    //     }
-
-    //     return node;
-    // }
-
-    // public tryGetNode(key: string, location?: string): GmodNode | undefined {
-    //     const node = this._nodeMap.get(key);
-    //     if (!node) return;
-    //     return location ? node.withLocation(location) : node;
-    // }
-
     public getNode(key: string): GmodNode {
         const node = this.tryGetNode(key);
 
