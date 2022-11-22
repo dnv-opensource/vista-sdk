@@ -395,12 +395,12 @@ public sealed record GmodPath
                 foreach (var parent in parents)
                 {
                     if (context.Locations?.TryGetValue(parent.Code, out var location) ?? false)
-                        pathParents.Add(parent.WithLocation(location));
+                        pathParents.Add(parent.TryWithLocation(location));
                     else
                         pathParents.Add(parent);
                 }
                 var endNode = toFind.Location is not null
-                    ? current.WithLocation(toFind.Location)
+                    ? current.TryWithLocation(toFind.Location)
                     : current;
 
                 var startNode =
