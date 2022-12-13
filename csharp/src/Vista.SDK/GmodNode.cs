@@ -1,4 +1,5 @@
 using System.Text;
+using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
@@ -48,10 +49,25 @@ public record class GmodNode
         };
     }
 
+    public GmodNode WithLocation(string location, out LocationParsingErrorBuilder errorBuilder)
+    {
+        var locations = VIS.Instance.GetLocations(VisVersion);
+        return this with { Location = locations.Parse(location, out errorBuilder) };
+    }
+
     public GmodNode TryWithLocation(string? location)
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
         var parsedLocation = locations.TryParse(location);
+        if (parsedLocation is null)
+            return this;
+        return WithLocation(parsedLocation.Value);
+    }
+
+    public GmodNode TryWithLocation(string? location, out LocationParsingErrorBuilder errorBuilder)
+    {
+        var locations = VIS.Instance.GetLocations(VisVersion);
+        var parsedLocation = locations.TryParse(location, out errorBuilder);
         if (parsedLocation is null)
             return this;
         return WithLocation(parsedLocation.Value);
