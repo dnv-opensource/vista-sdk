@@ -83,12 +83,21 @@ public sealed class Locations
             AddError(
                 ref errorBuilder,
                 LocationValidationResult.NullOrWhiteSpace,
-                $"Invalid location: {locationStr} is null, empty or contains only whitespace"
+                $"Invalid location: is null, empty or contains only whitespace"
             );
             return null;
         }
 
         if (locationStr.Trim().Length != locationStr.Length)
+        {
+            AddError(
+                ref errorBuilder,
+                LocationValidationResult.Invalid,
+                $"Invalid location with leading and/or trailing whitespace: {locationStr}"
+            );
+            return null;
+        }
+        if (locationStr.Any(char.IsWhiteSpace))
         {
             AddError(
                 ref errorBuilder,
@@ -99,67 +108,59 @@ public sealed class Locations
         }
 
         var locationWithoutNumber = locationStr.Where(l => !char.IsDigit(l)).ToList();
-
-        var invalidLocationCode = locationWithoutNumber.Any(
-            l => !_locationCodes.Contains(l) || l == 'N'
-        );
-        if (invalidLocationCode)
+        var invalidLocationCodes = locationWithoutNumber
+            .Where(l => !_locationCodes.Contains(l) || l == 'N')
+            .ToArray();
+        if (invalidLocationCodes.Length > 0)
         {
+            var invalidChars = string.Join(",", invalidLocationCodes);
             AddError(
                 ref errorBuilder,
                 LocationValidationResult.InvalidCode,
-                $"Invalid location code: {locationStr}"
+                $"Invalid location code: {locationStr} with invalid character(s): {invalidChars}"
             );
-            return null;
         }
         var numberNotAtStart =
             locationStr.Any(l => char.IsDigit(l))
             && !int.TryParse(locationStr[0].ToString(), out _);
         if (numberNotAtStart)
-        {
             AddError(
                 ref errorBuilder,
                 LocationValidationResult.Invalid,
-                $"Invalid location: numbers starts before characters in location: {locationStr}"
+                $"Invalid location: numbers should start before characters in location: {locationStr}"
             );
-            return null;
-        }
 
-        var alphabeticallySorted = locationWithoutNumber.OrderBy(l => l).ToList();
+        var alphabeticallySorted = locationWithoutNumber
+            .OrderBy(l => char.ToUpperInvariant(l))
+            .ToList();
         var notAlphabeticallySorted = !locationWithoutNumber.SequenceEqual(alphabeticallySorted);
         if (notAlphabeticallySorted)
-        {
             AddError(
                 ref errorBuilder,
                 LocationValidationResult.InvalidOrder,
                 $"Invalid location {locationStr}: not alphabetically sorted"
             );
-            return null;
-        }
 
         var notUpperCase = locationWithoutNumber.Any(l => !char.IsUpper(l));
         if (notUpperCase)
-        {
             AddError(
                 ref errorBuilder,
                 LocationValidationResult.Invalid,
                 $"Invalid location {locationStr}: characters can only be uppercase"
             );
-            return null;
-        }
 
         var locationNumbersFirst = locationStr.OrderBy(l => !char.IsDigit(l)).ToList();
         var notNumericalSorted = !locationStr.ToList().SequenceEqual(locationNumbersFirst);
 
         if (notNumericalSorted)
-        {
             AddError(
                 ref errorBuilder,
                 LocationValidationResult.InvalidOrder,
                 $"Invalid location {locationStr}: not numerically sorted"
             );
+
+        if (errorBuilder.HasError)
             return null;
-        }
 
         return new Location(locationStr);
     }

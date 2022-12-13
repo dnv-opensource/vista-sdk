@@ -10,6 +10,127 @@
         { "value": "1IFPU", "success": false, "output": null },
         { "value": "I1FPU", "success": false, "output": null },
         { "value": "1aFPU", "success": false, "output": null },
-        { "value": "1BFPU", "success": false, "output": null }
+        { "value": "1BFPU", "success": false, "output": null },
+        {
+            "value": "ACFILMOPSU",
+            "success": true,
+            "output": "ACFILMOPSU",
+            "expectedErrorMessages": []
+        },
+        {
+            "value": "",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: is null, empty or contains only whitespace"
+            ]
+        },
+        {
+            "value": "  ",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: is null, empty or contains only whitespace"
+            ]
+        },
+        {
+            "value": null,
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: is null, empty or contains only whitespace"
+            ]
+        },
+        {
+            "value": "A BC",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location containing whitespace: A BC"
+            ]
+        },
+        {
+            "value": "ABC ",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location with leading and/or trailing whitespace: ABC "
+            ]
+        },
+        {
+            "value": "A BC",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location containing whitespace: A BC"
+            ]
+        },
+        {
+            "value": "ABCFILMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location code: ABCFILMOPSU with invalid character(s): B"
+            ]
+        },
+        {
+            "value": "ABDFILMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location code: ABDFILMOPSU with invalid character(s): B,D"
+            ]
+        },
+        {
+            "value": "ACF2I1LMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: numbers should start before characters in location: ACF2I1LMOPSU",
+                "Invalid location ACF2I1LMOPSU: not numerically sorted"
+            ]
+        },
+        {
+            "value": "A1CFILMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: numbers should start before characters in location: A1CFILMOPSU",
+                "Invalid location A1CFILMOPSU: not numerically sorted"
+            ]
+        },
+        {
+            "value": "FCAILMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location FCAILMOPSU: not alphabetically sorted"
+            ]
+        },
+        {
+            "value": "aFILMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location code: aFILMOPSU with invalid character(s): a",
+                "Invalid location aFILMOPSU: characters can only be uppercase"
+            ]
+        },
+        {
+            "value": "1F2ILMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location 1F2ILMOPSU: not numerically sorted"
+            ]
+        },
+        {
+            "value": "1F2ILMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location 1F2ILMOPSU: not numerically sorted"
+            ]
+        }
     ]
 }

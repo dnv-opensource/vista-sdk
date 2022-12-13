@@ -1,12 +1,21 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using Vista.SDK.Internal;
 
 namespace Vista.SDK.Tests;
 
 public class LocationsTests
 {
-    private sealed record class TestData(TestDataItem[] Locations);
+    private sealed record TestData(
+        [property: JsonPropertyName("Locations")] TestDataItem[] Locations
+    );
 
-    private sealed record class TestDataItem(string Value, bool Success, string? Output);
+    private sealed record class TestDataItem(
+        string Value,
+        bool Success,
+        string? Output,
+        string[]? ExpectedErrorMessages
+    );
 
     [Fact]
     public void Test_Locations_Loads()
@@ -31,9 +40,22 @@ public class LocationsTests
 
         var locations = vis.GetLocations(VisVersion.v3_4a);
 
-        foreach (var (value, _, output) in data!.Locations)
+        foreach (var (value, success, output, expectedErrorMessages) in data!.Locations)
         {
-            var parsedLocation = locations.TryParse(value);
+            var parsedLocation = locations.TryParse(
+                value,
+                out LocationParsingErrorBuilder errorBuilder
+            );
+            if (!success && expectedErrorMessages is not null)
+            {
+                foreach (var error in errorBuilder.ErrorMessages)
+                {
+                    Assert.Contains(error.message, expectedErrorMessages);
+                }
+
+                Assert.NotNull(errorBuilder);
+                Assert.Equal(expectedErrorMessages!.Count(), errorBuilder.ErrorMessages.Count);
+            }
             Assert.Equal(output, parsedLocation?.ToString());
         }
     }
