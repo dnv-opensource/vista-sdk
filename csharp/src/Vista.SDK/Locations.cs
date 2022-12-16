@@ -78,12 +78,14 @@ public sealed class Locations
         ref LocationParsingErrorBuilder errorBuilder
     )
     {
-        if (locationStr is null || string.IsNullOrWhiteSpace(locationStr))
+        if (locationStr is null)
+            return null;
+        if (string.IsNullOrWhiteSpace(locationStr))
         {
             AddError(
                 ref errorBuilder,
                 LocationValidationResult.NullOrWhiteSpace,
-                $"Invalid location: is null, empty or contains only whitespace"
+                "Invalid location: contains only whitespace"
             );
             return null;
         }
