@@ -19,27 +19,23 @@
         },
         {
             "value": "",
-            "success": false,
+            "success": true,
             "output": null,
-            "expectedErrorMessages": [
-                "Invalid location: is null, empty or contains only whitespace"
-            ]
+            "expectedErrorMessages": []
         },
         {
             "value": "  ",
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location: is null, empty or contains only whitespace"
+                "Invalid location: contains only whitespace"
             ]
         },
         {
             "value": null,
-            "success": false,
+            "success": true,
             "output": null,
-            "expectedErrorMessages": [
-                "Invalid location: is null, empty or contains only whitespace"
-            ]
+            "expectedErrorMessages": []
         },
         {
             "value": "A BC",
@@ -130,6 +126,16 @@
             "output": null,
             "expectedErrorMessages": [
                 "Invalid location 1F2ILMOPSU: not numerically sorted"
+            ]
+        },
+        {
+            "value": "FC1AILMOPSU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: numbers should start before characters in location: FC1AILMOPSU",
+                "Invalid location FC1AILMOPSU: not alphabetically sorted",
+                "Invalid location FC1AILMOPSU: not numerically sorted"
             ]
         }
     ]
