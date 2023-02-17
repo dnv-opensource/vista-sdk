@@ -3,7 +3,7 @@ import {
     LocationValidationResult,
     RelativeLocation as RelativeLocations,
 } from "./types/Location";
-import { LocationsDto, RelativeLocationsDto } from "./types/LocationDto";
+import { LocationsDto } from "./types/LocationDto";
 import { isNullOrWhiteSpace, tryParseInt } from "./util/util";
 import { VisVersion } from "./VisVersion";
 
@@ -48,42 +48,36 @@ export class Locations {
     }
 
     public parse(
-        value: string,
+        locationStr: string,
         errorBuilder?: LocationParsingErrorBuilder
     ): Location {
-        const location = this.tryParse(value, errorBuilder);
+        const location = this.tryParse(locationStr, errorBuilder);
         if (!location) {
-            throw new Error(`Invalid value for location: ${value}`);
+            throw new Error(`Invalid value for location: ${locationStr}`);
         }
 
         return location;
     }
 
     public tryParse(
-        nodeLocation?: string | undefined | null,
+        locationStr?: string | undefined,
         errorBuilder?: LocationParsingErrorBuilder
     ): Location | undefined {
-        if (!this.isValid(nodeLocation, errorBuilder)) return;
-
-        return new Location(nodeLocation!);
+        return this.tryParseInternal(locationStr, errorBuilder)
     }
 
-    public isValid(
-        nodeLocation: Location | string | undefined | null,
+    private tryParseInternal(
+        location: string | undefined,
         errorBuilder?: LocationParsingErrorBuilder
-    ): boolean {
-        const location =
-            typeof nodeLocation === "string"
-                ? nodeLocation
-                : nodeLocation?.toString();
-        if (!location) return true;
+    ): Location | undefined {
+        if (!location) return;
 
         if (isNullOrWhiteSpace(location)) {
             errorBuilder?.push({
                 type: LocationValidationResult.NullOrWhiteSpace,
                 message: "Invalid location: contains only whitespace",
             });
-            return false;
+            return;
         }
         if (location.trim().length !== location.length) {
             errorBuilder?.push({
@@ -92,14 +86,14 @@ export class Locations {
                     "Invalid location with leading and/or trailing whitespace: " +
                     location,
             });
-            return false;
+            return;
         }
         if (location.indexOf(" ") >= 0) {
             errorBuilder?.push({
                 type: LocationValidationResult.Invalid,
                 message: "Invalid location containing whitespace: " + location,
             });
-            return false;
+            return;
         }
 
         const locationWithoutNumber = [...location].filter(
@@ -166,8 +160,9 @@ export class Locations {
                 message: `Invalid location ${location}: not numerically sorted`,
             });
 
-        if (errorBuilder?.hasError) return false;
-        return true;
+        if (errorBuilder?.hasError) return;
+
+        return new Location(location);
     }
 
     public get relativeLocations() {

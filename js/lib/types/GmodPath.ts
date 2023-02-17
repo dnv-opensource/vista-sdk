@@ -1,13 +1,14 @@
 import { GmodPath } from "..";
+import { Location } from "../Location";
 
 export interface PathNode {
     code: string;
-    location?: string;
+    location?: Location;
 }
 
 export interface ParseContext {
     parts: PathNode[];
     toFind: PathNode;
-    locations: Map<string, string>;
+    locations: Map<string, Location>;
     path?: GmodPath;
 }

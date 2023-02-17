@@ -13,9 +13,7 @@ public class GmodPathTests
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
-
-        var parsed = GmodPath.TryParse(inputPath, gmod, out var path);
+        var parsed = GmodPath.TryParse(inputPath, VisVersion.v3_4a, out var path);
         Assert.True(parsed);
         Assert.NotNull(path);
         Assert.Equal(inputPath, path?.ToString());
@@ -30,9 +28,7 @@ public class GmodPathTests
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
-
-        var parsed = GmodPath.TryParse(inputPath, gmod, out var path);
+        var parsed = GmodPath.TryParse(inputPath, VisVersion.v3_4a, out var path);
         Assert.False(parsed);
         Assert.Null(path);
     }
@@ -41,8 +37,6 @@ public class GmodPathTests
     public void Test_GetFullPath()
     {
         var (_, vis) = VISTests.GetVis();
-
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var pathStr = "411.1/C101.72/I101";
         var expectation = new Dictionary<int, string>
@@ -61,7 +55,7 @@ public class GmodPathTests
         };
 
         var seen = new HashSet<int>();
-        foreach (var (depth, node) in GmodPath.Parse(pathStr, gmod).GetFullPath())
+        foreach (var (depth, node) in GmodPath.Parse(pathStr, VisVersion.v3_4a).GetFullPath())
         {
             if (!seen.Add(depth))
                 Assert.True(false, "Got same depth twice");
@@ -78,8 +72,6 @@ public class GmodPathTests
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
-
         var pathStr = "411.1/C101.72/I101";
         var expectation = new Dictionary<int, string>
         {
@@ -93,7 +85,7 @@ public class GmodPathTests
         };
 
         var seen = new HashSet<int>();
-        var path = GmodPath.Parse(pathStr, gmod);
+        var path = GmodPath.Parse(pathStr, VisVersion.v3_4a);
         foreach (var (depth, node) in path.GetFullPathFrom(4))
         {
             if (!seen.Add(depth))

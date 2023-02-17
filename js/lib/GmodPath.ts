@@ -1,7 +1,7 @@
 import { VIS, VisVersion } from ".";
 import { Gmod } from "./Gmod";
 import { GmodNode } from "./GmodNode";
-import { Locations } from "./Location";
+import { Locations, Location } from "./Location";
 import { TraversalHandlerResult } from "./types/Gmod";
 import { PathNode, ParseContext } from "./types/GmodPath";
 import { isNullOrWhiteSpace } from "./util/util";
@@ -163,14 +163,6 @@ export class GmodPath {
         return commonNames;
     }
 
-    public isValid(locations: Locations): boolean {
-        // so far only validates the location
-        return (
-            locations.isValid(this.node.location) &&
-            this.parents.every((p) => locations.isValid(p.location))
-        );
-    }
-
     public static parse(
         item: string,
         locations: Locations,
@@ -202,7 +194,9 @@ export class GmodPath {
         for (const partStr of item.split("/")) {
             if (partStr.includes("-")) {
                 const split = partStr.split("-");
-                parts.push({ code: split[0], location: split[1] });
+                const parsedLocation = locations.tryParse(split[1]);
+                if (!parsedLocation) return;
+                parts.push({ code: split[0], location: parsedLocation });
             } else {
                 parts.push({ code: partStr });
             }
@@ -219,7 +213,7 @@ export class GmodPath {
         const baseNode = gmod.tryGetNode(toFind.code);
         if (!baseNode) return;
 
-        const context: ParseContext = { parts, toFind, locations: new Map() };
+        const context: ParseContext = { parts, toFind, locations: new Map<string, Location>() };
 
         gmod.traverse(
             (parents, current, context) => {
@@ -248,7 +242,7 @@ export class GmodPath {
                     const location = context.locations.get(parent.code);
                     if (location) {
                         pathParents.push(
-                            parent.tryWithLocation(location, locations)
+                            parent.withLocation(location)
                         );
                     } else {
                         pathParents.push(parent);
@@ -256,7 +250,7 @@ export class GmodPath {
                 }
 
                 const endNode = toFind.location
-                    ? current.tryWithLocation(toFind.location, locations)
+                    ? current.withLocation(toFind.location)
                     : current;
 
                 const firstParentHasSingleParent =

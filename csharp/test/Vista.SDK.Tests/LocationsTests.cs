@@ -42,8 +42,9 @@ public class LocationsTests
 
         foreach (var (value, success, output, expectedErrorMessages) in data!.Locations)
         {
-            var parsedLocation = locations.TryParse(
+            locations.TryParse(
                 value,
+                out var parsedLocation,
                 out LocationParsingErrorBuilder errorBuilder
             );
             if (!success && expectedErrorMessages is not null)
@@ -56,7 +57,7 @@ public class LocationsTests
                 Assert.NotNull(errorBuilder);
                 Assert.Equal(expectedErrorMessages!.Count(), errorBuilder.ErrorMessages.Count);
             }
-            Assert.Equal(output, parsedLocation?.ToString());
+            Assert.Equal(output, parsedLocation.ToString());
         }
     }
 

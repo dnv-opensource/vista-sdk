@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 using Vista.SDK;
 
@@ -18,5 +18,5 @@ public class GmodPathParse
     }
 
     [Benchmark]
-    public bool TryParse() => GmodPath.TryParse("411.1/C101.72/I101", _gmod, out _);
+    public bool TryParse() => GmodPath.TryParse("411.1/C101.72/I101", VisVersion.v3_4a, out _);
 }

@@ -82,10 +82,9 @@ public class GmodVersioningTests
     [MemberData(nameof(Valid_Test_Data_Path))]
     public void Test_GmodVersioning_ConvertPath(string inputPath, string expectedPath)
     {
-        var gmod = VIS.Instance.GetGmod(VisVersion.v3_4a);
         var targetGmod = VIS.Instance.GetGmod(VisVersion.v3_5a);
 
-        var sourcePath = GmodPath.Parse(inputPath, gmod);
+        var sourcePath = GmodPath.Parse(inputPath, VisVersion.v3_4a);
         var parsedPath = targetGmod.TryParsePath(expectedPath, out var parsedTargetPath);
         var targetPath = VIS.Instance.ConvertPath(VisVersion.v3_4a, sourcePath, VisVersion.v3_5a);
         Assert.NotNull(targetPath);

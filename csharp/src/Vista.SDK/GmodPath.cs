@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Text.RegularExpressions;
 using Vista.SDK.Internal;
 
 namespace Vista.SDK;
@@ -83,9 +82,7 @@ public sealed record GmodPath
         if (parents.Count > 0 && !parents[0].IsRoot)
             return false;
 
-        var set = new HashSet<string>();
-
-        set.Add("VE");
+        var set = new HashSet<string> { "VE" };
 
         for (int i = 0; i < parents.Count; i++)
         {
@@ -315,28 +312,35 @@ public sealed record GmodPath
         }
     }
 
-    private readonly record struct PathNode(string Code, string? Location = null);
+    private readonly record struct PathNode(string Code, Location? Location = null);
 
     private sealed record ParseContext(Queue<PathNode> Parts)
     {
         public PathNode ToFind;
-        public Dictionary<string, string>? Locations;
+        public Dictionary<string, Location>? Locations;
         public GmodPath? Path;
     }
 
-    public static GmodPath Parse(string item, Gmod gmod)
+    public static GmodPath Parse(string item, VisVersion visVersion)
     {
-        if (!TryParse(item, gmod, out var path))
+        if (!TryParse(item, visVersion, out var path))
             throw new ArgumentException("Couldnt parse path");
 
         return path;
     }
 
-    public static bool TryParse(string item, Gmod gmod, [NotNullWhen(true)] out GmodPath? path)
+    public static bool TryParse(
+        string item,
+        VisVersion visVersion,
+        [NotNullWhen(true)] out GmodPath? path
+    )
     {
         path = null;
         if (string.IsNullOrWhiteSpace(item))
             return false;
+
+        var gmod = VIS.Instance.GetGmod(visVersion);
+        var locations = VIS.Instance.GetLocations(visVersion);
 
         item = item.Trim().TrimStart('/');
 
@@ -346,7 +350,9 @@ public sealed record GmodPath
             if (partStr.Contains('-'))
             {
                 var split = partStr.Split('-');
-                parts.Enqueue(new PathNode(split[0], split[1]));
+                if (!locations.TryParse(split[1], out var location))
+                    return false;
+                parts.Enqueue(new PathNode(split[0], location));
             }
             else
             {
@@ -382,7 +388,7 @@ public sealed record GmodPath
                 if (toFind.Location is not null)
                 {
                     context.Locations ??= new();
-                    context.Locations.Add(toFind.Code, toFind.Location);
+                    context.Locations.Add(toFind.Code, toFind.Location.Value);
                 }
 
                 if (context.Parts.Count > 0)
@@ -395,12 +401,12 @@ public sealed record GmodPath
                 foreach (var parent in parents)
                 {
                     if (context.Locations?.TryGetValue(parent.Code, out var location) ?? false)
-                        pathParents.Add(parent.TryWithLocation(location));
+                        pathParents.Add(parent.WithLocation(location));
                     else
                         pathParents.Add(parent);
                 }
                 var endNode = toFind.Location is not null
-                    ? current.TryWithLocation(toFind.Location)
+                    ? current.WithLocation(toFind.Location)
                     : current;
 
                 var startNode =

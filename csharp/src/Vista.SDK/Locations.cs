@@ -4,7 +4,7 @@ namespace Vista.SDK;
 
 public readonly record struct Location
 {
-    public readonly string Value { get; private init; }
+    public readonly string Value { get; }
 
     internal Location(string value)
     {
@@ -47,39 +47,46 @@ public sealed class Locations
 
     public Location Parse(string locationStr)
     {
-        var location = TryParse(locationStr);
-        if (location is null)
+        if (!TryParse(locationStr, out var location))
             throw new ArgumentException($"Invalid value for location: {locationStr}");
 
-        return location.Value;
+        return location;
     }
 
     public Location Parse(string locationStr, out LocationParsingErrorBuilder errorBuilder)
     {
-        var location = TryParse(locationStr, out errorBuilder);
-        if (location is null)
+        if (!TryParse(locationStr, out var location, out errorBuilder))
             throw new ArgumentException($"Invalid value for location: {locationStr}");
-        return location.Value;
+
+        return location;
     }
 
-    public Location? TryParse(string? value)
+    public bool TryParse(string? value, out Location location)
     {
-        return TryParse(value, out _);
+        return TryParse(value, out location, out _);
     }
 
-    public Location? TryParse(string? value, out LocationParsingErrorBuilder errorBuilder)
+    public bool TryParse(
+        string? value,
+        out Location location,
+        out LocationParsingErrorBuilder errorBuilder
+    )
     {
         errorBuilder = LocationParsingErrorBuilder.Empty;
-        return TryParseInternal(value, ref errorBuilder);
+        return TryParseInternal(value, out location, ref errorBuilder);
     }
 
-    internal Location? TryParseInternal(
+    private bool TryParseInternal(
         string? locationStr,
+        out Location location,
         ref LocationParsingErrorBuilder errorBuilder
     )
     {
+        location = default;
+
         if (locationStr is null)
-            return null;
+            return false;
+
         if (string.IsNullOrWhiteSpace(locationStr))
         {
             AddError(
@@ -87,7 +94,7 @@ public sealed class Locations
                 LocationValidationResult.NullOrWhiteSpace,
                 "Invalid location: contains only whitespace"
             );
-            return null;
+            return false;
         }
 
         if (locationStr.Trim().Length != locationStr.Length)
@@ -97,7 +104,7 @@ public sealed class Locations
                 LocationValidationResult.Invalid,
                 $"Invalid location with leading and/or trailing whitespace: {locationStr}"
             );
-            return null;
+            return false;
         }
         if (locationStr.Any(char.IsWhiteSpace))
         {
@@ -106,7 +113,7 @@ public sealed class Locations
                 LocationValidationResult.Invalid,
                 $"Invalid location containing whitespace: {locationStr}"
             );
-            return null;
+            return false;
         }
 
         var locationWithoutNumber = locationStr.Where(l => !char.IsDigit(l)).ToList();
@@ -162,9 +169,10 @@ public sealed class Locations
             );
 
         if (errorBuilder.HasError)
-            return null;
+            return false;
 
-        return new Location(locationStr);
+        location = new Location(locationStr);
+        return true;
     }
 
     static void AddError(
@@ -179,7 +187,23 @@ public sealed class Locations
     }
 }
 
-public sealed record RelativeLocation(char Code, string Name, string? Definition);
+public sealed record RelativeLocation
+{
+    public char Code { get; }
+    public string Name { get; }
+    public string? Definition { get; }
+
+    internal RelativeLocation(char code, string name, string? definition)
+    {
+        Code = code;
+        Name = name;
+        Definition = definition;
+    }
+
+    public override int GetHashCode() => Code.GetHashCode();
+
+    public bool Equals(RelativeLocation? other) => Code == other?.Code;
+}
 
 public enum LocationValidationResult
 {

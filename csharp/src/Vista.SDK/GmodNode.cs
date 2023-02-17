@@ -55,22 +55,25 @@ public record class GmodNode
         return this with { Location = locations.Parse(location, out errorBuilder) };
     }
 
-    public GmodNode TryWithLocation(string? location)
+    public GmodNode TryWithLocation(string? locationStr)
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
-        var parsedLocation = locations.TryParse(location);
-        if (parsedLocation is null)
+        if (!locations.TryParse(locationStr, out var location))
             return this;
-        return WithLocation(parsedLocation.Value);
+
+        return WithLocation(location);
     }
 
-    public GmodNode TryWithLocation(string? location, out LocationParsingErrorBuilder errorBuilder)
+    public GmodNode TryWithLocation(
+        string? locationStr,
+        out LocationParsingErrorBuilder errorBuilder
+    )
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
-        var parsedLocation = locations.TryParse(location, out errorBuilder);
-        if (parsedLocation is null)
+        if (!locations.TryParse(locationStr, out var location, out errorBuilder))
             return this;
-        return WithLocation(parsedLocation.Value);
+
+        return WithLocation(location);
     }
 
     public GmodNode WithLocation(in Location location) => this with { Location = location };
@@ -79,6 +82,7 @@ public record class GmodNode
     {
         if (location is null)
             return this;
+
         return WithLocation(location.Value);
     }
 
