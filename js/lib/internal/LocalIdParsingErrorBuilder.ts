@@ -21,7 +21,7 @@ export class LocalIdParsingErrorBuilder extends ErrorBuilder<ParsingState> {
 
         map.set(ParsingState.NamingRule, "Missing or invalid naming rule");
         map.set(ParsingState.VisVersion, "Missing or invalid vis version");
-        map.set(ParsingState.PrimaryItem, "Missing or invalid primary item");
+        map.set(ParsingState.PrimaryItem, "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag.");
         map.set(ParsingState.SecondaryItem, "Invalid secondary item");
         map.set(
             ParsingState.ItemDescription,

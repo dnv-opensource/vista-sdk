@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Vista.SDK.Internal;
 
@@ -88,14 +89,20 @@ public sealed partial record class LocalIdBuilder
         int i = 1;
         while (state <= ParsingState.MetaDetail)
         {
-            if (i >= span.Length)
-                break; // We've consumed the string
-
-            var nextSlash = span.Slice(i).IndexOf('/');
-            var segment = nextSlash == -1 ? span.Slice(i) : span.Slice(i, nextSlash);
+            var nextStart = Math.Min(span.Length, i);
+            var nextSlash = span.Slice(nextStart).IndexOf('/');
+            var segment =
+                nextSlash == -1 ? span.Slice(nextStart) : span.Slice(nextStart, nextSlash);
             switch (state)
             {
                 case ParsingState.NamingRule:
+                    if (segment.Length == 0)
+                    {
+                        AddError(ref errorBuilder, ParsingState.NamingRule, predefinedMessage);
+                        state++;
+                        break;
+                    }
+
                     if (!segment.SequenceEqual(NamingRule.AsSpan()))
                     {
                         AddError(ref errorBuilder, ParsingState.NamingRule, predefinedMessage);
@@ -104,6 +111,13 @@ public sealed partial record class LocalIdBuilder
                     AdvanceParser(ref i, in segment, ref state);
                     break;
                 case ParsingState.VisVersion:
+                    if (segment.Length == 0)
+                    {
+                        AddError(ref errorBuilder, ParsingState.VisVersion, predefinedMessage);
+                        state++;
+                        break;
+                    }
+
                     if (!segment.StartsWith("vis-".AsSpan()))
                     {
                         AddError(ref errorBuilder, ParsingState.VisVersion, predefinedMessage);
@@ -126,6 +140,41 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.PrimaryItem:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            if (primaryItemStart != -1)
+                            {
+                                if (gmod is null)
+                                    return false;
+
+                                var path = span.Slice(primaryItemStart, i - 1 - primaryItemStart);
+                                if (!gmod.TryParsePath(path.ToString(), out primaryItem))
+                                {
+                                    // Displays the full GmodPath when first part of PrimaryItem is invalid
+                                    AddError(
+                                        ref errorBuilder,
+                                        ParsingState.PrimaryItem,
+                                        $"Invalid GmodPath in Primary item: {path.ToString()}"
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                AddError(
+                                    ref errorBuilder,
+                                    ParsingState.PrimaryItem,
+                                    predefinedMessage
+                                );
+                            }
+                            AddError(
+                                ref errorBuilder,
+                                ParsingState.PrimaryItem,
+                                "Invalid or missing '/meta' prefix after Primary item"
+                            );
+                            state++;
+                            break;
+                        }
+
                         var dashIndex = segment.IndexOf('-');
                         var code = dashIndex == -1 ? segment : segment.Slice(0, dashIndex);
 
@@ -243,6 +292,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.SecondaryItem:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var dashIndex = segment.IndexOf('-');
                         var code = dashIndex == -1 ? segment : segment.Slice(0, dashIndex);
                         if (gmod is null)
@@ -358,6 +413,12 @@ public sealed partial record class LocalIdBuilder
                     }
                     break;
                 case ParsingState.ItemDescription:
+                    if (segment.Length == 0)
+                    {
+                        state++;
+                        break;
+                    }
+
                     verbose = true;
 
                     var metaIndex = span.IndexOf("/meta".AsSpan());
@@ -374,6 +435,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.MetaQuantity:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var result = ParseMetatag(
                             CodebookName.Quantity,
                             ref state,
@@ -390,6 +457,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.MetaContent:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var result = ParseMetatag(
                             CodebookName.Content,
                             ref state,
@@ -406,6 +479,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.MetaCalculation:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var result = ParseMetatag(
                             CodebookName.Calculation,
                             ref state,
@@ -422,6 +501,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.MetaState:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var result = ParseMetatag(
                             CodebookName.State,
                             ref state,
@@ -438,6 +523,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.MetaCommand:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var result = ParseMetatag(
                             CodebookName.Command,
                             ref state,
@@ -454,6 +545,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.MetaType:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var result = ParseMetatag(
                             CodebookName.Type,
                             ref state,
@@ -470,6 +567,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.MetaPosition:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var result = ParseMetatag(
                             CodebookName.Position,
                             ref state,
@@ -486,6 +589,12 @@ public sealed partial record class LocalIdBuilder
                 case ParsingState.MetaDetail:
 
                     {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
                         var result = ParseMetatag(
                             CodebookName.Detail,
                             ref state,

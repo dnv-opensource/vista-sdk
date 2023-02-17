@@ -1,4 +1,5 @@
-using Vista.SDK;
+using FluentAssertions;
+using Vista.SDK.Experimental;
 using Vista.SDK.Internal;
 using Vista.SDK.Mqtt;
 
@@ -296,6 +297,15 @@ public class LocalIdTests
         Assert.Empty(errored);
     }
 
+    [Fact(Skip = "Experimental")]
+    public void NewParser()
+    {
+        var input = "/dnv-v2/vis-3-4a/511.11-1SO/C101.67/S208/meta/qty-pressure/cnt-air/state-low";
+        var parser = new LocalIdParser(input);
+
+        var id = parser.Parse();
+    }
+
     [Theory]
     [MemberData(
         nameof(VistaSDKTestData.AddInvalidLocalIdsData),
@@ -309,13 +319,10 @@ public class LocalIdTests
             out _
         );
 
-        foreach (var error in errorBuilder.ErrorMessages)
-        {
-            Assert.Contains(error.message, expectedErrorMessages);
-        }
+        var actualErrorMessages = errorBuilder.ErrorMessages.Select(e => e.message).ToArray();
+        actualErrorMessages.Should().Equal(expectedErrorMessages);
 
         Assert.False(parsed);
         Assert.NotNull(errorBuilder);
-        Assert.Equal(expectedErrorMessages.Count(), errorBuilder.ErrorMessages.Count);
     }
 }

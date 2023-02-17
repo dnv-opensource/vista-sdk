@@ -1,0 +1,56 @@
+; Overall syntax defined by ISO 19848 annex C
+
+UniversalID = [protocol] "//" NamingEntity ShipID LocalID
+LocalID = NamingRule LocalDataName
+NamingEntity = "data.dnv.com"
+
+; Note: Subject to agreement and conformance with the "dnv-v2" naming rule,
+; different URLs may be used as NamingEntity.
+
+; <NamingRule> defines the rules for composing the <LocalDataName>.
+NamingRule = "/" NamingRuleIdentifier "-" NamingRuleVersion ; here: /dnv-v2
+NamingRuleIdentifier = "dnv"
+NamingRuleVersion = "v2"
+
+; Syntax specific to naming rule /dnv-v2
+LocalDataName = VISElement PrimaryItem ["/sec" SecondaryItem] [Description] "/meta" 1*TagElement
+
+; <VISElement> identifies the version of VIS used to compose <ItemPath> and <Description>.
+VISElement = "/vis-" VISRelease
+
+; <PrimaryItem> describes an item (function or product) on board a ship that the
+; data channel is assigned to or associated with. The <PrimaryItem> is considered the
+; primary reference to Gmod, and is normally the item being monitored by the data channel.
+PrimaryItem = ItemPath
+
+; <SecondaryItem> describes another item (function or product) on board a ship that is
+; also related to the data channel. <SecondaryItem> provides additional description and
+; can be used to disambiguate the <PrimaryItem> if there are multiple items of the same
+; kind as <PrimaryItem>. Normally, <SecondaryItem> is an item being served by the
+; <PrimaryItem>.
+; <SecondaryItem> can not be an ancestor of the <PrimaryItem> in the Gmod hierarchy.
+SecondaryItem = ItemPath
+
+; <ItemPath> is a reference to an item (function or product) in the Gmod hierarchy.
+ItemPath = 1*FunctionElement [ProductElement]
+FunctionElement = "/" FunctionCode ["-" Location]
+ProductElement = "/" ProductCode
+
+; <Description> provides a human readable description of the
+; <PrimaryItem> and the <SecondaryItem>.
+; NOTE: <Description> must be removed from a normalized channel ID.
+Description = 1*("/~" *Unreserved)
+
+; <TagElement>s provide additional information about the data channel.
+; A tag may have a standardized value from a codebook or a custom value.
+TagElement = "/" Tag (("-" CodebookValue) / ("~" CustomValue))
+Tag = "qty" / "cnt" / "calc" / "state" / "cmd" / "type" / "pos" / "detail"
+CodebookValue = 1*Unreserved
+CustomValue = 1*Unreserved
+; Valid values for the following elements are specified in VIS:
+VISRelease = 1*Unreserved
+ProductCode = ALPHA 1*DIGIT
+FunctionCode = ((ProductCode ".") / DIGIT) 1*(ALPHA DIGIT ".")
+Location = 1*Unreserved
+; Unreserved characters as per RFC 3986
+Unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"

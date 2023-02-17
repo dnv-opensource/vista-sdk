@@ -39,7 +39,10 @@ public sealed record LocalIdParsingErrorBuilder
         var parsingMap = new Dictionary<ParsingState, string>();
         parsingMap.Add(ParsingState.NamingRule, "Missing or invalid naming rule");
         parsingMap.Add(ParsingState.VisVersion, "Missing or invalid vis version");
-        parsingMap.Add(ParsingState.PrimaryItem, "Missing or invalid primary item");
+        parsingMap.Add(
+            ParsingState.PrimaryItem,
+            "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag."
+        );
         parsingMap.Add(ParsingState.SecondaryItem, "Invalid secondary item");
         parsingMap.Add(ParsingState.ItemDescription, "Missing or invalid /meta prefix");
         parsingMap.Add(ParsingState.MetaQuantity, "Invalid metadata tag: Quantity");

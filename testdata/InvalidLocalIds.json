@@ -110,6 +110,21 @@
             "expectedErrorMessages": [
                 "No metadata tags specified. Local IDs require atleast 1 metadata tag."
             ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/411.1/C101/",
+            "expectedErrorMessages": [
+                "Invalid or missing '/meta' prefix after Primary item",
+                "No metadata tags specified. Local IDs require atleast 1 metadata tag."
+            ]
+        },
+        {
+            "input": "/dnv-v2/vis-3-4a/",
+            "expectedErrorMessages": [
+                "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag.",
+                "Invalid or missing '/meta' prefix after Primary item",
+                "No metadata tags specified. Local IDs require atleast 1 metadata tag."
+            ]
         }
     ]
 }

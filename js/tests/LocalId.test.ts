@@ -279,29 +279,22 @@ describe("LocalId", () => {
             console.warn("Number of errors in dataset:", errored.length);
     });
 
-    test("LocalId parsing validation", async () => {
+    test.each(InvalidData.InvalidLocalIds.map(l => [l.input, l.expectedErrorMessages]))("LocalId parsing validation - %s", async (input, expectedErrorMessages) => {
         const gmod = await gmodPromise;
         const codeBooks = await codebooksPromise;
         const locations = await locationsPromise;
 
-        InvalidData.InvalidLocalIds.forEach(
-            ({ input, expectedErrorMessages }) => {
-                const errorBuilder = new LocalIdParsingErrorBuilder();
-                const localId = LocalIdBuilder.tryParse(
-                    input,
-                    gmod,
-                    codeBooks,
-                    locations,
-                    errorBuilder
-                );
-
-                expect(localId).toBeUndefined();
-                expect(errorBuilder.errors.length).not.toEqual(0);
-                expect(errorBuilder.errors.length).toEqual(
-                    expectedErrorMessages.length
-                );
-            }
+        const errorBuilder = new LocalIdParsingErrorBuilder();
+        const localId = LocalIdBuilder.tryParse(
+            input as string,
+            gmod,
+            codeBooks,
+            locations,
+            errorBuilder
         );
+
+        expect(localId).toBeUndefined();
+        expect(errorBuilder.errors.map(e => e.message)).toEqual(expectedErrorMessages);
     });
 
     test("LocalId Metadata Equality", async () => {

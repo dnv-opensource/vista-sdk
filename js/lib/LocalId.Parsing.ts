@@ -100,15 +100,20 @@ export class LocalIdParser {
         };
 
         while (context.state <= ParsingState.MetaDetail) {
-            if (context.i >= context.span.length) break;
-
-            const nextSlash = context.span.slice(context.i).indexOf("/");
+            const nextStart = Math.min(context.span.length, context.i);
+            const nextSlash = context.span.slice(nextStart).indexOf("/");
             context.segment =
                 nextSlash === -1
-                    ? context.span.slice(context.i)
-                    : context.span.slice(context.i, context.i + nextSlash);
+                    ? context.span.slice(nextStart)
+                    : context.span.slice(nextStart, nextStart + nextSlash);
             switch (context.state) {
                 case ParsingState.NamingRule:
+                    if (context.segment.length == 0) {
+                        errorBuilder?.push(ParsingState.NamingRule);
+                        context.state++;
+                        break;
+                    }
+
                     if (context.segment !== namingRule) {
                         errorBuilder?.push(ParsingState.NamingRule);
                         return;
@@ -121,6 +126,12 @@ export class LocalIdParser {
                     );
                     break;
                 case ParsingState.VisVersion:
+                    if (context.segment.length == 0) {
+                        errorBuilder?.push(ParsingState.VisVersion);
+                        context.state++;
+                        break;
+                    }
+
                     if (!context.segment.startsWith("vis-")) {
                         errorBuilder?.push(ParsingState.VisVersion);
                         return;
@@ -143,6 +154,38 @@ export class LocalIdParser {
                     break;
                 case ParsingState.PrimaryItem:
                     {
+                        if (context.segment.length == 0) {
+                            if (primaryItemStart != -1) {
+                                if (!gmod) return;
+
+                                const path = context.span.slice(
+                                    primaryItemStart,
+                                    context.i - 1
+                                ); // context.i - 1
+
+                                const gmodPath = gmod.tryParsePath(
+                                    path,
+                                    locations
+                                );
+                                if (gmodPath === undefined) {
+                                    errorBuilder?.push({
+                                        type: ParsingState.PrimaryItem,
+                                        message:
+                                            "Invalid GmodPath in Primary item: " +
+                                            path,
+                                    });
+                                }
+                            } else {
+                                errorBuilder?.push(ParsingState.PrimaryItem);
+                            }
+                            errorBuilder?.push({
+                                type: ParsingState.PrimaryItem,
+                                message: "Invalid or missing '/meta' prefix after Primary item",
+                            });
+                            context.state++;
+                            break;
+                        }
+
                         const dashIndex = context.segment.indexOf("-");
                         const code =
                             dashIndex === -1
@@ -318,6 +361,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.SecondaryItem:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const dashIndex = context.segment.indexOf("-");
                         const code =
                             dashIndex === -1
@@ -486,6 +534,11 @@ export class LocalIdParser {
                     }
                     break;
                 case ParsingState.ItemDescription:
+                    if (context.segment.length == 0) {
+                        context.state++;
+                        break;
+                    }
+
                     verbose = true;
 
                     const metaStr = "/meta";
@@ -510,6 +563,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.MetaQuantity:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const res = this.parseMetatag(
                             CodebookName.Quantity,
                             context,
@@ -527,6 +585,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.MetaContent:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const res = this.parseMetatag(
                             CodebookName.Content,
                             context,
@@ -543,6 +606,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.MetaCalculation:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const res = this.parseMetatag(
                             CodebookName.Calculation,
                             context,
@@ -560,6 +628,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.MetaState:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const res = this.parseMetatag(
                             CodebookName.State,
                             context,
@@ -577,6 +650,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.MetaCommand:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const res = this.parseMetatag(
                             CodebookName.Command,
                             context,
@@ -594,6 +672,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.MetaType:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const res = this.parseMetatag(
                             CodebookName.Type,
                             context,
@@ -611,6 +694,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.MetaPosition:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const res = this.parseMetatag(
                             CodebookName.Position,
                             context,
@@ -628,6 +716,11 @@ export class LocalIdParser {
                     break;
                 case ParsingState.MetaDetail:
                     {
+                        if (context.segment.length == 0) {
+                            context.state++;
+                            break;
+                        }
+
                         const res = this.parseMetatag(
                             CodebookName.Detail,
                             context,
