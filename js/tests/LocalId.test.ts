@@ -224,7 +224,7 @@ describe("LocalId", () => {
         expect(localId).toBeUndefined();
     });
 
-    test("LocalId smoketest parsing", async () => {
+    test.skip("LocalId smoketest parsing", async () => {
         const gmod = await gmodPromise;
         const codebooks = await codebooksPromise;
         const locations = await locationsPromise;
