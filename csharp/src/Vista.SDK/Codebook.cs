@@ -65,12 +65,13 @@ public sealed record class Codebook
 
         var isCustom = false;
 
-        if (Name.Equals(CodebookName.Position))
+        if (Name == CodebookName.Position)
         {
-            if ((int)ValidatePosition(value) < 100)
+            var positionValidity = ValidatePosition(value);
+            if ((int)positionValidity < 100)
                 return null;
 
-            if (ValidatePosition(value).Equals(PositionValidationResult.Custom))
+            if (positionValidity == PositionValidationResult.Custom)
                 isCustom = true;
         }
         else
