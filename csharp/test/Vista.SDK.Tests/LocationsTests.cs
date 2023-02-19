@@ -1,3 +1,4 @@
+using FluentAssertions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Vista.SDK.Internal;
@@ -6,17 +7,6 @@ namespace Vista.SDK.Tests;
 
 public class LocationsTests
 {
-    private sealed record TestData(
-        [property: JsonPropertyName("Locations")] TestDataItem[] Locations
-    );
-
-    private sealed record class TestDataItem(
-        string Value,
-        bool Success,
-        string? Output,
-        string[]? ExpectedErrorMessages
-    );
-
     [Fact]
     public void Test_Locations_Loads()
     {
@@ -26,37 +16,40 @@ public class LocationsTests
         Assert.NotNull(locations);
     }
 
-    [Fact]
-    public async void Test_Locations()
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddLocationsData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_Locations(
+        string value,
+        bool success,
+        string? output,
+        string[] expectedErrorMessages
+    )
     {
-        var text = await File.ReadAllTextAsync("testdata/Locations.json");
+        var locations = VIS.Instance.GetLocations(VisVersion.v3_4a);
 
-        var data = JsonSerializer.Deserialize<TestData>(
-            text,
-            new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        var succeeded = locations.TryParse(
+            value,
+            out var parsedLocation,
+            out LocationParsingErrorBuilder errorBuilder
         );
-
-        var (_, vis) = VISTests.GetVis();
-
-        var locations = vis.GetLocations(VisVersion.v3_4a);
-
-        foreach (var (value, success, output, expectedErrorMessages) in data!.Locations)
+        if (!success)
         {
-            locations.TryParse(
-                value,
-                out var parsedLocation,
-                out LocationParsingErrorBuilder errorBuilder
-            );
-            if (!success && expectedErrorMessages is not null)
-            {
-                foreach (var error in errorBuilder.ErrorMessages)
-                {
-                    Assert.Contains(error.message, expectedErrorMessages);
-                }
+            Assert.False(succeeded);
+            Assert.Equal(default, parsedLocation);
 
+            if (expectedErrorMessages.Length > 0)
+            {
                 Assert.NotNull(errorBuilder);
-                Assert.Equal(expectedErrorMessages!.Count(), errorBuilder.ErrorMessages.Count);
+                Assert.True(errorBuilder.HasError);
+                var actualErrors = errorBuilder.ErrorMessages.Select(e => e.message).ToArray();
+                actualErrors.Should().Equal(expectedErrorMessages);
             }
+        }
+        else
+        {
+            Assert.True(succeeded);
+            Assert.False(errorBuilder.HasError);
+            Assert.NotEqual(default, parsedLocation);
             Assert.Equal(output, parsedLocation.ToString());
         }
     }

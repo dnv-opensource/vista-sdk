@@ -133,7 +133,7 @@ public sealed partial class Gmod
 
     private readonly struct Parents
     {
-#if NETCOREAPP3_0_OR_GREATER
+#if NETCOREAPP3_1_OR_GREATER
         private readonly HashSet<string> _codes = new(64);
 #else
         private readonly HashSet<string> _codes = new();

@@ -50,11 +50,8 @@ export class LocalIdBuilder {
         return this._items?.secondaryItem;
     }
 
-    public isValid(locations: Locations): boolean {
-        const validItems = this._items.every(
-            (item) => item?.isValid(locations) ?? true
-        );
-        return !!this._items.primaryItem && validItems && !this.isEmptyMetadata;
+    public isValid(): boolean {
+        return !!this._items.primaryItem && !!this.visVersion && !this.isEmptyMetadata;
     }
 
     public get hasCustomTag(): boolean {
@@ -88,11 +85,10 @@ export class LocalIdBuilder {
     }
 
     public validate(
-        locations: Locations,
         errorBuilder = new LocalIdParsingErrorBuilder()
     ): LocalIdParsingErrorBuilder {
         // Add validation for primaryItem
-        if (!this.primaryItem || this.primaryItem.isValid(locations)) {
+        if (!this.primaryItem) {
             errorBuilder.push(ParsingState.PrimaryItem);
         }
         if (this.isEmptyMetadata) {
@@ -218,7 +214,7 @@ export class LocalIdBuilder {
         if(!item) return this;
         return this.withPrimaryItem(item);
     }
- 
+
     public withSecondaryItem(item: GmodPath): LocalIdBuilder {
         return this.with((s) => (s._items.secondaryItem = item));
     }

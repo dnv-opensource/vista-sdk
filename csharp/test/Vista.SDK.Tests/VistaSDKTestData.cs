@@ -27,9 +27,12 @@ public class VistaSDKTestData
     public static IEnumerable<object[]> AddInvalidGmodPathsData() =>
         AddInvalidGmodPathsData(GmodPathTestData);
 
+    public static IEnumerable<object?[]> AddLocationsData() => AddLocationsData(LocationsTestData);
+
     private static CodebookTestData CodebookTestData => GetData<CodebookTestData>("Codebook");
     private static LocalIdTestData LocalIdTestData => GetData<LocalIdTestData>("InvalidLocalIds");
     private static GmodPathTestData GmodPathTestData => GetData<GmodPathTestData>("GmodPaths");
+    private static LocationsTestData LocationsTestData => GetData<LocationsTestData>("Locations");
 
     private static T GetData<T>(string testName)
     {
@@ -74,6 +77,20 @@ public class VistaSDKTestData
             yield return new object[] { inputPath };
         }
     }
+
+    public static IEnumerable<object?[]> AddLocationsData(LocationsTestData data)
+    {
+        foreach (var location in data.Locations)
+        {
+            yield return new object?[]
+            {
+                location.Value,
+                location.Success,
+                location.Output,
+                location.ExpectedErrorMessages
+            };
+        }
+    }
 }
 
 public record InvalidLocalIds(
@@ -96,4 +113,15 @@ public record CodebookTestData(
     [property: JsonPropertyName("States")] string[][] States,
     [property: JsonPropertyName("Tag")] string[][] Tag,
     [property: JsonPropertyName("DetailTag")] string[][] DetailTag
+);
+
+public sealed record LocationsTestData(
+    [property: JsonPropertyName("locations")] LocationsTestDataItem[] Locations
+);
+
+public sealed record class LocationsTestDataItem(
+    [property: JsonPropertyName("value")] string Value,
+    [property: JsonPropertyName("success")] bool Success,
+    [property: JsonPropertyName("output")] string? Output,
+    [property: JsonPropertyName("expectedErrorMessages")] string[] ExpectedErrorMessages
 );

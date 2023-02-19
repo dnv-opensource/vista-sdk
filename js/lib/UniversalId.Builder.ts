@@ -16,8 +16,8 @@ export class UniversalIdBuilder {
         return this._localId;
     }
 
-    public isValid(locations: Locations): boolean {
-        return !!this.imoNumber?.isValid && !!this.localId?.isValid(locations);
+    public isValid(): boolean {
+        return !!this.imoNumber?.isValid && !!this.localId?.isValid();
     }
 
     public static create(visVersion: VisVersion) {
@@ -39,7 +39,6 @@ export class UniversalIdBuilder {
     }
 
     public validate(
-        locations: Locations,
         errorBuilder = new LocalIdParsingErrorBuilder()
     ): LocalIdParsingErrorBuilder {
         if (!this.imoNumber?.isValid) {
@@ -48,7 +47,7 @@ export class UniversalIdBuilder {
                 message: "Missing or invalid IMO number",
             });
         }
-        this._localId?.validate(locations, errorBuilder);
+        this._localId?.validate(errorBuilder);
         return errorBuilder;
     }
 

@@ -255,7 +255,7 @@ describe("LocalId", () => {
                 );
                 const parsedLocalIdStr = localId?.toString();
 
-                if (localId?.isEmpty || !localId?.isValid(locations)) {
+                if (localId?.isEmpty || !localId?.isValid()) {
                     errored.push({
                         localIdStr,
                         parsedLocalIdStr,
@@ -279,23 +279,33 @@ describe("LocalId", () => {
             console.warn("Number of errors in dataset:", errored.length);
     });
 
-    test.each(InvalidData.InvalidLocalIds.map(l => [l.input, l.expectedErrorMessages]))("LocalId parsing validation - %s", async (input, expectedErrorMessages) => {
-        const gmod = await gmodPromise;
-        const codeBooks = await codebooksPromise;
-        const locations = await locationsPromise;
+    test.each(
+        InvalidData.InvalidLocalIds.map((l) => [
+            l.input,
+            l.expectedErrorMessages,
+        ])
+    )(
+        "LocalId parsing validation - %s",
+        async (input, expectedErrorMessages) => {
+            const gmod = await gmodPromise;
+            const codeBooks = await codebooksPromise;
+            const locations = await locationsPromise;
 
-        const errorBuilder = new LocalIdParsingErrorBuilder();
-        const localId = LocalIdBuilder.tryParse(
-            input as string,
-            gmod,
-            codeBooks,
-            locations,
-            errorBuilder
-        );
+            const errorBuilder = new LocalIdParsingErrorBuilder();
+            const localId = LocalIdBuilder.tryParse(
+                input as string,
+                gmod,
+                codeBooks,
+                locations,
+                errorBuilder
+            );
 
-        expect(localId).toBeUndefined();
-        expect(errorBuilder.errors.map(e => e.message)).toEqual(expectedErrorMessages);
-    });
+            expect(localId).toBeUndefined();
+            expect(errorBuilder.errors.map((e) => e.message)).toEqual(
+                expectedErrorMessages
+            );
+        }
+    );
 
     test("LocalId Metadata Equality", async () => {
         const t1 = await LocalIdBuilder.parseAsync(

@@ -1,16 +1,79 @@
 {
     "locations": [
-        { "value": "20P1S", "success": false, "output": null },
-        { "value": "1P1S", "success": false, "output": null },
-        { "value": "P1S", "success": false, "output": null },
-        { "value": "0", "success": true, "output": "0" },
-        { "value": "FIPU", "success": true, "output": "FIPU" },
-        { "value": "1FIPU", "success": true, "output": "1FIPU" },
-        { "value": "F1IPU", "success": false, "output": null },
-        { "value": "1IFPU", "success": false, "output": null },
-        { "value": "I1FPU", "success": false, "output": null },
-        { "value": "1aFPU", "success": false, "output": null },
-        { "value": "1BFPU", "success": false, "output": null },
+        {
+            "value": "0",
+            "success": true,
+            "output": "0",
+            "expectedErrorMessages": []
+        },
+        {
+            "value": "FIPU",
+            "success": true,
+            "output": "FIPU",
+            "expectedErrorMessages": []
+        },
+        {
+            "value": "34",
+            "success": true,
+            "output": "34",
+            "expectedErrorMessages": []
+        },
+        {
+            "value": "1FIPU",
+            "success": true,
+            "output": "1FIPU",
+            "expectedErrorMessages": []
+        },
+        {
+            "value": "S",
+            "success": true,
+            "output": "S",
+            "expectedErrorMessages": []
+        },
+        {
+            "value": "7C",
+            "success": true,
+            "output": "7C",
+            "expectedErrorMessages": []
+        },
+        {
+            "value": "77C",
+            "success": true,
+            "output": "77C",
+            "expectedErrorMessages": []
+        },
+        {
+            "value": "1IFPU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: '1IFPU' not alphabetically sorted"
+            ]
+        },
+        {
+            "value": "I1FPU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: numeric location should start before location code(s) in location: 'I1FPU'"
+            ]
+        },
+        {
+            "value": "1aFPU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location code: '1aFPU' with invalid location code(s): 'a'"
+            ]
+        },
+        {
+            "value": "1BFPU",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location code: '1BFPU' with invalid location code(s): 'B'"
+            ]
+        },
         {
             "value": "ACFILMOPSU",
             "success": true,
@@ -19,7 +82,7 @@
         },
         {
             "value": "",
-            "success": true,
+            "success": false,
             "output": null,
             "expectedErrorMessages": []
         },
@@ -33,7 +96,7 @@
         },
         {
             "value": null,
-            "success": true,
+            "success": false,
             "output": null,
             "expectedErrorMessages": []
         },
@@ -42,7 +105,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location containing whitespace: A BC"
+                "Invalid location code: 'A BC' with invalid location code(s): ' ','B'"
             ]
         },
         {
@@ -50,15 +113,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location with leading and/or trailing whitespace: ABC "
-            ]
-        },
-        {
-            "value": "A BC",
-            "success": false,
-            "output": null,
-            "expectedErrorMessages": [
-                "Invalid location containing whitespace: A BC"
+                "Invalid location code: 'ABC ' with invalid location code(s): 'B',' '"
             ]
         },
         {
@@ -66,7 +121,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location code: ABCFILMOPSU with invalid character(s): B"
+                "Invalid location code: 'ABCFILMOPSU' with invalid location code(s): 'B'"
             ]
         },
         {
@@ -74,7 +129,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location code: ABDFILMOPSU with invalid character(s): B,D"
+                "Invalid location code: 'ABDFILMOPSU' with invalid location code(s): 'B','D'"
             ]
         },
         {
@@ -82,8 +137,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location: numbers should start before characters in location: ACF2I1LMOPSU",
-                "Invalid location ACF2I1LMOPSU: not numerically sorted"
+                "Invalid location: numeric location should start before location code(s) in location: 'ACF2I1LMOPSU'"
             ]
         },
         {
@@ -91,8 +145,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location: numbers should start before characters in location: A1CFILMOPSU",
-                "Invalid location A1CFILMOPSU: not numerically sorted"
+                "Invalid location: numeric location should start before location code(s) in location: 'A1CFILMOPSU'"
             ]
         },
         {
@@ -100,7 +153,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location FCAILMOPSU: not alphabetically sorted"
+                "Invalid location: 'FCAILMOPSU' not alphabetically sorted"
             ]
         },
         {
@@ -108,8 +161,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location code: aFILMOPSU with invalid character(s): a",
-                "Invalid location aFILMOPSU: characters can only be uppercase"
+                "Invalid location code: 'aFILMOPSU' with invalid location code(s): 'a'"
             ]
         },
         {
@@ -117,15 +169,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location 1F2ILMOPSU: not numerically sorted"
-            ]
-        },
-        {
-            "value": "1F2ILMOPSU",
-            "success": false,
-            "output": null,
-            "expectedErrorMessages": [
-                "Invalid location 1F2ILMOPSU: not numerically sorted"
+                "Invalid location: cannot have multiple separated digits in location: '1F2ILMOPSU'"
             ]
         },
         {
@@ -133,9 +177,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location: numbers should start before characters in location: FC1AILMOPSU",
-                "Invalid location FC1AILMOPSU: not alphabetically sorted",
-                "Invalid location FC1AILMOPSU: not numerically sorted"
+                "Invalid location: 'FC1AILMOPSU' not alphabetically sorted"
             ]
         }
     ]

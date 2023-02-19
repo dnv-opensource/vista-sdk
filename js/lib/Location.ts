@@ -7,6 +7,9 @@ import { LocationsDto } from "./types/LocationDto";
 import { isNullOrWhiteSpace, tryParseInt } from "./util/util";
 import { VisVersion } from "./VisVersion";
 
+const charCodeZero = "0".charCodeAt(0);
+const charCodeNine = "9".charCodeAt(0);
+
 export class Location {
     public readonly value: string;
 
@@ -60,109 +63,115 @@ export class Locations {
     }
 
     public tryParse(
-        locationStr?: string | undefined,
+        locationStr?: string | null | undefined,
         errorBuilder?: LocationParsingErrorBuilder
     ): Location | undefined {
-        return this.tryParseInternal(locationStr, errorBuilder)
+        return this.tryParseInternal(locationStr, errorBuilder);
     }
 
     private tryParseInternal(
-        location: string | undefined,
+        location: string | null | undefined,
         errorBuilder?: LocationParsingErrorBuilder
     ): Location | undefined {
         if (!location) return;
 
         if (isNullOrWhiteSpace(location)) {
-            errorBuilder?.push({
-                type: LocationValidationResult.NullOrWhiteSpace,
-                message: "Invalid location: contains only whitespace",
-            });
-            return;
-        }
-        if (location.trim().length !== location.length) {
-            errorBuilder?.push({
-                type: LocationValidationResult.Invalid,
-                message:
-                    "Invalid location with leading and/or trailing whitespace: " +
-                    location,
-            });
-            return;
-        }
-        if (location.indexOf(" ") >= 0) {
-            errorBuilder?.push({
-                type: LocationValidationResult.Invalid,
-                message: "Invalid location containing whitespace: " + location,
-            });
+            addError(
+                LocationValidationResult.NullOrWhiteSpace,
+                "Invalid location: contains only whitespace"
+            );
             return;
         }
 
-        const locationWithoutNumber = [...location].filter(
-            (l) => !(typeof tryParseInt(l) === "number")
-        );
+        const span = location;
+        let digitStartIndex: number | null = null;
+        let lastLetterIndex: number | null = null;
+        let charsStartIndex: number | null = null;
+        let n: number | null = null;
 
-        const invalidLocationCodes = locationWithoutNumber.filter(
-            (l) => !this._locationCodes.includes(l) || l === "N"
-        );
+        for (let i = 0; i < span.length; i++) {
+            const ch = span.charAt(i);
 
-        if (invalidLocationCodes.length > 0) {
-            const invalidChars = invalidLocationCodes.join(",");
-            errorBuilder?.push({
-                type: LocationValidationResult.InvalidCode,
-                message: `Invalid location code: ${location} with invalid character(s): ${invalidChars}`,
-            });
+            if (isDigitCode(ch)) {
+                if (digitStartIndex === null) {
+                    digitStartIndex = i;
+                    if (lastLetterIndex !== null) {
+                        addError(
+                            LocationValidationResult.Invalid,
+                            `Invalid location: numeric location should start before location code(s) in location: '${location}'`
+                        );
+                        return;
+                    }
+                } else {
+                    if (lastLetterIndex !== null) {
+                        if (lastLetterIndex < digitStartIndex) {
+                            addError(
+                                LocationValidationResult.Invalid,
+                                `Invalid location: numeric location should start before location code(s) in location: '${location}'`
+                            );
+                            return;
+                        } else if (lastLetterIndex > digitStartIndex && lastLetterIndex < i) {
+                            addError(
+                                LocationValidationResult.Invalid,
+                                `Invalid location: cannot have multiple separated digits in location: '${location}'`
+                            );
+                            return;
+                        }
+                    }
+
+                    n = parseInt(span.slice(digitStartIndex, i - digitStartIndex), 10);
+
+                    if (n < 0) {
+                        addError(
+                            LocationValidationResult.Invalid,
+                            `Invalid location: negative numeric location is not allowed: '${location}'`
+                        );
+                        return;
+                    }
+                }
+            } else {
+                if (ch === 'N' || !this._locationCodes.includes(ch)) {
+                    const invalidChars = Array.from(location)
+                        .filter(c => !isDigitCode(c) && (c === 'N' || !this._locationCodes.includes(c)))
+                        .map(c => `'${c}'`)
+                        .join(',');
+                    addError(
+                        LocationValidationResult.InvalidCode,
+                        `Invalid location code: '${location}' with invalid location code(s): ${invalidChars}`
+                    );
+                    return;
+                }
+
+                if (charsStartIndex === null) {
+                    charsStartIndex = i;
+                } else if (i > 0) {
+                    const prevCh = span.charAt(i - 1);
+                    if (ch.localeCompare(prevCh) < 0) {
+                        addError(
+                            LocationValidationResult.InvalidOrder,
+                            `Invalid location: '${location}' not alphabetically sorted`
+                        );
+                        return;
+                    }
+                }
+
+                lastLetterIndex = i;
+            }
         }
-        const numberNotAtStart = [...location].some(
-            (l) =>
-                typeof tryParseInt(l) === "number" &&
-                typeof tryParseInt(location[0]) !== "number"
-        );
-        if (numberNotAtStart)
-            errorBuilder?.push({
-                type: LocationValidationResult.Invalid,
-                message:
-                    "Invalid location: numbers should start before characters in location: " +
-                    location,
-            });
-
-        const alphabeticallySorted = [...locationWithoutNumber].sort((a, b) =>
-            a.toLowerCase().localeCompare(b.toLowerCase())
-        );
-        const notAlphabeticallySorted =
-            JSON.stringify(locationWithoutNumber) !==
-            JSON.stringify(alphabeticallySorted);
-        if (notAlphabeticallySorted)
-            errorBuilder?.push({
-                type: LocationValidationResult.InvalidOrder,
-                message: `Invalid location ${location}: not alphabetically sorted`,
-            });
-
-        const notUpperCase = locationWithoutNumber.some(
-            (l) => l === l.toLowerCase()
-        );
-        if (notUpperCase)
-            errorBuilder?.push({
-                type: LocationValidationResult.Invalid,
-                message: `Invalid location ${location}: characters can only be uppercase`,
-            });
-
-        const locationWithNumber = [...location].filter(
-            (l) => typeof tryParseInt(l) === "number"
-        );
-        const alphaNumericLocation = locationWithNumber.concat(
-            locationWithoutNumber
-        );
-        const notNumericalSorted =
-            JSON.stringify([...location]) !==
-            JSON.stringify(alphaNumericLocation);
-        if (notNumericalSorted)
-            errorBuilder?.push({
-                type: LocationValidationResult.InvalidOrder,
-                message: `Invalid location ${location}: not numerically sorted`,
-            });
-
-        if (errorBuilder?.hasError) return;
 
         return new Location(location);
+
+
+        function addError(type: LocationValidationResult, message: string) {
+            errorBuilder?.push({
+                type,
+                message,
+            });
+        }
+
+        function isDigitCode(ch: string) {
+            return(ch.charCodeAt(0) >= charCodeZero && ch.charCodeAt(0) <= charCodeNine);
+        }
     }
 
     public get relativeLocations() {

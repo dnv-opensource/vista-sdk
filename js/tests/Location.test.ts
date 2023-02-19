@@ -13,37 +13,28 @@ describe("Location", () => {
         expect(location).toBeTruthy();
     });
 
-    test("Location validation", async () => {
-        const locations = await locationPromise;
+    test.each(testData.locations.map((l) => [l]))(
+        "Location parsing - %s",
+        async ({ value, success, output, expectedErrorMessages }) => {
+            const locations = await locationPromise;
 
-        testData.locations.forEach(
-            ({ value, success, output, expectedErrorMessages }) => {
-                const errorBuilder = new LocationParsingErrorBuilder();
-                const createdLocation = locations.tryParse(value, errorBuilder);
-                if (!success) {
-                    expect(createdLocation).toBeUndefined();
-                    if (
-                        expectedErrorMessages !== undefined &&
-                        expectedErrorMessages.length > 0
-                    ) {
-                        const errorMessages = expectedErrorMessages as string[];
-                        errorBuilder.errors.forEach((e) => {
-                            if (!errorMessages.includes(e.message))
-                                console.log(e.message);
-                            expect(
-                                errorMessages.includes(e.message)
-                            ).toBeTruthy();
-                        });
-
-                        expect(errorBuilder.errors.length).not.toEqual(0);
-                        expect(errorBuilder.errors.length).toEqual(
-                            expectedErrorMessages.length
-                        );
-                    }
-                } else expect(createdLocation!).toBeDefined();
-
-                if (output) expect(createdLocation!.toString()).toBe(output);
+            const errorBuilder = new LocationParsingErrorBuilder();
+            const createdLocation = locations.tryParse(value, errorBuilder);
+            if (!success) {
+                expect(createdLocation).toBeUndefined();
+                if (expectedErrorMessages.length > 0) {
+                    expect(errorBuilder).toBeDefined();
+                    expect(errorBuilder.hasError).toBe(true);
+                    const actualErrors = errorBuilder.errors.map(
+                        (e) => e.message
+                    );
+                    expect(actualErrors).toEqual(expectedErrorMessages);
+                }
+            } else {
+                expect(errorBuilder.hasError).toBe(false);
+                expect(createdLocation).toBeTruthy();
+                expect(createdLocation!.toString()).toBe(output);
             }
-        );
-    });
+        }
+    );
 });

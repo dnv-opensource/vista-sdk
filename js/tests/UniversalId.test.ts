@@ -39,8 +39,8 @@ describe("UniversalId", () => {
                 errorBuilder
             );
             expect(universalId.imoNumber.value).toBe(1234567);
-            expect(universalId.builder.localId?.isValid(locations)).toBe(true);
-            expect(universalId.builder.isValid(locations)).toBe(true);
+            expect(universalId.builder.localId?.isValid()).toBe(true);
+            expect(universalId.builder.isValid()).toBe(true);
             expect(errorBuilder.errors.length).toBe(0);
         });
     });
@@ -86,7 +86,7 @@ describe("UniversalId", () => {
             );
 
             expect(universalIdBuilder).toBeTruthy();
-            expect(universalIdBuilder?.localId?.isValid(locations)).toBe(
+            expect(universalIdBuilder?.localId?.isValid()).toBe(
                 data.validLocalId
             );
             expect(errorBuilder.errors).toHaveLength(data.numErrors);
