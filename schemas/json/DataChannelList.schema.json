@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://vista.dnv.com/DataChannelListPackage.schema.json",
+    "$id": "urn:ISO19848:Ship_Data_Definition",
     "title": "DataChannelListPackage",
     "description": "A DataChannelList package for ISO19848",
     "type": "object",
@@ -174,10 +174,10 @@
                     "type": "string"
                 },
                 "UpdateCycle": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "CalculationPeriod": {
-                    "type": "string"
+                    "type": "number"
                 }
             },
             "required": [
@@ -204,10 +204,10 @@
             "type": "object",
             "properties": {
                 "High": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "Low": {
-                    "type": "string"
+                    "type": "number"
                 }
             },
             "required": [
@@ -240,34 +240,39 @@
                     }
                 },
                 "FractionDigits": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "Length": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "MaxExclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MaxInclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MaxLength": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "MinExclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MinInclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MinLength": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "Pattern": {
                     "type": "string"
                 },
                 "TotalDigits": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "WhiteSpace": {
                     "type": "string",
