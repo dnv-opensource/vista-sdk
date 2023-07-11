@@ -1,6 +1,8 @@
+using Vista.SDK.Internal;
+
 namespace Vista.SDK;
 
-public interface ILocalId
+public interface ILocalId<T> where T : ILocalId<T>
 {
     VisVersion VisVersion { get; }
 
@@ -10,23 +12,13 @@ public interface ILocalId
 
     GmodPath? SecondaryItem { get; }
 
-    MetadataTag? Quantity { get; }
-
-    MetadataTag? Content { get; }
-
-    MetadataTag? Calculation { get; }
-
-    MetadataTag? State { get; }
-
-    MetadataTag? Command { get; }
-
-    MetadataTag? Type { get; }
-
-    MetadataTag? Position { get; }
-
-    MetadataTag? Detail { get; }
-
     bool HasCustomTag { get; }
+    IReadOnlyList<MetadataTag> MetadataTags { get; }
 
+#if NET7_0_OR_GREATER
+
+    static abstract T Parse(string localIdStr);
+    static abstract T Parse(string localIdStr, out LocalIdParsingErrorBuilder errorBuilder);
+#endif
     string ToString();
 }

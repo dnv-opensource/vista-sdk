@@ -1,19 +1,18 @@
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Vista.SDK.Internal;
 
-namespace Vista.SDK;
+namespace Vista.SDK.Experimental;
 
-public sealed partial record class LocalIdBuilder
+public sealed partial record class PMSLocalIdBuilder
 {
-    public static LocalIdBuilder Parse(string localIdStr)
+    public static PMSLocalIdBuilder Parse(string localIdStr)
     {
         if (!TryParse(localIdStr, out var localId))
             throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
         return localId;
     }
 
-    public static LocalIdBuilder Parse(
+    public static PMSLocalIdBuilder Parse(
         string localIdStr,
         out LocalIdParsingErrorBuilder errorBuilder
     )
@@ -25,7 +24,7 @@ public sealed partial record class LocalIdBuilder
 
     public static bool TryParse(
         string localIdStr,
-        [MaybeNullWhen(false)] out LocalIdBuilder localId
+        [MaybeNullWhen(false)] out PMSLocalIdBuilder localId
     )
     {
         return TryParse(localIdStr, out _, out localId);
@@ -34,7 +33,7 @@ public sealed partial record class LocalIdBuilder
     public static bool TryParse(
         string localIdStr,
         out LocalIdParsingErrorBuilder errorBuilder,
-        [MaybeNullWhen(false)] out LocalIdBuilder localId
+        [MaybeNullWhen(false)] out PMSLocalIdBuilder localId
     )
     {
         errorBuilder = LocalIdParsingErrorBuilder.Empty;
@@ -45,7 +44,7 @@ public sealed partial record class LocalIdBuilder
     internal static bool TryParseInternal(
         string localIdStr,
         ref LocalIdParsingErrorBuilder errorBuilder,
-        [MaybeNullWhen(false)] out LocalIdBuilder localId
+        [MaybeNullWhen(false)] out PMSLocalIdBuilder localId
     )
     {
         localId = null;
@@ -72,10 +71,11 @@ public sealed partial record class LocalIdBuilder
         GmodPath? secondaryItem = null;
         MetadataTag? qty = null;
         MetadataTag? cnt = null;
-        MetadataTag? calc = null;
         MetadataTag? stateTag = null;
         MetadataTag? cmd = null;
-        MetadataTag? type = null;
+        MetadataTag? func = null;
+        MetadataTag? maint = null;
+        MetadataTag? act = null;
         MetadataTag? pos = null;
         MetadataTag? detail = null;
         bool verbose = false;
@@ -476,28 +476,6 @@ public sealed partial record class LocalIdBuilder
                             return false;
                     }
                     break;
-                case ParsingState.MetaCalculation:
-
-                    {
-                        if (segment.Length == 0)
-                        {
-                            state++;
-                            break;
-                        }
-
-                        var result = ParseMetatag(
-                            CodebookName.Calculation,
-                            ref state,
-                            ref i,
-                            in segment,
-                            ref calc,
-                            codebooks,
-                            ref errorBuilder
-                        );
-                        if (!result)
-                            return false;
-                    }
-                    break;
                 case ParsingState.MetaState:
 
                     {
@@ -542,7 +520,7 @@ public sealed partial record class LocalIdBuilder
                             return false;
                     }
                     break;
-                case ParsingState.MetaType:
+                case ParsingState.MetaFunctionalServices:
 
                     {
                         if (segment.Length == 0)
@@ -552,11 +530,55 @@ public sealed partial record class LocalIdBuilder
                         }
 
                         var result = ParseMetatag(
-                            CodebookName.Type,
+                            CodebookName.FunctionalServices,
                             ref state,
                             ref i,
                             in segment,
-                            ref type,
+                            ref func,
+                            codebooks,
+                            ref errorBuilder
+                        );
+                        if (!result)
+                            return false;
+                    }
+                    break;
+                case ParsingState.MetaMaintenanceCategory:
+
+                    {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
+                        var result = ParseMetatag(
+                            CodebookName.MaintenanceCategory,
+                            ref state,
+                            ref i,
+                            in segment,
+                            ref maint,
+                            codebooks,
+                            ref errorBuilder
+                        );
+                        if (!result)
+                            return false;
+                    }
+                    break;
+                case ParsingState.MetaActivityType:
+
+                    {
+                        if (segment.Length == 0)
+                        {
+                            state++;
+                            break;
+                        }
+
+                        var result = ParseMetatag(
+                            CodebookName.ActivityType,
+                            ref state,
+                            ref i,
+                            in segment,
+                            ref act,
                             codebooks,
                             ref errorBuilder
                         );
@@ -620,10 +642,11 @@ public sealed partial record class LocalIdBuilder
             .WithVerboseMode(in verbose)
             .TryWithMetadataTag(in qty)
             .TryWithMetadataTag(in cnt)
-            .TryWithMetadataTag(in calc)
             .TryWithMetadataTag(in stateTag)
             .TryWithMetadataTag(in cmd)
-            .TryWithMetadataTag(in type)
+            .TryWithMetadataTag(in func)
+            .TryWithMetadataTag(in maint)
+            .TryWithMetadataTag(in act)
             .TryWithMetadataTag(in pos)
             .TryWithMetadataTag(in detail);
 
@@ -683,7 +706,6 @@ public sealed partial record class LocalIdBuilder
                 AdvanceParser(ref state, actualState.Value);
                 return true;
             }
-
             var nextState = NextParsingState(actualState.Value);
 
             var value = segment.Slice(prefixIndex + 1);
@@ -723,6 +745,7 @@ public sealed partial record class LocalIdBuilder
                     state,
                     $"Invalid {codebookName} metadata tag: '{value.ToString()}'. Use prefix '~' for custom values"
                 );
+
             if (nextState is null)
                 AdvanceParser(ref i, in segment, ref state);
             else
@@ -736,14 +759,16 @@ public sealed partial record class LocalIdBuilder
                 return ParsingState.MetaQuantity;
             if (prefix.SequenceEqual("cnt".AsSpan()))
                 return ParsingState.MetaContent;
-            if (prefix.SequenceEqual("calc".AsSpan()))
-                return ParsingState.MetaCalculation;
             if (prefix.SequenceEqual("state".AsSpan()))
                 return ParsingState.MetaState;
             if (prefix.SequenceEqual("cmd".AsSpan()))
                 return ParsingState.MetaCommand;
-            if (prefix.SequenceEqual("type".AsSpan()))
-                return ParsingState.MetaType;
+            if (prefix.SequenceEqual("funct.svc".AsSpan()))
+                return ParsingState.MetaFunctionalServices;
+            if (prefix.SequenceEqual("maint.cat".AsSpan()))
+                return ParsingState.MetaMaintenanceCategory;
+            if (prefix.SequenceEqual("act.type".AsSpan()))
+                return ParsingState.MetaActivityType;
             if (prefix.SequenceEqual("pos".AsSpan()))
                 return ParsingState.MetaPosition;
             if (prefix.SequenceEqual("detail".AsSpan()))
@@ -756,11 +781,12 @@ public sealed partial record class LocalIdBuilder
             prev switch
             {
                 ParsingState.MetaQuantity => ParsingState.MetaContent,
-                ParsingState.MetaContent => ParsingState.MetaCalculation,
-                ParsingState.MetaCalculation => ParsingState.MetaState,
+                ParsingState.MetaContent => ParsingState.MetaState,
                 ParsingState.MetaState => ParsingState.MetaCommand,
-                ParsingState.MetaCommand => ParsingState.MetaType,
-                ParsingState.MetaType => ParsingState.MetaPosition,
+                ParsingState.MetaCommand => ParsingState.MetaFunctionalServices,
+                ParsingState.MetaFunctionalServices => ParsingState.MetaMaintenanceCategory,
+                ParsingState.MetaMaintenanceCategory => ParsingState.MetaActivityType,
+                ParsingState.MetaActivityType => ParsingState.MetaPosition,
                 ParsingState.MetaPosition => ParsingState.MetaDetail,
                 _ => null
             };
@@ -795,16 +821,16 @@ public sealed partial record class LocalIdBuilder
                     var secIndex = span.IndexOf("/sec".AsSpan());
                     var endOfSecIndex = (secIndex + "/sec".Length + 1);
                     return secIndex != -1
-                        ? (secIndex, endOfSecIndex)
-                        : customIndex != -1
-                            ? (customIndex, endOfCustomIndex)
-                            : (metaIndex, endOfMetaIndex);
+                      ? (secIndex, endOfSecIndex)
+                      : customIndex != -1
+                          ? (customIndex, endOfCustomIndex)
+                          : (metaIndex, endOfMetaIndex);
                 }
 
                 case (ParsingState.SecondaryItem):
                     return customIndex != -1
-                        ? (customIndex, endOfCustomIndex)
-                        : (metaIndex, endOfMetaIndex);
+                      ? (customIndex, endOfCustomIndex)
+                      : (metaIndex, endOfMetaIndex);
 
                 default:
                     return (metaIndex, endOfMetaIndex);

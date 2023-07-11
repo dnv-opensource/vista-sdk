@@ -187,4 +187,52 @@ public class PMSLocalIdTests
         Assert.True(localId == otherLocalId);
         Assert.NotSame(localId, otherLocalId);
     }
+
+    [Theory]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/411.1/C101.661i-F/C621/meta/maint.cat-preventive/act.type-service"
+    )]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/411.1/C101.661i-A/C621/meta/maint.cat-preventive/act.type-service"
+    )]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/511.11-2/C101.663i/C663/meta/maint.cat-preventive/act.type-service/detail-turbine"
+    )]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/511.15-1/E32/meta/maint.cat-preventive/act.type-check"
+    )]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/621.21/S90.1/S41/~fuel.oil.piping/~pipes/meta/maint.cat-preventive/act.type-service"
+    )]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/411.1/C101.64/S201/meta/maint.cat-preventive/act.type-check"
+    )]
+    public void Test_Parsing(string pmsLocalIdStr)
+    {
+        var parsed = PMSLocalIdBuilder.TryParse(pmsLocalIdStr, out var pmsLocalId);
+
+        Assert.True(parsed);
+        Assert.Equal(pmsLocalIdStr, pmsLocalId!.ToString());
+    }
+
+    [Theory]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/621.21/S90.1/S41/~fuel.oil.piping/~pipes/meta/maint.cat-preventive/act.type-service"
+    )]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/411.1/C101.64/S201/meta/maint.cat-preventive/act.type-check"
+    )]
+    public void Test_Build(string pmsLocalIdStr)
+    {
+        var parsedBuilder = PMSLocalIdBuilder.TryParse(pmsLocalIdStr, out var pmsLocalIdBuilder);
+        var parsedId = PMSLocalId.Parse(pmsLocalIdStr);
+        Assert.True(parsedBuilder);
+        Assert.NotNull(parsedId);
+        Assert.Equal(pmsLocalIdStr, pmsLocalIdBuilder!.ToString());
+
+        var builtFromBuilder = pmsLocalIdBuilder.Build();
+        Assert.NotNull(builtFromBuilder);
+        Assert.NotSame(parsedId, builtFromBuilder);
+        Assert.True(parsedId == builtFromBuilder);
+    }
 }

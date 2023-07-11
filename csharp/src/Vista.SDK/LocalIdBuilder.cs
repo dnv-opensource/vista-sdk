@@ -3,7 +3,7 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public partial record class LocalIdBuilder : ILocalIdBuilder
+public partial record class LocalIdBuilder : ILocalIdBuilder<LocalIdBuilder, LocalId>
 {
     public static readonly string NamingRule = "dnv-v2";
     public static readonly CodebookName[] UsedCodebooks = new[]
@@ -321,6 +321,22 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         && Command is null
         && Type is null
         && Detail is null;
+
+    public IReadOnlyList<MetadataTag> MetadataTags =>
+        new List<MetadataTag?>()
+        {
+            Quantity,
+            Calculation,
+            Content,
+            Position,
+            State,
+            Command,
+            Type,
+            Detail
+        }
+            .Where(m => m is not null)
+            .Cast<MetadataTag>()
+            .ToArray();
 
     public bool Equals(LocalIdBuilder? other)
     {

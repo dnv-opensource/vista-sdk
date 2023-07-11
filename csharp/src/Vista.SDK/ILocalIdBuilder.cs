@@ -1,6 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+using Vista.SDK.Internal;
+
 namespace Vista.SDK;
 
-public interface ILocalIdBuilder
+public interface ILocalIdBuilder<TBuilder, TResult>
+    where TBuilder : ILocalIdBuilder<TBuilder, TResult>
+    where TResult : ILocalId<TResult>
 {
     VisVersion? VisVersion { get; }
 
@@ -10,52 +15,50 @@ public interface ILocalIdBuilder
 
     GmodPath? SecondaryItem { get; }
 
-    MetadataTag? Quantity { get; }
-
-    MetadataTag? Content { get; }
-
-    MetadataTag? Calculation { get; }
-
-    MetadataTag? State { get; }
-
-    MetadataTag? Command { get; }
-
-    MetadataTag? Type { get; }
-
-    MetadataTag? Position { get; }
-
-    MetadataTag? Detail { get; }
-
     bool HasCustomTag { get; }
 
-    LocalIdBuilder WithVisVersion(in string visVersion);
-    LocalIdBuilder WithVisVersion(in VisVersion version);
-    LocalIdBuilder TryWithVisVersion(in VisVersion? version);
-    LocalIdBuilder TryWithVisVersion(in string? visVersionStr, out bool succeeded);
-    LocalIdBuilder WithoutVisVersion();
+    IReadOnlyList<MetadataTag> MetadataTags { get; }
 
-    LocalIdBuilder WithVerboseMode(in bool verboseMode);
+    TBuilder WithVisVersion(in string visVersion);
+    TBuilder WithVisVersion(in VisVersion version);
+    TBuilder TryWithVisVersion(in VisVersion? version);
+    TBuilder TryWithVisVersion(in string? visVersionStr, out bool succeeded);
+    TBuilder WithoutVisVersion();
 
-    LocalIdBuilder WithPrimaryItem(in GmodPath item);
-    LocalIdBuilder TryWithPrimaryItem(in GmodPath? item);
-    LocalIdBuilder TryWithPrimaryItem(in GmodPath? item, out bool succeeded);
-    LocalIdBuilder WithoutPrimaryItem();
+    TBuilder WithVerboseMode(in bool verboseMode);
 
-    LocalIdBuilder WithSecondaryItem(in GmodPath item);
-    LocalIdBuilder TryWithSecondaryItem(in GmodPath? item);
-    LocalIdBuilder TryWithSecondaryItem(in GmodPath? item, out bool succeeded);
-    LocalIdBuilder WithoutSecondaryItem();
+    TBuilder WithPrimaryItem(in GmodPath item);
+    TBuilder TryWithPrimaryItem(in GmodPath? item);
+    TBuilder TryWithPrimaryItem(in GmodPath? item, out bool succeeded);
+    TBuilder WithoutPrimaryItem();
 
-    LocalIdBuilder WithMetadataTag(in MetadataTag metadataTag);
-    LocalIdBuilder TryWithMetadataTag(in MetadataTag? metadataTag);
-    LocalIdBuilder TryWithMetadataTag(in MetadataTag? metadataTag, out bool succeeded);
-    LocalIdBuilder WithoutMetadataTag(in CodebookName name);
+    TBuilder WithSecondaryItem(in GmodPath item);
+    TBuilder TryWithSecondaryItem(in GmodPath? item);
+    TBuilder TryWithSecondaryItem(in GmodPath? item, out bool succeeded);
+    TBuilder WithoutSecondaryItem();
 
-    LocalId Build();
+    TBuilder WithMetadataTag(in MetadataTag metadataTag);
+    TBuilder TryWithMetadataTag(in MetadataTag? metadataTag);
+    TBuilder TryWithMetadataTag(in MetadataTag? metadataTag, out bool succeeded);
+    TBuilder WithoutMetadataTag(in CodebookName name);
+
+    TResult Build();
 
     bool IsValid { get; }
 
     bool IsEmpty { get; }
 
+#if NET7_0_OR_GREATER
+    static abstract TBuilder Parse(string localIdStr);
+    static abstract TBuilder Parse(string localIdStr, out LocalIdParsingErrorBuilder errorBuilder);
+
+    static abstract bool TryParse(string localIdStr, [MaybeNullWhen(false)] out TBuilder localId);
+
+    static abstract bool TryParse(
+        string localIdStr,
+        out LocalIdParsingErrorBuilder errorBuilder,
+        [MaybeNullWhen(false)] out TBuilder localId
+    );
+#endif
     string ToString();
 }

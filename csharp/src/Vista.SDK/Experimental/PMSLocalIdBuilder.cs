@@ -3,7 +3,7 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK.Experimental;
 
-public sealed record class PMSLocalIdBuilder
+public partial record class PMSLocalIdBuilder : ILocalIdBuilder<PMSLocalIdBuilder, PMSLocalId>
 {
     public static readonly string NamingRule = "dnv-v2-experimental";
     public static readonly CodebookName[] UsedCodebooks = new[]
@@ -347,6 +347,23 @@ public sealed record class PMSLocalIdBuilder
         && ActivityType is null
         && Detail is null;
 
+    public IReadOnlyList<MetadataTag> MetadataTags =>
+        new List<MetadataTag?>()
+        {
+            Quantity,
+            Content,
+            Position,
+            State,
+            Command,
+            FunctionalServices,
+            MaintenanceCategory,
+            ActivityType,
+            Detail
+        }
+            .Where(m => m is not null)
+            .Cast<MetadataTag>()
+            .ToArray();
+
     public bool Equals(PMSLocalIdBuilder? other)
     {
         if (other is null)
@@ -428,5 +445,19 @@ public sealed record class PMSLocalIdBuilder
         ToString(builder);
 
         return lease.ToString();
+    }
+
+    public PMSLocalId Build()
+    {
+        if (IsEmpty)
+            throw new InvalidOperationException(
+                "Cant build to PMSLocalId from empty PMSLocalIdBuilder"
+            );
+        if (!IsValid)
+            throw new InvalidOperationException(
+                "Cant build to PMSLocalId from invalid PMSLocalIdBuilder"
+            );
+
+        return new PMSLocalId(this);
     }
 }

@@ -2,13 +2,13 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public class LocalId : ILocalId, IEquatable<LocalId>
+public class LocalId : ILocalId<LocalId>, IEquatable<LocalId>
 {
     public static readonly string NamingRule = "dnv-v2";
 
-    private readonly ILocalIdBuilder _builder;
+    private readonly LocalIdBuilder _builder;
 
-    internal LocalId(ILocalIdBuilder builder)
+    internal LocalId(LocalIdBuilder builder)
     {
         if (builder.IsEmpty)
             throw new ArgumentException("LocalId cannot be constructed from empty LocalIdBuilder");
@@ -44,6 +44,8 @@ public class LocalId : ILocalId, IEquatable<LocalId>
     public MetadataTag? Detail => _builder.Detail;
 
     public bool HasCustomTag => _builder.HasCustomTag;
+
+    public IReadOnlyList<MetadataTag> MetadataTags => _builder.MetadataTags;
 
     public sealed override bool Equals(object? obj) => Equals(obj as LocalId);
 
@@ -93,6 +95,9 @@ internal enum ParsingState
     MetaState,
     MetaCommand,
     MetaType,
+    MetaFunctionalServices,
+    MetaMaintenanceCategory,
+    MetaActivityType,
     MetaPosition,
     MetaDetail,
 
