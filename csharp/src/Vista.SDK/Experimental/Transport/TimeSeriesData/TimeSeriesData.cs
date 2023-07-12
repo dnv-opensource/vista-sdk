@@ -5,7 +5,7 @@ public sealed record TimeSeriesDataPackage(Package Package);
 public sealed record Package(Header? Header, IReadOnlyList<TimeSeriesData> TimeSeriesData);
 
 public sealed record Header(
-    AssetId AssetId,
+    AssetIdentifier AssetId,
     TimeSpan? TimeSpan,
     DateTimeOffset? DateCreated,
     DateTimeOffset? DateModified,

@@ -1,6 +1,6 @@
 namespace Vista.SDK.Experimental.Transport;
 
-public readonly record struct AssetId
+public readonly record struct AssetIdentifier
 {
     private readonly int _tag;
     private readonly ImoNumber _imoNumber;
@@ -13,14 +13,14 @@ public readonly record struct AssetId
 
     public readonly string? OtherId => _tag == 2 ? _otherId : null;
 
-    private AssetId(ImoNumber value)
+    private AssetIdentifier(ImoNumber value)
     {
         _tag = 1;
         _imoNumber = value;
         _otherId = null;
     }
 
-    private AssetId(string value)
+    private AssetIdentifier(string value)
     {
         _tag = 2;
         _imoNumber = default;
@@ -56,7 +56,7 @@ public readonly record struct AssetId
             _ => throw new Exception("Invalid state exception"),
         };
 
-    public static AssetId Parse(ReadOnlySpan<char> value)
+    public static AssetIdentifier Parse(ReadOnlySpan<char> value)
     {
         if (value.IsEmpty)
             throw new ArgumentNullException(nameof(value));
@@ -66,12 +66,12 @@ public readonly record struct AssetId
             value.StartsWith("IMO".AsSpan(), StringComparison.OrdinalIgnoreCase)
             && SDK.ImoNumber.TryParse(value, out var imo)
         )
-            return new AssetId(imo);
+            return new AssetIdentifier(imo);
         else
-            return new AssetId(value.ToString());
+            return new AssetIdentifier(value.ToString());
     }
 
-    public static AssetId Parse(string value)
+    public static AssetIdentifier Parse(string value)
     {
         if (value is null)
             throw new ArgumentNullException(nameof(value));
@@ -82,10 +82,10 @@ public readonly record struct AssetId
             span.StartsWith("IMO".AsSpan(), StringComparison.OrdinalIgnoreCase)
             && SDK.ImoNumber.TryParse(span, out var imo)
         )
-            return new AssetId(imo);
+            return new AssetIdentifier(imo);
         else
-            return new AssetId(value);
+            return new AssetIdentifier(value);
     }
 
-    public static implicit operator AssetId(ImoNumber id) => new AssetId(id);
+    public static implicit operator AssetIdentifier(ImoNumber id) => new AssetIdentifier(id);
 }

@@ -10,7 +10,7 @@ public partial class IsoMessageTests
         new TimeSeriesDataPackage(
             new Package(
                 new Header(
-                    AssetId.Parse("IMO1234567"),
+                    AssetIdentifier.Parse("IMO1234567"),
                     new Experimental.Transport.TimeSeries.TimeSpan(
                         DateTimeOffset.Parse("2016-01-01T12:00:00Z"),
                         DateTimeOffset.Parse("2016-01-03T12:00:00Z")
