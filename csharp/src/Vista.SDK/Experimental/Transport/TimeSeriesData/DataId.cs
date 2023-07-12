@@ -1,6 +1,6 @@
 namespace Vista.SDK.Experimental.Transport;
 
-public readonly record struct DataId
+public readonly record struct DataId : IEquatable<DataId>
 {
     private readonly int _tag;
     private readonly LocalId? _localId;
@@ -16,7 +16,7 @@ public readonly record struct DataId
 
     public readonly string? ShortId => _tag == 3 ? _shortId : null;
 
-    private DataId(LocalId value)
+    public DataId(LocalId value)
     {
         _tag = 1;
         _localId = value;
@@ -24,7 +24,7 @@ public readonly record struct DataId
         _shortId = null;
     }
 
-    private DataId(PMSLocalId value)
+    public DataId(PMSLocalId value)
     {
         _tag = 2;
         _localId = null;
@@ -32,7 +32,7 @@ public readonly record struct DataId
         _shortId = null;
     }
 
-    private DataId(string value)
+    public DataId(string value)
     {
         _tag = 3;
         _localId = null;
@@ -84,7 +84,6 @@ public readonly record struct DataId
     {
         if (value is null)
             throw new ArgumentNullException(nameof(value));
-
         if (LocalIdBuilder.TryParse(value, out var localIdBuilder))
             return new DataId(localIdBuilder.Build());
         else if (PMSLocalIdBuilder.TryParse(value, out var pmsLocalIdBuilder))
@@ -92,4 +91,26 @@ public readonly record struct DataId
         else
             return new DataId(value);
     }
+
+    public override int GetHashCode()
+    {
+        var hash = default(HashCode);
+
+        Switch(
+            l => hash.Add(l.GetHashCode()),
+            pl => hash.Add(pl.GetHashCode()),
+            s => hash.Add(s.GetHashCode())
+        );
+
+        return hash.ToHashCode();
+    }
+
+    public bool Equals(DataId other) =>
+        _tag switch
+        {
+            1 => other.IsLocalId && other.LocalId == _localId,
+            2 => other.IsPmsLocalId && other.PMSLocalId == _pmsLocalId,
+            3 => other.IsShortId && other.ShortId == _shortId,
+            _ => throw new Exception("Invalid state exception"),
+        };
 }
