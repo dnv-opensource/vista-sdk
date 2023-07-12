@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DotNetVersion>6.0.0</DotNetVersion>
+    <DotNetVersion>7.0.0</DotNetVersion>
   </PropertyGroup>
 
   <ItemGroup>

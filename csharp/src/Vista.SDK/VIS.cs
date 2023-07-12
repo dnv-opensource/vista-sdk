@@ -119,7 +119,7 @@ public sealed class VIS : IVIS
 
                 return dto;
             }
-        );
+        )!;
     }
 
     public Gmod GetGmod(VisVersion visVersion)
@@ -138,7 +138,7 @@ public sealed class VIS : IVIS
 
                 return new Gmod(visVersion, dto);
             }
-        );
+        )!;
     }
 
     public IReadOnlyDictionary<VisVersion, Gmod> GetGmodsMap(IEnumerable<VisVersion> visVersions)
@@ -172,7 +172,7 @@ public sealed class VIS : IVIS
 
                 return dto;
             }
-        );
+        )!;
     }
 
     private GmodVersioning GetGmodVersioning()
@@ -188,7 +188,7 @@ public sealed class VIS : IVIS
 
                 return new GmodVersioning(dto);
             }
-        );
+        )!;
     }
 
     private CodebooksDto GetCodebooksDto(VisVersion visVersion)
@@ -206,7 +206,7 @@ public sealed class VIS : IVIS
 
                 return dto;
             }
-        );
+        )!;
     }
 
     public Codebooks GetCodebooks(VisVersion visVersion)
@@ -222,7 +222,7 @@ public sealed class VIS : IVIS
 
                 return new Codebooks(visVersion, dto);
             }
-        );
+        )!;
     }
 
     public IReadOnlyDictionary<VisVersion, Codebooks> GetCodebooksMap(
@@ -258,7 +258,7 @@ public sealed class VIS : IVIS
 
                 return dto;
             }
-        );
+        )!;
     }
 
     public Locations GetLocations(VisVersion visversion)
@@ -274,7 +274,7 @@ public sealed class VIS : IVIS
 
                 return new Locations(visversion, dto);
             }
-        );
+        )!;
     }
 
     public IReadOnlyDictionary<VisVersion, Locations> GetLocationsMap(
