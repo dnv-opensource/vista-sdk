@@ -46,7 +46,7 @@ namespace Vista.SDK.Experimental.Transport.Json.TimeSeriesData
 
         {
 
-            this.AssetId = @assetId;
+            this.AssetID = @assetId;
 
             this.TimeSpan = @timeSpan;
 
@@ -59,8 +59,8 @@ namespace Vista.SDK.Experimental.Transport.Json.TimeSeriesData
             this.SystemConfiguration = @systemConfiguration;
 
         }
-        [System.Text.Json.Serialization.JsonPropertyName("AssetId")]
-        public string AssetId { get; }
+        [System.Text.Json.Serialization.JsonPropertyName("AssetID")]
+        public string AssetID { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("TimeSpan")]

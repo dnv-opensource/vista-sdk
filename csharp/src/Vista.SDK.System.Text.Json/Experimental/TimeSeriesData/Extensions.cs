@@ -94,7 +94,7 @@ public static class Extensions
                 h is null
                   ? null
                   : new Domain.Header(
-                        AssetIdentifier.Parse(h.AssetId),
+                        AssetIdentifier.Parse(h.AssetID),
                         h.TimeSpan is null
                           ? null
                           : new Domain.TimeSpan(h.TimeSpan.Start, h.TimeSpan.End),
