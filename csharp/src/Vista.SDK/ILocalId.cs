@@ -2,7 +2,8 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public interface ILocalId<T> where T : ILocalId<T>
+public interface ILocalId<T>
+    where T : ILocalId<T>
 {
     VisVersion VisVersion { get; }
 
