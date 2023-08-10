@@ -24,9 +24,13 @@
                     "$ref": "#/definitions/Header"
                 },
                 "TimeSeriesData": {
-                    "$ref": "#/definitions/TimeSeriesData"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TimeSeriesData"
+                    }
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "Header": {
             "type": "object",
@@ -74,7 +78,8 @@
                     "type": "string",
                     "format": "date-time"
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "ConfigurationReference": {
             "type": "object",
@@ -90,51 +95,53 @@
                     "type": "string",
                     "format": "date-time"
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "TimeSeriesData": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": [],
-                "properties": {
-                    "DataConfiguration": {
-                        "$ref": "#/definitions/ConfigurationReference"
-                    },
-                    "TabularData": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "DataConfiguration": {
+                    "$ref": "#/definitions/ConfigurationReference"
+                },
+                "TabularData": {
+                    "type": "array",
+                    "items": {
                         "$ref": "#/definitions/TabularData"
-                    },
-                    "EventData": {
-                        "$ref": "#/definitions/EventData"
                     }
+                },
+                "EventData": {
+                    "$ref": "#/definitions/EventData"
                 }
             }
         },
         "TabularData": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": [],
-                "properties": {
-                    "NumberOfDataSet": {
-                        "type": "integer",
-                        "minimum": 0
-                    },
-                    "NumberOfDataChannel": {
-                        "type": "integer",
-                        "minimum": 0
-                    },
-                    "DataChannelID": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "DataSet": {
+            "type": "object",
+            "required": [],
+            "properties": {
+                "NumberOfDataSet": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "NumberOfDataChannel": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "DataChannelID": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "DataSet": {
+                    "type": "array",
+                    "items": {
                         "$ref": "#/definitions/DataSet_Tabular"
                     }
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "EventData": {
             "type": "object",
@@ -145,64 +152,63 @@
                     "minimum": 0
                 },
                 "DataSet": {
-                    "$ref": "#/definitions/DataSet_Event"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DataSet_Event"
+                    }
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "DataSet_Tabular": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": [
-                    "TimeStamp",
-                    "Value"
-                ],
-                "properties": {
-                    "TimeStamp": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "Value": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "Quality": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
+            "type": "object",
+            "required": [
+                "TimeStamp",
+                "Value"
+            ],
+            "properties": {
+                "TimeStamp": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "Value": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "Quality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
                     }
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "DataSet_Event": {
-            "type": "array",
-            "items": {
-                "title": "A Schema",
-                "type": "object",
-                "required": [
-                    "TimeStamp",
-                    "DataChannelID",
-                    "Value"
-                ],
-                "properties": {
-                    "TimeStamp": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "DataChannelID": {
-                        "type": "string"
-                    },
-                    "Value": {
-                        "type": "string"
-                    },
-                    "Quality": {
-                        "type": "string"
-                    }
+            "type": "object",
+            "required": [
+                "TimeStamp",
+                "DataChannelID",
+                "Value"
+            ],
+            "properties": {
+                "TimeStamp": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "DataChannelID": {
+                    "type": "string"
+                },
+                "Value": {
+                    "type": "string"
+                },
+                "Quality": {
+                    "type": "string"
                 }
-            }
+            },
+            "additionalProperties": false
         }
     }
 }

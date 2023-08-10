@@ -97,47 +97,6 @@ namespace Vista.SDK.Transport.Json.TimeSeriesData
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.6.10.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class TimeSeriesData
-    {
-        [System.Text.Json.Serialization.JsonConstructor]
-
-        public TimeSeriesData(ConfigurationReference? @dataConfiguration, EventData? @eventData, System.Collections.Generic.IReadOnlyList<TabularData>? @tabularData)
-
-
-        {
-
-            this.DataConfiguration = @dataConfiguration;
-
-            this.TabularData = @tabularData;
-
-            this.EventData = @eventData;
-
-        }
-        [System.Text.Json.Serialization.JsonPropertyName("DataConfiguration")]
-        public ConfigurationReference? DataConfiguration { get; }
-
-
-        [System.Text.Json.Serialization.JsonPropertyName("TabularData")]
-        public System.Collections.Generic.IReadOnlyList<TabularData>? TabularData { get; }
-
-
-        [System.Text.Json.Serialization.JsonPropertyName("EventData")]
-        public EventData? EventData { get; }
-
-
-
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
-
-        [System.Text.Json.Serialization.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties; }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.6.10.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial class TimeSpan
     {
         [System.Text.Json.Serialization.JsonConstructor]
@@ -188,11 +147,52 @@ namespace Vista.SDK.Transport.Json.TimeSeriesData
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.6.10.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class TimeSeriesData
+    {
+        [System.Text.Json.Serialization.JsonConstructor]
+
+        public TimeSeriesData(ConfigurationReference? @dataConfiguration, EventData? @eventData, System.Collections.Generic.IReadOnlyList<TabularData>? @tabularData)
+
+
+        {
+
+            this.DataConfiguration = @dataConfiguration;
+
+            this.TabularData = @tabularData;
+
+            this.EventData = @eventData;
+
+        }
+        [System.Text.Json.Serialization.JsonPropertyName("DataConfiguration")]
+        public ConfigurationReference? DataConfiguration { get; }
+
+
+        [System.Text.Json.Serialization.JsonPropertyName("TabularData")]
+        public System.Collections.Generic.IReadOnlyList<TabularData>? TabularData { get; }
+
+
+        [System.Text.Json.Serialization.JsonPropertyName("EventData")]
+        public EventData? EventData { get; }
+
+
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties = new System.Collections.Generic.Dictionary<string, object>();
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties; }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.6.10.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial class TabularData
     {
         [System.Text.Json.Serialization.JsonConstructor]
 
-        public TabularData(System.Collections.Generic.IReadOnlyList<string>? @dataChannelID, System.Collections.Generic.IReadOnlyList<TabularDataSet>? @dataSet, string? @numberOfDataChannel, string? @numberOfDataSet)
+        public TabularData(System.Collections.Generic.IReadOnlyList<string>? @dataChannelID, System.Collections.Generic.IReadOnlyList<DataSet_Tabular>? @dataSet, int? @numberOfDataChannel, int? @numberOfDataSet)
 
 
         {
@@ -207,11 +207,11 @@ namespace Vista.SDK.Transport.Json.TimeSeriesData
 
         }
         [System.Text.Json.Serialization.JsonPropertyName("NumberOfDataSet")]
-        public string? NumberOfDataSet { get; }
+        public int? NumberOfDataSet { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("NumberOfDataChannel")]
-        public string? NumberOfDataChannel { get; }
+        public int? NumberOfDataChannel { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("DataChannelID")]
@@ -219,17 +219,42 @@ namespace Vista.SDK.Transport.Json.TimeSeriesData
 
 
         [System.Text.Json.Serialization.JsonPropertyName("DataSet")]
-        public System.Collections.Generic.IReadOnlyList<TabularDataSet>? DataSet { get; }
+        public System.Collections.Generic.IReadOnlyList<DataSet_Tabular>? DataSet { get; }
 
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.6.10.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class TabularDataSet
+    public partial class EventData
     {
         [System.Text.Json.Serialization.JsonConstructor]
 
-        public TabularDataSet(System.Collections.Generic.IReadOnlyList<string>? @quality, System.DateTimeOffset @timeStamp, System.Collections.Generic.IReadOnlyList<string> @value)
+        public EventData(System.Collections.Generic.IReadOnlyList<DataSet_Event>? @dataSet, int? @numberOfDataSet)
+
+
+        {
+
+            this.NumberOfDataSet = @numberOfDataSet;
+
+            this.DataSet = @dataSet;
+
+        }
+        [System.Text.Json.Serialization.JsonPropertyName("NumberOfDataSet")]
+        public int? NumberOfDataSet { get; }
+
+
+        [System.Text.Json.Serialization.JsonPropertyName("DataSet")]
+        public System.Collections.Generic.IReadOnlyList<DataSet_Event>? DataSet { get; }
+
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.6.10.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class DataSet_Tabular
+    {
+        [System.Text.Json.Serialization.JsonConstructor]
+
+        public DataSet_Tabular(System.Collections.Generic.IReadOnlyList<string>? @quality, System.DateTimeOffset @timeStamp, System.Collections.Generic.IReadOnlyList<string> @value)
 
 
         {
@@ -256,36 +281,11 @@ namespace Vista.SDK.Transport.Json.TimeSeriesData
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.6.10.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class EventData
+    public partial class DataSet_Event
     {
         [System.Text.Json.Serialization.JsonConstructor]
 
-        public EventData(System.Collections.Generic.IReadOnlyList<EventDataSet>? @dataSet, string? @numberOfDataSet)
-
-
-        {
-
-            this.NumberOfDataSet = @numberOfDataSet;
-
-            this.DataSet = @dataSet;
-
-        }
-        [System.Text.Json.Serialization.JsonPropertyName("NumberOfDataSet")]
-        public string? NumberOfDataSet { get; }
-
-
-        [System.Text.Json.Serialization.JsonPropertyName("DataSet")]
-        public System.Collections.Generic.IReadOnlyList<EventDataSet>? DataSet { get; }
-
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.6.10.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class EventDataSet
-    {
-        [System.Text.Json.Serialization.JsonConstructor]
-
-        public EventDataSet(string @dataChannelID, string? @quality, System.DateTimeOffset @timeStamp, string @value)
+        public DataSet_Event(string @dataChannelID, string? @quality, System.DateTimeOffset @timeStamp, string @value)
 
 
         {

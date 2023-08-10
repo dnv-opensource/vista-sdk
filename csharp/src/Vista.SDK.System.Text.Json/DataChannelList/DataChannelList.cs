@@ -301,7 +301,7 @@ namespace Vista.SDK.Transport.Json.DataChannel
     {
         [System.Text.Json.Serialization.JsonConstructor]
 
-        public DataChannelType(string? @calculationPeriod, string @type, string? @updateCycle)
+        public DataChannelType(double? @calculationPeriod, string @type, double? @updateCycle)
 
 
         {
@@ -318,11 +318,11 @@ namespace Vista.SDK.Transport.Json.DataChannel
 
 
         [System.Text.Json.Serialization.JsonPropertyName("UpdateCycle")]
-        public string? UpdateCycle { get; }
+        public double? UpdateCycle { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("CalculationPeriod")]
-        public string? CalculationPeriod { get; }
+        public double? CalculationPeriod { get; }
 
 
     }
@@ -357,7 +357,7 @@ namespace Vista.SDK.Transport.Json.DataChannel
     {
         [System.Text.Json.Serialization.JsonConstructor]
 
-        public Range(string @high, string @low)
+        public Range(double @high, double @low)
 
 
         {
@@ -368,11 +368,11 @@ namespace Vista.SDK.Transport.Json.DataChannel
 
         }
         [System.Text.Json.Serialization.JsonPropertyName("High")]
-        public string High { get; }
+        public double High { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("Low")]
-        public string Low { get; }
+        public double Low { get; }
 
 
     }
@@ -417,7 +417,7 @@ namespace Vista.SDK.Transport.Json.DataChannel
     {
         [System.Text.Json.Serialization.JsonConstructor]
 
-        public Restriction(System.Collections.Generic.IReadOnlyList<string>? @enumeration, string? @fractionDigits, string? @length, string? @maxExclusive, string? @maxInclusive, string? @maxLength, string? @minExclusive, string? @minInclusive, string? @minLength, string? @pattern, string? @totalDigits, RestrictionWhiteSpace? @whiteSpace)
+        public Restriction(System.Collections.Generic.IReadOnlyList<string>? @enumeration, int? @fractionDigits, int? @length, double? @maxExclusive, double? @maxInclusive, int? @maxLength, double? @minExclusive, double? @minInclusive, int? @minLength, string? @pattern, int? @totalDigits, RestrictionWhiteSpace? @whiteSpace)
 
 
         {
@@ -452,35 +452,35 @@ namespace Vista.SDK.Transport.Json.DataChannel
 
 
         [System.Text.Json.Serialization.JsonPropertyName("FractionDigits")]
-        public string? FractionDigits { get; }
+        public int? FractionDigits { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("Length")]
-        public string? Length { get; }
+        public int? Length { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("MaxExclusive")]
-        public string? MaxExclusive { get; }
+        public double? MaxExclusive { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("MaxInclusive")]
-        public string? MaxInclusive { get; }
+        public double? MaxInclusive { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("MaxLength")]
-        public string? MaxLength { get; }
+        public int? MaxLength { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("MinExclusive")]
-        public string? MinExclusive { get; }
+        public double? MinExclusive { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("MinInclusive")]
-        public string? MinInclusive { get; }
+        public double? MinInclusive { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("MinLength")]
-        public string? MinLength { get; }
+        public int? MinLength { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("Pattern")]
@@ -488,7 +488,7 @@ namespace Vista.SDK.Transport.Json.DataChannel
 
 
         [System.Text.Json.Serialization.JsonPropertyName("TotalDigits")]
-        public string? TotalDigits { get; }
+        public int? TotalDigits { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("WhiteSpace")]
