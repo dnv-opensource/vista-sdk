@@ -1,3 +1,10 @@
 {
-    "dotnet.defaultSolution": "csharp\\Vista.SDK.sln"
+    "dotnet.defaultSolution": "csharp\\Vista.SDK.sln",
+    "[csharp]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        },
+        "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    }
 }

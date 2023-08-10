@@ -3,9 +3,7 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public interface ILocalIdBuilder<TBuilder, TResult>
-    where TBuilder : ILocalIdBuilder<TBuilder, TResult>
-    where TResult : ILocalId<TResult>
+public interface ILocalIdBuilder
 {
     VisVersion? VisVersion { get; }
 
@@ -19,6 +17,17 @@ public interface ILocalIdBuilder<TBuilder, TResult>
 
     IReadOnlyList<MetadataTag> MetadataTags { get; }
 
+    bool IsValid { get; }
+
+    bool IsEmpty { get; }
+
+    string ToString();
+}
+
+public interface ILocalIdBuilder<TBuilder, TResult> : ILocalIdBuilder
+    where TBuilder : ILocalIdBuilder<TBuilder, TResult>
+    where TResult : ILocalId<TResult>
+{
     TBuilder WithVisVersion(in string visVersion);
     TBuilder WithVisVersion(in VisVersion version);
     TBuilder TryWithVisVersion(in VisVersion? version);
@@ -44,10 +53,6 @@ public interface ILocalIdBuilder<TBuilder, TResult>
 
     TResult Build();
 
-    bool IsValid { get; }
-
-    bool IsEmpty { get; }
-
 #if NET7_0_OR_GREATER
     static abstract TBuilder Parse(string localIdStr);
     static abstract TBuilder Parse(string localIdStr, out LocalIdParsingErrorBuilder errorBuilder);
@@ -60,6 +65,4 @@ public interface ILocalIdBuilder<TBuilder, TResult>
         [MaybeNullWhen(false)] out TBuilder localId
     );
 #endif
-
-    string ToString();
 }

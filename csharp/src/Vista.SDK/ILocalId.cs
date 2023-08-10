@@ -2,8 +2,7 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public interface ILocalId<T>
-    where T : ILocalId<T>
+public interface ILocalId
 {
     VisVersion VisVersion { get; }
 
@@ -14,12 +13,17 @@ public interface ILocalId<T>
     GmodPath? SecondaryItem { get; }
 
     bool HasCustomTag { get; }
+
     IReadOnlyList<MetadataTag> MetadataTags { get; }
 
+    string ToString();
+}
+
+public interface ILocalId<T> : ILocalId
+    where T : ILocalId<T>
+{
 #if NET7_0_OR_GREATER
     static abstract T Parse(string localIdStr);
     static abstract T Parse(string localIdStr, out LocalIdParsingErrorBuilder errorBuilder);
 #endif
-
-    string ToString();
 }
