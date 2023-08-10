@@ -60,5 +60,6 @@ public interface ILocalIdBuilder<TBuilder, TResult>
         [MaybeNullWhen(false)] out TBuilder localId
     );
 #endif
+
     string ToString();
 }
