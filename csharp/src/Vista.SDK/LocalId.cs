@@ -81,32 +81,3 @@ public class LocalId : ILocalId<LocalId>, IEquatable<LocalId>
 
     public static LocalId Parse(string localIdStr) => LocalIdBuilder.Parse(localIdStr).Build();
 }
-
-internal enum ParsingState
-{
-    NamingRule,
-    VisVersion,
-    PrimaryItem,
-    SecondaryItem,
-    ItemDescription,
-    MetaQuantity,
-    MetaContent,
-    MetaCalculation,
-    MetaState,
-    MetaCommand,
-    MetaType,
-    MetaFunctionalServices,
-    MetaMaintenanceCategory,
-    MetaActivityType,
-    MetaPosition,
-    MetaDetail,
-
-    // For "other" errors
-    EmptyState = 100,
-    Formatting = 101,
-    Completeness = 102,
-
-    // UniversalId
-    NamingEntity = 200,
-    IMONumber = 201
-}

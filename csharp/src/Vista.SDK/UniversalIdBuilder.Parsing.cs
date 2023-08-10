@@ -54,7 +54,7 @@ public sealed partial record UniversalIdBuilder
         {
             AddError(
                 ref errorBuilder,
-                ParsingState.NamingRule,
+                LocalIdParsingState.NamingRule,
                 "Failed to find localId start segment"
             );
             return false;
@@ -78,10 +78,10 @@ public sealed partial record UniversalIdBuilder
             return false;
 
         ReadOnlySpan<char> span = universalIdSegment.AsSpan();
-        var state = ParsingState.NamingEntity;
+        var state = LocalIdParsingState.NamingEntity;
         int i = 0;
 
-        while (state <= ParsingState.IMONumber)
+        while (state <= LocalIdParsingState.IMONumber)
         {
             if (i >= span.Length)
                 break; // We've consumed the string
@@ -90,7 +90,7 @@ public sealed partial record UniversalIdBuilder
 
             switch (state)
             {
-                case ParsingState.NamingEntity:
+                case LocalIdParsingState.NamingEntity:
                     if (!NamingEntity.AsSpan().SequenceEqual(segment))
                     {
                         AddError(
@@ -101,7 +101,7 @@ public sealed partial record UniversalIdBuilder
                         break;
                     }
                     break;
-                case ParsingState.IMONumber:
+                case LocalIdParsingState.IMONumber:
                     if (!SDK.ImoNumber.TryParse(segment, out var imo))
                     {
                         AddError(ref errorBuilder, state, "Invalid IMO number segment");
@@ -120,7 +120,7 @@ public sealed partial record UniversalIdBuilder
         var visVersion = localIdBuilder.VisVersion;
         if (visVersion is null)
         {
-            AddError(ref errorBuilder, ParsingState.VisVersion, null);
+            AddError(ref errorBuilder, LocalIdParsingState.VisVersion, null);
             return false;
         }
 
@@ -133,7 +133,7 @@ public sealed partial record UniversalIdBuilder
 
     static void AddError(
         ref LocalIdParsingErrorBuilder errorBuilder,
-        ParsingState state,
+        LocalIdParsingState state,
         string? message
     )
     {
