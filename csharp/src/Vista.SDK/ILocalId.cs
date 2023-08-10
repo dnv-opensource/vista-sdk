@@ -17,9 +17,9 @@ public interface ILocalId<T>
     IReadOnlyList<MetadataTag> MetadataTags { get; }
 
 #if NET7_0_OR_GREATER
-
     static abstract T Parse(string localIdStr);
     static abstract T Parse(string localIdStr, out LocalIdParsingErrorBuilder errorBuilder);
 #endif
+
     string ToString();
 }
