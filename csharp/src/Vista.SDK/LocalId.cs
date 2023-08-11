@@ -61,12 +61,10 @@ public class LocalId : ILocalId<LocalId>, IEquatable<LocalId>
 
     public static bool operator ==(LocalId? left, LocalId? right)
     {
-        if ((object?)left != right)
+        if (!ReferenceEquals(left, right))
         {
-            if ((object?)left != null)
-            {
+            if (left is not null)
                 return left.Equals(right);
-            }
             return false;
         }
         return true;
@@ -76,8 +74,17 @@ public class LocalId : ILocalId<LocalId>, IEquatable<LocalId>
 
     public override string ToString() => _builder.ToString();
 
-    public static LocalId Parse(string localIdStr, out ParsingErrors errors) =>
-        LocalIdBuilder.Parse(localIdStr, out errors).Build();
-
     public static LocalId Parse(string localIdStr) => LocalIdBuilder.Parse(localIdStr).Build();
+
+    public static bool TryParse(string localIdStr, out ParsingErrors errors, out LocalId? localId)
+    {
+        if (!LocalIdBuilder.TryParse(localIdStr, out errors, out var localIdBuilder))
+        {
+            localId = null;
+            return false;
+        }
+
+        localId = localIdBuilder.Build();
+        return true;
+    }
 }

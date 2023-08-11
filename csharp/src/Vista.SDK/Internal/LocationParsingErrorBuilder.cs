@@ -22,9 +22,6 @@ internal sealed record LocationParsingErrorBuilder
 
     internal static LocationParsingErrorBuilder Create() => new();
 
-    internal IReadOnlyCollection<(LocationValidationResult name, string message)> ErrorMessages =>
-        _errors;
-
     internal ParsingErrors Build() =>
         _errors.Count == 0
             ? ParsingErrors.Empty

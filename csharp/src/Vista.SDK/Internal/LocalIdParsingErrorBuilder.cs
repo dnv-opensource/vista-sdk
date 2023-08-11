@@ -32,9 +32,6 @@ internal sealed record LocalIdParsingErrorBuilder
 
     internal static LocalIdParsingErrorBuilder Create() => new();
 
-    internal IReadOnlyCollection<(LocalIdParsingState type, string message)> ErrorMessages =>
-        _errors;
-
     public ParsingErrors Build() =>
         _errors.Count == 0
             ? ParsingErrors.Empty

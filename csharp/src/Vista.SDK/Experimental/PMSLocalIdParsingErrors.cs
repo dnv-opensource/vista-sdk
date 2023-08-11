@@ -33,9 +33,6 @@ internal sealed record PMSLocalIdParsingErrorBuilder
 
     internal static PMSLocalIdParsingErrorBuilder Create() => new();
 
-    internal IReadOnlyCollection<(PMSLocalIdParsingState type, string message)> ErrorMessages =>
-        _errors;
-
     internal ParsingErrors Build() =>
         _errors.Count == 0
             ? ParsingErrors.Empty

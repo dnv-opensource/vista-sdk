@@ -3,7 +3,7 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public partial record class LocalIdBuilder : ILocalIdBuilder<LocalIdBuilder, LocalId>
+public sealed partial record class LocalIdBuilder : ILocalIdBuilder<LocalIdBuilder, LocalId>
 {
     public static readonly string NamingRule = "dnv-v2";
     public static readonly CodebookName[] UsedCodebooks = new[]

@@ -56,13 +56,12 @@ public interface ILocalIdBuilder<TBuilder, TResult> : ILocalIdBuilder
 
 #if NET7_0_OR_GREATER
     static abstract TBuilder Parse(string localIdStr);
-    static abstract TBuilder Parse(string localIdStr, out ParsingErrors errorBuilder);
 
     static abstract bool TryParse(string localIdStr, [MaybeNullWhen(false)] out TBuilder localId);
 
     static abstract bool TryParse(
         string localIdStr,
-        out ParsingErrors errorBuilder,
+        out ParsingErrors errors,
         [MaybeNullWhen(false)] out TBuilder localId
     );
 #endif

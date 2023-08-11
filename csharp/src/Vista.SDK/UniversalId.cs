@@ -29,9 +29,23 @@ public class UniversalId : IUniversalId, IEquatable<UniversalId>
         return _builder.Equals(other._builder);
     }
 
-    public static UniversalId Parse(string universalIdStr)
+    public static UniversalId Parse(string universalIdStr) =>
+        UniversalIdBuilder.Parse(universalIdStr).Build();
+
+    public static bool TryParse(
+        string universalIdStr,
+        out ParsingErrors errors,
+        out UniversalId? universalId
+    )
     {
-        return UniversalIdBuilder.Parse(universalIdStr).Build();
+        if (!UniversalIdBuilder.TryParse(universalIdStr, out errors, out var universalIdBuilder))
+        {
+            universalId = null;
+            return false;
+        }
+
+        universalId = universalIdBuilder.Build();
+        return true;
     }
 
     public override string ToString() => _builder.ToString();

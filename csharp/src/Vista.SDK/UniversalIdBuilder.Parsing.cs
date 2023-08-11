@@ -8,20 +8,15 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public sealed partial record UniversalIdBuilder
+partial record class UniversalIdBuilder
 {
-    public static UniversalIdBuilder Parse(string localIdStr)
+    public static UniversalIdBuilder Parse(string universalIdStr)
     {
-        if (!TryParse(localIdStr, out var localId))
-            throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
-        return localId;
-    }
-
-    public static UniversalIdBuilder Parse(string localIdStr, out ParsingErrors errors)
-    {
-        if (!TryParse(localIdStr, out errors, out var localId))
-            throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
-        return localId;
+        if (!TryParse(universalIdStr, out var errors, out var universalId))
+            throw new ArgumentException(
+                $"Couldn't parse universal ID from: '{universalIdStr}'. {errors}"
+            );
+        return universalId;
     }
 
     public static bool TryParse(

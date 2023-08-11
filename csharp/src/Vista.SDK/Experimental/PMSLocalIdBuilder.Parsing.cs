@@ -32,19 +32,12 @@ internal enum PMSLocalIdParsingState
     IMONumber = 201
 }
 
-public sealed partial record class PMSLocalIdBuilder
+partial record class PMSLocalIdBuilder
 {
     public static PMSLocalIdBuilder Parse(string localIdStr)
     {
-        if (!TryParse(localIdStr, out var localId))
-            throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
-        return localId;
-    }
-
-    public static PMSLocalIdBuilder Parse(string localIdStr, out ParsingErrors errorBuilder)
-    {
-        if (!TryParse(localIdStr, out errorBuilder, out var localId))
-            throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
+        if (!TryParse(localIdStr, out var errors, out var localId))
+            throw new ArgumentException($"Couldn't parse local ID from: '{localIdStr}'. {errors}");
         return localId;
     }
 

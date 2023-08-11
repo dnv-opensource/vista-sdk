@@ -53,11 +53,24 @@ public class PMSLocalId : ILocalId<PMSLocalId>, IEquatable<PMSLocalId>
 
     public override string ToString() => _builder.ToString();
 
-    public static PMSLocalId Parse(string localIdStr, out ParsingErrors errors) =>
-        PMSLocalIdBuilder.Parse(localIdStr, out errors).Build();
-
     public static PMSLocalId Parse(string localIdStr) =>
         PMSLocalIdBuilder.Parse(localIdStr).Build();
+
+    public static bool TryParse(
+        string localIdStr,
+        out ParsingErrors errors,
+        out PMSLocalId? localId
+    )
+    {
+        if (!PMSLocalIdBuilder.TryParse(localIdStr, out errors, out var localIdBuilder))
+        {
+            localId = null;
+            return false;
+        }
+
+        localId = localIdBuilder.Build();
+        return true;
+    }
 
     public sealed override bool Equals(object? obj) => Equals(obj as PMSLocalId);
 
@@ -73,12 +86,10 @@ public class PMSLocalId : ILocalId<PMSLocalId>, IEquatable<PMSLocalId>
 
     public static bool operator ==(PMSLocalId? left, PMSLocalId? right)
     {
-        if ((object?)left != right)
+        if (!ReferenceEquals(left, right))
         {
-            if ((object?)left != null)
-            {
+            if (left is not null)
                 return left.Equals(right);
-            }
             return false;
         }
         return true;

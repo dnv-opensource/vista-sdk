@@ -3,7 +3,8 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK.Experimental;
 
-public partial record class PMSLocalIdBuilder : ILocalIdBuilder<PMSLocalIdBuilder, PMSLocalId>
+public sealed partial record class PMSLocalIdBuilder
+    : ILocalIdBuilder<PMSLocalIdBuilder, PMSLocalId>
 {
     public static readonly string NamingRule = "dnv-v2-experimental";
     public static readonly CodebookName[] UsedCodebooks = new[]
