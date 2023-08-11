@@ -6,7 +6,7 @@ internal sealed record PMSLocalIdParsingErrorBuilder
     private static Dictionary<PMSLocalIdParsingState, string> _predefinedErrorMessages =>
         SetPredefinedMessages();
 
-    public static readonly PMSLocalIdParsingErrorBuilder Empty = new();
+    internal static readonly PMSLocalIdParsingErrorBuilder Empty = new();
 
     internal PMSLocalIdParsingErrorBuilder() =>
         _errors = new List<(PMSLocalIdParsingState, string)>();
@@ -29,14 +29,14 @@ internal sealed record PMSLocalIdParsingErrorBuilder
         return this;
     }
 
-    public bool HasError => _errors.Count > 0;
+    internal bool HasError => _errors.Count > 0;
 
     internal static PMSLocalIdParsingErrorBuilder Create() => new();
 
     internal IReadOnlyCollection<(PMSLocalIdParsingState type, string message)> ErrorMessages =>
         _errors;
 
-    public ParsingErrors Build() =>
+    internal ParsingErrors Build() =>
         _errors.Count == 0
             ? ParsingErrors.Empty
             : new ParsingErrors(_errors.Select((t, m) => (t.type.ToString(), t.message)).ToArray());

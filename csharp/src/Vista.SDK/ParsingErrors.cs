@@ -3,7 +3,9 @@ using System.Text;
 
 namespace Vista.SDK;
 
-public sealed class ParsingErrors : IEnumerable<(string Type, string Message)>
+public sealed class ParsingErrors
+    : IEnumerable<(string Type, string Message)>,
+        IEquatable<ParsingErrors>
 {
     public static readonly ParsingErrors Empty = new(Array.Empty<(string Type, string Message)>());
 
@@ -38,6 +40,30 @@ public sealed class ParsingErrors : IEnumerable<(string Type, string Message)>
 
         return builder.ToString();
     }
+
+    public bool Equals(ParsingErrors? other)
+    {
+        if (other is null)
+            return false;
+        return _errors.SequenceEqual(other._errors);
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as ParsingErrors);
+
+    public static bool operator ==(ParsingErrors? left, ParsingErrors? right)
+    {
+        if (!ReferenceEquals(left, right))
+        {
+            if (left is not null)
+                return left.Equals(right);
+            return false;
+        }
+        return true;
+    }
+
+    public static bool operator !=(ParsingErrors? left, ParsingErrors? right) => !(left == right);
+
+    public override int GetHashCode() => _errors.GetHashCode();
 
     public IEnumerator<(string Type, string Message)> GetEnumerator() => new Enumerator(_errors);
 

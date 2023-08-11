@@ -25,7 +25,7 @@ internal sealed record LocationParsingErrorBuilder
     internal IReadOnlyCollection<(LocationValidationResult name, string message)> ErrorMessages =>
         _errors;
 
-    public ParsingErrors Build() =>
+    internal ParsingErrors Build() =>
         _errors.Count == 0
             ? ParsingErrors.Empty
             : new ParsingErrors(_errors.Select((t, m) => (t.name.ToString(), t.message)).ToArray());
