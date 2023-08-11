@@ -1,12 +1,12 @@
 namespace Vista.SDK.Internal;
 
-public sealed record LocalIdParsingErrorBuilder
+internal sealed record LocalIdParsingErrorBuilder
 {
     private readonly List<(LocalIdParsingState type, string message)> _errors;
     private static Dictionary<LocalIdParsingState, string> _predefinedErrorMessages =>
         SetPredefinedMessages();
 
-    public static readonly LocalIdParsingErrorBuilder Empty = new();
+    internal static readonly LocalIdParsingErrorBuilder Empty = new();
 
     internal LocalIdParsingErrorBuilder() => _errors = new List<(LocalIdParsingState, string)>();
 
@@ -28,33 +28,40 @@ public sealed record LocalIdParsingErrorBuilder
         return this;
     }
 
-    public bool HasError => _errors.Count > 0;
+    internal bool HasError => _errors.Count > 0;
 
     internal static LocalIdParsingErrorBuilder Create() => new();
 
     internal IReadOnlyCollection<(LocalIdParsingState type, string message)> ErrorMessages =>
         _errors;
 
+    public ParsingErrors Build() =>
+        _errors.Count == 0
+            ? ParsingErrors.Empty
+            : new ParsingErrors(_errors.Select((t, m) => (t.type.ToString(), t.message)).ToArray());
+
     private static Dictionary<LocalIdParsingState, string> SetPredefinedMessages()
     {
-        var parsingMap = new Dictionary<LocalIdParsingState, string>();
-        parsingMap.Add(LocalIdParsingState.NamingRule, "Missing or invalid naming rule");
-        parsingMap.Add(LocalIdParsingState.VisVersion, "Missing or invalid vis version");
-        parsingMap.Add(
-            LocalIdParsingState.PrimaryItem,
-            "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag."
-        );
-        parsingMap.Add(LocalIdParsingState.SecondaryItem, "Invalid secondary item");
-        parsingMap.Add(LocalIdParsingState.ItemDescription, "Missing or invalid /meta prefix");
-        parsingMap.Add(LocalIdParsingState.MetaQuantity, "Invalid metadata tag: Quantity");
-        parsingMap.Add(LocalIdParsingState.MetaContent, "Invalid metadata tag: Content");
-        parsingMap.Add(LocalIdParsingState.MetaCommand, "Invalid metadata tag: Command");
-        parsingMap.Add(LocalIdParsingState.MetaPosition, "Invalid metadata tag: Position");
-        parsingMap.Add(LocalIdParsingState.MetaCalculation, "Invalid metadata tag: Calculation");
-        parsingMap.Add(LocalIdParsingState.MetaState, "Invalid metadata tag: State");
-        parsingMap.Add(LocalIdParsingState.MetaType, "Invalid metadata tag: Type");
-        parsingMap.Add(LocalIdParsingState.MetaDetail, "Invalid metadata tag: Detail");
-        parsingMap.Add(LocalIdParsingState.EmptyState, "Missing primary path or metadata");
+        var parsingMap = new Dictionary<LocalIdParsingState, string>
+        {
+            { LocalIdParsingState.NamingRule, "Missing or invalid naming rule" },
+            { LocalIdParsingState.VisVersion, "Missing or invalid vis version" },
+            {
+                LocalIdParsingState.PrimaryItem,
+                "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag."
+            },
+            { LocalIdParsingState.SecondaryItem, "Invalid secondary item" },
+            { LocalIdParsingState.ItemDescription, "Missing or invalid /meta prefix" },
+            { LocalIdParsingState.MetaQuantity, "Invalid metadata tag: Quantity" },
+            { LocalIdParsingState.MetaContent, "Invalid metadata tag: Content" },
+            { LocalIdParsingState.MetaCommand, "Invalid metadata tag: Command" },
+            { LocalIdParsingState.MetaPosition, "Invalid metadata tag: Position" },
+            { LocalIdParsingState.MetaCalculation, "Invalid metadata tag: Calculation" },
+            { LocalIdParsingState.MetaState, "Invalid metadata tag: State" },
+            { LocalIdParsingState.MetaType, "Invalid metadata tag: Type" },
+            { LocalIdParsingState.MetaDetail, "Invalid metadata tag: Detail" },
+            { LocalIdParsingState.EmptyState, "Missing primary path or metadata" }
+        };
         return parsingMap;
     }
 }

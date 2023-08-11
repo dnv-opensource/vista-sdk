@@ -17,12 +17,9 @@ public sealed partial record UniversalIdBuilder
         return localId;
     }
 
-    public static UniversalIdBuilder Parse(
-        string localIdStr,
-        out LocalIdParsingErrorBuilder errorBuilder
-    )
+    public static UniversalIdBuilder Parse(string localIdStr, out ParsingErrors errors)
     {
-        if (!TryParse(localIdStr, out errorBuilder, out var localId))
+        if (!TryParse(localIdStr, out errors, out var localId))
             throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
         return localId;
     }
@@ -37,17 +34,34 @@ public sealed partial record UniversalIdBuilder
 
     public static bool TryParse(
         string universalId,
-        out LocalIdParsingErrorBuilder errorBuilder,
+        out ParsingErrors errors,
         [MaybeNullWhen(false)] out UniversalIdBuilder universalIdBuilder
     )
     {
         universalIdBuilder = null;
 
-        errorBuilder = LocalIdParsingErrorBuilder.Empty;
+        var errorBuilder = LocalIdParsingErrorBuilder.Empty;
+
         if (universalId is null)
-            throw new ArgumentNullException(nameof(universalId));
-        if (universalId.Length == 0)
+        {
+            AddError(
+                ref errorBuilder,
+                LocalIdParsingState.NamingRule,
+                "Failed to find localId start segment"
+            );
+            errors = errorBuilder.Build();
             return false;
+        }
+        if (universalId.Length == 0)
+        {
+            AddError(
+                ref errorBuilder,
+                LocalIdParsingState.NamingRule,
+                "Failed to find localId start segment"
+            );
+            errors = errorBuilder.Build();
+            return false;
+        }
 
         var localIdStartIndex = universalId.IndexOf("/dnv-v");
         if (localIdStartIndex == -1)
@@ -57,6 +71,7 @@ public sealed partial record UniversalIdBuilder
                 LocalIdParsingState.NamingRule,
                 "Failed to find localId start segment"
             );
+            errors = errorBuilder.Build();
             return false;
         }
 
@@ -74,8 +89,11 @@ public sealed partial record UniversalIdBuilder
             : null;
 
         if (localIdBuilder is null)
+        {
             // Dont need additional error, as the localIdBuilder does it for us
+            errors = errorBuilder.Build();
             return false;
+        }
 
         ReadOnlySpan<char> span = universalIdSegment.AsSpan();
         var state = LocalIdParsingState.NamingEntity;
@@ -121,6 +139,7 @@ public sealed partial record UniversalIdBuilder
         if (visVersion is null)
         {
             AddError(ref errorBuilder, LocalIdParsingState.VisVersion, null);
+            errors = errorBuilder.Build();
             return false;
         }
 
@@ -128,6 +147,7 @@ public sealed partial record UniversalIdBuilder
             .TryWithLocalId(in localIdBuilder)
             .TryWithImoNumber(in imoNumber);
 
+        errors = errorBuilder.Build();
         return true;
     }
 

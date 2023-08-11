@@ -53,10 +53,8 @@ public class PMSLocalId : ILocalId<PMSLocalId>, IEquatable<PMSLocalId>
 
     public override string ToString() => _builder.ToString();
 
-    public static PMSLocalId Parse(
-        string localIdStr,
-        out LocalIdParsingErrorBuilder errorBuilder
-    ) => PMSLocalIdBuilder.Parse(localIdStr, out errorBuilder).Build();
+    public static PMSLocalId Parse(string localIdStr, out ParsingErrors errors) =>
+        PMSLocalIdBuilder.Parse(localIdStr, out errors).Build();
 
     public static PMSLocalId Parse(string localIdStr) =>
         PMSLocalIdBuilder.Parse(localIdStr).Build();

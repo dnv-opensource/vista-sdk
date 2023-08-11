@@ -41,10 +41,7 @@ public sealed partial record class PMSLocalIdBuilder
         return localId;
     }
 
-    public static PMSLocalIdBuilder Parse(
-        string localIdStr,
-        out PMSLocalIdParsingErrorBuilder errorBuilder
-    )
+    public static PMSLocalIdBuilder Parse(string localIdStr, out ParsingErrors errorBuilder)
     {
         if (!TryParse(localIdStr, out errorBuilder, out var localId))
             throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
@@ -61,13 +58,16 @@ public sealed partial record class PMSLocalIdBuilder
 
     public static bool TryParse(
         string localIdStr,
-        out PMSLocalIdParsingErrorBuilder errorBuilder,
+        out ParsingErrors errors,
         [MaybeNullWhen(false)] out PMSLocalIdBuilder localId
     )
     {
-        errorBuilder = PMSLocalIdParsingErrorBuilder.Empty;
+        var errorBuilder = PMSLocalIdParsingErrorBuilder.Empty;
 
-        return TryParseInternal(localIdStr, ref errorBuilder, out localId);
+        var result = TryParseInternal(localIdStr, ref errorBuilder, out localId);
+        errors = errorBuilder.Build();
+
+        return result;
     }
 
     internal static bool TryParseInternal(

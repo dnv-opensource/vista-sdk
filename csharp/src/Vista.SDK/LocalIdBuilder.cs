@@ -48,7 +48,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder<LocalIdBuilder, Loc
     {
         var localIdbuilder = TryWithVisVersion(visVersion, out var succeeded);
         if (!succeeded)
-            throw new ArgumentException(nameof(visVersion));
+            throw new ArgumentException("Failed to parse VIS version", nameof(visVersion));
 
         return localIdbuilder;
     }

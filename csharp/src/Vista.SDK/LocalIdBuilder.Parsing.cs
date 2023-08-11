@@ -36,16 +36,15 @@ public sealed partial record class LocalIdBuilder
     {
         if (!TryParse(localIdStr, out var localId))
             throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
+
         return localId;
     }
 
-    public static LocalIdBuilder Parse(
-        string localIdStr,
-        out LocalIdParsingErrorBuilder errorBuilder
-    )
+    public static LocalIdBuilder Parse(string localIdStr, out ParsingErrors errors)
     {
-        if (!TryParse(localIdStr, out errorBuilder, out var localId))
+        if (!TryParse(localIdStr, out errors, out var localId))
             throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
+
         return localId;
     }
 
@@ -59,13 +58,15 @@ public sealed partial record class LocalIdBuilder
 
     public static bool TryParse(
         string localIdStr,
-        out LocalIdParsingErrorBuilder errorBuilder,
+        out ParsingErrors errors,
         [MaybeNullWhen(false)] out LocalIdBuilder localId
     )
     {
-        errorBuilder = LocalIdParsingErrorBuilder.Empty;
+        var errorBuilder = LocalIdParsingErrorBuilder.Empty;
 
-        return TryParseInternal(localIdStr, ref errorBuilder, out localId);
+        var result = TryParseInternal(localIdStr, ref errorBuilder, out localId);
+        errors = errorBuilder.Build();
+        return result;
     }
 
     internal static bool TryParseInternal(

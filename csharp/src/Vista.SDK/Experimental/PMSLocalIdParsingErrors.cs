@@ -1,6 +1,6 @@
 namespace Vista.SDK.Experimental;
 
-public sealed record PMSLocalIdParsingErrorBuilder
+internal sealed record PMSLocalIdParsingErrorBuilder
 {
     private readonly List<(PMSLocalIdParsingState type, string message)> _errors;
     private static Dictionary<PMSLocalIdParsingState, string> _predefinedErrorMessages =>
@@ -36,26 +36,33 @@ public sealed record PMSLocalIdParsingErrorBuilder
     internal IReadOnlyCollection<(PMSLocalIdParsingState type, string message)> ErrorMessages =>
         _errors;
 
+    public ParsingErrors Build() =>
+        _errors.Count == 0
+            ? ParsingErrors.Empty
+            : new ParsingErrors(_errors.Select((t, m) => (t.type.ToString(), t.message)).ToArray());
+
     private static Dictionary<PMSLocalIdParsingState, string> SetPredefinedMessages()
     {
-        var parsingMap = new Dictionary<PMSLocalIdParsingState, string>();
-        parsingMap.Add(PMSLocalIdParsingState.NamingRule, "Missing or invalid naming rule");
-        parsingMap.Add(PMSLocalIdParsingState.VisVersion, "Missing or invalid vis version");
-        parsingMap.Add(
-            PMSLocalIdParsingState.PrimaryItem,
-            "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag."
-        );
-        parsingMap.Add(PMSLocalIdParsingState.SecondaryItem, "Invalid secondary item");
-        parsingMap.Add(PMSLocalIdParsingState.ItemDescription, "Missing or invalid /meta prefix");
-        parsingMap.Add(PMSLocalIdParsingState.MetaQuantity, "Invalid metadata tag: Quantity");
-        parsingMap.Add(PMSLocalIdParsingState.MetaContent, "Invalid metadata tag: Content");
-        parsingMap.Add(PMSLocalIdParsingState.MetaCommand, "Invalid metadata tag: Command");
-        parsingMap.Add(PMSLocalIdParsingState.MetaPosition, "Invalid metadata tag: Position");
-        parsingMap.Add(PMSLocalIdParsingState.MetaCalculation, "Invalid metadata tag: Calculation");
-        parsingMap.Add(PMSLocalIdParsingState.MetaState, "Invalid metadata tag: State");
-        parsingMap.Add(PMSLocalIdParsingState.MetaType, "Invalid metadata tag: Type");
-        parsingMap.Add(PMSLocalIdParsingState.MetaDetail, "Invalid metadata tag: Detail");
-        parsingMap.Add(PMSLocalIdParsingState.EmptyState, "Missing primary path or metadata");
+        var parsingMap = new Dictionary<PMSLocalIdParsingState, string>
+        {
+            { PMSLocalIdParsingState.NamingRule, "Missing or invalid naming rule" },
+            { PMSLocalIdParsingState.VisVersion, "Missing or invalid vis version" },
+            {
+                PMSLocalIdParsingState.PrimaryItem,
+                "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag."
+            },
+            { PMSLocalIdParsingState.SecondaryItem, "Invalid secondary item" },
+            { PMSLocalIdParsingState.ItemDescription, "Missing or invalid /meta prefix" },
+            { PMSLocalIdParsingState.MetaQuantity, "Invalid metadata tag: Quantity" },
+            { PMSLocalIdParsingState.MetaContent, "Invalid metadata tag: Content" },
+            { PMSLocalIdParsingState.MetaCommand, "Invalid metadata tag: Command" },
+            { PMSLocalIdParsingState.MetaPosition, "Invalid metadata tag: Position" },
+            { PMSLocalIdParsingState.MetaCalculation, "Invalid metadata tag: Calculation" },
+            { PMSLocalIdParsingState.MetaState, "Invalid metadata tag: State" },
+            { PMSLocalIdParsingState.MetaType, "Invalid metadata tag: Type" },
+            { PMSLocalIdParsingState.MetaDetail, "Invalid metadata tag: Detail" },
+            { PMSLocalIdParsingState.EmptyState, "Missing primary path or metadata" }
+        };
         return parsingMap;
     }
 }

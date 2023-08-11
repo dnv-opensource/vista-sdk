@@ -24,6 +24,6 @@ public interface ILocalId<T> : ILocalId
 {
 #if NET7_0_OR_GREATER
     static abstract T Parse(string localIdStr);
-    static abstract T Parse(string localIdStr, out LocalIdParsingErrorBuilder errorBuilder);
+    static abstract T Parse(string localIdStr, out ParsingErrors errors);
 #endif
 }

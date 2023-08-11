@@ -1,10 +1,10 @@
 namespace Vista.SDK.Internal;
 
-public sealed record LocationParsingErrorBuilder
+internal sealed record LocationParsingErrorBuilder
 {
     private readonly List<(LocationValidationResult name, string message)> _errors;
 
-    public static readonly LocationParsingErrorBuilder Empty = new LocationParsingErrorBuilder();
+    internal static readonly LocationParsingErrorBuilder Empty = new();
 
     internal LocationParsingErrorBuilder() =>
         _errors = new List<(LocationValidationResult, string)>();
@@ -18,10 +18,15 @@ public sealed record LocationParsingErrorBuilder
         return this;
     }
 
-    public bool HasError => _errors.Count > 0;
+    internal bool HasError => _errors.Count > 0;
 
-    internal static LocationParsingErrorBuilder Create() => new LocationParsingErrorBuilder();
+    internal static LocationParsingErrorBuilder Create() => new();
 
     internal IReadOnlyCollection<(LocationValidationResult name, string message)> ErrorMessages =>
         _errors;
+
+    public ParsingErrors Build() =>
+        _errors.Count == 0
+            ? ParsingErrors.Empty
+            : new ParsingErrors(_errors.Select((t, m) => (t.name.ToString(), t.message)).ToArray());
 }

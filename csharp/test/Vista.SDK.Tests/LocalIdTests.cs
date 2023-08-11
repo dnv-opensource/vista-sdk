@@ -272,7 +272,7 @@ public class LocalIdTests
                 string LocalIdStr,
                 LocalIdBuilder? LocalId,
                 Exception? Exception,
-                LocalIdParsingErrorBuilder? ErrorBuilder
+                ParsingErrors ParsingErrors
             )>();
 
         string? localIdStr;
@@ -295,16 +295,16 @@ public class LocalIdTests
                 // Quick fix to skip invalid location e.g. primaryItem 511.11-1SO
                 if (ex.Message.Contains("location"))
                     continue;
-                errored.Add((localIdStr, null, ex, null));
+                errored.Add((localIdStr, null, ex, ParsingErrors.Empty));
             }
         }
-        if (errored.Select(e => e.ErrorBuilder?.ErrorMessages).Count() > 0)
+        if (errored.Any(e => e.ParsingErrors.HasErrors))
         {
             // TODO - gmod path parsing now fails because we actually validate locations properly
             // might have to skip the smoketests while we fix the source data
             Console.Write("");
         }
-        Assert.Empty(errored.Select(e => e.ErrorBuilder?.ErrorMessages).ToList());
+        Assert.Empty(errored.SelectMany(e => e.ParsingErrors).ToList());
         Assert.Empty(errored);
     }
 
@@ -324,13 +324,9 @@ public class LocalIdTests
     )]
     public void Test_Parsing_Validation(string localIdStr, string[] expectedErrorMessages)
     {
-        var parsed = LocalIdBuilder.TryParse(
-            localIdStr,
-            out LocalIdParsingErrorBuilder errorBuilder,
-            out _
-        );
+        var parsed = LocalIdBuilder.TryParse(localIdStr, out var errorBuilder, out _);
 
-        var actualErrorMessages = errorBuilder.ErrorMessages.Select(e => e.message).ToArray();
+        var actualErrorMessages = errorBuilder.Select(e => e.Message).ToArray();
         actualErrorMessages.Should().Equal(expectedErrorMessages);
 
         Assert.False(parsed);

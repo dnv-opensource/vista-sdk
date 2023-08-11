@@ -49,10 +49,10 @@ public record class GmodNode
         };
     }
 
-    public GmodNode WithLocation(string location, out LocationParsingErrorBuilder errorBuilder)
+    public GmodNode WithLocation(string location, out ParsingErrors errors)
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
-        return this with { Location = locations.Parse(location, out errorBuilder) };
+        return this with { Location = locations.Parse(location, out errors) };
     }
 
     public GmodNode TryWithLocation(string? locationStr)
@@ -64,13 +64,11 @@ public record class GmodNode
         return WithLocation(location);
     }
 
-    public GmodNode TryWithLocation(
-        string? locationStr,
-        out LocationParsingErrorBuilder errorBuilder
-    )
+    public GmodNode TryWithLocation(string? locationStr, out ParsingErrors errors)
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
-        if (!locations.TryParse(locationStr, out var location, out errorBuilder))
+
+        if (!locations.TryParse(locationStr, out var location, out errors))
             return this;
 
         return WithLocation(location);

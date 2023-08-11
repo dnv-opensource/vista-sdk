@@ -38,11 +38,7 @@ public class LocationsTests
         Verify(stringSuccess, stringErrorBuilder, stringParsedLocation);
         Verify(spanSuccess, spanErrorBuilder, spanParsedLocation);
 
-        void Verify(
-            bool succeeded,
-            LocationParsingErrorBuilder errorBuilder,
-            Location parsedLocation
-        )
+        void Verify(bool succeeded, ParsingErrors errors, Location parsedLocation)
         {
             if (!success)
             {
@@ -51,16 +47,16 @@ public class LocationsTests
 
                 if (expectedErrorMessages.Length > 0)
                 {
-                    Assert.NotNull(errorBuilder);
-                    Assert.True(errorBuilder.HasError);
-                    var actualErrors = errorBuilder.ErrorMessages.Select(e => e.message).ToArray();
+                    Assert.NotNull(errors);
+                    Assert.True(errors.HasErrors);
+                    var actualErrors = errors.Select(e => e.Message).ToArray();
                     actualErrors.Should().Equal(expectedErrorMessages);
                 }
             }
             else
             {
                 Assert.True(succeeded);
-                Assert.False(errorBuilder.HasError);
+                Assert.False(errors.HasErrors);
                 Assert.NotEqual(default, parsedLocation);
                 Assert.Equal(output, parsedLocation.ToString());
             }
