@@ -68,9 +68,7 @@ public class LocationsTests
     {
         var locations = VIS.Instance.GetLocations(VisVersion.v3_4a);
         Assert.Throws<ArgumentException>(() => locations.Parse(null!));
-        Assert.Throws<ArgumentException>(() => locations.Parse(null!, out _));
         Assert.Throws<ArgumentException>(() => locations.Parse(ReadOnlySpan<char>.Empty));
-        Assert.Throws<ArgumentException>(() => locations.Parse(ReadOnlySpan<char>.Empty, out _));
     }
 
     [Fact]

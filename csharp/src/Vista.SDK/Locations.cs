@@ -52,20 +52,10 @@ public sealed class Locations
 
         var span = locationStr is null ? ReadOnlySpan<char>.Empty : locationStr.AsSpan();
         if (!TryParseInternal(span, locationStr, out var location, ref errorBuilder))
-            throw new ArgumentException($"Invalid value for location: {locationStr}");
+            throw new ArgumentException(
+                $"Invalid value for location: {locationStr}, errors: {errorBuilder.Build()}"
+            );
 
-        return location;
-    }
-
-    public Location Parse(string locationStr, out ParsingErrors errors)
-    {
-        var errorBuilder = LocationParsingErrorBuilder.Empty;
-
-        var span = locationStr is null ? ReadOnlySpan<char>.Empty : locationStr.AsSpan();
-        if (!TryParseInternal(span, locationStr, out var location, ref errorBuilder))
-            throw new ArgumentException($"Invalid value for location: {locationStr}");
-
-        errors = errorBuilder.Build();
         return location;
     }
 
@@ -74,19 +64,10 @@ public sealed class Locations
         var errorBuilder = LocationParsingErrorBuilder.Empty;
 
         if (!TryParseInternal(locationStr, null, out var location, ref errorBuilder))
-            throw new ArgumentException($"Invalid value for location: {locationStr.ToString()}");
+            throw new ArgumentException(
+                $"Invalid value for location: {locationStr.ToString()}, errors: {errorBuilder.Build()}"
+            );
 
-        return location;
-    }
-
-    public Location Parse(ReadOnlySpan<char> locationStr, out ParsingErrors errors)
-    {
-        var errorBuilder = LocationParsingErrorBuilder.Empty;
-
-        if (!TryParseInternal(locationStr, null, out var location, ref errorBuilder))
-            throw new ArgumentException($"Invalid value for location: {locationStr.ToString()}");
-
-        errors = errorBuilder.Build();
         return location;
     }
 
@@ -130,7 +111,14 @@ public sealed class Locations
         location = default;
 
         if (span.IsEmpty)
+        {
+            AddError(
+                ref errorBuilder,
+                LocationValidationResult.NullOrWhiteSpace,
+                "Invalid location: contains only whitespace"
+            );
             return false;
+        }
 
         if (span.IsWhiteSpace())
         {
