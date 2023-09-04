@@ -43,15 +43,13 @@ impl Vis {
     }
 
     pub fn get_gmod(&self, version: VisVersion) -> Arc<Gmod> {
-        let gmod = self.gmod_cache.get_with(version, move || {
-            let dto =
-                get_gmod_dto(version.to_string().as_str()).map_err(|e| VisError::FailedToLoad(e.to_string()))
+        self.gmod_cache.get_with(version, move || {
+            let dto = get_gmod_dto(version.to_string().as_str())
+                .map_err(|e| VisError::FailedToLoad(e.to_string()))
                 .expect("We should always end up having a valid gmod mapped to the binary");
 
             Arc::new(Gmod::new(&dto))
-        });
-
-        gmod
+        })
     }
 }
 

@@ -92,11 +92,8 @@ impl Gmod {
                     common_name: node.common_name.clone(),
                     definition: node.definition.clone(),
                     common_definition: node.common_definition.clone(),
-                    install_substructure: node.install_substructure.clone(),
-                    normal_assignment_names: node
-                        .normal_assignment_names
-                        .clone()
-                        .unwrap_or_default(),
+                    install_substructure: node.install_substructure,
+                    normal_assignment_names: node.normal_assignment_names.clone().unwrap_or_default(),
                 },
             });
 
@@ -111,8 +108,8 @@ impl Gmod {
             let children = &mut children[(*parent) as usize];
             let parents = &mut parents[(*child) as usize];
 
-            children.push((*child) as u32);
-            parents.push((*parent) as u32);
+            children.push(*child);
+            parents.push(*parent);
         }
 
         Gmod {
@@ -142,9 +139,7 @@ impl Gmod {
 
     pub fn get_children(&self, node: &GmodNode) -> impl Iterator<Item = &GmodNode> {
         let index = self.get_index(node);
-        self.children[index]
-            .iter()
-            .map(|child| &self.nodes[(*child) as usize])
+        self.children[index].iter().map(|child| &self.nodes[(*child) as usize])
     }
 
     pub fn get_product_type_for(&self, node: &GmodNode) -> Option<&GmodNode> {
@@ -187,11 +182,7 @@ impl Gmod {
         self.index[&node.code] as usize
     }
 
-    fn traverse_node<THandler>(
-        &self,
-        context: &mut TraversalContext<THandler>,
-        index: u32,
-    ) -> TraversalHandlerResult
+    fn traverse_node<THandler>(&self, context: &mut TraversalContext<THandler>, index: u32) -> TraversalHandlerResult
     where
         THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
     {
@@ -238,7 +229,7 @@ impl Gmod {
         let mut context = TraversalContext {
             ids: VecSet::new(16),
             parents: Vec::with_capacity(16),
-            handler: handler,
+            handler,
         };
 
         let result = self.traverse_node(&mut context, index);
