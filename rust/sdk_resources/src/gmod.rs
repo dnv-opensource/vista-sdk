@@ -40,8 +40,7 @@ pub struct GmodNodeDto {
 }
 
 pub fn get_gmod_dto(vis_version: &str) -> Result<GmodDto> {
-    let gmod_file_name = match Asset::iter().find(|f| f.contains("gmod") && f.contains(vis_version))
-    {
+    let gmod_file_name = match Asset::iter().find(|f| f.contains("gmod") && f.contains(vis_version)) {
         Some(f) => f,
         None => return Err(LoadResourceError::ResourceNotFound),
     };
@@ -50,7 +49,8 @@ pub fn get_gmod_dto(vis_version: &str) -> Result<GmodDto> {
 }
 
 pub fn deserialize_gmod_dto(gmod_file_name: Cow<str>) -> Result<GmodDto> {
-    assert!(gmod_file_name.contains("gmod"));
+    assert!(gmod_file_name.starts_with("gmod"));
+    assert!(!gmod_file_name.starts_with("gmod-vis-versioning"));
 
     let gmod_file = match Asset::get(gmod_file_name.as_ref()) {
         Some(f) => f,
@@ -69,12 +69,10 @@ pub fn deserialize_gmod_dto(gmod_file_name: Cow<str>) -> Result<GmodDto> {
         Err(e) => return Err(LoadResourceError::DeserializationError(e)),
     };
 
-    const EXCLUDE_PATTERN: &'static str = "99";
-    gmod.items
-        .retain(|node| !node.code.ends_with(EXCLUDE_PATTERN));
-    gmod.relations.retain(|[parent, child]| {
-        !parent.ends_with(EXCLUDE_PATTERN) && !child.ends_with(EXCLUDE_PATTERN)
-    });
+    const EXCLUDE_PATTERN: &str = "99";
+    gmod.items.retain(|node| !node.code.ends_with(EXCLUDE_PATTERN));
+    gmod.relations
+        .retain(|[parent, child]| !parent.ends_with(EXCLUDE_PATTERN) && !child.ends_with(EXCLUDE_PATTERN));
 
     Ok(gmod)
 }

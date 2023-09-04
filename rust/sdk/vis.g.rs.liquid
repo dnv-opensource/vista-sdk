@@ -25,7 +25,7 @@ impl std::str::FromStr for VisVersion {
         {% for version in vis_versions %}
         "{{ version.display_version }}" => Ok(VisVersion::v{{ version.enum_version }}),
         {% endfor %}
-            _ => Err(format!("{}", input)),
+            _ => Err(input.to_string()),
         }
     }
 }
