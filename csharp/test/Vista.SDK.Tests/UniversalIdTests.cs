@@ -1,5 +1,3 @@
-using System.Reflection.Emit;
-
 namespace Vista.SDK.Tests;
 
 public class UniversalIdTests
@@ -10,14 +8,16 @@ public class UniversalIdTests
             new object[]
             {
                 "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet"
-            }
+            },
+            new object[] { "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/meta/calc~accumulate" }
         };
 
     [Theory]
     [MemberData(nameof(Test_Data))]
     public void Test_TryParsing(string testCase)
     {
-        Assert.True(UniversalIdBuilder.TryParse(testCase, out var _));
+        var success = UniversalIdBuilder.TryParse(testCase, out var errors, out var uid);
+        Assert.True(success);
     }
 
     [Theory]

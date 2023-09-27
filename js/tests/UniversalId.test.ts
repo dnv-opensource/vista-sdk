@@ -39,8 +39,8 @@ describe("UniversalId", () => {
                 errorBuilder
             );
             expect(universalId.imoNumber.value).toBe(1234567);
-            expect(universalId.builder.localId?.isValid()).toBe(true);
-            expect(universalId.builder.isValid()).toBe(true);
+            expect(universalId.builder.localId?.isValid).toBe(true);
+            expect(universalId.builder.isValid).toBe(true);
             expect(errorBuilder.errors.length).toBe(0);
         });
     });
@@ -86,7 +86,7 @@ describe("UniversalId", () => {
             );
 
             expect(universalIdBuilder).toBeTruthy();
-            expect(universalIdBuilder?.localId?.isValid()).toBe(
+            expect(universalIdBuilder?.localId?.isValid).toBe(
                 data.validLocalId
             );
             expect(errorBuilder.errors).toHaveLength(data.numErrors);
@@ -94,5 +94,16 @@ describe("UniversalId", () => {
                 data.errorTypes.sort()
             );
         });
+    });
+
+    const testCase = [
+        "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/meta/calc~accumulate",
+        "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/sec/411.1/C101/meta/calc~accumulate",
+    ];
+    test.each(testCase)("Async parsing %s", async (s) => {
+        const errors = new LocalIdParsingErrorBuilder();
+        const universalId = await UniversalIdBuilder.tryParseAsync(s, errors);
+
+        expect(universalId?.isValid).toEqual(true);
     });
 });

@@ -255,7 +255,7 @@ describe("LocalId", () => {
                 );
                 const parsedLocalIdStr = localId?.toString();
 
-                if (localId?.isEmpty || !localId?.isValid()) {
+                if (localId?.isEmpty || !localId?.isValid) {
                     errored.push({
                         localIdStr,
                         parsedLocalIdStr,

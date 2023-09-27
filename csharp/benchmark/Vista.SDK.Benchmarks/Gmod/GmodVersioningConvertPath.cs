@@ -17,6 +17,5 @@ public class GmodVersioningConvertPath
     }
 
     [Benchmark]
-    public GmodPath ConvertPath() =>
-        VIS.Instance.ConvertPath(VisVersion.v3_4a, _gmodPath, VisVersion.v3_5a);
+    public GmodPath ConvertPath() => VIS.Instance.ConvertPath(VisVersion.v3_4a, _gmodPath, VisVersion.v3_5a);
 }

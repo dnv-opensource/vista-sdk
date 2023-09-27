@@ -1,0 +1,189 @@
+﻿{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://vista.dnv.com/experimental/TimeSeriesDataPackage.schema.json",
+    "title": "TimeSeriesDataPackage",
+    "description": "An experimental generalized TimeSeriesData package based on ISO19848",
+    "type": "object",
+    "properties": {
+        "Package": {
+            "$ref": "#/definitions/Package"
+        }
+    },
+    "required": ["Package"],
+    "additionalProperties": false,
+    "definitions": {
+        "Package": {
+            "type": "object",
+            "properties": {
+                "Header": {
+                    "$ref": "#/definitions/Header"
+                },
+                "TimeSeriesData": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TimeSeriesData"
+                    }
+                }
+            },
+            "required": ["TimeSeriesData"],
+            "additionalProperties": false
+        },
+        "Header": {
+            "type": "object",
+            "properties": {
+                "AssetId": {
+                    "type": "string"
+                },
+                "TimeSpan": {
+                    "$ref": "#/definitions/TimeSpan"
+                },
+                "DateCreated": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "DateModified": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "Author": {
+                    "type": "string"
+                },
+                "SystemConfiguration": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ConfigurationReference"
+                    }
+                }
+            },
+            "required": ["AssetId"]
+        },
+        "TimeSeriesData": {
+            "type": "object",
+            "properties": {
+                "DataConfiguration": {
+                    "$ref": "#/definitions/ConfigurationReference"
+                },
+                "TabularData": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TabularData"
+                    }
+                },
+                "EventData": {
+                    "$ref": "#/definitions/EventData"
+                }
+            }
+        },
+        "TimeSpan": {
+            "type": "object",
+            "properties": {
+                "Start": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "End": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": ["Start", "End"],
+            "additionalProperties": false
+        },
+        "ConfigurationReference": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "string"
+                },
+                "TimeStamp": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": ["ID", "TimeStamp"],
+            "additionalProperties": false
+        },
+        "TabularData": {
+            "type": "object",
+            "properties": {
+                "NumberOfDataSet": {
+                    "type": "string"
+                },
+                "NumberOfDataPoints": {
+                    "type": "string"
+                },
+                "DataId": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "DataSet": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TabularDataSet"
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "TabularDataSet": {
+            "type": "object",
+            "properties": {
+                "TimeStamp": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "Value": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "Quality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["TimeStamp", "Value"],
+            "additionalProperties": false
+        },
+        "EventData": {
+            "type": "object",
+            "properties": {
+                "NumberOfDataSet": {
+                    "type": "string"
+                },
+                "DataSet": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/EventDataSet"
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "EventDataSet": {
+            "type": "object",
+            "properties": {
+                "TimeStamp": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "DataId": {
+                    "type": "string"
+                },
+                "Value": {
+                    "type": "string"
+                },
+                "Quality": {
+                    "type": "string"
+                }
+            },
+            "required": ["TimeStamp", "DataId", "Value"],
+            "additionalProperties": false
+        }
+    }
+}

@@ -76,9 +76,11 @@
         },
         {
             "value": "ACFILMOPSU",
-            "success": true,
+            "success": false,
             "output": "ACFILMOPSU",
-            "expectedErrorMessages": []
+            "expectedErrorMessages": [
+                "Invalid location: Multiple 'Longitudinal' values. Got both 'A' and 'F' in 'ACFILMOPSU'"
+            ]
         },
         {
             "value": "",
@@ -137,7 +139,7 @@
             "success": false,
             "output": null,
             "expectedErrorMessages": [
-                "Invalid location: numeric location should start before location code(s) in location: 'ACF2I1LMOPSU'"
+                "Invalid location: Multiple 'Longitudinal' values. Got both 'A' and 'F' in 'ACF2I1LMOPSU'"
             ]
         },
         {
@@ -178,6 +180,22 @@
             "output": null,
             "expectedErrorMessages": [
                 "Invalid location: 'FC1AILMOPSU' not alphabetically sorted"
+            ]
+        },
+        {
+            "value": "1-1",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location code: '1-1' with invalid location code(s): '-'"
+            ]
+        },
+        {
+            "value": "1ML",
+            "success": false,
+            "output": null,
+            "expectedErrorMessages": [
+                "Invalid location: Multiple 'Vertical' values. Got both 'M' and 'L' in '1ML'"
             ]
         }
     ]

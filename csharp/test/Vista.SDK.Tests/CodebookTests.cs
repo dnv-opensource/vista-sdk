@@ -3,10 +3,7 @@ namespace Vista.SDK.Tests;
 public class CodebookTests
 {
     [Theory]
-    [MemberData(
-        nameof(VistaSDKTestData.AddValidPositionData),
-        MemberType = typeof(VistaSDKTestData)
-    )]
+    [MemberData(nameof(VistaSDKTestData.AddValidPositionData), MemberType = typeof(VistaSDKTestData))]
     public void Test_Position_Validation(string input, string expectedOutput)
     {
         var (_, vis) = VISTests.GetVis();
@@ -47,12 +44,7 @@ public class CodebookTests
 
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddStatesData), MemberType = typeof(VistaSDKTestData))]
-    public void Test_States(
-        string invalidGroup,
-        string validValue,
-        string validGroup,
-        string secondValidValue
-    )
+    public void Test_States(string invalidGroup, string validValue, string validGroup, string secondValidValue)
     {
         var (_, vis) = VISTests.GetVis();
         var codebooks = vis.GetCodebooks(VisVersion.v3_4a);
@@ -161,11 +153,7 @@ public class CodebookTests
 
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddDetailTagData), MemberType = typeof(VistaSDKTestData))]
-    public void Test_Detail_Tag(
-        string validCustomTag,
-        string firstInvalidCustomTag,
-        string secondInvalidCustomTag
-    )
+    public void Test_Detail_Tag(string validCustomTag, string firstInvalidCustomTag, string secondInvalidCustomTag)
     {
         var (_, vis) = VISTests.GetVis();
         var codebooks = vis.GetCodebooks(VisVersion.v3_4a);

@@ -1,4 +1,4 @@
-import { GmodNode } from ".";
+import { GmodNode, GmodPath } from ".";
 
 export class PmodNode {
     private _node: GmodNode;
@@ -6,7 +6,12 @@ export class PmodNode {
 
     public constructor(node: GmodNode, depth: number) {
         if (!this.hasValidInput(node))
-            throw new Error("Invalid GmodNode with code: " + node.toString());
+            throw new Error(
+                "Invalid GmodNode with code: " +
+                    node.toString() +
+                    " - Parents: " +
+                    node.parents.map((s) => s.toString()).join(", ")
+            );
         this._node = node;
         this._depth = depth;
     }
@@ -37,6 +42,14 @@ export class PmodNode {
 
     public get parents() {
         return this._node.parents.map((p) => new PmodNode(p, this._depth - 1));
+    }
+
+    public get path(): GmodPath {
+        return new GmodPath(getParents(this._node), this._node);
+    }
+
+    public get parent(): PmodNode | undefined {
+        return this.parents[this.parents.length - 1];
     }
 
     public get isValid() {
@@ -73,4 +86,13 @@ export class PmodNode {
             this._depth
         );
     }
+}
+
+function getParents(node: GmodNode, parents: GmodNode[] = []): GmodNode[] {
+    for (const parent of node.parents) {
+        parents.unshift(parent);
+        getParents(parent, parents);
+    }
+
+    return parents;
 }

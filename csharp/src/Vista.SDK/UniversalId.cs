@@ -14,9 +14,7 @@ public class UniversalId : IUniversalId, IEquatable<UniversalId>
     }
 
     public ImoNumber ImoNumber =>
-        _builder.ImoNumber is not null
-            ? _builder.ImoNumber.Value
-            : throw new Exception("Invalid ImoNumber");
+        _builder.ImoNumber is not null ? _builder.ImoNumber.Value : throw new Exception("Invalid ImoNumber");
     public LocalId LocalId => _localId;
 
     public sealed override bool Equals(object? obj) => Equals(obj as UniversalId);
@@ -29,9 +27,18 @@ public class UniversalId : IUniversalId, IEquatable<UniversalId>
         return _builder.Equals(other._builder);
     }
 
-    public static UniversalId Parse(string universalIdStr)
+    public static UniversalId Parse(string universalIdStr) => UniversalIdBuilder.Parse(universalIdStr).Build();
+
+    public static bool TryParse(string universalIdStr, out ParsingErrors errors, out UniversalId? universalId)
     {
-        return UniversalIdBuilder.Parse(universalIdStr).Build();
+        if (!UniversalIdBuilder.TryParse(universalIdStr, out errors, out var universalIdBuilder))
+        {
+            universalId = null;
+            return false;
+        }
+
+        universalId = universalIdBuilder.Build();
+        return true;
     }
 
     public override string ToString() => _builder.ToString();

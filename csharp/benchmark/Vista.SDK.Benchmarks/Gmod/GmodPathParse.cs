@@ -19,15 +19,10 @@ public class GmodPathParse
 
     [Benchmark, BenchmarkCategory("No location")]
     public bool TryParseFullPath() =>
-        GmodPath.TryParseFullPath(
-            "VE/400a/410/411/411i/411.1/CS1/C101/C101.7/C101.72/I101",
-            VisVersion.v3_4a,
-            out _
-        );
+        GmodPath.TryParseFullPath("VE/400a/410/411/411i/411.1/CS1/C101/C101.7/C101.72/I101", VisVersion.v3_4a, out _);
 
     [Benchmark, BenchmarkCategory("With location")]
-    public bool TryParseIndividualized() =>
-        GmodPath.TryParse("612.21-1/C701.13/S93", VisVersion.v3_4a, out _);
+    public bool TryParseIndividualized() => GmodPath.TryParse("612.21-1/C701.13/S93", VisVersion.v3_4a, out _);
 
     [Benchmark, BenchmarkCategory("With location")]
     public bool TryParseFullPathIndividualized() =>

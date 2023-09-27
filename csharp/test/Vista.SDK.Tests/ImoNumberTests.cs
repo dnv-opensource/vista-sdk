@@ -13,10 +13,7 @@ public class ImoNumberTests
     {
         var text = await File.ReadAllTextAsync("testdata/ImoNumbers.json");
 
-        var data = JsonSerializer.Deserialize<TestData>(
-            text,
-            new JsonSerializerOptions(JsonSerializerDefaults.Web)
-        );
+        var data = JsonSerializer.Deserialize<TestData>(text, new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
         foreach (var (value, success, output) in data!.ImoNumbers)
         {

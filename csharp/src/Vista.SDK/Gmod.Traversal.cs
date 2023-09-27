@@ -1,9 +1,6 @@
 namespace Vista.SDK;
 
-public delegate TraversalHandlerResult TraverseHandler(
-    IReadOnlyList<GmodNode> parents,
-    GmodNode node
-);
+public delegate TraversalHandlerResult TraverseHandler(IReadOnlyList<GmodNode> parents, GmodNode node);
 public delegate TraversalHandlerResult TraverseHandlerWithState<TState>(
     TState state,
     IReadOnlyList<GmodNode> parents,
@@ -65,9 +62,7 @@ public sealed partial class Gmod
 
                 if (fromPath.All(qn => parents.Any(p => p.Code == qn.Code)))
                 {
-                    state.RemainingParents = parents
-                        .Where(p => !fromPath.Any(pp => pp.Code == p.Code))
-                        .ToArray();
+                    state.RemainingParents = parents.Where(p => !fromPath.Any(pp => pp.Code == p.Code)).ToArray();
                     return TraversalHandlerResult.Stop;
                 }
 
@@ -85,20 +80,13 @@ public sealed partial class Gmod
         public IEnumerable<GmodNode> RemainingParents = Enumerable.Empty<GmodNode>();
     }
 
-    public bool Traverse<TState>(
-        TState state,
-        GmodNode rootNode,
-        TraverseHandlerWithState<TState> handler
-    )
+    public bool Traverse<TState>(TState state, GmodNode rootNode, TraverseHandlerWithState<TState> handler)
     {
         var context = new TraversalContext<TState>(new Parents(), handler, state);
         return TraverseNode(in context, rootNode) == TraversalHandlerResult.Continue;
     }
 
-    private TraversalHandlerResult TraverseNode<TState>(
-        in TraversalContext<TState> context,
-        GmodNode node
-    )
+    private TraversalHandlerResult TraverseNode<TState>(in TraversalContext<TState> context, GmodNode node)
     {
         if (context.Parents.Has(node))
             // Avoid cycles

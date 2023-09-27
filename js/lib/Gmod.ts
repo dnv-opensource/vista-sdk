@@ -13,6 +13,8 @@ import { GmodNodeMetadata } from "./types/GmodNode";
 import { Parents } from "./util/Parents";
 import { VisVersion } from "./VisVersion";
 
+export const PotentialParentScopeTypes = ["SELECTION", "GROUP", "LEAF"];
+
 export class Gmod {
     public visVersion: VisVersion;
     private _rootNode: GmodNode;
@@ -156,6 +158,23 @@ export class Gmod {
         locations: Locations
     ): GmodPath | undefined {
         return GmodPath.tryParse(item, locations, this);
+    }
+
+    // Parsing
+    public parseFromFullPath(item: string, locations: Locations): GmodPath {
+        const path = this.tryParseFromFullPath(item, locations);
+
+        if (!path) {
+            throw new Error("Couldn't parse GmodPath");
+        }
+        return path;
+    }
+
+    public tryParseFromFullPath(
+        item: string,
+        locations: Locations
+    ): GmodPath | undefined {
+        return GmodPath.tryParseFromFullPath(item, this, locations);
     }
 
     // Traversal

@@ -15,11 +15,7 @@ public sealed record Header(
 
 public sealed record ConfigurationReference(string Id, string? Version, DateTimeOffset TimeStamp);
 
-public sealed record VersionInformation(
-    string NamingRule,
-    string NamingSchemeVersion,
-    string? ReferenceUrl
-);
+public sealed record VersionInformation(string NamingRule, string NamingSchemeVersion, string? ReferenceUrl);
 
 public sealed record DataChannelList(IReadOnlyList<DataChannel> DataChannel);
 
@@ -27,10 +23,7 @@ public sealed record DataChannel(DataChannelId DataChannelId, Property Property)
 
 public sealed record DataChannelId(LocalId LocalId, string? ShortId, NameObject? NameObject);
 
-public sealed record NameObject(
-    string NamingRule,
-    IReadOnlyDictionary<string, object> CustomProperties
-);
+public sealed record NameObject(string NamingRule, IReadOnlyDictionary<string, object> CustomProperties);
 
 public sealed record DataChannelType(string Type, string? UpdateCycle, string? CalculationPeriod);
 

@@ -9,6 +9,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <Features>strict</Features>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591;CS1591</NoWarn>
 
     <Author>DNV AS</Author>
     <Company>DNV AS</Company>
@@ -22,12 +23,15 @@
     <PackageTags>dnv dnvgl vis maritime iso-19847 iso-19848</PackageTags>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <DotNetVersion>7.0.0</DotNetVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net7.0'">
     <DotNetVersion>6.0.0</DotNetVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpier.MsBuild" Version="0.15.1" >
+    <PackageReference Include="CSharpier.MsBuild" Version="0.25.0" >
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

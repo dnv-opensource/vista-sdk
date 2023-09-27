@@ -34,4 +34,21 @@ public static class CodebookNames
             null => throw new ArgumentException(nameof(prefix)),
             _ => throw new ArgumentException("unknown prefix: " + prefix, nameof(prefix)),
         };
+
+    public static string ToPrefix(CodebookName name) =>
+        name switch
+        {
+            CodebookName.Position => "pos",
+            CodebookName.Quantity => "qty",
+            CodebookName.Calculation => "calc",
+            CodebookName.State => "state",
+            CodebookName.Content => "cnt",
+            CodebookName.Command => "cmd",
+            CodebookName.Type => "type",
+            CodebookName.FunctionalServices => "funct.svc",
+            CodebookName.MaintenanceCategory => "maint.cat",
+            CodebookName.ActivityType => "act.type",
+            CodebookName.Detail => "detail",
+            _ => throw new ArgumentException("unknown codebook: " + name, nameof(name)),
+        };
 }

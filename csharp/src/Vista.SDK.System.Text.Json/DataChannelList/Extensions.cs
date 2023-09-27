@@ -16,8 +16,8 @@ public static class Extensions
                                     new DataChannelID(
                                         c.DataChannelId.LocalId.ToString(),
                                         c.DataChannelId.NameObject is null
-                                          ? null
-                                          : new NameObject(c.DataChannelId.NameObject.NamingRule)
+                                            ? null
+                                            : new NameObject(c.DataChannelId.NameObject.NamingRule)
                                             {
                                                 AdditionalProperties =
                                                     c.DataChannelId.NameObject.CustomProperties.CopyProperties(),
@@ -33,8 +33,8 @@ public static class Extensions
                                         ),
                                         new Format(
                                             c.Property.Format.Restriction is null
-                                              ? null
-                                              : new Restriction(
+                                                ? null
+                                                : new Restriction(
                                                     c.Property.Format.Restriction.Enumeration,
                                                     c.Property.Format.Restriction.FractionDigits,
                                                     c.Property.Format.Restriction.Length,
@@ -53,23 +53,19 @@ public static class Extensions
                                         c.Property.Name,
                                         c.Property.QualityCoding,
                                         c.Property.Range is null
-                                          ? null
-                                          : new Range(c.Property.Range.High, c.Property.Range.Low),
+                                            ? null
+                                            : new Range(c.Property.Range.High, c.Property.Range.Low),
                                         c.Property.Remarks,
                                         c.Property.Unit is null
-                                          ? null
-                                          : new Unit(
-                                                c.Property.Unit.QuantityName,
-                                                c.Property.Unit.UnitSymbol
-                                            )
+                                            ? null
+                                            : new Unit(c.Property.Unit.QuantityName, c.Property.Unit.UnitSymbol)
                                             {
                                                 AdditionalProperties =
                                                     c.Property.Unit.CustomProperties.CopyProperties(),
                                             }
                                     )
                                     {
-                                        AdditionalProperties =
-                                            c.Property.CustomProperties.CopyProperties(),
+                                        AdditionalProperties = c.Property.CustomProperties.CopyProperties(),
                                     }
                                 )
                         )
@@ -85,8 +81,8 @@ public static class Extensions
                     package.Package.Header.DateCreated,
                     package.Package.Header.ShipId.ToString(),
                     package.Package.Header.VersionInformation is null
-                      ? null
-                      : new VersionInformation(
+                        ? null
+                        : new VersionInformation(
                             package.Package.Header.VersionInformation.NamingRule,
                             package.Package.Header.VersionInformation.NamingSchemeVersion,
                             package.Package.Header.VersionInformation.ReferenceUrl
@@ -112,8 +108,8 @@ public static class Extensions
                         p.Header.DataChannelListID.TimeStamp
                     ),
                     p.Header.VersionInformation is null
-                      ? null
-                      : new Domain.VersionInformation(
+                        ? null
+                        : new Domain.VersionInformation(
                             p.Header.VersionInformation.NamingRule,
                             p.Header.VersionInformation.NamingSchemeVersion,
                             p.Header.VersionInformation.ReferenceURL
@@ -129,14 +125,14 @@ public static class Extensions
                                 new Domain.DataChannel(
                                     new Domain.DataChannelId(
                                         c.DataChannelID.LocalID is null
-                                          ? throw new InvalidOperationException(
+                                            ? throw new InvalidOperationException(
                                                 "DataChannelPackage local ID was null"
                                             )
-                                          : LocalId.Parse(c.DataChannelID.LocalID),
+                                            : LocalId.Parse(c.DataChannelID.LocalID),
                                         c.DataChannelID.ShortID,
                                         c.DataChannelID.NameObject is null
-                                          ? null
-                                          : new Domain.NameObject(
+                                            ? null
+                                            : new Domain.NameObject(
                                                 c.DataChannelID.NameObject.NamingRule,
                                                 c.DataChannelID.NameObject.AdditionalProperties.CopyProperties()
                                             )
@@ -150,8 +146,8 @@ public static class Extensions
                                         new Domain.Format(
                                             c.Property.Format.Type,
                                             c.Property.Format.Restriction is null
-                                              ? null
-                                              : new Domain.Restriction(
+                                                ? null
+                                                : new Domain.Restriction(
                                                     c.Property.Format.Restriction.Enumeration?.ToList(),
                                                     c.Property.Format.Restriction.FractionDigits,
                                                     c.Property.Format.Restriction.Length,
@@ -167,14 +163,11 @@ public static class Extensions
                                                 )
                                         ),
                                         c.Property.Range is null
-                                          ? null
-                                          : new Domain.Range(
-                                                c.Property.Range.High,
-                                                c.Property.Range.Low
-                                            ),
+                                            ? null
+                                            : new Domain.Range(c.Property.Range.High, c.Property.Range.Low),
                                         c.Property.Unit is null
-                                          ? null
-                                          : new Domain.Unit(
+                                            ? null
+                                            : new Domain.Unit(
                                                 c.Property.Unit.UnitSymbol,
                                                 c.Property.Unit.QuantityName,
                                                 c.Property.Unit.AdditionalProperties.CopyProperties()

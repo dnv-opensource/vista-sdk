@@ -19,10 +19,7 @@ public partial class IsoMessageTests
                     new VersionInformation("some_naming_rule", "2.0", "http://somewhere.net"),
                     "Author1",
                     DateTimeOffset.Parse("2015-12-01T00:00:00Z"),
-                    new Dictionary<string, object>()
-                    {
-                        ["nr:CustomHeaderElement"] = "Vender specific headers"
-                    }
+                    new Dictionary<string, object>() { ["nr:CustomHeaderElement"] = "Vender specific headers" }
                 ),
                 new DataChannelList(
                     new DataChannel[]
@@ -42,11 +39,7 @@ public partial class IsoMessageTests
                                 )
                             ),
                             new Property(
-                                new DataChannelType(
-                                    "Inst",
-                                    UpdateCycle: "1",
-                                    CalculationPeriod: null
-                                ),
+                                new DataChannelType("Inst", UpdateCycle: "1", CalculationPeriod: null),
                                 new Format(
                                     "Decimal",
                                     new Restriction(

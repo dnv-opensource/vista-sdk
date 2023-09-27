@@ -5,6 +5,50 @@ using Vista.SDK.Mqtt;
 
 namespace Vista.SDK.Tests;
 
+public class ParsingErrorsTests
+{
+    [Fact]
+    public void Comparisons()
+    {
+        var errors1 = new[] { ("T1", "M1") };
+        var errors2 = new[] { ("T1", "M1"), ("T2", "M1") };
+
+        var e1 = new ParsingErrors(errors1);
+        var e2 = new ParsingErrors(errors1);
+        var e3 = new ParsingErrors(errors2);
+        var e4 = ParsingErrors.Empty;
+        Assert.Equal(e1, e2);
+        Assert.True(e1 == e2);
+#pragma warning disable CS1718
+        Assert.True(e1 == e1);
+#pragma warning restore CS1718
+        Assert.False(e1 == null);
+        Assert.False(e1 == e4);
+
+        Assert.NotEqual(e1, e3);
+        Assert.False(e1 == e3);
+        Assert.True(e4 == ParsingErrors.Empty);
+        Assert.Equal(e4, ParsingErrors.Empty);
+        Assert.True(e4.Equals(ParsingErrors.Empty));
+        Assert.True(e4.Equals((object)ParsingErrors.Empty));
+    }
+
+    [Fact]
+    public void Enumerator()
+    {
+        var errors1 = new[] { ("T1", "M1") };
+        var errors2 = new[] { ("T1", "M1"), ("T2", "M1") };
+
+        var e1 = new ParsingErrors(errors1);
+        var e2 = new ParsingErrors(errors2);
+        var e3 = ParsingErrors.Empty;
+
+        Assert.Equal(errors1.Length, e1.Count());
+        Assert.Equal(errors2.Length, e2.Count());
+        Assert.Empty(e3);
+    }
+}
+
 public class LocalIdTests
 {
     public sealed record class Input(
@@ -27,14 +71,7 @@ public class LocalIdTests
             },
             new object[]
             {
-                new Input(
-                    "411.1/C101.63/S206",
-                    null,
-                    "temperature",
-                    "exhaust.gas",
-                    "inlet",
-                    Verbose: true
-                ),
+                new Input("411.1/C101.63/S206", null, "temperature", "exhaust.gas", "inlet", Verbose: true),
                 "/dnv-v2/vis-3-4a/411.1/C101.63/S206/~propulsion.engine/~cooling.system/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
             },
             new object[]
@@ -66,13 +103,7 @@ public class LocalIdTests
             },
             new object[]
             {
-                new Input(
-                    "411.1/C101.63/S206",
-                    "411.1/C101.31-5",
-                    "temperature",
-                    "exhaust.gas",
-                    "inlet"
-                ),
+                new Input("411.1/C101.63/S206", "411.1/C101.31-5", "temperature", "exhaust.gas", "inlet"),
                 "dnv-v2/vis-3-4a/411.1_C101.63_S206/411.1_C101.31-5/qty-temperature/cnt-exhaust.gas/_/_/_/_/pos-inlet/_",
             },
         };
@@ -89,9 +120,7 @@ public class LocalIdTests
         var codebooks = vis.GetCodebooks(visVersion);
 
         var primaryItem = gmod.ParsePath(input.PrimaryItem);
-        var secondaryItem = input.SecondaryItem is not null
-            ? gmod.ParsePath(input.SecondaryItem)
-            : null;
+        var secondaryItem = input.SecondaryItem is not null ? gmod.ParsePath(input.SecondaryItem) : null;
 
         var localId = LocalIdBuilder
             .Create(visVersion)
@@ -158,9 +187,7 @@ public class LocalIdTests
         var codebooks = vis.GetCodebooks(visVersion);
 
         var primaryItem = gmod.ParsePath(input.PrimaryItem);
-        var secondaryItem = input.SecondaryItem is not null
-            ? gmod.ParsePath(input.SecondaryItem)
-            : null;
+        var secondaryItem = input.SecondaryItem is not null ? gmod.ParsePath(input.SecondaryItem) : null;
 
         var localIdBuilder = LocalIdBuilder
             .Create(visVersion)
@@ -191,9 +218,7 @@ public class LocalIdTests
         var codebooks = vis.GetCodebooks(visVersion);
 
         var primaryItem = gmod.ParsePath(input.PrimaryItem);
-        var secondaryItem = input.SecondaryItem is not null
-            ? gmod.ParsePath(input.SecondaryItem)
-            : null;
+        var secondaryItem = input.SecondaryItem is not null ? gmod.ParsePath(input.SecondaryItem) : null;
 
         var localId = LocalIdBuilder
             .Create(visVersion)
@@ -213,18 +238,14 @@ public class LocalIdTests
         Assert.True(localId == otherLocalId);
         Assert.NotSame(localId, otherLocalId);
 
-        otherLocalId = otherLocalId.WithMetadataTag(
-            codebooks.CreateTag(CodebookName.Position, "eqtestvalue")
-        );
+        otherLocalId = otherLocalId.WithMetadataTag(codebooks.CreateTag(CodebookName.Position, "eqtestvalue"));
         Assert.NotEqual(localId, otherLocalId);
         Assert.True(localId != otherLocalId);
         Assert.NotSame(localId, otherLocalId);
 
         otherLocalId = localId
             .TryWithPrimaryItem(localId.PrimaryItem is null ? null : localId.PrimaryItem with { })
-            .TryWithMetadataTag(
-                codebooks.TryCreateTag(CodebookName.Position, localId.Position?.Value)
-            );
+            .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.Position, localId.Position?.Value));
 
         Assert.Equal(localId, otherLocalId);
         Assert.True(localId == otherLocalId);
@@ -254,8 +275,7 @@ public class LocalIdTests
     [Fact]
     public void Test()
     {
-        var localIdAsString =
-            "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet";
+        var localIdAsString = "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet";
 
         var localId = LocalIdBuilder.Parse(localIdAsString);
     }
@@ -268,7 +288,7 @@ public class LocalIdTests
         var reader = new StreamReader(file);
 
         var errored =
-            new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception, LocalIdParsingErrorBuilder? ErrorBuilder)>();
+            new List<(string LocalIdStr, LocalIdBuilder? LocalId, Exception? Exception, ParsingErrors ParsingErrors)>();
 
         string? localIdStr;
         while ((localIdStr = await reader.ReadLineAsync()) is not null)
@@ -290,16 +310,16 @@ public class LocalIdTests
                 // Quick fix to skip invalid location e.g. primaryItem 511.11-1SO
                 if (ex.Message.Contains("location"))
                     continue;
-                errored.Add((localIdStr, null, ex, null));
+                errored.Add((localIdStr, null, ex, ParsingErrors.Empty));
             }
         }
-        if (errored.Select(e => e.ErrorBuilder?.ErrorMessages).Count() > 0)
+        if (errored.Any(e => e.ParsingErrors.HasErrors))
         {
             // TODO - gmod path parsing now fails because we actually validate locations properly
             // might have to skip the smoketests while we fix the source data
             Console.Write("");
         }
-        Assert.Empty(errored.Select(e => e.ErrorBuilder?.ErrorMessages).ToList());
+        Assert.Empty(errored.SelectMany(e => e.ParsingErrors).ToList());
         Assert.Empty(errored);
     }
 
@@ -313,22 +333,40 @@ public class LocalIdTests
     }
 
     [Theory]
-    [MemberData(
-        nameof(VistaSDKTestData.AddInvalidLocalIdsData),
-        MemberType = typeof(VistaSDKTestData)
-    )]
+    [MemberData(nameof(VistaSDKTestData.AddInvalidLocalIdsData), MemberType = typeof(VistaSDKTestData))]
     public void Test_Parsing_Validation(string localIdStr, string[] expectedErrorMessages)
     {
-        var parsed = LocalIdBuilder.TryParse(
-            localIdStr,
-            out LocalIdParsingErrorBuilder errorBuilder,
-            out _
-        );
+        var parsed = LocalIdBuilder.TryParse(localIdStr, out var errorBuilder, out _);
 
-        var actualErrorMessages = errorBuilder.ErrorMessages.Select(e => e.message).ToArray();
+        var actualErrorMessages = errorBuilder.Select(e => e.Message).ToArray();
         actualErrorMessages.Should().Equal(expectedErrorMessages);
 
         Assert.False(parsed);
         Assert.NotNull(errorBuilder);
     }
+
+    // [Fact]
+    // public async Task Test_ILocalId_Equivalency()
+    // {
+    //     var tasks = new Task[Environment.ProcessorCount];
+    //     for (int i = 0; i < Environment.ProcessorCount; i++)
+    //     {
+    //         var task = Task.Run(() =>
+    //         {
+    //             for (int j = 0; j < 100; j++)
+    //             {
+    //                 ILocalId localId1 = PMSLocalId.Parse(
+    //                     "/dnv-v2-experimental/vis-3-6a/411.1/C101.661i-F/C621/meta/maint.cat-preventive/act.type-service"
+    //                 );
+
+    //                 ILocalId localId2 = PMSLocalId.Parse(localId1.ToString());
+
+    //                 localId2.Should().BeEquivalentTo(localId1, config => config.For);
+    //             }
+    //         });
+    //         tasks[i] = task;
+    //     }
+
+    //     await Task.WhenAll(tasks);
+    // }
 }

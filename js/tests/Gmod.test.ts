@@ -1,11 +1,11 @@
-import { Gmod, GmodPath, VisVersion } from "../lib";
+import { Gmod, GmodPath, VisVersion, VisVersions } from "../lib";
 import { TraversalHandlerResult } from "../lib/types/Gmod";
 import { VIS } from "../lib/VIS";
 
 describe("Gmod", () => {
     const vis = VIS.instance;
     const version = VisVersion.v3_4a;
-    const testVersions = [VisVersion.v3_4a, VisVersion.v3_5a, VisVersion.v3_6a];
+    const testVersions = VisVersions.all;
     const gmodPromise = vis.getGmod(version);
     const locationsPromise = vis.getLocations(version);
 
@@ -24,8 +24,8 @@ describe("Gmod", () => {
         const gmod = await gmodPromise;
         const locations = await locationsPromise;
 
-        const node1 = gmod.getNode("400a");
-        const node2 = gmod.getNode("400a");
+        const node1 = gmod.getNode("411.1");
+        const node2 = gmod.getNode("411.1");
 
         expect(node1).toEqual(node2);
         expect(node1).toBe(node2);

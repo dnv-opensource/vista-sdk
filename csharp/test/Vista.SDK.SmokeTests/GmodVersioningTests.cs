@@ -21,89 +21,81 @@ public class GmodVersioningTests
         var context = new SmokeTestContext(targetGmod, channel);
         const int pad = 7;
 
-        var producer = Task.Run(
-            () =>
-            {
-                var completed = sourceGmod.Traverse(
-                    context,
-                    (context, parents, node) =>
-                    {
-                        if (parents.Count == 0)
-                            return TraversalHandlerResult.Continue;
-
-                        var path = new GmodPath(parents.ToArray(), node, skipVerify: true);
-                        _ = context.Channel.Writer.TryWrite(path);
+        var producer = Task.Run(() =>
+        {
+            var completed = sourceGmod.Traverse(
+                context,
+                (context, parents, node) =>
+                {
+                    if (parents.Count == 0)
                         return TraversalHandlerResult.Continue;
-                    }
-                );
-                Assert.True(completed);
-                context.Channel.Writer.Complete();
-                var counter = Interlocked.Read(ref context.Counter);
-                Console.WriteLine($"[{counter, pad}] Done traversing {sourceGmod.VisVersion} gmod");
-            }
-        );
+
+                    var path = new GmodPath(parents.ToList(), node, skipVerify: true);
+                    _ = context.Channel.Writer.TryWrite(path);
+                    return TraversalHandlerResult.Continue;
+                }
+            );
+            Assert.True(completed);
+            context.Channel.Writer.Complete();
+            var counter = Interlocked.Read(ref context.Counter);
+            Console.WriteLine($"[{counter, pad}] Done traversing {sourceGmod.VisVersion} gmod");
+        });
 
         var consumers = new Task[Environment.ProcessorCount];
         for (int i = 0; i < consumers.Length; i++)
         {
             var capturedI = i;
-            consumers[i] = Task.Run(
-                async () =>
+            consumers[i] = Task.Run(async () =>
+            {
+                var thread = capturedI;
+                var reader = context.Channel.Reader;
+
+                while (await reader.WaitToReadAsync())
                 {
-                    var thread = capturedI;
-                    var reader = context.Channel.Reader;
-
-                    while (await reader.WaitToReadAsync())
+                    while (reader.TryRead(out var sourcePath))
                     {
-                        while (reader.TryRead(out var sourcePath))
+                        GmodPath? targetPath = null;
+                        long counter = 0;
+                        try
                         {
-                            GmodPath? targetPath = null;
-                            long counter = 0;
-                            try
-                            {
-                                targetPath = VIS.Instance.ConvertPath(
-                                    VisVersion.v3_4a,
-                                    sourcePath,
-                                    VisVersion.v3_5a
-                                );
-                                Assert.NotNull(targetPath);
-                                var parsedPath = context.TargetGmod.TryParsePath(
-                                    targetPath!.ToString(),
-                                    out var parsedTargetPath
-                                );
-                                Assert.True(parsedPath);
-                                Assert.Equal(parsedTargetPath?.ToString(), targetPath.ToString());
-                                counter = Interlocked.Increment(ref context.Counter);
+                            targetPath = VIS.Instance.ConvertPath(VisVersion.v3_4a, sourcePath, VisVersion.v3_5a);
+                            Assert.NotNull(targetPath);
+                            var parsedPath = context.TargetGmod.TryParsePath(
+                                targetPath!.ToString(),
+                                out var parsedTargetPath
+                            );
+                            Assert.True(parsedPath);
+                            Assert.Equal(parsedTargetPath?.ToString(), targetPath.ToString());
+                            counter = Interlocked.Increment(ref context.Counter);
 
-                                var sourcePathStr = sourcePath.ToString();
-                                var targetPathStr = targetPath.ToString();
-                                if (!sourcePathStr.SequenceEqual(targetPathStr))
+                            var sourcePathStr = sourcePath.ToString();
+                            var targetPathStr = targetPath.ToString();
+                            if (!sourcePathStr.SequenceEqual(targetPathStr))
+                            {
+                                lock (context.ChangedPaths)
                                 {
-                                    lock (context.ChangedPaths)
-                                    {
-                                        context.ChangedPaths.Add((sourcePathStr, targetPathStr));
-                                    }
+                                    context.ChangedPaths.Add((sourcePathStr, targetPathStr));
                                 }
                             }
-                            catch (Exception e)
+                        }
+                        catch (Exception e)
+                        {
+                            counter = Interlocked.Increment(ref context.Counter);
+                            Console.WriteLine(
+                                $"[{counter, pad}][{thread, 2}] Failed to create valid path from: {sourcePath} -> {targetPath?.ToString() ?? "N/A"} - {e.Message}"
+                            );
+                            lock (context.FailedConversions)
                             {
-                                counter = Interlocked.Increment(ref context.Counter);
-                                Console.WriteLine(
-                                    $"[{counter, pad}][{thread, 2}] Failed to create valid path from: {sourcePath} -> {targetPath?.ToString() ?? "N/A"} - {e.Message}"
-                                );
-                                lock (context.FailedConversions)
-                                {
-                                    context.FailedConversions.Add((sourcePath, targetPath, e));
-                                }
+                                context.FailedConversions.Add((sourcePath, targetPath, e));
                             }
-                            if (counter % 10_000 == 0)
-                            {
-                                Console.WriteLine($"[{counter, pad}][{thread, 2}] Paths processed");
-                            }
+                        }
+                        if (counter % 10_000 == 0)
+                        {
+                            Console.WriteLine($"[{counter, pad}][{thread, 2}] Paths processed");
                         }
                     }
                 }
-            );
+            });
         }
 
         await producer;
@@ -161,8 +153,7 @@ public class GmodVersioningTests
     private record SmokeTestContext(Gmod TargetGmod, Channel<GmodPath> Channel)
     {
         public long Counter;
-        public List<(GmodPath SourcePath, GmodPath? TargetPath, Exception Exception)> FailedConversions =
-            new();
+        public List<(GmodPath SourcePath, GmodPath? TargetPath, Exception Exception)> FailedConversions = new();
         public List<(string SourcePath, string TargetPath)> ChangedPaths = new();
     }
 }

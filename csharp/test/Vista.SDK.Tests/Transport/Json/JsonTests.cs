@@ -15,12 +15,7 @@ public class JsonTests
     [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_File_Serialization(string file)
     {
-        await using var reader = new FileStream(
-            file,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read
-        );
+        await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
@@ -33,12 +28,7 @@ public class JsonTests
     [InlineData("Transport/Json/_files/TimeSeriesData.json")]
     public async Task Test_TimeSeriesData_Deserialization(string file)
     {
-        await using var reader = new FileStream(
-            file,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read
-        );
+        await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var package = await Serializer.DeserializeTimeSeriesDataAsync(reader);
         Assert.NotNull(package);
@@ -49,12 +39,7 @@ public class JsonTests
     [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_Deserialization(string file)
     {
-        await using var reader = new FileStream(
-            file,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read
-        );
+        await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
@@ -64,12 +49,7 @@ public class JsonTests
     [InlineData("Transport/Json/_files/TimeSeriesData.json")]
     public async Task Test_TimeSeriesData_Serialization_Roundtrip(string file)
     {
-        await using var reader = new FileStream(
-            file,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read
-        );
+        await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var package = await Serializer.DeserializeTimeSeriesDataAsync(reader);
         Assert.NotNull(package);
@@ -85,12 +65,7 @@ public class JsonTests
     [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_Serialization_Roundtrip(string file)
     {
-        await using var reader = new FileStream(
-            file,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read
-        );
+        await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
@@ -106,12 +81,7 @@ public class JsonTests
     [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_Domain_Model_Roundtrip(string file)
     {
-        await using var reader = new FileStream(
-            file,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read
-        );
+        await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
@@ -127,12 +97,7 @@ public class JsonTests
     [InlineData("schemas/json/DataChannelList.sample.json")]
     public async Task Test_DataChannelList_Compression(string file)
     {
-        await using var reader = new FileStream(
-            file,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read
-        );
+        await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
@@ -158,12 +123,7 @@ public class JsonTests
     [InlineData("Transport/Json/_files/TimeSeriesData.json")]
     public async Task Test_TimeSeriesData_Domain_Model_Roundtrip(string file)
     {
-        await using var reader = new FileStream(
-            file,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read
-        );
+        await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         var package = await Serializer.DeserializeTimeSeriesDataAsync(reader);
         Assert.NotNull(package);
@@ -179,8 +139,7 @@ public class JsonTests
         public bool Equals(JsonElement x, JsonElement y) =>
             EqualityComparer<string>.Default.Equals(x.GetString(), y.GetString());
 
-        public int GetHashCode(JsonElement obj) =>
-            EqualityComparer<string>.Default.GetHashCode(obj.GetString()!);
+        public int GetHashCode(JsonElement obj) => EqualityComparer<string>.Default.GetHashCode(obj.GetString()!);
     }
 
     private static readonly Func<

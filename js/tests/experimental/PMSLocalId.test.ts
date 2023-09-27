@@ -1,4 +1,5 @@
 import { VisVersion, Experimental, CodebookName, VIS } from "../../lib";
+import { PMSLocalId } from "../../lib/experimental/PMSLocalId";
 
 type Input = {
     primaryItem: string;
@@ -253,4 +254,10 @@ describe("LocalId", () => {
             expect(localId.maintenanceCategory).toBeFalsy();
         }
     );
+
+    test.each(testData)("Parsing", async ({ output }) => {
+        const pmsLocalId = await PMSLocalId.parseAsync(output);
+
+        expect(pmsLocalId).not.toBeFalsy();
+    });
 });

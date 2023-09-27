@@ -40,14 +40,12 @@ public class DataChannelListSerialization
     private SpecificWriter<DataChannelListAvroPackage> _avroWriter;
 
     private static readonly Lazy<DataChannelListSerialization> _bench =
-        new(
-            () =>
-            {
-                var bench = new DataChannelListSerialization();
-                bench.Setup();
-                return bench;
-            }
-        );
+        new(() =>
+        {
+            var bench = new DataChannelListSerialization();
+            bench.Setup();
+            return bench;
+        });
     private static readonly Dictionary<string, long> _payloadSizes = new();
 
     public class ConfigSourceAttribute : Attribute, IConfigSource
@@ -77,9 +75,7 @@ public class DataChannelListSerialization
             // );
             config.AddLogicalGroupRules(BenchmarkLogicalGroupRule.ByCategory);
 
-            config.SummaryStyle = SummaryStyle.Default
-                .WithRatioStyle(RatioStyle.Percentage)
-                .WithSizeUnit(SizeUnit.KB);
+            config.SummaryStyle = SummaryStyle.Default.WithRatioStyle(RatioStyle.Percentage).WithSizeUnit(SizeUnit.KB);
 
             // AddColumn(new RankColumn(NumeralSystem.Arabic));
             // AddColumn(BaselineRatioColumn.RatioMean);
@@ -112,9 +108,7 @@ public class DataChannelListSerialization
 
         _memoryStream = new MemoryStream();
         _compressionStream = new MemoryStream();
-        _avroWriter = new SpecificWriter<DataChannelListAvroPackage>(
-            DataChannelListAvroPackage._SCHEMA
-        );
+        _avroWriter = new SpecificWriter<DataChannelListAvroPackage>(DataChannelListAvroPackage._SCHEMA);
         _avroEncoder = new BinaryEncoder(_memoryStream);
 
         Json();

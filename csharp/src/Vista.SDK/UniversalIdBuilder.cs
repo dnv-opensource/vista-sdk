@@ -49,8 +49,7 @@ public sealed partial record class UniversalIdBuilder : IUniversalIdBuilder
         return this with { _localId = localId };
     }
 
-    public UniversalIdBuilder TryWithLocalId(in LocalIdBuilder? localId) =>
-        TryWithLocalId(localId, out _);
+    public UniversalIdBuilder TryWithLocalId(in LocalIdBuilder? localId) => TryWithLocalId(localId, out _);
 
     public UniversalIdBuilder WithImoNumber(in ImoNumber imoNumber)
     {
@@ -60,8 +59,7 @@ public sealed partial record class UniversalIdBuilder : IUniversalIdBuilder
         return universalIdBuilder;
     }
 
-    public UniversalIdBuilder TryWithImoNumber(in ImoNumber? imoNumber) =>
-        TryWithImoNumber(imoNumber, out _);
+    public UniversalIdBuilder TryWithImoNumber(in ImoNumber? imoNumber) => TryWithImoNumber(imoNumber, out _);
 
     public UniversalIdBuilder TryWithImoNumber(in ImoNumber? imoNumber, out bool succeeded)
     {

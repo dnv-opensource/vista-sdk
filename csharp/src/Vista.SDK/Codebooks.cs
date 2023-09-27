@@ -20,9 +20,7 @@ public sealed class Codebooks : IEnumerable<(CodebookName Name, Codebook Codeboo
             _codebooks.Add(type.Name, type);
         }
 
-        var detailsCodebook = new Codebook(
-            new CodebookDto("detail", new Dictionary<string, string[]>())
-        );
+        var detailsCodebook = new Codebook(new CodebookDto("detail", new Dictionary<string, string[]>()));
         _codebooks.Add(detailsCodebook.Name, detailsCodebook);
     }
 
@@ -40,8 +38,7 @@ public sealed class Codebooks : IEnumerable<(CodebookName Name, Codebook Codeboo
     public MetadataTag? TryCreateTag(CodebookName name, string? value) =>
         _codebooks.GetValueOrDefault(name)?.TryCreateTag(value);
 
-    public MetadataTag CreateTag(CodebookName name, string value) =>
-        _codebooks[name].CreateTag(value);
+    public MetadataTag CreateTag(CodebookName name, string value) => _codebooks[name].CreateTag(value);
 
     public Codebook GetCodebook(CodebookName name)
     {
@@ -53,8 +50,10 @@ public sealed class Codebooks : IEnumerable<(CodebookName Name, Codebook Codeboo
 
     public Enumerator GetEnumerator() => new Enumerator(this);
 
-    IEnumerator<(CodebookName Name, Codebook Codebook)> IEnumerable<(CodebookName Name, Codebook Codebook)>.GetEnumerator() =>
-        new Enumerator(this);
+    IEnumerator<(CodebookName Name, Codebook Codebook)> IEnumerable<(
+        CodebookName Name,
+        Codebook Codebook
+    )>.GetEnumerator() => new Enumerator(this);
 
     IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
 
@@ -67,8 +66,7 @@ public sealed class Codebooks : IEnumerable<(CodebookName Name, Codebook Codeboo
             _inner = parent._codebooks.GetEnumerator();
         }
 
-        public (CodebookName Name, Codebook Codebook) Current =>
-            (_inner.Current.Key, _inner.Current.Value);
+        public (CodebookName Name, Codebook Codebook) Current => (_inner.Current.Key, _inner.Current.Value);
 
         object IEnumerator.Current => Current;
 

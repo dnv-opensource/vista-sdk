@@ -34,10 +34,7 @@ public partial class IsoMessageTests
                 new[]
                 {
                     new TimeSeriesData(
-                        new ConfigurationReference(
-                            "DataChannelList.xml",
-                            DateTimeOffset.Parse("2016-01-01T00:00:00Z")
-                        ),
+                        new ConfigurationReference("DataChannelList.xml", DateTimeOffset.Parse("2016-01-01T00:00:00Z")),
                         TabularData: new[]
                         {
                             new TabularData(
@@ -109,10 +106,7 @@ public partial class IsoMessageTests
                         new Dictionary<string, object>()
                     ),
                     new TimeSeriesData(
-                        new ConfigurationReference(
-                            "DataChannelList.xml",
-                            DateTimeOffset.Parse("2016-01-03T00:00:00Z")
-                        ),
+                        new ConfigurationReference("DataChannelList.xml", DateTimeOffset.Parse("2016-01-03T00:00:00Z")),
                         TabularData: new[]
                         {
                             new TabularData(

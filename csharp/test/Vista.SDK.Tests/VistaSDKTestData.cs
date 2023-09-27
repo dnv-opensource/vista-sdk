@@ -5,34 +5,33 @@ namespace Vista.SDK.Tests;
 
 public class VistaSDKTestData
 {
-    public static IEnumerable<object[]> AddValidPositionData() =>
-        AddCodebookData(CodebookTestData.ValidPosition);
+    public static IEnumerable<object[]> AddValidPositionData() => AddCodebookData(CodebookTestData.ValidPosition);
 
     public static IEnumerable<object[]> AddStatesData() => AddCodebookData(CodebookTestData.States);
 
-    public static IEnumerable<object[]> AddPositionsData() =>
-        AddCodebookData(CodebookTestData.Positions);
+    public static IEnumerable<object[]> AddPositionsData() => AddCodebookData(CodebookTestData.Positions);
 
     public static IEnumerable<object[]> AddTagData() => AddCodebookData(CodebookTestData.Tag);
 
-    public static IEnumerable<object[]> AddDetailTagData() =>
-        AddCodebookData(CodebookTestData.DetailTag);
+    public static IEnumerable<object[]> AddDetailTagData() => AddCodebookData(CodebookTestData.DetailTag);
 
-    public static IEnumerable<object[]> AddInvalidLocalIdsData() =>
-        AddInvalidLocalId(LocalIdTestData);
+    public static IEnumerable<object[]> AddInvalidLocalIdsData() => AddInvalidLocalId(LocalIdTestData);
 
-    public static IEnumerable<object[]> AddValidGmodPathsData() =>
-        AddValidGmodPathsData(GmodPathTestData);
+    public static IEnumerable<object[]> AddValidGmodPathsData() => AddValidGmodPathsData(GmodPathTestData);
 
-    public static IEnumerable<object[]> AddInvalidGmodPathsData() =>
-        AddInvalidGmodPathsData(GmodPathTestData);
+    public static IEnumerable<object[]> AddInvalidGmodPathsData() => AddInvalidGmodPathsData(GmodPathTestData);
 
     public static IEnumerable<object?[]> AddLocationsData() => AddLocationsData(LocationsTestData);
+
+    public static IEnumerable<object?[]> AddIndividualizableSetsData() =>
+        AddIndividualizableSetsData(IndividualizableSetsData);
 
     private static CodebookTestData CodebookTestData => GetData<CodebookTestData>("Codebook");
     private static LocalIdTestData LocalIdTestData => GetData<LocalIdTestData>("InvalidLocalIds");
     private static GmodPathTestData GmodPathTestData => GetData<GmodPathTestData>("GmodPaths");
     private static LocationsTestData LocationsTestData => GetData<LocationsTestData>("Locations");
+    private static IndividualizableSetData[] IndividualizableSetsData =>
+        GetData<IndividualizableSetData[]>("IndividualizableSets");
 
     private static T GetData<T>(string testName)
     {
@@ -54,11 +53,7 @@ public class VistaSDKTestData
     {
         foreach (var invalidLocalIdItem in data.InvalidLocalIds)
         {
-            yield return new object[]
-            {
-                invalidLocalIdItem.localIdStr,
-                invalidLocalIdItem.ExpectedErrormessages
-            };
+            yield return new object[] { invalidLocalIdItem.localIdStr, invalidLocalIdItem.ExpectedErrormessages };
         }
     }
 
@@ -91,6 +86,14 @@ public class VistaSDKTestData
             };
         }
     }
+
+    public static IEnumerable<object?[]> AddIndividualizableSetsData(IndividualizableSetData[] data)
+    {
+        foreach (var set in data)
+        {
+            yield return new object?[] { set.Path, set.Expected, };
+        }
+    }
 }
 
 public record InvalidLocalIds(
@@ -98,9 +101,7 @@ public record InvalidLocalIds(
     [property: JsonPropertyName("expectedErrorMessages")] string[] ExpectedErrormessages
 );
 
-public record LocalIdTestData(
-    [property: JsonPropertyName("InvalidLocalIds")] InvalidLocalIds[] InvalidLocalIds
-);
+public record LocalIdTestData([property: JsonPropertyName("InvalidLocalIds")] InvalidLocalIds[] InvalidLocalIds);
 
 public record GmodPathTestData(
     [property: JsonPropertyName("Valid")] string[] Valid,
@@ -115,13 +116,16 @@ public record CodebookTestData(
     [property: JsonPropertyName("DetailTag")] string[][] DetailTag
 );
 
-public sealed record LocationsTestData(
-    [property: JsonPropertyName("locations")] LocationsTestDataItem[] Locations
-);
+public sealed record LocationsTestData([property: JsonPropertyName("locations")] LocationsTestDataItem[] Locations);
 
 public sealed record class LocationsTestDataItem(
     [property: JsonPropertyName("value")] string Value,
     [property: JsonPropertyName("success")] bool Success,
     [property: JsonPropertyName("output")] string? Output,
     [property: JsonPropertyName("expectedErrorMessages")] string[] ExpectedErrorMessages
+);
+
+public sealed record IndividualizableSetData(
+    [property: JsonPropertyName("path")] string Path,
+    [property: JsonPropertyName("expected")] string[][] Expected
 );

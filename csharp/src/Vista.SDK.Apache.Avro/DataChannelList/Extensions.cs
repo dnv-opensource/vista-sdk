@@ -24,11 +24,11 @@ public static class Extensions
                     VersionInformation = h.VersionInformation is null
                         ? null
                         : new VersionInformation()
-                          {
-                              NamingRule = h.VersionInformation.NamingRule,
-                              NamingSchemeVersion = h.VersionInformation.NamingSchemeVersion,
-                              ReferenceURL = h.VersionInformation.ReferenceUrl,
-                          },
+                        {
+                            NamingRule = h.VersionInformation.NamingRule,
+                            NamingSchemeVersion = h.VersionInformation.NamingSchemeVersion,
+                            ReferenceURL = h.VersionInformation.ReferenceUrl,
+                        },
                     Author = h.Author,
                     DateCreated = h.DateCreated?.DateTime,
                 },
@@ -44,11 +44,7 @@ public static class Extensions
                                         LocalID = dc.DataChannelId.LocalId.ToString(),
                                         NameObject = dc.DataChannelId.NameObject is null
                                             ? null
-                                            : new NameObject()
-                                              {
-                                                  NamingRule =
-                                                      dc.DataChannelId.NameObject.NamingRule,
-                                              },
+                                            : new NameObject() { NamingRule = dc.DataChannelId.NameObject.NamingRule, },
                                         ShortID = dc.DataChannelId.ShortId,
                                     },
                                     Property = new Property()
@@ -56,8 +52,7 @@ public static class Extensions
                                         AlertPriority = dc.Property.AlertPriority,
                                         DataChannelType = new DataChannelType()
                                         {
-                                            CalculationPeriod =
-                                                dc.Property.DataChannelType.CalculationPeriod,
+                                            CalculationPeriod = dc.Property.DataChannelType.CalculationPeriod,
                                             Type = dc.Property.DataChannelType.Type,
                                             UpdateCycle = dc.Property.DataChannelType.UpdateCycle,
                                         },
@@ -66,32 +61,20 @@ public static class Extensions
                                             Restriction = dc.Property.Format.Restriction is null
                                                 ? null
                                                 : new Restriction()
-                                                  {
-                                                      Enumeration =
-                                                          dc.Property.Format.Restriction.Enumeration?.ToList(),
-                                                      FractionDigits =
-                                                          dc.Property.Format.Restriction.FractionDigits,
-                                                      Length =
-                                                          dc.Property.Format.Restriction.Length,
-                                                      MaxExclusive =
-                                                          dc.Property.Format.Restriction.MaxExclusive,
-                                                      MaxInclusive =
-                                                          dc.Property.Format.Restriction.MaxInclusive,
-                                                      MaxLength =
-                                                          dc.Property.Format.Restriction.MaxLength,
-                                                      MinExclusive =
-                                                          dc.Property.Format.Restriction.MinExclusive,
-                                                      MinInclusive =
-                                                          dc.Property.Format.Restriction.MinInclusive,
-                                                      MinLength =
-                                                          dc.Property.Format.Restriction.MinLength,
-                                                      Pattern =
-                                                          dc.Property.Format.Restriction.Pattern,
-                                                      TotalDigits =
-                                                          dc.Property.Format.Restriction.TotalDigits,
-                                                      WhiteSpace =
-                                                          (WhiteSpace?)dc.Property.Format.Restriction.WhiteSpace,
-                                                  },
+                                                {
+                                                    Enumeration = dc.Property.Format.Restriction.Enumeration?.ToList(),
+                                                    FractionDigits = dc.Property.Format.Restriction.FractionDigits,
+                                                    Length = dc.Property.Format.Restriction.Length,
+                                                    MaxExclusive = dc.Property.Format.Restriction.MaxExclusive,
+                                                    MaxInclusive = dc.Property.Format.Restriction.MaxInclusive,
+                                                    MaxLength = dc.Property.Format.Restriction.MaxLength,
+                                                    MinExclusive = dc.Property.Format.Restriction.MinExclusive,
+                                                    MinInclusive = dc.Property.Format.Restriction.MinInclusive,
+                                                    MinLength = dc.Property.Format.Restriction.MinLength,
+                                                    Pattern = dc.Property.Format.Restriction.Pattern,
+                                                    TotalDigits = dc.Property.Format.Restriction.TotalDigits,
+                                                    WhiteSpace = (WhiteSpace?)dc.Property.Format.Restriction.WhiteSpace,
+                                                },
                                             Type = dc.Property.Format.Type,
                                         },
                                         Name = dc.Property.Name,
@@ -99,18 +82,18 @@ public static class Extensions
                                         Range = dc.Property.Range is null
                                             ? null
                                             : new Range()
-                                              {
-                                                  High = dc.Property.Range.High,
-                                                  Low = dc.Property.Range.Low,
-                                              },
+                                            {
+                                                High = dc.Property.Range.High,
+                                                Low = dc.Property.Range.Low,
+                                            },
                                         Remarks = dc.Property.Remarks,
                                         Unit = dc.Property.Unit is null
                                             ? null
                                             : new Unit()
-                                              {
-                                                  QuantityName = dc.Property.Unit.QuantityName,
-                                                  UnitSymbol = dc.Property.Unit.UnitSymbol,
-                                              },
+                                            {
+                                                QuantityName = dc.Property.Unit.QuantityName,
+                                                UnitSymbol = dc.Property.Unit.UnitSymbol,
+                                            },
                                     },
                                 }
                         )
@@ -120,9 +103,7 @@ public static class Extensions
         };
     }
 
-    public static Transport.DataChannel.DataChannelListPackage ToDomainModel(
-        this DataChannelListPackage package
-    )
+    public static Transport.DataChannel.DataChannelListPackage ToDomainModel(this DataChannelListPackage package)
     {
         var p = package.Package;
         return new Domain.DataChannelListPackage(
@@ -135,8 +116,8 @@ public static class Extensions
                         p.Header.DataChannelListID.TimeStamp
                     ),
                     p.Header.VersionInformation is null
-                      ? null
-                      : new Domain.VersionInformation(
+                        ? null
+                        : new Domain.VersionInformation(
                             p.Header.VersionInformation.NamingRule,
                             p.Header.VersionInformation.NamingSchemeVersion,
                             p.Header.VersionInformation.ReferenceURL
@@ -153,14 +134,14 @@ public static class Extensions
                                 new Domain.DataChannel(
                                     new Domain.DataChannelId(
                                         c.DataChannelID.LocalID is null
-                                          ? throw new InvalidOperationException(
+                                            ? throw new InvalidOperationException(
                                                 "DataChannelPackage local ID was null"
                                             )
-                                          : LocalId.Parse(c.DataChannelID.LocalID),
+                                            : LocalId.Parse(c.DataChannelID.LocalID),
                                         c.DataChannelID.ShortID,
                                         c.DataChannelID.NameObject is null
-                                          ? null
-                                          : new Domain.NameObject(
+                                            ? null
+                                            : new Domain.NameObject(
                                                 c.DataChannelID.NameObject.NamingRule,
                                                 // c.DataChannelID.NameObject.AdditionalProperties.CopyProperties()
                                                 new Dictionary<string, object>()
@@ -175,8 +156,8 @@ public static class Extensions
                                         new Domain.Format(
                                             c.Property.Format.Type,
                                             c.Property.Format.Restriction is null
-                                              ? null
-                                              : new Domain.Restriction(
+                                                ? null
+                                                : new Domain.Restriction(
                                                     c.Property.Format.Restriction.Enumeration?.ToList(),
                                                     c.Property.Format.Restriction.FractionDigits,
                                                     c.Property.Format.Restriction.Length,
@@ -192,14 +173,11 @@ public static class Extensions
                                                 )
                                         ),
                                         c.Property.Range is null
-                                          ? null
-                                          : new Domain.Range(
-                                                c.Property.Range.High,
-                                                c.Property.Range.Low
-                                            ),
+                                            ? null
+                                            : new Domain.Range(c.Property.Range.High, c.Property.Range.Low),
                                         c.Property.Unit is null
-                                          ? null
-                                          : new Domain.Unit(
+                                            ? null
+                                            : new Domain.Unit(
                                                 c.Property.Unit.UnitSymbol,
                                                 c.Property.Unit.QuantityName,
                                                 // c.Property.Unit.AdditionalProperties.CopyProperties()

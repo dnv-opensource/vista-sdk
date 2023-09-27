@@ -39,10 +39,7 @@ public partial class TimeSeriesDataPackage
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageHeader
 {
     private string? shipIDField;
@@ -104,10 +101,7 @@ public partial class PackageHeader
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageHeaderTimeSpan
 {
     private System.DateTime startField;
@@ -132,10 +126,7 @@ public partial class PackageHeaderTimeSpan
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageHeaderSystemConfiguration
 {
     private string? idField;
@@ -160,10 +151,7 @@ public partial class PackageHeaderSystemConfiguration
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageTimeSeriesData
 {
     private PackageTimeSeriesDataDataConfiguration? dataConfigurationField;
@@ -198,10 +186,7 @@ public partial class PackageTimeSeriesData
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageTimeSeriesDataDataConfiguration
 {
     private string? idField;
@@ -226,10 +211,7 @@ public partial class PackageTimeSeriesDataDataConfiguration
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageTimeSeriesDataTabularData
 {
     private string? numberOfDataSetField;
@@ -276,10 +258,7 @@ public partial class PackageTimeSeriesDataTabularData
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageTimeSeriesDataTabularDataDataChannelID
 {
     private string? idField;
@@ -306,10 +285,7 @@ public partial class PackageTimeSeriesDataTabularDataDataChannelID
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageTimeSeriesDataTabularDataDataSet
 {
     private PackageTimeSeriesDataTabularDataDataSetValue[]? valueField;
@@ -336,10 +312,7 @@ public partial class PackageTimeSeriesDataTabularDataDataSet
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageTimeSeriesDataTabularDataDataSetValue
 {
     private string? refField;
@@ -376,10 +349,7 @@ public partial class PackageTimeSeriesDataTabularDataDataSetValue
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageTimeSeriesDataEventData
 {
     private string? numberOfDataSetField;
@@ -406,10 +376,7 @@ public partial class PackageTimeSeriesDataEventData
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_TRANSPORT")]
 public partial class PackageTimeSeriesDataEventDataDataSet
 {
     private string? dataChannelIDField;

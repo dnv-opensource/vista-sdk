@@ -1,0 +1,265 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://vista.dnv.com/experimental/DataListPackage.schema.json",
+    "title": "DataListPackage",
+    "description": "An experimental generalized DataList package based on ISO19848",
+    "type": "object",
+    "properties": {
+        "Package": {
+            "$ref": "#/definitions/Package"
+        }
+    },
+    "additionalProperties": false,
+    "required": ["Package"],
+    "definitions": {
+        "Package": {
+            "type": "object",
+            "properties": {
+                "Header": {
+                    "$ref": "#/definitions/Header"
+                },
+                "DataList": {
+                    "$ref": "#/definitions/DataList"
+                }
+            },
+            "required": ["Header", "DataList"],
+            "additionalProperties": false
+        },
+        "Header": {
+            "type": "object",
+            "properties": {
+                "AssetId": {
+                    "type": "string"
+                },
+                "DataListID": {
+                    "$ref": "#/definitions/ConfigurationReference"
+                },
+                "VersionInformation": {
+                    "$ref": "#/definitions/VersionInformation"
+                },
+                "Author": {
+                    "type": "string"
+                },
+                "DateCreated": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": ["AssetId", "DataListID"]
+        },
+        "VersionInformation": {
+            "type": "object",
+            "properties": {
+                "NamingRule": {
+                    "type": "string"
+                },
+                "NamingSchemeVersion": {
+                    "type": "string"
+                },
+                "ReferenceURL": {
+                    "type": "string"
+                }
+            },
+            "required": ["NamingRule", "NamingSchemeVersion"],
+            "additionalProperties": false
+        },
+        "DataList": {
+            "type": "object",
+            "properties": {
+                "Data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Data"
+                    }
+                }
+            },
+            "required": ["Data"],
+            "additionalProperties": false
+        },
+        "Data": {
+            "type": "object",
+            "properties": {
+                "DataID": {
+                    "$ref": "#/definitions/DataID"
+                },
+                "Property": {
+                    "$ref": "#/definitions/Property"
+                }
+            },
+            "required": ["DataID", "Property"],
+            "additionalProperties": false
+        },
+        "DataID": {
+            "type": "object",
+            "properties": {
+                "LocalID": {
+                    "type": "string"
+                },
+                "ShortID": {
+                    "type": "string"
+                },
+                "NameObject": {
+                    "$ref": "#/definitions/NameObject"
+                }
+            },
+            "required": ["LocalID"],
+            "additionalProperties": false
+        },
+        "NameObject": {
+            "type": "object",
+            "properties": {
+                "NamingRule": {
+                    "type": "string"
+                }
+            },
+            "required": ["NamingRule"]
+        },
+        "Property": {
+            "type": "object",
+            "properties": {
+                "DataType": {
+                    "$ref": "#/definitions/DataType"
+                },
+                "Format": {
+                    "$ref": "#/definitions/Format"
+                },
+                "Range": {
+                    "$ref": "#/definitions/Range"
+                },
+                "Unit": {
+                    "$ref": "#/definitions/Unit"
+                },
+                "QualityCoding": {
+                    "type": "string"
+                },
+                "AlertPriority": {
+                    "type": "string"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Remarks": {
+                    "type": "string"
+                }
+            },
+            "required": ["DataType", "Format"]
+        },
+        "DataType": {
+            "type": "object",
+            "properties": {
+                "Type": {
+                    "type": "string"
+                },
+                "UpdateCycle": {
+                    "type": "string"
+                },
+                "CalculationPeriod": {
+                    "type": "string"
+                }
+            },
+            "required": ["Type"],
+            "additionalProperties": false
+        },
+        "Format": {
+            "type": "object",
+            "properties": {
+                "Type": {
+                    "type": "string"
+                },
+                "Restriction": {
+                    "$ref": "#/definitions/Restriction"
+                }
+            },
+            "required": ["Type"],
+            "additionalProperties": false
+        },
+        "Range": {
+            "type": "object",
+            "properties": {
+                "High": {
+                    "type": "string"
+                },
+                "Low": {
+                    "type": "string"
+                }
+            },
+            "required": ["High", "Low"],
+            "additionalProperties": false
+        },
+        "Unit": {
+            "type": "object",
+            "properties": {
+                "UnitSymbol": {
+                    "type": "string"
+                },
+                "QuantityName": {
+                    "type": "string"
+                }
+            },
+            "required": ["UnitSymbol"]
+        },
+        "Restriction": {
+            "type": "object",
+            "properties": {
+                "Enumeration": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "FractionDigits": {
+                    "type": "string"
+                },
+                "Length": {
+                    "type": "string"
+                },
+                "MaxExclusive": {
+                    "type": "string"
+                },
+                "MaxInclusive": {
+                    "type": "string"
+                },
+                "MaxLength": {
+                    "type": "string"
+                },
+                "MinExclusive": {
+                    "type": "string"
+                },
+                "MinInclusive": {
+                    "type": "string"
+                },
+                "MinLength": {
+                    "type": "string"
+                },
+                "Pattern": {
+                    "type": "string"
+                },
+                "TotalDigits": {
+                    "type": "string"
+                },
+                "WhiteSpace": {
+                    "type": "string",
+                    "enum": ["Preserve", "Replace", "Collapse"]
+                }
+            },
+            "additionalProperties": false
+        },
+        "ConfigurationReference": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "string"
+                },
+                "Version": {
+                    "type": "string"
+                },
+                "TimeStamp": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": ["ID", "TimeStamp"],
+            "additionalProperties": false
+        }
+    }
+}

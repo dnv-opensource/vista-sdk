@@ -11,10 +11,7 @@
 namespace System.Diagnostics.CodeAnalysis
 {
     /// <summary>Specifies that null is allowed as an input even if the corresponding type disallows it.</summary>
-    [AttributeUsage(
-        AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property,
-        Inherited = false
-    )]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false)]
 #if INTERNAL_NULLABLE_ATTRIBUTES
     internal
 #else
@@ -23,10 +20,7 @@ namespace System.Diagnostics.CodeAnalysis
     sealed class AllowNullAttribute : Attribute { }
 
     /// <summary>Specifies that null is disallowed as an input even if the corresponding type allows it.</summary>
-    [AttributeUsage(
-        AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property,
-        Inherited = false
-    )]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false)]
 #if INTERNAL_NULLABLE_ATTRIBUTES
     internal
 #else
@@ -36,10 +30,7 @@ namespace System.Diagnostics.CodeAnalysis
 
     /// <summary>Specifies that an output may be null even if the corresponding type disallows it.</summary>
     [AttributeUsage(
-        AttributeTargets.Field
-            | AttributeTargets.Parameter
-            | AttributeTargets.Property
-            | AttributeTargets.ReturnValue,
+        AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue,
         Inherited = false
     )]
 #if INTERNAL_NULLABLE_ATTRIBUTES
@@ -51,10 +42,7 @@ namespace System.Diagnostics.CodeAnalysis
 
     /// <summary>Specifies that an output will not be null even if the corresponding type allows it. Specifies that an input argument was not null when the call returns.</summary>
     [AttributeUsage(
-        AttributeTargets.Field
-            | AttributeTargets.Parameter
-            | AttributeTargets.Property
-            | AttributeTargets.ReturnValue,
+        AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue,
         Inherited = false
     )]
 #if INTERNAL_NULLABLE_ATTRIBUTES
@@ -155,11 +143,7 @@ namespace System.Diagnostics.CodeAnalysis
     }
 
     /// <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values.</summary>
-    [AttributeUsage(
-        AttributeTargets.Method | AttributeTargets.Property,
-        Inherited = false,
-        AllowMultiple = true
-    )]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
 #if INTERNAL_NULLABLE_ATTRIBUTES
     internal
 #else
@@ -184,11 +168,7 @@ namespace System.Diagnostics.CodeAnalysis
     }
 
     /// <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.</summary>
-    [AttributeUsage(
-        AttributeTargets.Method | AttributeTargets.Property,
-        Inherited = false,
-        AllowMultiple = true
-    )]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
 #if INTERNAL_NULLABLE_ATTRIBUTES
     internal
 #else

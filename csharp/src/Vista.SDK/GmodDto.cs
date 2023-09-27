@@ -11,8 +11,7 @@ internal sealed record GmodNodeDto(
     [property: JsonPropertyName("definition")] string? Definition,
     [property: JsonPropertyName("commonDefinition")] string? CommonDefinition,
     [property: JsonPropertyName("installSubstructure")] bool? InstallSubstructure,
-    [property: JsonPropertyName("normalAssignmentNames")]
-        IReadOnlyDictionary<string, string>? NormalAssignmentNames
+    [property: JsonPropertyName("normalAssignmentNames")] IReadOnlyDictionary<string, string>? NormalAssignmentNames
 );
 
 internal sealed record GmodDto(

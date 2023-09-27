@@ -47,7 +47,7 @@ public readonly record struct DataChannelId
             throw new InvalidOperationException("Tried to switch on invalid DataChannelId");
     }
 
-    public readonly override string ToString() =>
+    public override readonly string ToString() =>
         _tag switch
         {
             1 => _localId!.ToString(),

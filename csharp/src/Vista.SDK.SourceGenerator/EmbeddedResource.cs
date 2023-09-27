@@ -10,13 +10,11 @@ namespace Vista.SDK;
 
 internal static class EmbeddedResource
 {
-    internal static List<string> GetGmodVisVersion()
+    internal static List<string> GetVisVersions()
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        var manifestResourceNames = GetResourceNames(assembly)
-            .Where(x => x.EndsWith(".gz"))
-            .ToArray();
+        var manifestResourceNames = GetResourceNames(assembly).Where(x => x.EndsWith(".gz")).ToArray();
 
         if (!manifestResourceNames.Any())
             throw new InvalidOperationException(
@@ -27,17 +25,12 @@ internal static class EmbeddedResource
 
         foreach (var manifestResourceName in manifestResourceNames)
         {
-            if (
-                manifestResourceName.Contains("gmod")
-                && !manifestResourceName.Contains("versioning")
-            )
+            if (manifestResourceName.Contains("gmod") && !manifestResourceName.Contains("versioning"))
             {
                 var stream = GetDecompressedStream(assembly, manifestResourceName);
                 var gmod =
                     JsonSerializer.Deserialize<GmodDto>(stream)
-                    ?? throw new InvalidOperationException(
-                        $"Could not deserialize Gmod {nameof(stream)}"
-                    );
+                    ?? throw new InvalidOperationException($"Could not deserialize Gmod {nameof(stream)}");
                 visVersions.Add(gmod.VisVersion);
             }
         }
@@ -81,8 +74,7 @@ internal static class EmbeddedResource
     internal static UnmanagedMemoryStream GetStream(Assembly assembly, string resourceName) =>
         (UnmanagedMemoryStream)assembly.GetManifestResourceStream(resourceName)!;
 
-    internal static string[] GetResourceNames(Assembly assembly) =>
-        assembly.GetManifestResourceNames().ToArray();
+    internal static string[] GetResourceNames(Assembly assembly) => assembly.GetManifestResourceNames().ToArray();
 
     internal static GZipStream GetDecompressedStream(Assembly assembly, string resourceName)
     {

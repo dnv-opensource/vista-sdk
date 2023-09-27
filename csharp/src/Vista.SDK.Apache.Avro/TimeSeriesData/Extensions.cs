@@ -15,29 +15,18 @@ public static class Extensions
                 Header = h is null
                     ? null
                     : new Header()
-                      {
-                          Author = h.Author,
-                          DateCreated = h.DateCreated?.DateTime,
-                          DateModified = h.DateModified?.DateTime,
-                          ShipID = h.ShipId.ToString(),
-                          SystemConfiguration = h.SystemConfiguration
-                              ?.Select(
-                                  s =>
-                                      new SystemConfiguration()
-                                      {
-                                          ID = s.Id,
-                                          TimeStamp = s.TimeStamp.DateTime
-                                      }
-                              )
-                              .ToList(),
-                          TimeSpan = h.TimeSpan is null
-                              ? null
-                              : new TimeSpan()
-                                {
-                                    Start = h.TimeSpan.Start.DateTime,
-                                    End = h.TimeSpan.End.DateTime,
-                                },
-                      },
+                    {
+                        Author = h.Author,
+                        DateCreated = h.DateCreated?.DateTime,
+                        DateModified = h.DateModified?.DateTime,
+                        ShipID = h.ShipId.ToString(),
+                        SystemConfiguration = h.SystemConfiguration
+                            ?.Select(s => new SystemConfiguration() { ID = s.Id, TimeStamp = s.TimeStamp.DateTime })
+                            .ToList(),
+                        TimeSpan = h.TimeSpan is null
+                            ? null
+                            : new TimeSpan() { Start = h.TimeSpan.Start.DateTime, End = h.TimeSpan.End.DateTime, },
+                    },
                 TimeSeriesData = p.TimeSeriesData
                     .Select(
                         t =>
@@ -46,37 +35,34 @@ public static class Extensions
                                 DataConfiguration = t.DataConfiguration is null
                                     ? null
                                     : new DataConfiguration()
-                                      {
-                                          ID = t.DataConfiguration.Id,
-                                          TimeStamp = t.DataConfiguration.TimeStamp.DateTime,
-                                      },
+                                    {
+                                        ID = t.DataConfiguration.Id,
+                                        TimeStamp = t.DataConfiguration.TimeStamp.DateTime,
+                                    },
                                 EventData = t.EventData is null
                                     ? null
                                     : new EventData()
-                                      {
-                                          DataSet = t.EventData.DataSet
-                                              ?.Select(
-                                                  d =>
-                                                      new EventDataSet()
-                                                      {
-                                                          DataChannelID =
-                                                              d.DataChannelId.ToString(),
-                                                          Quality = d.Quality,
-                                                          TimeStamp = d.TimeStamp.DateTime,
-                                                          Value = d.Value,
-                                                      }
-                                              )
-                                              .ToList(),
-                                          NumberOfDataSet = t.EventData.NumberOfDataSet,
-                                      },
+                                    {
+                                        DataSet = t.EventData.DataSet
+                                            ?.Select(
+                                                d =>
+                                                    new EventDataSet()
+                                                    {
+                                                        DataChannelID = d.DataChannelId.ToString(),
+                                                        Quality = d.Quality,
+                                                        TimeStamp = d.TimeStamp.DateTime,
+                                                        Value = d.Value,
+                                                    }
+                                            )
+                                            .ToList(),
+                                        NumberOfDataSet = t.EventData.NumberOfDataSet,
+                                    },
                                 TabularData = t.TabularData
                                     ?.Select(
                                         td =>
                                             new TabularData()
                                             {
-                                                DataChannelID = td.DataChannelId
-                                                    ?.Select(i => i.ToString())
-                                                    .ToList(),
+                                                DataChannelID = td.DataChannelId?.Select(i => i.ToString()).ToList(),
                                                 DataSet = td.DataSet
                                                     ?.Select(
                                                         ds =>
@@ -100,21 +86,17 @@ public static class Extensions
         };
     }
 
-    public static Transport.TimeSeries.TimeSeriesDataPackage ToDomainModel(
-        this TimeSeriesDataPackage package
-    )
+    public static Transport.TimeSeries.TimeSeriesDataPackage ToDomainModel(this TimeSeriesDataPackage package)
     {
         var p = package.Package;
         var h = package.Package.Header;
         return new Domain.TimeSeriesDataPackage(
             new Domain.Package(
                 h is null
-                  ? null
-                  : new Domain.Header(
+                    ? null
+                    : new Domain.Header(
                         ShipId.Parse(h.ShipID),
-                        h.TimeSpan is null
-                          ? null
-                          : new Domain.TimeSpan(h.TimeSpan.Start, h.TimeSpan.End),
+                        h.TimeSpan is null ? null : new Domain.TimeSpan(h.TimeSpan.Start, h.TimeSpan.End),
                         h.DateCreated,
                         h.DateModified,
                         h.Author,
@@ -129,8 +111,8 @@ public static class Extensions
                         t =>
                             new Domain.TimeSeriesData(
                                 t.DataConfiguration is null
-                                  ? null
-                                  : new Domain.ConfigurationReference(
+                                    ? null
+                                    : new Domain.ConfigurationReference(
                                         t.DataConfiguration.ID,
                                         t.DataConfiguration.TimeStamp
                                     ),
@@ -140,9 +122,7 @@ public static class Extensions
                                             new Domain.TabularData(
                                                 td.NumberOfDataSet,
                                                 td.NumberOfDataChannel,
-                                                td.DataChannelID
-                                                    .Select(i => DataChannelId.Parse(i))
-                                                    ?.ToList(),
+                                                td.DataChannelID.Select(i => DataChannelId.Parse(i))?.ToList(),
                                                 td.DataSet
                                                     ?.Select(
                                                         tds =>
@@ -157,8 +137,8 @@ public static class Extensions
                                     )
                                     .ToList(),
                                 t.EventData is null
-                                  ? null
-                                  : new Domain.EventData(
+                                    ? null
+                                    : new Domain.EventData(
                                         t.EventData.NumberOfDataSet,
                                         t.EventData.DataSet
                                             ?.Select(

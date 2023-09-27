@@ -18,46 +18,22 @@ public class PMSLocalIdTests
         {
             new object[]
             {
-                new Input(
-                    "632.32i-1/S110",
-                    null,
-                    "high.temperature.fresh.water",
-                    "preventive",
-                    "overhaul"
-                ),
+                new Input("632.32i-1/S110", null, "high.temperature.fresh.water", "preventive", "overhaul"),
                 "/dnv-v2-experimental/vis-3-6a/632.32i-1/S110/meta/cnt-high.temperature.fresh.water/maint.cat-preventive/act.type-overhaul"
             },
             new object[]
             {
-                new Input(
-                    "632.32i-2/S110",
-                    null,
-                    "high.temperature.fresh.water",
-                    "preventive",
-                    "test"
-                ),
+                new Input("632.32i-2/S110", null, "high.temperature.fresh.water", "preventive", "test"),
                 "/dnv-v2-experimental/vis-3-6a/632.32i-2/S110/meta/cnt-high.temperature.fresh.water/maint.cat-preventive/act.type-test"
             },
             new object[]
             {
-                new Input(
-                    "632.32i-2/S110",
-                    null,
-                    "low.temperature.fresh.water",
-                    "preventive",
-                    "inspection"
-                ),
+                new Input("632.32i-2/S110", null, "low.temperature.fresh.water", "preventive", "inspection"),
                 "/dnv-v2-experimental/vis-3-6a/632.32i-2/S110/meta/cnt-low.temperature.fresh.water/maint.cat-preventive/act.type-inspection"
             },
             new object[]
             {
-                new Input(
-                    "632.32i-1/S110",
-                    null,
-                    "low.temperature.fresh.water",
-                    "preventive",
-                    "inspection"
-                ),
+                new Input("632.32i-1/S110", null, "low.temperature.fresh.water", "preventive", "inspection"),
                 "/dnv-v2-experimental/vis-3-6a/632.32i-1/S110/meta/cnt-low.temperature.fresh.water/maint.cat-preventive/act.type-inspection"
             },
             new object[]
@@ -104,21 +80,15 @@ public class PMSLocalIdTests
         var codebooks = vis.GetCodebooks(visVersion);
 
         var primaryItem = gmod.ParsePath(input.PrimaryItem);
-        var secondaryItem = input.SecondaryItem is not null
-            ? gmod.ParsePath(input.SecondaryItem)
-            : null;
+        var secondaryItem = input.SecondaryItem is not null ? gmod.ParsePath(input.SecondaryItem) : null;
 
         var localId = PMSLocalIdBuilder
             .Create(visVersion)
             .WithPrimaryItem(primaryItem)
             .TryWithSecondaryItem(secondaryItem)
             .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.Content, input.Content))
-            .TryWithMetadataTag(
-                codebooks.TryCreateTag(CodebookName.MaintenanceCategory, input.MaintenanceCategory)
-            )
-            .TryWithMetadataTag(
-                codebooks.TryCreateTag(CodebookName.ActivityType, input.ActivityType)
-            )
+            .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.MaintenanceCategory, input.MaintenanceCategory))
+            .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.ActivityType, input.ActivityType))
             .WithVerboseMode(input.Verbose);
 
         var localIdStr = localId.ToString();
@@ -140,21 +110,15 @@ public class PMSLocalIdTests
         var codebooks = vis.GetCodebooks(visVersion);
 
         var primaryItem = gmod.ParsePath(input.PrimaryItem);
-        var secondaryItem = input.SecondaryItem is not null
-            ? gmod.ParsePath(input.SecondaryItem)
-            : null;
+        var secondaryItem = input.SecondaryItem is not null ? gmod.ParsePath(input.SecondaryItem) : null;
 
         var localId = PMSLocalIdBuilder
             .Create(visVersion)
             .WithPrimaryItem(primaryItem)
             .TryWithSecondaryItem(secondaryItem)
             .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.Content, input.Content))
-            .TryWithMetadataTag(
-                codebooks.TryCreateTag(CodebookName.MaintenanceCategory, input.MaintenanceCategory)
-            )
-            .TryWithMetadataTag(
-                codebooks.TryCreateTag(CodebookName.ActivityType, input.ActivityType)
-            )
+            .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.MaintenanceCategory, input.MaintenanceCategory))
+            .TryWithMetadataTag(codebooks.TryCreateTag(CodebookName.ActivityType, input.ActivityType))
             .WithVerboseMode(input.Verbose);
 
         var otherLocalId = localId;
@@ -177,14 +141,49 @@ public class PMSLocalIdTests
         otherLocalId = localId
             .TryWithPrimaryItem(localId.PrimaryItem)
             .TryWithMetadataTag(
-                codebooks.TryCreateTag(
-                    CodebookName.FunctionalServices,
-                    localId.FunctionalServices?.Value
-                )
+                codebooks.TryCreateTag(CodebookName.FunctionalServices, localId.FunctionalServices?.Value)
             );
 
         Assert.Equal(localId, otherLocalId);
         Assert.True(localId == otherLocalId);
         Assert.NotSame(localId, otherLocalId);
+    }
+
+    [Theory]
+    [InlineData("/dnv-v2-experimental/vis-3-6a/411.1/C101.661i-F/C621/meta/maint.cat-preventive/act.type-service")]
+    [InlineData("/dnv-v2-experimental/vis-3-6a/411.1/C101.661i-A/C621/meta/maint.cat-preventive/act.type-service")]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/511.11-2/C101.663i/C663/meta/maint.cat-preventive/act.type-service/detail-turbine"
+    )]
+    [InlineData("/dnv-v2-experimental/vis-3-6a/511.15-1/E32/meta/maint.cat-preventive/act.type-check")]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/621.21/S90.1/S41/~fuel.oil.piping/~pipes/meta/maint.cat-preventive/act.type-service"
+    )]
+    [InlineData("/dnv-v2-experimental/vis-3-6a/411.1/C101.64/S201/meta/maint.cat-preventive/act.type-check")]
+    public void Test_Parsing(string pmsLocalIdStr)
+    {
+        var parsed = PMSLocalIdBuilder.TryParse(pmsLocalIdStr, out var pmsLocalId);
+
+        Assert.True(parsed);
+        Assert.Equal(pmsLocalIdStr, pmsLocalId!.ToString());
+    }
+
+    [Theory]
+    [InlineData(
+        "/dnv-v2-experimental/vis-3-6a/621.21/S90.1/S41/~fuel.oil.piping/~pipes/meta/maint.cat-preventive/act.type-service"
+    )]
+    [InlineData("/dnv-v2-experimental/vis-3-6a/411.1/C101.64/S201/meta/maint.cat-preventive/act.type-check")]
+    public void Test_Build(string pmsLocalIdStr)
+    {
+        var parsedBuilder = PMSLocalIdBuilder.TryParse(pmsLocalIdStr, out var pmsLocalIdBuilder);
+        var parsedId = PMSLocalId.Parse(pmsLocalIdStr);
+        Assert.True(parsedBuilder);
+        Assert.NotNull(parsedId);
+        Assert.Equal(pmsLocalIdStr, pmsLocalIdBuilder!.ToString());
+
+        var builtFromBuilder = pmsLocalIdBuilder.Build();
+        Assert.NotNull(builtFromBuilder);
+        Assert.NotSame(parsedId, builtFromBuilder);
+        Assert.True(parsedId == builtFromBuilder);
     }
 }

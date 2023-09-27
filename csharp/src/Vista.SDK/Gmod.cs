@@ -12,6 +12,8 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
     public GmodNode RootNode => _rootNode;
 
+    internal static readonly string[] PotentialParentScopeTypes = new[] { "SELECTION", "GROUP", "LEAF" };
+
     private static readonly (string Category, string Type)[] LeafTypes = new[]
     {
         ("ASSET FUNCTION", "LEAF"),
@@ -29,22 +31,21 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
         return false;
     }
 
-    public static bool IsLeafNode(GmodNodeMetadata metadata) =>
-        IsLeafNode(metadata.Category, metadata.Type);
+    public static bool IsLeafNode(GmodNodeMetadata metadata) => IsLeafNode(metadata.Category, metadata.Type);
 
-    private static bool IsFunctionNode(string category) =>
-        category != "PRODUCT" && category != "ASSET";
+    private static bool IsFunctionNode(string category) => category != "PRODUCT" && category != "ASSET";
 
-    public static bool IsFunctionNode(GmodNodeMetadata metadata) =>
-        IsFunctionNode(metadata.Category);
+    public static bool IsFunctionNode(GmodNodeMetadata metadata) => IsFunctionNode(metadata.Category);
 
     public static bool IsProductSelection(GmodNodeMetadata metadata) =>
         metadata.Category == "PRODUCT" && metadata.Type == "SELECTION";
 
+    public static bool IsProductType(GmodNodeMetadata metadata) =>
+        metadata.Category == "PRODUCT" && metadata.Type == "TYPE";
+
     public static bool IsAsset(GmodNodeMetadata metadata) => metadata.Category == "ASSET";
 
-    public static bool IsAssetFunctionNode(GmodNodeMetadata metadata) =>
-        metadata.Category == "ASSET FUNCTION";
+    public static bool IsAssetFunctionNode(GmodNodeMetadata metadata) => metadata.Category == "ASSET FUNCTION";
 
     internal Gmod(VisVersion version, GmodDto dto)
     {
@@ -89,8 +90,12 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
     public bool TryParsePath(string item, [NotNullWhen(true)] out GmodPath? path) =>
         GmodPath.TryParse(item, VisVersion, out path);
 
-    public Dictionary<string, GmodNode>.ValueCollection.Enumerator GetEnumerator() =>
-        _nodeMap.Values.GetEnumerator();
+    public GmodPath ParseFromFullPath(string item) => GmodPath.ParseFullPath(item, VisVersion);
+
+    public bool TryParseFromFullPath(string item, [NotNullWhen(true)] out GmodPath? path) =>
+        GmodPath.TryParseFullPath(item, VisVersion, out path);
+
+    public Dictionary<string, GmodNode>.ValueCollection.Enumerator GetEnumerator() => _nodeMap.Values.GetEnumerator();
 
     IEnumerator<GmodNode> IEnumerable<GmodNode>.GetEnumerator() => GetEnumerator();
 

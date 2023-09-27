@@ -10,11 +10,12 @@ export enum ParsingState {
     MetaState,
     MetaCommand,
     MetaType,
-    MetaPosition,
-    MetaDetail,
     MetaActivityType,
     MetaFunctionalServices,
     MetaMaintenanceCategory,
+    MetaPosition,
+    MetaDetail,
+
     // For "other" errors
     EmptyState = 100,
     Formatting = 101,

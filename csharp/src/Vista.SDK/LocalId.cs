@@ -2,20 +2,20 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public class LocalId : ILocalId, IEquatable<LocalId>
+public class LocalId : ILocalId<LocalId>, IEquatable<LocalId>
 {
     public static readonly string NamingRule = "dnv-v2";
 
-    private readonly ILocalIdBuilder _builder;
+    private readonly LocalIdBuilder _builder;
 
-    internal LocalId(ILocalIdBuilder builder)
+    public LocalIdBuilder Builder => _builder;
+
+    internal LocalId(LocalIdBuilder builder)
     {
         if (builder.IsEmpty)
             throw new ArgumentException("LocalId cannot be constructed from empty LocalIdBuilder");
         if (!builder.IsValid)
-            throw new ArgumentException(
-                "LocalId cannot be constructed from invalid LocalIdBuilder"
-            );
+            throw new ArgumentException("LocalId cannot be constructed from invalid LocalIdBuilder");
         _builder = builder;
     }
 
@@ -45,6 +45,8 @@ public class LocalId : ILocalId, IEquatable<LocalId>
 
     public bool HasCustomTag => _builder.HasCustomTag;
 
+    public IReadOnlyList<MetadataTag> MetadataTags => _builder.MetadataTags;
+
     public sealed override bool Equals(object? obj) => Equals(obj as LocalId);
 
     public bool Equals(LocalId? other)
@@ -59,12 +61,10 @@ public class LocalId : ILocalId, IEquatable<LocalId>
 
     public static bool operator ==(LocalId? left, LocalId? right)
     {
-        if ((object?)left != right)
+        if (!ReferenceEquals(left, right))
         {
-            if ((object?)left != null)
-            {
+            if (left is not null)
                 return left.Equals(right);
-            }
             return false;
         }
         return true;
@@ -74,34 +74,17 @@ public class LocalId : ILocalId, IEquatable<LocalId>
 
     public override string ToString() => _builder.ToString();
 
-    public static LocalId Parse(string localIdStr, out LocalIdParsingErrorBuilder errorBuilder) =>
-        LocalIdBuilder.Parse(localIdStr, out errorBuilder).Build();
-
     public static LocalId Parse(string localIdStr) => LocalIdBuilder.Parse(localIdStr).Build();
-}
 
-internal enum ParsingState
-{
-    NamingRule,
-    VisVersion,
-    PrimaryItem,
-    SecondaryItem,
-    ItemDescription,
-    MetaQuantity,
-    MetaContent,
-    MetaCalculation,
-    MetaState,
-    MetaCommand,
-    MetaType,
-    MetaPosition,
-    MetaDetail,
+    public static bool TryParse(string localIdStr, out ParsingErrors errors, out LocalId? localId)
+    {
+        if (!LocalIdBuilder.TryParse(localIdStr, out errors, out var localIdBuilder))
+        {
+            localId = null;
+            return false;
+        }
 
-    // For "other" errors
-    EmptyState = 100,
-    Formatting = 101,
-    Completeness = 102,
-
-    // UniversalId
-    NamingEntity = 200,
-    IMONumber = 201
+        localId = localIdBuilder.Build();
+        return true;
+    }
 }

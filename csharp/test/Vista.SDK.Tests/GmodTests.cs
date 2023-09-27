@@ -4,13 +4,7 @@ namespace Vista.SDK.Tests;
 
 public class GmodTests
 {
-    public static IEnumerable<object[]> Test_Vis_Versions =>
-        new object[][]
-        {
-            new object[] { VisVersion.v3_4a },
-            new object[] { VisVersion.v3_5a },
-            new object[] { VisVersion.v3_6a },
-        };
+    public static IEnumerable<object[]> Test_Vis_Versions => VisVersions.All.Select(x => new object[] { x }).ToArray();
 
     [Theory]
     [MemberData(nameof(Test_Vis_Versions))]
@@ -158,7 +152,7 @@ public class GmodTests
 
                 if (parents.Any(p => p.Code == "HG3") || node.Code == "HG3")
                 {
-                    paths.Add(new GmodPath(parents, node));
+                    paths.Add(new GmodPath(parents.ToList(), node));
                 }
 
                 return TraversalHandlerResult.Continue;

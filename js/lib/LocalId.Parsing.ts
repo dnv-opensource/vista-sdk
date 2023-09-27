@@ -180,7 +180,8 @@ export class LocalIdParser {
                             }
                             errorBuilder?.push({
                                 type: ParsingState.PrimaryItem,
-                                message: "Invalid or missing '/meta' prefix after Primary item",
+                                message:
+                                    "Invalid or missing '/meta' prefix after Primary item",
                             });
                             context.state++;
                             break;
@@ -736,6 +737,14 @@ export class LocalIdParser {
                         detail = res;
                     }
                     break;
+                default:
+                    this.advanceParser(
+                        context,
+                        context.i,
+                        context.segment,
+                        context.state
+                    );
+                    break;
             }
         }
 
@@ -848,6 +857,7 @@ export class LocalIdParser {
             this.advanceParser(context, i, segment, state);
             return;
         }
+        const nextState = LocalIdParser.nextParsingState(actualState);
 
         tag = codebooks.tryCreateTag(codebookName, value);
         if (tag === undefined) {
@@ -883,7 +893,9 @@ export class LocalIdParser {
                     "'. Use prefix '~' for custom values",
             });
 
-        this.advanceParser(context, i, segment, state);
+        if (nextState === undefined)
+            this.advanceParser(context, i, segment, state);
+        else this.advanceParser(context, i, segment, state, nextState);
         return tag;
     }
 
@@ -909,6 +921,26 @@ export class LocalIdParser {
                 return;
         }
     }
+    static nextParsingState(prev: ParsingState): ParsingState | undefined {
+        switch (prev) {
+            case ParsingState.MetaQuantity:
+                return ParsingState.MetaQuantity;
+            case ParsingState.MetaContent:
+                return ParsingState.MetaCalculation;
+            case ParsingState.MetaCalculation:
+                return ParsingState.MetaState;
+            case ParsingState.MetaState:
+                return ParsingState.MetaCommand;
+            case ParsingState.MetaCommand:
+                return ParsingState.MetaType;
+            case ParsingState.MetaType:
+                return ParsingState.MetaPosition;
+            case ParsingState.MetaPosition:
+                return ParsingState.MetaDetail;
+            default:
+                return;
+        }
+    }
 
     static getNextStateIndexes(
         span: string,
@@ -919,36 +951,41 @@ export class LocalIdParser {
 
         const metaIndex = span.indexOf("/meta");
         const endOfMetaIndex = metaIndex + "/meta".length + 1;
+        const isVerbose = customIndex < metaIndex;
 
         switch (state) {
             case ParsingState.PrimaryItem: {
                 const secIndex = span.indexOf("/sec");
                 const endOfSecIndex = secIndex + "/sec".length + 1;
-                return secIndex != -1
-                    ? {
-                          nextStateIndex: secIndex,
-                          endOfNextStateIndex: endOfSecIndex,
-                      }
-                    : customIndex != -1
-                    ? {
-                          nextStateIndex: customIndex,
-                          endOfNextStateIndex: endOfCustomIndex,
-                      }
-                    : {
-                          nextStateIndex: metaIndex,
-                          endOfNextStateIndex: endOfMetaIndex,
-                      };
+
+                if (secIndex !== -1)
+                    return {
+                        nextStateIndex: secIndex,
+                        endOfNextStateIndex: endOfSecIndex,
+                    };
+
+                if (isVerbose && customIndex !== -1)
+                    return {
+                        nextStateIndex: customIndex,
+                        endOfNextStateIndex: endOfCustomIndex,
+                    };
+
+                return {
+                    nextStateIndex: metaIndex,
+                    endOfNextStateIndex: endOfMetaIndex,
+                };
             }
             case ParsingState.SecondaryItem:
-                return customIndex != -1
-                    ? {
-                          nextStateIndex: customIndex,
-                          endOfNextStateIndex: endOfCustomIndex,
-                      }
-                    : {
-                          nextStateIndex: metaIndex,
-                          endOfNextStateIndex: endOfMetaIndex,
-                      };
+                if (isVerbose && customIndex !== -1)
+                    return {
+                        nextStateIndex: customIndex,
+                        endOfNextStateIndex: endOfCustomIndex,
+                    };
+
+                return {
+                    nextStateIndex: metaIndex,
+                    endOfNextStateIndex: endOfMetaIndex,
+                };
             default:
                 return {
                     nextStateIndex: metaIndex,

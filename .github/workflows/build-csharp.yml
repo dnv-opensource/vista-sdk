@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: [main]
     paths: ["csharp/**", ".github/workflows/build-csharp.yml"]
+  workflow_dispatch:
 
 env:
   CI_BUILD: true
@@ -22,10 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
         with:
-          global-json-file: csharp/global.json
+          dotnet-version: |
+            6.0.x
+            7.0.x
 
       - name: Install dependencies
         run: dotnet restore Build.csproj
@@ -43,7 +46,7 @@ jobs:
         run: echo echo "$(pwd)" && find . -path "src/*/*.*sproj"
 
       - name: Pack
-        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.0.1-preview-$GITHUB_RUN_NUMBER
+        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.0.2-preview-$GITHUB_RUN_NUMBER
 
       - name: Push
         if: ${{ success() && !github.base_ref }}

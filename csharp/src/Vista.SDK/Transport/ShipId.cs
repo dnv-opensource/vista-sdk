@@ -47,7 +47,7 @@ public readonly record struct ShipId
             throw new InvalidOperationException("Tried to switch on invalid ShipId");
     }
 
-    public readonly override string ToString() =>
+    public override readonly string ToString() =>
         _tag switch
         {
             // In ISO-19848, IMO number as ShipID should be prefixed with "IMO"

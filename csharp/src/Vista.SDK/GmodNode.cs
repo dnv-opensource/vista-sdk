@@ -1,19 +1,18 @@
 using System.Text;
-using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
 public record class GmodNode
 {
     public string Code { get; init; }
-    public Location? Location { get; private init; }
+    public Location? Location { get; internal init; }
 
     public VisVersion VisVersion { get; }
 
     public GmodNodeMetadata Metadata { get; }
 
-    private readonly List<GmodNode> _children;
-    private readonly List<GmodNode> _parents;
+    internal readonly List<GmodNode> _children;
+    internal readonly List<GmodNode> _parents;
 
     public IReadOnlyList<GmodNode> Children => _children;
 
@@ -37,9 +36,9 @@ public record class GmodNode
         _parents = new List<GmodNode>();
     }
 
-    public GmodNode WithoutLocation() => Location is null ? this : this with { Location = null };
+    internal GmodNode WithoutLocation() => Location is null ? this : this with { Location = null };
 
-    public GmodNode WithLocation(string location)
+    internal GmodNode WithLocation(string location)
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
 
@@ -49,13 +48,7 @@ public record class GmodNode
         };
     }
 
-    public GmodNode WithLocation(string location, out LocationParsingErrorBuilder errorBuilder)
-    {
-        var locations = VIS.Instance.GetLocations(VisVersion);
-        return this with { Location = locations.Parse(location, out errorBuilder) };
-    }
-
-    public GmodNode TryWithLocation(string? locationStr)
+    internal GmodNode TryWithLocation(string? locationStr)
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
         if (!locations.TryParse(locationStr, out var location))
@@ -64,27 +57,44 @@ public record class GmodNode
         return WithLocation(location);
     }
 
-    public GmodNode TryWithLocation(
-        string? locationStr,
-        out LocationParsingErrorBuilder errorBuilder
-    )
+    internal GmodNode TryWithLocation(string? locationStr, out ParsingErrors errors)
     {
         var locations = VIS.Instance.GetLocations(VisVersion);
-        if (!locations.TryParse(locationStr, out var location, out errorBuilder))
+
+        if (!locations.TryParse(locationStr, out var location, out errors))
             return this;
 
         return WithLocation(location);
     }
 
-    public GmodNode WithLocation(in Location location) => this with { Location = location };
+    internal GmodNode WithLocation(in Location location) => this with { Location = location };
 
-    public GmodNode TryWithLocation(in Location? location)
+    internal GmodNode TryWithLocation(in Location? location)
     {
         if (location is null)
             return this;
 
         return WithLocation(location.Value);
     }
+
+    internal bool IsIndividualizable(bool isTargetNode = false, bool isInSet = false)
+    {
+        if (Metadata.Type == "GROUP")
+            return false;
+        if (Metadata.Type == "SELECTION")
+            return false;
+        if (IsProductType)
+            return false;
+        if (Metadata.Category == "ASSET" && Metadata.Type == "TYPE")
+            return false;
+        if (IsFunctionComposition)
+            return Code[Code.Length - 1] == 'i' || isInSet || isTargetNode;
+        return true;
+    }
+
+    public bool IsFunctionComposition =>
+        Metadata.Category == "ASSET FUNCTION" && Metadata.Type == "COMPOSITION"
+        || Metadata.Category == "PRODUCT FUNCTION" && Metadata.Type == "COMPOSITION";
 
     public bool IsMappable
     {
@@ -105,6 +115,8 @@ public record class GmodNode
     }
 
     public bool IsProductSelection => Gmod.IsProductSelection(Metadata);
+
+    public bool IsProductType => Gmod.IsProductType(Metadata);
 
     public bool IsAsset => Gmod.IsAsset(Metadata);
 
@@ -163,12 +175,11 @@ public record class GmodNode
         return false;
     }
 
-    public virtual bool Equals(GmodNode? other) =>
-        Code == other?.Code && Location == other?.Location;
+    public virtual bool Equals(GmodNode? other) => Code == other?.Code && Location == other?.Location;
 
     public override int GetHashCode() => HashCode.Combine(Code, Location);
 
-    public override sealed string ToString() => Location is null ? Code : $"{Code}-{Location}";
+    public sealed override string ToString() => Location is null ? Code : $"{Code}-{Location}";
 
     public void ToString(StringBuilder builder)
     {

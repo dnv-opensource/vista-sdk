@@ -39,10 +39,7 @@ public partial class DataChannelListPackage
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageHeader
 {
     private string? shipIDField;
@@ -95,10 +92,7 @@ public partial class PackageHeader
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageHeaderDataChannelListID
 {
     private string? idField;
@@ -132,10 +126,7 @@ public partial class PackageHeaderDataChannelListID
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageHeaderVersionInformation
 {
     private string? namingRuleField;
@@ -169,10 +160,7 @@ public partial class PackageHeaderVersionInformation
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannel
 {
     private PackageDataChannelDataChannelID? dataChannelIDField;
@@ -197,10 +185,7 @@ public partial class PackageDataChannel
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannelDataChannelID
 {
     private string? localIDField;
@@ -234,10 +219,7 @@ public partial class PackageDataChannelDataChannelID
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannelDataChannelIDNameObject
 {
     private string? namingRuleField;
@@ -253,10 +235,7 @@ public partial class PackageDataChannelDataChannelIDNameObject
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannelProperty
 {
     private PackageDataChannelPropertyDataChannelType? dataChannelTypeField;
@@ -335,10 +314,7 @@ public partial class PackageDataChannelProperty
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannelPropertyDataChannelType
 {
     private string? typeField;
@@ -374,10 +350,7 @@ public partial class PackageDataChannelPropertyDataChannelType
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannelPropertyFormat
 {
     private string? typeField;
@@ -402,10 +375,7 @@ public partial class PackageDataChannelPropertyFormat
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannelPropertyFormatRestriction
 {
     private string[]? enumerationField;
@@ -442,10 +412,7 @@ public partial class PackageDataChannelPropertyFormatRestriction
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannelPropertyRange
 {
     private string? highField;
@@ -470,10 +437,7 @@ public partial class PackageDataChannelPropertyRange
 /// <remarks/>
 [System.SerializableAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(
-    AnonymousType = true,
-    Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION"
-)]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "urn:ISO19848:SHIP_DATA_DEFINITION")]
 public partial class PackageDataChannelPropertyUnit
 {
     private string? unitSymbolField;

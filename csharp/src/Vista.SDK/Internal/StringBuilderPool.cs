@@ -7,11 +7,10 @@ namespace Vista.SDK.Internal;
 
 internal static class StringBuilderPool
 {
-    private static readonly ObjectPool<StringBuilder> _pool =
-        new DefaultObjectPoolProvider().CreateStringBuilderPool(
-            initialCapacity: 128,
-            maximumRetainedCapacity: 1024
-        );
+    private static readonly ObjectPool<StringBuilder> _pool = new DefaultObjectPoolProvider().CreateStringBuilderPool(
+        initialCapacity: 128,
+        maximumRetainedCapacity: 1024
+    );
 
     public static StringBuilderLease Get() => new StringBuilderLease(_pool.Get());
 
@@ -51,8 +50,6 @@ internal static class StringBuilderPool
 
         [DoesNotReturn]
         private static void ThrowInvalidOperation() =>
-            throw new InvalidOperationException(
-                "Tried to access StringBuilder after it was returned to pool"
-            );
+            throw new InvalidOperationException("Tried to access StringBuilder after it was returned to pool");
     }
 }

@@ -39,10 +39,7 @@ public sealed record class Codebook
             .Where(v => v.Value != "<number>")
             .ToArray();
 
-        RawData = dto.Values.ToDictionary(
-            kvp => kvp.Key,
-            kvp => (IReadOnlyList<string>)kvp.Value.ToList()
-        );
+        RawData = dto.Values.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<string>)kvp.Value.ToList());
 
         foreach (var t in data)
             _groupMap[t.Value] = t.Group;
@@ -93,9 +90,7 @@ public sealed record class Codebook
     {
         var tag = TryCreateTag(value);
         if (tag is null)
-            throw new ArgumentException(
-                $"Invalid value for metadata tag: codebook={Name}, value={value}"
-            );
+            throw new ArgumentException($"Invalid value for metadata tag: codebook={Name}, value={value}");
 
         return tag.Value;
     }
@@ -131,9 +126,7 @@ public sealed record class Codebook
             return validations.Max();
 
         var numberNotAtEnd = positions
-            .Where(
-                (pValue, pIndex) => int.TryParse(pValue, out _) && pIndex < (positions.Length - 1)
-            )
+            .Where((pValue, pIndex) => int.TryParse(pValue, out _) && pIndex < (positions.Length - 1))
             .Any();
 
         var positionsWithoutNumber = positions.Where(p => !int.TryParse(p, out _)).ToList();
@@ -145,9 +138,7 @@ public sealed record class Codebook
 
         if (validations.All(v => (int)v == (int)PositionValidationResult.Valid))
         {
-            var groups = positions
-                .Select(p => int.TryParse(p, out _) ? "<number>" : _groupMap[p])
-                .ToArray();
+            var groups = positions.Select(p => int.TryParse(p, out _) ? "<number>" : _groupMap[p]).ToArray();
 
             var groupsSet = new HashSet<string>(groups);
             if (!groups.Contains("DEFAULT_GROUP") && groupsSet.Count != groups.Length)

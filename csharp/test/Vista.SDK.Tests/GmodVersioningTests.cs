@@ -20,16 +20,8 @@ public class GmodVersioningTests
             new string[] { "511.331/C221", "511.31/C121.31/C221" },
             new string[] { "511.11/C101.663i/C663.5/CS6d", "511.11/C101.663i/C663.6/CS6d" },
             new string[] { "511.11-1/C101.663i/C663.5/CS6d", "511.11-1/C101.663i/C663.6/CS6d" },
-            new string[]
-            {
-                "1012.21/C1147.221/C1051.7/C101.22",
-                "1012.21/C1147.221/C1051.7/C101.93"
-            },
-            new string[]
-            {
-                "1012.21/C1147.221/C1051.7/C101.61/S203.6",
-                "1012.21/C1147.221/C1051.7/C101.311/C467.5"
-            },
+            new string[] { "1012.21/C1147.221/C1051.7/C101.22", "1012.21/C1147.221/C1051.7/C101.93" },
+            new string[] { "1012.21/C1147.221/C1051.7/C101.61/S203.6", "1012.21/C1147.221/C1051.7/C101.311/C467.5" },
             new string[] { "001", "001", },
             new string[] { "038.7/F101.2/F71", "038.7/F101.2/F71", },
             new string[]
@@ -53,16 +45,8 @@ public class GmodVersioningTests
             //    "1012.22/S201.1/C151.2/S110.2/C101.61/S203.2/S101",
             //    "1012.22/S201.1/C151.2/S110.2/C101.61/S203.3/S110.1/S101",
             //},
-            new string[]
-            {
-                "1012.22/S201.1/C151.2/S110.2/C101.64i",
-                "1012.22/S201.1/C151.2/S110.2/C101.64",
-            },
-            new string[]
-            {
-                "632.32i/S110.2/C111.42/G203.31/S90.5/C401",
-                "632.32i/S110.2/C111.42/G203.31/S90.5/C401",
-            },
+            new string[] { "1012.22/S201.1/C151.2/S110.2/C101.64i", "1012.22/S201.1/C151.2/S110.2/C101.64", },
+            new string[] { "632.32i/S110.2/C111.42/G203.31/S90.5/C401", "632.32i/S110.2/C111.42/G203.31/S90.5/C401", },
             new string[]
             {
                 "864.11/G71.21/C101.64i/S201.1/C151.31/S110.2/C111.42/G204.41/S90.2/S51",
@@ -87,11 +71,7 @@ public class GmodVersioningTests
         var sourcePath = GmodPath.Parse(inputPath, VisVersion.v3_4a);
         var parsedPath = targetGmod.TryParsePath(expectedPath, out var parsedTargetPath);
 
-        var targetPath = VIS.Instance.ConvertPath(
-            VisVersion.v3_4a,
-            sourcePath,
-            targetGmod.VisVersion
-        );
+        var targetPath = VIS.Instance.ConvertPath(VisVersion.v3_4a, sourcePath, targetGmod.VisVersion);
         Assert.NotNull(targetPath);
 
         var nodesWithLocation = sourcePath
@@ -127,7 +107,7 @@ public class GmodVersioningTests
                 if (parents.Count == 0)
                     return TraversalHandlerResult.Continue;
 
-                var path = new GmodPath(parents.ToArray(), node);
+                var path = new GmodPath(parents.ToList(), node);
                 if (path.ToString() == "1012.22/S201.1/C151.2/S110.2/C101.61/S203.2/S101")
                     return TraversalHandlerResult.Stop;
 
@@ -174,11 +154,7 @@ public class GmodVersioningTests
 
     [Theory]
     [MemberData(nameof(Valid_Test_Data_Node))]
-    public void Test_GmodVersioning_ConvertNode(
-        string inputCode,
-        string? location,
-        string expectedCode
-    )
+    public void Test_GmodVersioning_ConvertNode(string inputCode, string? location, string expectedCode)
     {
         var (_, vis) = VISTests.GetVis();
 
@@ -205,10 +181,7 @@ public class GmodVersioningTests
         var sourceLocalId = LocalIdBuilder.Parse(sourceLocalIdStr);
         var targetLocalId = LocalIdBuilder.Parse(targetLocalIdStr);
 
-        var convertedLocalId = VIS.Instance.ConvertLocalId(
-            sourceLocalId,
-            targetLocalId.VisVersion!.Value
-        );
+        var convertedLocalId = VIS.Instance.ConvertLocalId(sourceLocalId, targetLocalId.VisVersion!.Value);
         Assert.Equal(targetLocalId, convertedLocalId);
         Assert.Equal(targetLocalIdStr, convertedLocalId!.ToString());
     }

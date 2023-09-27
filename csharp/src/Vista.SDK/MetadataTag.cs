@@ -29,9 +29,9 @@ public readonly record struct MetadataTag
         return other.Value.Equals(Value);
     }
 
-    public readonly override int GetHashCode() => Value.GetHashCode();
+    public override readonly int GetHashCode() => Value.GetHashCode();
 
-    public readonly override string ToString() => Value;
+    public override readonly string ToString() => Value;
 
     public readonly void ToString(StringBuilder builder, char separator = '/')
     {

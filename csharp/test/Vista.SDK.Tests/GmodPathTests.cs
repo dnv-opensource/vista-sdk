@@ -5,10 +5,7 @@ namespace Vista.SDK.Tests;
 public class GmodPathTests
 {
     [Theory]
-    [MemberData(
-        nameof(VistaSDKTestData.AddValidGmodPathsData),
-        MemberType = typeof(VistaSDKTestData)
-    )]
+    [MemberData(nameof(VistaSDKTestData.AddValidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
     public void Test_GmodPath_Parse(string inputPath)
     {
         var (_, vis) = VISTests.GetVis();
@@ -20,10 +17,7 @@ public class GmodPathTests
     }
 
     [Theory]
-    [MemberData(
-        nameof(VistaSDKTestData.AddInvalidGmodPathsData),
-        MemberType = typeof(VistaSDKTestData)
-    )]
+    [MemberData(nameof(VistaSDKTestData.AddInvalidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
     public void Test_GmodPath_Parse_Invalid(string inputPath)
     {
         var (_, vis) = VISTests.GetVis();
@@ -100,10 +94,7 @@ public class GmodPathTests
 
     [Theory]
     [InlineData("411.1/C101.72/I101", "VE/400a/410/411/411i/411.1/CS1/C101/C101.7/C101.72/I101")]
-    [InlineData(
-        "612.21-1/C701.13/S93",
-        "VE/600a/610/612/612.2/612.2i/612.21-1/CS10/C701/C701.1/C701.13/S93"
-    )]
+    [InlineData("612.21-1/C701.13/S93", "VE/600a/610/612/612.2/612.2i-1/612.21-1/CS10/C701/C701.1/C701.13/S93")]
     public void Test_FullPathParsing(string shortPathStr, string expectedFullPathStr)
     {
         var version = VisVersion.v3_4a;
@@ -120,5 +111,108 @@ public class GmodPathTests
         Assert.Equal(fullString, parsedPath.ToFullPathString());
         Assert.Equal(shortPathStr, path.ToString());
         Assert.Equal(shortPathStr, parsedPath.ToString());
+
+        parsedPath = GmodPath.ParseFullPath(fullString, version);
+        Assert.NotNull(parsedPath);
+        Assert.True(parsed);
+        Assert.StrictEqual(path, parsedPath);
+        Assert.Equal(fullString, path.ToFullPathString());
+        Assert.Equal(fullString, parsedPath.ToFullPathString());
+        Assert.Equal(shortPathStr, path.ToString());
+        Assert.Equal(shortPathStr, parsedPath.ToString());
+    }
+
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddIndividualizableSetsData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_IndividualizableSets(string inputPath, string[][] expected)
+    {
+        var version = VisVersion.v3_4a;
+        var gmod = VIS.Instance.GetGmod(version);
+
+        var path = gmod.ParsePath(inputPath);
+        var sets = path.IndividualizableSets;
+        Assert.Equal(expected.Length, sets.Count);
+        for (int i = 0; i < expected.Length; i++)
+        {
+            Assert.Equal(expected[i], sets[i].Nodes.Select(n => n.Code));
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddIndividualizableSetsData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_IndividualizableSets_FullPath(string inputPath, string[][] expected)
+    {
+        var version = VisVersion.v3_4a;
+        var gmod = VIS.Instance.GetGmod(version);
+
+        var path = GmodPath.ParseFullPath(gmod.ParsePath(inputPath).ToFullPathString(), version);
+        var sets = path.IndividualizableSets;
+        Assert.Equal(expected.Length, sets.Count);
+        for (int i = 0; i < expected.Length; i++)
+        {
+            Assert.Equal(expected[i], sets[i].Nodes.Select(n => n.Code));
+        }
+    }
+
+    [Fact]
+    public void Test_GmodPath_Individualizes()
+    {
+        var version = VisVersion.v3_7a;
+        var gmod = VIS.Instance.GetGmod(version);
+        var path = gmod.ParsePath("411.1/C101.62/S205");
+        var sets = path.IndividualizableSets;
+        Assert.Equal(2, sets.Count);
+    }
+
+    [Fact]
+    public void Test_ToFullPathString()
+    {
+        var version = VisVersion.v3_7a;
+        var gmod = VIS.Instance.GetGmod(version);
+
+        var path = gmod.ParsePath("511.11-1/C101.663i-1/C663");
+        Assert.Equal(
+            "VE/500a/510/511/511.1/511.1i-1/511.11-1/CS1/C101/C101.6/C101.66/C101.663/C101.663i-1/C663",
+            path.ToFullPathString()
+        );
+
+        path = gmod.ParsePath("846/G203.32-2/S110.2-1/E31");
+        Assert.Equal("VE/800a/840/846/G203/G203.3-2/G203.32-2/S110/S110.2-1/CS1/E31", path.ToFullPathString());
+    }
+
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddValidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_Valid_GmodPath_IndividualizableSets(string inputPath)
+    {
+        var version = VisVersion.v3_4a;
+        var gmod = VIS.Instance.GetGmod(version);
+
+        var path = gmod.ParsePath(inputPath);
+        var sets = path.IndividualizableSets;
+
+        var uniqueCodes = new HashSet<string>();
+        foreach (var set in sets)
+        {
+            foreach (var node in set.Nodes)
+                Assert.True(uniqueCodes.Add(node.Code));
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddValidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_Valid_GmodPath_IndividualizableSets_FullPath(string inputPath)
+    {
+        var version = VisVersion.v3_4a;
+        var gmod = VIS.Instance.GetGmod(version);
+
+        var path = GmodPath.ParseFullPath(gmod.ParsePath(inputPath).ToFullPathString(), version);
+        var sets = path.IndividualizableSets;
+
+        var uniqueCodes = new HashSet<string>();
+        foreach (var set in sets)
+        {
+            foreach (var node in set.Nodes)
+                Assert.True(uniqueCodes.Add(node.Code));
+        }
     }
 }

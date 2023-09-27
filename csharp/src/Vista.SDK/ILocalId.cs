@@ -10,23 +10,18 @@ public interface ILocalId
 
     GmodPath? SecondaryItem { get; }
 
-    MetadataTag? Quantity { get; }
-
-    MetadataTag? Content { get; }
-
-    MetadataTag? Calculation { get; }
-
-    MetadataTag? State { get; }
-
-    MetadataTag? Command { get; }
-
-    MetadataTag? Type { get; }
-
-    MetadataTag? Position { get; }
-
-    MetadataTag? Detail { get; }
-
     bool HasCustomTag { get; }
 
+    IReadOnlyList<MetadataTag> MetadataTags { get; }
+
     string ToString();
+}
+
+public interface ILocalId<T> : ILocalId, IEquatable<T>
+    where T : ILocalId<T>
+{
+#if NET7_0_OR_GREATER
+    static abstract T Parse(string localIdStr);
+    static abstract bool TryParse(string localIdStr, out ParsingErrors errors, out T? localId);
+#endif
 }

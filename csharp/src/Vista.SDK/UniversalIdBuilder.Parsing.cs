@@ -8,55 +8,48 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public sealed partial record UniversalIdBuilder
+partial record class UniversalIdBuilder
 {
-    public static UniversalIdBuilder Parse(string localIdStr)
+    public static UniversalIdBuilder Parse(string universalIdStr)
     {
-        if (!TryParse(localIdStr, out var localId))
-            throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
-        return localId;
+        if (!TryParse(universalIdStr, out var errors, out var universalId))
+            throw new ArgumentException($"Couldn't parse universal ID from: '{universalIdStr}'. {errors}");
+        return universalId;
     }
 
-    public static UniversalIdBuilder Parse(
-        string localIdStr,
-        out LocalIdParsingErrorBuilder errorBuilder
-    )
-    {
-        if (!TryParse(localIdStr, out errorBuilder, out var localId))
-            throw new ArgumentException("Couldn't parse local ID from: " + localIdStr);
-        return localId;
-    }
-
-    public static bool TryParse(
-        string universalId,
-        [MaybeNullWhen(false)] out UniversalIdBuilder universalIdBuilder
-    )
+    public static bool TryParse(string universalId, [MaybeNullWhen(false)] out UniversalIdBuilder universalIdBuilder)
     {
         return TryParse(universalId, out _, out universalIdBuilder);
     }
 
     public static bool TryParse(
         string universalId,
-        out LocalIdParsingErrorBuilder errorBuilder,
+        out ParsingErrors errors,
         [MaybeNullWhen(false)] out UniversalIdBuilder universalIdBuilder
     )
     {
         universalIdBuilder = null;
 
-        errorBuilder = LocalIdParsingErrorBuilder.Empty;
+        var errorBuilder = LocalIdParsingErrorBuilder.Empty;
+
         if (universalId is null)
-            throw new ArgumentNullException(nameof(universalId));
-        if (universalId.Length == 0)
+        {
+            AddError(ref errorBuilder, LocalIdParsingState.NamingRule, "Failed to find localId start segment");
+            errors = errorBuilder.Build();
             return false;
+        }
+        if (universalId.Length == 0)
+        {
+            AddError(ref errorBuilder, LocalIdParsingState.NamingRule, "Failed to find localId start segment");
+            errors = errorBuilder.Build();
+            return false;
+        }
 
         var localIdStartIndex = universalId.IndexOf("/dnv-v");
         if (localIdStartIndex == -1)
         {
-            AddError(
-                ref errorBuilder,
-                ParsingState.NamingRule,
-                "Failed to find localId start segment"
-            );
+            AddError(ref errorBuilder, LocalIdParsingState.NamingRule, "Failed to find localId start segment");
+            errors = errorBuilder.Build();
             return false;
         }
 
@@ -65,23 +58,20 @@ public sealed partial record UniversalIdBuilder
 
         ImoNumber? imoNumber = null;
 
-        var localIdBuilder = LocalIdBuilder.TryParseInternal(
-            localIdSegment,
-            ref errorBuilder,
-            out var b
-        )
-          ? b
-          : null;
+        var localIdBuilder = LocalIdBuilder.TryParseInternal(localIdSegment, ref errorBuilder, out var b) ? b : null;
 
         if (localIdBuilder is null)
+        {
             // Dont need additional error, as the localIdBuilder does it for us
+            errors = errorBuilder.Build();
             return false;
+        }
 
         ReadOnlySpan<char> span = universalIdSegment.AsSpan();
-        var state = ParsingState.NamingEntity;
+        var state = LocalIdParsingState.NamingEntity;
         int i = 0;
 
-        while (state <= ParsingState.IMONumber)
+        while (state <= LocalIdParsingState.IMONumber)
         {
             if (i >= span.Length)
                 break; // We've consumed the string
@@ -90,7 +80,7 @@ public sealed partial record UniversalIdBuilder
 
             switch (state)
             {
-                case ParsingState.NamingEntity:
+                case LocalIdParsingState.NamingEntity:
                     if (!NamingEntity.AsSpan().SequenceEqual(segment))
                     {
                         AddError(
@@ -101,7 +91,7 @@ public sealed partial record UniversalIdBuilder
                         break;
                     }
                     break;
-                case ParsingState.IMONumber:
+                case LocalIdParsingState.IMONumber:
                     if (!SDK.ImoNumber.TryParse(segment, out var imo))
                     {
                         AddError(ref errorBuilder, state, "Invalid IMO number segment");
@@ -120,22 +110,18 @@ public sealed partial record UniversalIdBuilder
         var visVersion = localIdBuilder.VisVersion;
         if (visVersion is null)
         {
-            AddError(ref errorBuilder, ParsingState.VisVersion, null);
+            AddError(ref errorBuilder, LocalIdParsingState.VisVersion, null);
+            errors = errorBuilder.Build();
             return false;
         }
 
-        universalIdBuilder = Create(visVersion.Value)
-            .TryWithLocalId(in localIdBuilder)
-            .TryWithImoNumber(in imoNumber);
+        universalIdBuilder = Create(visVersion.Value).TryWithLocalId(in localIdBuilder).TryWithImoNumber(in imoNumber);
 
+        errors = errorBuilder.Build();
         return true;
     }
 
-    static void AddError(
-        ref LocalIdParsingErrorBuilder errorBuilder,
-        ParsingState state,
-        string? message
-    )
+    static void AddError(ref LocalIdParsingErrorBuilder errorBuilder, LocalIdParsingState state, string? message)
     {
         if (!errorBuilder.HasError)
             errorBuilder = LocalIdParsingErrorBuilder.Create();

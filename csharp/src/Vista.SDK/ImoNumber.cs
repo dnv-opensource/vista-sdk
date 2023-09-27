@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Vista.SDK;
 
@@ -39,12 +39,7 @@ public readonly record struct ImoNumber
 #if NETCOREAPP3_1_OR_GREATER
         int num = int.TryParse(startsWithImo ? value.Slice(3) : value, out var n) ? n : 0;
 #else
-        int num = int.TryParse(
-            startsWithImo ? value.Slice(3).ToString() : value.ToString(),
-            out var n
-        )
-          ? n
-          : 0;
+        int num = int.TryParse(startsWithImo ? value.Slice(3).ToString() : value.ToString(), out var n) ? n : 0;
 #endif
 
         if (num == 0 || !IsValid(num))

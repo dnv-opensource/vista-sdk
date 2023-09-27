@@ -29,7 +29,7 @@ public static partial class VisVersionExtensions { }
 
 public sealed class VIS : IVIS
 {
-    public static readonly VisVersion LatestVisVersion = VisVersion.v3_5a;
+    public static readonly VisVersion LatestVisVersion = VisVersion.v3_7a;
 
     private readonly MemoryCache _gmodDtoCache;
     private readonly MemoryCache _gmodCache;
@@ -46,61 +46,29 @@ public sealed class VIS : IVIS
     public VIS()
     {
         _gmodDtoCache = new MemoryCache(
-            new MemoryCacheOptions
-            {
-                SizeLimit = 10,
-                ExpirationScanFrequency = TimeSpan.FromHours(1),
-            }
+            new MemoryCacheOptions { SizeLimit = 10, ExpirationScanFrequency = TimeSpan.FromHours(1), }
         );
         _gmodCache = new MemoryCache(
-            new MemoryCacheOptions
-            {
-                SizeLimit = 10,
-                ExpirationScanFrequency = TimeSpan.FromHours(1),
-            }
+            new MemoryCacheOptions { SizeLimit = 10, ExpirationScanFrequency = TimeSpan.FromHours(1), }
         );
         _codebooksDtoCache = new MemoryCache(
-            new MemoryCacheOptions
-            {
-                SizeLimit = 10,
-                ExpirationScanFrequency = TimeSpan.FromHours(1),
-            }
+            new MemoryCacheOptions { SizeLimit = 10, ExpirationScanFrequency = TimeSpan.FromHours(1), }
         );
         _codebooksCache = new MemoryCache(
-            new MemoryCacheOptions
-            {
-                SizeLimit = 10,
-                ExpirationScanFrequency = TimeSpan.FromHours(1),
-            }
+            new MemoryCacheOptions { SizeLimit = 10, ExpirationScanFrequency = TimeSpan.FromHours(1), }
         );
         _locationsDtoCache = new MemoryCache(
-            new MemoryCacheOptions
-            {
-                SizeLimit = 10,
-                ExpirationScanFrequency = TimeSpan.FromHours(1),
-            }
+            new MemoryCacheOptions { SizeLimit = 10, ExpirationScanFrequency = TimeSpan.FromHours(1), }
         );
         _locationsCache = new MemoryCache(
-            new MemoryCacheOptions
-            {
-                SizeLimit = 10,
-                ExpirationScanFrequency = TimeSpan.FromHours(1),
-            }
+            new MemoryCacheOptions { SizeLimit = 10, ExpirationScanFrequency = TimeSpan.FromHours(1), }
         );
 
         _gmodVersioningDtoCache = new MemoryCache(
-            new MemoryCacheOptions
-            {
-                SizeLimit = 10,
-                ExpirationScanFrequency = TimeSpan.FromHours(1),
-            }
+            new MemoryCacheOptions { SizeLimit = 10, ExpirationScanFrequency = TimeSpan.FromHours(1), }
         );
         _gmodVersioningCache = new MemoryCache(
-            new MemoryCacheOptions
-            {
-                SizeLimit = 10,
-                ExpirationScanFrequency = TimeSpan.FromHours(1),
-            }
+            new MemoryCacheOptions { SizeLimit = 10, ExpirationScanFrequency = TimeSpan.FromHours(1), }
         );
     }
 
@@ -119,7 +87,7 @@ public sealed class VIS : IVIS
 
                 return dto;
             }
-        );
+        )!;
     }
 
     public Gmod GetGmod(VisVersion visVersion)
@@ -138,16 +106,14 @@ public sealed class VIS : IVIS
 
                 return new Gmod(visVersion, dto);
             }
-        );
+        )!;
     }
 
     public IReadOnlyDictionary<VisVersion, Gmod> GetGmodsMap(IEnumerable<VisVersion> visVersions)
     {
         var invalidVisVersions = visVersions.Where(v => !v.IsValid());
         if (invalidVisVersions.Any())
-            throw new ArgumentException(
-                "Invalid VIS versions provided: " + string.Join(", ", invalidVisVersions)
-            );
+            throw new ArgumentException("Invalid VIS versions provided: " + string.Join(", ", invalidVisVersions));
 
         var versions = new HashSet<VisVersion>(visVersions);
 
@@ -172,7 +138,7 @@ public sealed class VIS : IVIS
 
                 return dto;
             }
-        );
+        )!;
     }
 
     private GmodVersioning GetGmodVersioning()
@@ -188,7 +154,7 @@ public sealed class VIS : IVIS
 
                 return new GmodVersioning(dto);
             }
-        );
+        )!;
     }
 
     private CodebooksDto GetCodebooksDto(VisVersion visVersion)
@@ -206,7 +172,7 @@ public sealed class VIS : IVIS
 
                 return dto;
             }
-        );
+        )!;
     }
 
     public Codebooks GetCodebooks(VisVersion visVersion)
@@ -222,18 +188,14 @@ public sealed class VIS : IVIS
 
                 return new Codebooks(visVersion, dto);
             }
-        );
+        )!;
     }
 
-    public IReadOnlyDictionary<VisVersion, Codebooks> GetCodebooksMap(
-        IEnumerable<VisVersion> visVersions
-    )
+    public IReadOnlyDictionary<VisVersion, Codebooks> GetCodebooksMap(IEnumerable<VisVersion> visVersions)
     {
         var invalidVisVersions = visVersions.Where(v => !v.IsValid());
         if (invalidVisVersions.Any())
-            throw new ArgumentException(
-                "Invalid VIS versions provided: " + string.Join(", ", invalidVisVersions)
-            );
+            throw new ArgumentException("Invalid VIS versions provided: " + string.Join(", ", invalidVisVersions));
 
         var versions = new HashSet<VisVersion>(visVersions);
 
@@ -258,7 +220,7 @@ public sealed class VIS : IVIS
 
                 return dto;
             }
-        );
+        )!;
     }
 
     public Locations GetLocations(VisVersion visversion)
@@ -274,18 +236,14 @@ public sealed class VIS : IVIS
 
                 return new Locations(visversion, dto);
             }
-        );
+        )!;
     }
 
-    public IReadOnlyDictionary<VisVersion, Locations> GetLocationsMap(
-        IEnumerable<VisVersion> visVersions
-    )
+    public IReadOnlyDictionary<VisVersion, Locations> GetLocationsMap(IEnumerable<VisVersion> visVersions)
     {
         var invalidVisVersions = visVersions.Where(v => !v.IsValid());
         if (invalidVisVersions.Any())
-            throw new ArgumentException(
-                "Invalid VIS versions provided: " + string.Join(", ", invalidVisVersions)
-            );
+            throw new ArgumentException("Invalid VIS versions provided: " + string.Join(", ", invalidVisVersions));
 
         var versions = new HashSet<VisVersion>(visVersions);
 
@@ -299,18 +257,15 @@ public sealed class VIS : IVIS
         return (VisVersion[])Enum.GetValues(typeof(VisVersion));
     }
 
-    public GmodNode? ConvertNode(
-        VisVersion sourceVersion,
-        GmodNode sourceNode,
-        VisVersion targetVersion
-    ) => GetGmodVersioning().ConvertNode(sourceVersion, sourceNode, targetVersion);
+    public GmodNode? ConvertNode(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion) =>
+        GetGmodVersioning().ConvertNode(sourceVersion, sourceNode, targetVersion);
 
-    public GmodPath? ConvertPath(
-        VisVersion sourceVersion,
-        GmodPath sourcePath,
-        VisVersion targetVersion
-    ) => GetGmodVersioning().ConvertPath(sourceVersion, sourcePath, targetVersion);
+    public GmodPath? ConvertPath(VisVersion sourceVersion, GmodPath sourcePath, VisVersion targetVersion) =>
+        GetGmodVersioning().ConvertPath(sourceVersion, sourcePath, targetVersion);
 
     public LocalIdBuilder? ConvertLocalId(LocalIdBuilder sourceLocalId, VisVersion targetVersion) =>
+        GetGmodVersioning().ConvertLocalId(sourceLocalId, targetVersion);
+
+    public LocalId? ConvertLocalId(LocalId sourceLocalId, VisVersion targetVersion) =>
         GetGmodVersioning().ConvertLocalId(sourceLocalId, targetVersion);
 }

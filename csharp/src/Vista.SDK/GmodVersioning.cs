@@ -16,11 +16,7 @@ internal sealed class GmodVersioning
         }
     }
 
-    public GmodNode? ConvertNode(
-        VisVersion sourceVersion,
-        GmodNode sourceNode,
-        VisVersion targetVersion
-    )
+    public GmodNode? ConvertNode(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion)
     {
         ValidateSourceAndTargetVersions(sourceVersion, targetVersion);
 
@@ -41,11 +37,7 @@ internal sealed class GmodVersioning
         return node;
     }
 
-    public GmodNode? ConvertNodeInternal(
-        VisVersion sourceVersion,
-        GmodNode sourceNode,
-        VisVersion targetVersion
-    )
+    public GmodNode? ConvertNodeInternal(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion)
     {
         var nextCode = sourceNode.Code;
 
@@ -54,13 +46,10 @@ internal sealed class GmodVersioning
             if (versioningNode.TryGetCodeChanges(sourceNode.Code, out var change))
             {
                 if (targetVersion == change.NextVisVersion)
-                    nextCode =
-                        change.NextCode
-                        ?? throw new InvalidOperationException("failed to set next code");
+                    nextCode = change.NextCode ?? throw new InvalidOperationException("failed to set next code");
                 else if (targetVersion == change.PreviousVisVersion)
                     nextCode =
-                        change.PreviousCode
-                        ?? throw new InvalidOperationException("failed to set previous code");
+                        change.PreviousCode ?? throw new InvalidOperationException("failed to set previous code");
             }
         }
 
@@ -74,9 +63,7 @@ internal sealed class GmodVersioning
     public LocalIdBuilder? ConvertLocalId(LocalIdBuilder sourceLocalId, VisVersion targetVersion)
     {
         if (sourceLocalId.VisVersion is null)
-            throw new InvalidOperationException(
-                "Cant convert local ID without a specific VIS version"
-            );
+            throw new InvalidOperationException("Cant convert local ID without a specific VIS version");
 
         var targetLocalId = LocalIdBuilder.Create(targetVersion);
 
@@ -115,39 +102,29 @@ internal sealed class GmodVersioning
             .TryWithMetadataTag(sourceLocalId.Detail);
     }
 
-    public GmodPath? ConvertPath(
-        VisVersion sourceVersion,
-        GmodPath sourcePath,
-        VisVersion targetVersion
-    )
+    public LocalId? ConvertLocalId(LocalId sourceLocalId, VisVersion targetVersion) =>
+        ConvertLocalId(sourceLocalId.Builder, targetVersion)?.Build();
+
+    public GmodPath? ConvertPath(VisVersion sourceVersion, GmodPath sourcePath, VisVersion targetVersion)
     {
         var targetEndNode = ConvertNode(sourceVersion, sourcePath.Node, targetVersion);
         if (targetEndNode is null)
             return null;
 
         if (targetEndNode.IsRoot)
-            return new GmodPath(targetEndNode.Parents, targetEndNode, skipVerify: true);
+            return new GmodPath(targetEndNode._parents, targetEndNode, skipVerify: true);
 
         var targetGmod = VIS.Instance.GetGmod(targetVersion);
         var sourceGmod = VIS.Instance.GetGmod(sourceVersion);
 
         var qualifyingNodes = sourcePath
             .GetFullPath()
-            .Select(
-                (t, i) =>
-                    (
-                        SourceNode: t.Node,
-                        TargetNode: ConvertNode(sourceVersion, t.Node, targetVersion)!
-                    )
-            )
+            .Select((t, i) => (SourceNode: t.Node, TargetNode: ConvertNode(sourceVersion, t.Node, targetVersion)!))
             .ToArray();
         if (qualifyingNodes.Any(t => t.TargetNode is null))
             throw new Exception("Could convert node forward");
 
-        var potentialParents = qualifyingNodes
-            .Select(n => n.TargetNode)
-            .Take(qualifyingNodes.Length - 1)
-            .ToArray();
+        var potentialParents = qualifyingNodes.Select(n => n.TargetNode).Take(qualifyingNodes.Length - 1).ToList();
         if (GmodPath.IsValid(potentialParents, targetEndNode))
             return new GmodPath(potentialParents, targetEndNode, skipVerify: true);
 
@@ -164,8 +141,7 @@ internal sealed class GmodVersioning
             var sourceNormalAssignment = qualifyingNode.SourceNode.ProductType;
             var targetNormalAssignment = qualifyingNode.TargetNode.ProductType;
 
-            var normalAssignmentChanged =
-                sourceNormalAssignment?.Code != targetNormalAssignment?.Code;
+            var normalAssignmentChanged = sourceNormalAssignment?.Code != targetNormalAssignment?.Code;
 
             var selectionChanged = false;
 
@@ -180,19 +156,9 @@ internal sealed class GmodVersioning
                         {
                             var parent = path[j];
                             var currentParents = path.Take(j + 1).ToArray();
-                            if (
-                                !targetGmod.PathExistsBetween(
-                                    currentParents,
-                                    node,
-                                    out var remaining
-                                )
-                            )
+                            if (!targetGmod.PathExistsBetween(currentParents, node, out var remaining))
                             {
-                                if (
-                                    !currentParents.Any(
-                                        n => n.IsAssetFunctionNode && n.Code != parent.Code
-                                    )
-                                )
+                                if (!currentParents.Any(n => n.IsAssetFunctionNode && n.Code != parent.Code))
                                     throw new Exception("Tried to remove last asset function node");
                                 path.RemoveAt(j);
                             }
@@ -214,8 +180,7 @@ internal sealed class GmodVersioning
             }
             else if (normalAssignmentChanged) // AC || AN || AD
             {
-                var wasDeleted =
-                    sourceNormalAssignment is not null && targetNormalAssignment is null;
+                var wasDeleted = sourceNormalAssignment is not null && targetNormalAssignment is null;
 
                 if (!codeChanged)
                     AddToPath(targetGmod, path, qualifyingNode.TargetNode);
@@ -248,7 +213,7 @@ internal sealed class GmodVersioning
                 break;
         }
 
-        potentialParents = path.Take(path.Count - 1).ToArray();
+        potentialParents = path.Take(path.Count - 1).ToList();
         targetEndNode = path.Last();
 
         if (!GmodPath.IsValid(potentialParents, targetEndNode, out var missinkLinkAt))
@@ -272,20 +237,15 @@ internal sealed class GmodVersioning
     private void ValidateSourceAndTargetVersions(VisVersion sourceVersion, VisVersion targetVersion)
     {
         if (string.IsNullOrWhiteSpace(sourceVersion.ToVersionString()))
-            throw new ArgumentException(
-                "Invalid source VIS Version: " + sourceVersion.ToVersionString()
-            );
+            throw new ArgumentException("Invalid source VIS Version: " + sourceVersion.ToVersionString());
 
         if (string.IsNullOrWhiteSpace(targetVersion.ToVersionString()))
-            throw new ArgumentException(
-                "Invalid target VISVersion: " + targetVersion.ToVersionString()
-            );
+            throw new ArgumentException("Invalid target VISVersion: " + targetVersion.ToVersionString());
     }
 
     private readonly record struct GmodVersioningNode
     {
-        private readonly Dictionary<string, GmodVersioningNodeChanges> _versioningNodeChanges =
-            new();
+        private readonly Dictionary<string, GmodVersioningNodeChanges> _versioningNodeChanges = new();
 
         internal GmodVersioningNode(IReadOnlyDictionary<string, GmodVersioningNodeChangesDto> dto)
         {
@@ -293,38 +253,27 @@ internal sealed class GmodVersioning
             {
                 if (
                     versioningNodeDto.Value is null
-                    || (
-                        versioningNodeDto.Value.PreviousCode is null
-                        && versioningNodeDto.Value.NextCode is null
-                    )
+                    || (versioningNodeDto.Value.PreviousCode is null && versioningNodeDto.Value.NextCode is null)
                 )
                     continue;
 
                 var code = versioningNodeDto.Key;
                 var versioningNodeChanges = new GmodVersioningNodeChanges(
-                    VisVersions.TryParse(
-                        versioningNodeDto.Value.NextVisVersion,
-                        out var nextVisVersion
-                    )
-                      ? nextVisVersion
-                      : null,
+                    VisVersions.TryParse(versioningNodeDto.Value.NextVisVersion, out var nextVisVersion)
+                        ? nextVisVersion
+                        : null,
                     versioningNodeDto.Value.NextCode,
-                    VisVersions.TryParse(
-                        versioningNodeDto.Value.PreviousVisVersion,
-                        out var previoiusVisVersion
-                    )
-                      ? previoiusVisVersion
-                      : null,
+                    VisVersions.TryParse(versioningNodeDto.Value.PreviousVisVersion, out var previoiusVisVersion)
+                        ? previoiusVisVersion
+                        : null,
                     versioningNodeDto.Value.PreviousCode
                 );
                 _versioningNodeChanges.Add(code, versioningNodeChanges);
             }
         }
 
-        public bool TryGetCodeChanges(
-            string code,
-            [MaybeNullWhen(false)] out GmodVersioningNodeChanges nodeChanges
-        ) => _versioningNodeChanges.TryGetValue(code, out nodeChanges);
+        public bool TryGetCodeChanges(string code, [MaybeNullWhen(false)] out GmodVersioningNodeChanges nodeChanges) =>
+            _versioningNodeChanges.TryGetValue(code, out nodeChanges);
     }
 
     private sealed record GmodVersioningNodeChanges(

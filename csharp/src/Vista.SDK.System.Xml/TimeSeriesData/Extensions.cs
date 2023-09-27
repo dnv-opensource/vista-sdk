@@ -2,16 +2,12 @@
 
 public static class Extensions
 {
-    public static TimeSeriesDataPackage ToXmlDto(
-        this Transport.TimeSeries.TimeSeriesDataPackage package
-    )
+    public static TimeSeriesDataPackage ToXmlDto(this Transport.TimeSeries.TimeSeriesDataPackage package)
     {
         return null!;
     }
 
-    public static Transport.TimeSeries.TimeSeriesDataPackage ToDomainModel(
-        this TimeSeriesDataPackage package
-    )
+    public static Transport.TimeSeries.TimeSeriesDataPackage ToDomainModel(this TimeSeriesDataPackage package)
     {
         return null!;
     }

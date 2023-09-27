@@ -104,26 +104,56 @@ export class GmodNode {
         return this.with((s) => (s.location = undefined));
     }
 
-    public withLocation(location: Location): GmodNode {
-        return this.with((s) => (s.location = location));
+    public withLocation(
+        location: string | undefined,
+        locations: Locations
+    ): GmodNode;
+    public withLocation(location: Location): GmodNode;
+    public withLocation(location: unknown, locations?: unknown): GmodNode {
+        let result: GmodNode | undefined;
+        if (location instanceof Location) {
+            result = this.tryWithLocation(location);
+        } else if (
+            typeof location === "string" &&
+            locations instanceof Locations
+        ) {
+            result = this.tryWithLocation(location, locations);
+        }
+
+        if (!result) throw new Error("Node not individualizable");
+        return result;
     }
 
+    public tryWithLocation(location: Location): GmodNode | undefined;
     public tryWithLocation(
         location: string | undefined,
         locations: Locations
-    ): GmodNode {
-        const parsedLocation = locations.tryParse(location);
-        return !parsedLocation
-            ? this.withoutLocation()
-            : this.withLocation(parsedLocation);
+    ): GmodNode | undefined;
+    public tryWithLocation(
+        location: unknown,
+        locations?: unknown
+    ): GmodNode | undefined {
+        // if (!isIndividualizable(this, false, false)) return undefined; // TODO what to do about this case
+        if (location instanceof Location) {
+            return this.with((s) => (s.location = location));
+        } else if (
+            typeof location === "string" &&
+            locations instanceof Locations
+        ) {
+            const parsedLocation = locations.tryParse(location);
+            if (!parsedLocation) return undefined;
+            return this.with((s) => (s.location = parsedLocation));
+        }
     }
 
-    public async withLocationAsync(location: string) {
+    public async withLocationAsync(location: string): Promise<GmodNode> {
         const locations = await VIS.instance.getLocations(this.visVersion);
         const parsedLocation = locations.parse(location);
         return this.withLocation(parsedLocation);
     }
-    public async tryWithLocationAsync(location?: string): Promise<GmodNode> {
+    public async tryWithLocationAsync(
+        location?: string
+    ): Promise<GmodNode | undefined> {
         const locations = await VIS.instance.getLocations(this.visVersion);
         return this.tryWithLocation(location, locations);
     }
@@ -235,6 +265,11 @@ export class GmodNode {
         return Gmod.isFunctionNode(this.metadata);
     }
 
+    public get isFunctionComposition(): boolean {
+        return this.metadata.category === "ASSET FUNCTION" && this.metadata.type === "COMPOSITION" ||
+            this.metadata.category === "PRODUCT FUNCTION" && this.metadata.type === "COMPOSITION";
+    }
+
     public with(u: { (state: GmodNode): void }): GmodNode {
         const n = this.clone();
         u && u(n);
@@ -255,4 +290,20 @@ export class GmodNode {
             this
         );
     }
+}
+
+export function isIndividualizable(node: GmodNode, isTargetNode: boolean, isInSet: boolean = false) {
+    if (node.metadata.type === "GROUP")
+        return false;
+    if (node.metadata.type === "SELECTION")
+        return false;
+    if (node.isProductType)
+        return false;
+    if (node.metadata.category === "ASSET" && node.metadata.type == "TYPE")
+        return false;
+    if (node.metadata.category === "ASSET FUNCTION" && node.metadata.type === "COMPOSITION")
+        return node.code[node.code.length - 1] === 'i' || isTargetNode || isInSet;
+    if (node.metadata.category === "PRODUCT FUNCTION" && node.metadata.type === "COMPOSITION")
+        return node.code[node.code.length - 1] === 'i' || isTargetNode || isInSet;
+    return true;
 }

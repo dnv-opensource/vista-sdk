@@ -3,7 +3,7 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK.Experimental;
 
-public sealed record class PMSLocalIdBuilder
+public sealed partial record class PMSLocalIdBuilder : ILocalIdBuilder<PMSLocalIdBuilder, PMSLocalId>
 {
     public static readonly string NamingRule = "dnv-v2-experimental";
     public static readonly CodebookName[] UsedCodebooks = new[]
@@ -64,8 +64,7 @@ public sealed record class PMSLocalIdBuilder
         return localIdbuilder;
     }
 
-    public PMSLocalIdBuilder TryWithVisVersion(in VisVersion? visVersion) =>
-        TryWithVisVersion(visVersion, out _);
+    public PMSLocalIdBuilder TryWithVisVersion(in VisVersion? visVersion) => TryWithVisVersion(visVersion, out _);
 
     public PMSLocalIdBuilder TryWithVisVersion(in string? visVersionStr, out bool succeeded)
     {
@@ -87,11 +86,7 @@ public sealed record class PMSLocalIdBuilder
 
     public PMSLocalIdBuilder WithoutVisVersion() => this with { VisVersion = null };
 
-    public PMSLocalIdBuilder WithVerboseMode(in bool verboseMode) =>
-        this with
-        {
-            VerboseMode = verboseMode
-        };
+    public PMSLocalIdBuilder WithVerboseMode(in bool verboseMode) => this with { VerboseMode = verboseMode };
 
     public PMSLocalIdBuilder WithPrimaryItem(in GmodPath item)
     {
@@ -102,8 +97,7 @@ public sealed record class PMSLocalIdBuilder
         return localIdbuilder;
     }
 
-    public PMSLocalIdBuilder TryWithPrimaryItem(in GmodPath? item) =>
-        TryWithPrimaryItem(item, out _);
+    public PMSLocalIdBuilder TryWithPrimaryItem(in GmodPath? item) => TryWithPrimaryItem(item, out _);
 
     public PMSLocalIdBuilder TryWithPrimaryItem(in GmodPath? item, out bool succeeded)
     {
@@ -117,11 +111,7 @@ public sealed record class PMSLocalIdBuilder
         return this with { Items = this.Items with { PrimaryItem = item } };
     }
 
-    public PMSLocalIdBuilder WithoutPrimaryItem() =>
-        this with
-        {
-            Items = this.Items with { PrimaryItem = null }
-        };
+    public PMSLocalIdBuilder WithoutPrimaryItem() => this with { Items = this.Items with { PrimaryItem = null } };
 
     public PMSLocalIdBuilder WithSecondaryItem(in GmodPath item)
     {
@@ -132,8 +122,7 @@ public sealed record class PMSLocalIdBuilder
         return localIdBuilder;
     }
 
-    public PMSLocalIdBuilder TryWithSecondaryItem(in GmodPath? item) =>
-        TryWithSecondaryItem(in item, out _);
+    public PMSLocalIdBuilder TryWithSecondaryItem(in GmodPath? item) => TryWithSecondaryItem(in item, out _);
 
     public PMSLocalIdBuilder TryWithSecondaryItem(in GmodPath? item, out bool succeeded)
     {
@@ -147,11 +136,7 @@ public sealed record class PMSLocalIdBuilder
         return this with { Items = this.Items with { SecondaryItem = item } };
     }
 
-    public PMSLocalIdBuilder WithoutSecondaryItem() =>
-        this with
-        {
-            Items = this.Items with { SecondaryItem = null }
-        };
+    public PMSLocalIdBuilder WithoutSecondaryItem() => this with { Items = this.Items with { SecondaryItem = null } };
 
     public PMSLocalIdBuilder WithMetadataTag(in MetadataTag metadataTag)
     {
@@ -161,8 +146,7 @@ public sealed record class PMSLocalIdBuilder
         return localIdBuilder;
     }
 
-    public PMSLocalIdBuilder TryWithMetadataTag(in MetadataTag? metadataTag) =>
-        TryWithMetadataTag(metadataTag, out _);
+    public PMSLocalIdBuilder TryWithMetadataTag(in MetadataTag? metadataTag) => TryWithMetadataTag(metadataTag, out _);
 
     public PMSLocalIdBuilder TryWithMetadataTag(in MetadataTag? metadataTag, out bool succeeded)
     {
@@ -233,11 +217,7 @@ public sealed record class PMSLocalIdBuilder
 
     public PMSLocalIdBuilder WithoutFunctionalServices() => this with { FunctionalServices = null };
 
-    public PMSLocalIdBuilder WithoutMaintenanceCategory() =>
-        this with
-        {
-            MaintenanceCategory = null
-        };
+    public PMSLocalIdBuilder WithoutMaintenanceCategory() => this with { MaintenanceCategory = null };
 
     public PMSLocalIdBuilder WithoutActivityType() => this with { ActivityType = null };
 
@@ -245,25 +225,13 @@ public sealed record class PMSLocalIdBuilder
 
     public PMSLocalIdBuilder WithoutDetail() => this with { Detail = null };
 
-    private PMSLocalIdBuilder WithQuantity(in MetadataTag quantity) =>
-        this with
-        {
-            Quantity = quantity,
-        };
+    private PMSLocalIdBuilder WithQuantity(in MetadataTag quantity) => this with { Quantity = quantity, };
 
-    private PMSLocalIdBuilder WithContent(in MetadataTag content) =>
-        this with
-        {
-            Content = content,
-        };
+    private PMSLocalIdBuilder WithContent(in MetadataTag content) => this with { Content = content, };
 
     private PMSLocalIdBuilder WithState(in MetadataTag state) => this with { State = state, };
 
-    private PMSLocalIdBuilder WithCommand(in MetadataTag command) =>
-        this with
-        {
-            Command = command,
-        };
+    private PMSLocalIdBuilder WithCommand(in MetadataTag command) => this with { Command = command, };
 
     private PMSLocalIdBuilder WithFunctionalServices(in MetadataTag functionalServices) =>
         this with
@@ -283,16 +251,11 @@ public sealed record class PMSLocalIdBuilder
             ActivityType = activityType,
         };
 
-    private PMSLocalIdBuilder WithPosition(in MetadataTag position) =>
-        this with
-        {
-            Position = position,
-        };
+    private PMSLocalIdBuilder WithPosition(in MetadataTag position) => this with { Position = position, };
 
     private PMSLocalIdBuilder WithDetail(in MetadataTag detail) => this with { Detail = detail, };
 
-    public static PMSLocalIdBuilder Create(VisVersion version) =>
-        new PMSLocalIdBuilder().WithVisVersion(version);
+    public static PMSLocalIdBuilder Create(VisVersion version) => new PMSLocalIdBuilder().WithVisVersion(version);
 
     public bool HasCustomTag =>
         (Quantity?.IsCustom ?? false)
@@ -347,15 +310,30 @@ public sealed record class PMSLocalIdBuilder
         && ActivityType is null
         && Detail is null;
 
+    public IReadOnlyList<MetadataTag> MetadataTags =>
+        new List<MetadataTag?>()
+        {
+            Quantity,
+            Content,
+            Position,
+            State,
+            Command,
+            FunctionalServices,
+            MaintenanceCategory,
+            ActivityType,
+            Detail
+        }
+            .Where(m => m is not null)
+            .Cast<MetadataTag>()
+            .ToArray();
+
     public bool Equals(PMSLocalIdBuilder? other)
     {
         if (other is null)
             return false;
 
         if (VisVersion != other.VisVersion)
-            throw new InvalidOperationException(
-                "Cant compare local IDs from different VIS versions"
-            );
+            throw new InvalidOperationException("Cant compare local IDs from different VIS versions");
 
         return PrimaryItem == other.PrimaryItem
             && SecondaryItem == other.SecondaryItem
@@ -428,5 +406,15 @@ public sealed record class PMSLocalIdBuilder
         ToString(builder);
 
         return lease.ToString();
+    }
+
+    public PMSLocalId Build()
+    {
+        if (IsEmpty)
+            throw new InvalidOperationException("Cant build to PMSLocalId from empty PMSLocalIdBuilder");
+        if (!IsValid)
+            throw new InvalidOperationException("Cant build to PMSLocalId from invalid PMSLocalIdBuilder");
+
+        return new PMSLocalId(this);
     }
 }

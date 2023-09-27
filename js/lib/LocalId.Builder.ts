@@ -2,6 +2,7 @@ import { CodebookName } from "./CodebookName";
 import { Codebooks } from "./Codebooks";
 import { Gmod } from "./Gmod";
 import { GmodPath } from "./GmodPath";
+import { ILocalIdBuilderGeneric } from "./ILocalIdBuilder";
 import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import { LocalId } from "./LocalId";
 import { LocalIdItems } from "./LocalId.Items";
@@ -11,7 +12,9 @@ import { MetadataTag } from "./MetadataTag";
 import { ParsingState } from "./types/LocalId";
 import { VisVersion } from "./VisVersion";
 
-export class LocalIdBuilder {
+export class LocalIdBuilder
+    implements ILocalIdBuilderGeneric<LocalIdBuilder, LocalId>
+{
     public static readonly namingRule = "dnv-v2";
     public static readonly usedCodebooks = [
         CodebookName.Quantity,
@@ -61,7 +64,7 @@ export class LocalIdBuilder {
         return this._items?.secondaryItem;
     }
 
-    public isValid(): boolean {
+    public get isValid(): boolean {
         return (
             !!this._items.primaryItem &&
             !!this.visVersion &&

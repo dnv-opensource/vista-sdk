@@ -25,14 +25,14 @@ internal enum ParsingStateV2
 internal ref struct LocalIdParser
 {
     private readonly ReadOnlySpan<char> _buffer;
-    private ParsingState _state;
+    private LocalIdParsingState _state;
     private int _currentIndex;
     private int _nextSlash;
 
     internal LocalIdParser(ReadOnlySpan<char> buffer)
     {
         _buffer = buffer;
-        _state = ParsingState.NamingRule;
+        _state = LocalIdParsingState.NamingRule;
         _currentIndex = 1;
         _nextSlash = 0;
     }
@@ -50,18 +50,18 @@ internal ref struct LocalIdParser
             var segmentStr = segment.ToString();
             switch (_state)
             {
-                case ParsingState.NamingRule:
+                case LocalIdParsingState.NamingRule:
                     Debug.Assert(segment.SequenceEqual(LocalId.NamingRule.AsSpan()));
                     Consume();
                     AdvanceState();
                     break;
-                case ParsingState.VisVersion:
+                case LocalIdParsingState.VisVersion:
                     VisVersions.TryParse(segment, out version);
                     gmod = VIS.Instance.GetGmod(version);
                     Consume();
                     AdvanceState();
                     break;
-                case ParsingState.PrimaryItem:
+                case LocalIdParsingState.PrimaryItem:
                     if (gmod is null)
                         throw new Exception("Invalid state");
                     ParsePrimaryItem(gmod, segment);
@@ -123,5 +123,5 @@ internal ref struct LocalIdParser
 
     private void Consume() => _currentIndex += (_nextSlash - _currentIndex) + 1;
 
-    private ParsingState AdvanceState() => ++_state;
+    private LocalIdParsingState AdvanceState() => ++_state;
 }

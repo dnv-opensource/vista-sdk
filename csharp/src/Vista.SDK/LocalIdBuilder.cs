@@ -3,7 +3,7 @@ using Vista.SDK.Internal;
 
 namespace Vista.SDK;
 
-public partial record class LocalIdBuilder : ILocalIdBuilder
+public sealed partial record class LocalIdBuilder : ILocalIdBuilder<LocalIdBuilder, LocalId>
 {
     public static readonly string NamingRule = "dnv-v2";
     public static readonly CodebookName[] UsedCodebooks = new[]
@@ -48,7 +48,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
     {
         var localIdbuilder = TryWithVisVersion(visVersion, out var succeeded);
         if (!succeeded)
-            throw new ArgumentException(nameof(visVersion));
+            throw new ArgumentException("Failed to parse VIS version", nameof(visVersion));
 
         return localIdbuilder;
     }
@@ -62,8 +62,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         return localIdbuilder;
     }
 
-    public LocalIdBuilder TryWithVisVersion(in VisVersion? visVersion) =>
-        TryWithVisVersion(visVersion, out _);
+    public LocalIdBuilder TryWithVisVersion(in VisVersion? visVersion) => TryWithVisVersion(visVersion, out _);
 
     public LocalIdBuilder TryWithVisVersion(in string? visVersionStr, out bool succeeded)
     {
@@ -85,11 +84,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
 
     public LocalIdBuilder WithoutVisVersion() => this with { VisVersion = null };
 
-    public LocalIdBuilder WithVerboseMode(in bool verboseMode) =>
-        this with
-        {
-            VerboseMode = verboseMode
-        };
+    public LocalIdBuilder WithVerboseMode(in bool verboseMode) => this with { VerboseMode = verboseMode };
 
     public LocalIdBuilder WithPrimaryItem(in GmodPath item)
     {
@@ -114,11 +109,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         return this with { Items = this.Items with { PrimaryItem = item } };
     }
 
-    public LocalIdBuilder WithoutPrimaryItem() =>
-        this with
-        {
-            Items = this.Items with { PrimaryItem = null }
-        };
+    public LocalIdBuilder WithoutPrimaryItem() => this with { Items = this.Items with { PrimaryItem = null } };
 
     public LocalIdBuilder WithSecondaryItem(in GmodPath item)
     {
@@ -129,8 +120,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         return localIdBuilder;
     }
 
-    public LocalIdBuilder TryWithSecondaryItem(in GmodPath? item) =>
-        TryWithSecondaryItem(in item, out _);
+    public LocalIdBuilder TryWithSecondaryItem(in GmodPath? item) => TryWithSecondaryItem(in item, out _);
 
     public LocalIdBuilder TryWithSecondaryItem(in GmodPath? item, out bool succeeded)
     {
@@ -144,11 +134,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         return this with { Items = this.Items with { SecondaryItem = item } };
     }
 
-    public LocalIdBuilder WithoutSecondaryItem() =>
-        this with
-        {
-            Items = this.Items with { SecondaryItem = null }
-        };
+    public LocalIdBuilder WithoutSecondaryItem() => this with { Items = this.Items with { SecondaryItem = null } };
 
     public LocalIdBuilder WithMetadataTag(in MetadataTag metadataTag)
     {
@@ -158,8 +144,7 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         return localIdBuilder;
     }
 
-    public LocalIdBuilder TryWithMetadataTag(in MetadataTag? metadataTag) =>
-        TryWithMetadataTag(metadataTag, out _);
+    public LocalIdBuilder TryWithMetadataTag(in MetadataTag? metadataTag) => TryWithMetadataTag(metadataTag, out _);
 
     public LocalIdBuilder TryWithMetadataTag(in MetadataTag? metadataTag, out bool succeeded)
     {
@@ -231,19 +216,11 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
 
     public LocalIdBuilder WithoutDetail() => this with { Detail = null };
 
-    private LocalIdBuilder WithQuantity(in MetadataTag quantity) =>
-        this with
-        {
-            Quantity = quantity,
-        };
+    private LocalIdBuilder WithQuantity(in MetadataTag quantity) => this with { Quantity = quantity, };
 
     private LocalIdBuilder WithContent(in MetadataTag content) => this with { Content = content, };
 
-    private LocalIdBuilder WithCalculation(in MetadataTag calculation) =>
-        this with
-        {
-            Calculation = calculation,
-        };
+    private LocalIdBuilder WithCalculation(in MetadataTag calculation) => this with { Calculation = calculation, };
 
     private LocalIdBuilder WithState(in MetadataTag state) => this with { State = state, };
 
@@ -251,25 +228,18 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
 
     private LocalIdBuilder WithType(in MetadataTag type) => this with { Type = type, };
 
-    private LocalIdBuilder WithPosition(in MetadataTag position) =>
-        this with
-        {
-            Position = position,
-        };
+    private LocalIdBuilder WithPosition(in MetadataTag position) => this with { Position = position, };
 
     private LocalIdBuilder WithDetail(in MetadataTag detail) => this with { Detail = detail, };
 
-    public static LocalIdBuilder Create(VisVersion version) =>
-        new LocalIdBuilder().WithVisVersion(version);
+    public static LocalIdBuilder Create(VisVersion version) => new LocalIdBuilder().WithVisVersion(version);
 
     public LocalId Build()
     {
         if (IsEmpty)
             throw new InvalidOperationException("Cant build to LocalId from empty LocalIdBuilder");
         if (!IsValid)
-            throw new InvalidOperationException(
-                "Cant build to LocalId from invalid LocalIdBuilder"
-            );
+            throw new InvalidOperationException("Cant build to LocalId from invalid LocalIdBuilder");
 
         return new LocalId(this);
     }
@@ -322,15 +292,19 @@ public partial record class LocalIdBuilder : ILocalIdBuilder
         && Type is null
         && Detail is null;
 
+    public IReadOnlyList<MetadataTag> MetadataTags =>
+        new List<MetadataTag?>() { Quantity, Calculation, Content, Position, State, Command, Type, Detail }
+            .Where(m => m is not null)
+            .Cast<MetadataTag>()
+            .ToArray();
+
     public bool Equals(LocalIdBuilder? other)
     {
         if (other is null)
             return false;
 
         if (VisVersion != other.VisVersion)
-            throw new InvalidOperationException(
-                "Cant compare local IDs from different VIS versions"
-            );
+            throw new InvalidOperationException("Cant compare local IDs from different VIS versions");
 
         return PrimaryItem == other.PrimaryItem
             && SecondaryItem == other.SecondaryItem
