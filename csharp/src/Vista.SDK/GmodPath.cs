@@ -549,7 +549,7 @@ public sealed record GmodPath
         if (string.IsNullOrWhiteSpace(item))
             return false;
 
-        item = item.Trim().TrimStart('/');
+        item = item!.Trim().TrimStart('/');
 
         var parts = new Queue<PathNode>();
         foreach (var partStr in item.Split('/'))
