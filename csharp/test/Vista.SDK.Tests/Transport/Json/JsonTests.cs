@@ -1,7 +1,7 @@
+using System.Text.Json;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using ICSharpCode.SharpZipLib.BZip2;
-using System.Text.Json;
 using Vista.SDK.Transport.Json;
 using Vista.SDK.Transport.Json.DataChannel;
 using Vista.SDK.Transport.Json.TimeSeriesData;

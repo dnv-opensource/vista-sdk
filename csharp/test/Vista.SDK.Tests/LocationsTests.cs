@@ -1,5 +1,5 @@
-using FluentAssertions;
 using System.ComponentModel.DataAnnotations;
+using FluentAssertions;
 
 namespace Vista.SDK.Tests;
 

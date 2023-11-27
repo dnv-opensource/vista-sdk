@@ -1,5 +1,4 @@
 ﻿using System.Xml.Serialization;
-
 using Vista.SDK.Transport.Xml.DataChannel;
 using Vista.SDK.Transport.Xml.TimeSeriesData;
 

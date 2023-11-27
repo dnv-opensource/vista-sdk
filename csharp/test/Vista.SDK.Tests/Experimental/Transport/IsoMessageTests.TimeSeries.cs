@@ -1,6 +1,6 @@
 using FluentAssertions;
-using Vista.SDK.Experimental.Transport.TimeSeries;
 using Vista.SDK.Experimental.Transport;
+using Vista.SDK.Experimental.Transport.TimeSeries;
 
 namespace Vista.SDK.Experimental.Tests.Transport;
 

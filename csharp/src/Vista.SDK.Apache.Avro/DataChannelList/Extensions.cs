@@ -34,7 +34,8 @@ public static class Extensions
                 },
                 DataChannelList = new DataChannelList()
                 {
-                    DataChannel = p.DataChannelList.DataChannel
+                    DataChannel = p.DataChannelList
+                        .DataChannel
                         .Select(
                             dc =>
                                 new DataChannel()
@@ -128,7 +129,8 @@ public static class Extensions
                     new Dictionary<string, object>()
                 ),
                 new Domain.DataChannelList(
-                    p.DataChannelList.DataChannel
+                    p.DataChannelList
+                        .DataChannel
                         .Select(
                             c =>
                                 new Domain.DataChannel(

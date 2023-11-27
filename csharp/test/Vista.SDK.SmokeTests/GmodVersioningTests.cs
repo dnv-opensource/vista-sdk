@@ -60,10 +60,9 @@ public class GmodVersioningTests
                         {
                             targetPath = VIS.Instance.ConvertPath(VisVersion.v3_4a, sourcePath, VisVersion.v3_5a);
                             Assert.NotNull(targetPath);
-                            var parsedPath = context.TargetGmod.TryParsePath(
-                                targetPath!.ToString(),
-                                out var parsedTargetPath
-                            );
+                            var parsedPath = context
+                                .TargetGmod
+                                .TryParsePath(targetPath!.ToString(), out var parsedTargetPath);
                             Assert.True(parsedPath);
                             Assert.Equal(parsedTargetPath?.ToString(), targetPath.ToString());
                             counter = Interlocked.Increment(ref context.Counter);
@@ -110,7 +109,8 @@ public class GmodVersioningTests
         var successRate = (double)success / (double)context.Counter * 100.0d;
 
         Console.WriteLine($"Success/failed - {success}/{failed} ({successRate:0.00}% success)");
-        var distinctExceptions = context.FailedConversions
+        var distinctExceptions = context
+            .FailedConversions
             .GroupBy(x => x.Exception.ToString())
             .OrderByDescending(grp => grp.Count());
         Console.WriteLine("Errors: ");

@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.IO.Compression;
+using System.Text.Json;
 using Avro.IO;
 using Avro.Specific;
 using BenchmarkDotNet.Analysers;
@@ -15,14 +18,11 @@ using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 using BenchmarkDotNet.Validators;
 using ICSharpCode.SharpZipLib.BZip2;
 using Microsoft.Diagnostics.Tracing.Parsers.IIS_Trace;
-using System.Globalization;
-using System.IO.Compression;
-using System.Text.Json;
 using Vista.SDK.Transport.Avro.DataChannel;
 using Vista.SDK.Transport.Json;
 using Vista.SDK.Transport.Json.DataChannel;
-using DataChannelListJsonPackage = Vista.SDK.Transport.Json.DataChannel.DataChannelListPackage;
 using DataChannelListAvroPackage = Vista.SDK.Transport.Avro.DataChannel.DataChannelListPackage;
+using DataChannelListJsonPackage = Vista.SDK.Transport.Json.DataChannel.DataChannelListPackage;
 using RunMode = BenchmarkDotNet.Diagnosers.RunMode;
 
 namespace Vista.SDK.Benchmarks.Transport;

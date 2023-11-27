@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-
 using Vista.SDK;
 
 namespace Vista.SDK.Benchmarks.Gmod;

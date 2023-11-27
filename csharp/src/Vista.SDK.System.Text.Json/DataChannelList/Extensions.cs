@@ -9,7 +9,10 @@ public static class Extensions
         return new DataChannelListPackage(
             new Package(
                 new DataChannelList(
-                    package.Package.DataChannelList.DataChannel
+                    package
+                        .Package
+                        .DataChannelList
+                        .DataChannel
                         .Select(
                             c =>
                                 new DataChannel(
@@ -19,8 +22,10 @@ public static class Extensions
                                             ? null
                                             : new NameObject(c.DataChannelId.NameObject.NamingRule)
                                             {
-                                                AdditionalProperties =
-                                                    c.DataChannelId.NameObject.CustomProperties.CopyProperties(),
+                                                AdditionalProperties = c.DataChannelId
+                                                    .NameObject
+                                                    .CustomProperties
+                                                    .CopyProperties(),
                                             },
                                         c.DataChannelId.ShortId
                                     ),
@@ -60,8 +65,10 @@ public static class Extensions
                                             ? null
                                             : new Unit(c.Property.Unit.QuantityName, c.Property.Unit.UnitSymbol)
                                             {
-                                                AdditionalProperties =
-                                                    c.Property.Unit.CustomProperties.CopyProperties(),
+                                                AdditionalProperties = c.Property
+                                                    .Unit
+                                                    .CustomProperties
+                                                    .CopyProperties(),
                                             }
                                     )
                                     {
@@ -119,7 +126,8 @@ public static class Extensions
                     p.Header.AdditionalProperties.CopyProperties()
                 ),
                 new Domain.DataChannelList(
-                    p.DataChannelList.DataChannel
+                    p.DataChannelList
+                        .DataChannel
                         .Select(
                             c =>
                                 new Domain.DataChannel(

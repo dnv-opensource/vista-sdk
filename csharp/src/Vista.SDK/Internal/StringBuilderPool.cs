@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
-
 using Microsoft.Extensions.ObjectPool;
 
 namespace Vista.SDK.Internal;

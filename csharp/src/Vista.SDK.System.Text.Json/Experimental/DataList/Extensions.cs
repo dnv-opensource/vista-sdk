@@ -10,7 +10,10 @@ public static class Extensions
         return new DataListPackage(
             new Package(
                 new DataList(
-                    package.Package.DataList.Data
+                    package
+                        .Package
+                        .DataList
+                        .Data
                         .Select(
                             c =>
                                 new Data(
@@ -20,8 +23,10 @@ public static class Extensions
                                             ? null
                                             : new NameObject(c.DataId.NameObject.NamingRule)
                                             {
-                                                AdditionalProperties =
-                                                    c.DataId.NameObject.CustomProperties.CopyProperties(),
+                                                AdditionalProperties = c.DataId
+                                                    .NameObject
+                                                    .CustomProperties
+                                                    .CopyProperties(),
                                             },
                                         c.DataId.ShortId
                                     ),
@@ -61,8 +66,10 @@ public static class Extensions
                                             ? null
                                             : new Unit(c.Property.Unit.QuantityName, c.Property.Unit.UnitSymbol)
                                             {
-                                                AdditionalProperties =
-                                                    c.Property.Unit.CustomProperties.CopyProperties(),
+                                                AdditionalProperties = c.Property
+                                                    .Unit
+                                                    .CustomProperties
+                                                    .CopyProperties(),
                                             }
                                     )
                                     {
@@ -120,7 +127,8 @@ public static class Extensions
                     p.Header.AdditionalProperties.CopyProperties()
                 ),
                 new Domain.DataList(
-                    p.DataList.Data
+                    p.DataList
+                        .Data
                         .Select(c =>
                         {
                             if (c.DataID.LocalID is null)

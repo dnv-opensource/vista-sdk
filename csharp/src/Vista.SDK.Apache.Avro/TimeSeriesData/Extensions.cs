@@ -43,7 +43,8 @@ public static class Extensions
                                     ? null
                                     : new EventData()
                                     {
-                                        DataSet = t.EventData.DataSet
+                                        DataSet = t.EventData
+                                            .DataSet
                                             ?.Select(
                                                 d =>
                                                     new EventDataSet()
@@ -140,7 +141,8 @@ public static class Extensions
                                     ? null
                                     : new Domain.EventData(
                                         t.EventData.NumberOfDataSet,
-                                        t.EventData.DataSet
+                                        t.EventData
+                                            .DataSet
                                             ?.Select(
                                                 ed =>
                                                     new Domain.EventDataSet(
