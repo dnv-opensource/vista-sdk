@@ -23,10 +23,13 @@
     <PackageTags>dnv dnvgl vis maritime iso-19847 iso-19848</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <DotNetVersion>8.0.0</DotNetVersion>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
     <DotNetVersion>7.0.0</DotNetVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net7.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net7.0' and '$(TargetFramework)' != 'net8.0'">
     <DotNetVersion>6.0.0</DotNetVersion>
   </PropertyGroup>
 

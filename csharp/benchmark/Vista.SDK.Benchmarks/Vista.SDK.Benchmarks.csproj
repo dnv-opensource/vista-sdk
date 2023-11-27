@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>disable</Nullable>
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -48,7 +48,7 @@
   <ItemGroup>
     <VisSchemaFiles Include="$(MSBuildThisFileDirectory)\..\..\..\schemas\**\*.*" />
   </ItemGroup>
-  
+
   <Target Name="CopySomeFiles" AfterTargets="AfterBuild">
     <Copy
       SourceFiles="@(VisSchemaFiles)"
