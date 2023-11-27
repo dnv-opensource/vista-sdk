@@ -6,22 +6,22 @@
     "type": "object",
     "properties": {
         "Package": {
-            "$ref": "#/$defs/Package"
+            "$ref": "#/definitions/Package"
         }
     },
     "additionalProperties": false,
     "required": [
         "Package"
     ],
-    "$defs": {
+    "definitions": {
         "Package": {
             "type": "object",
             "properties": {
                 "Header": {
-                    "$ref": "#/$defs/Header"
+                    "$ref": "#/definitions/Header"
                 },
                 "DataChannelList": {
-                    "$ref": "#/$defs/DataChannelList"
+                    "$ref": "#/definitions/DataChannelList"
                 }
             },
             "required": [
@@ -37,12 +37,12 @@
                     "type": "string"
                 },
                 "DataChannelListID": {
-                    "$ref": "#/$defs/ConfigurationReference"
+                    "$ref": "#/definitions/ConfigurationReference"
                 },
                 "VersionInformation": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/$defs/VersionInformation"
+                        "$ref": "#/definitions/VersionInformation"
                     }
                 },
                 "Author": {
@@ -83,7 +83,7 @@
                 "DataChannel": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/$defs/DataChannel"
+                        "$ref": "#/definitions/DataChannel"
                     }
                 }
             },
@@ -96,10 +96,10 @@
             "type": "object",
             "properties": {
                 "DataChannelID": {
-                    "$ref": "#/$defs/DataChannelID"
+                    "$ref": "#/definitions/DataChannelID"
                 },
                 "Property": {
-                    "$ref": "#/$defs/Property"
+                    "$ref": "#/definitions/Property"
                 }
             },
             "required": [
@@ -118,7 +118,7 @@
                     "type": "string"
                 },
                 "NameObject": {
-                    "$ref": "#/$defs/NameObject"
+                    "$ref": "#/definitions/NameObject"
                 }
             },
             "required": [
@@ -141,16 +141,16 @@
             "type": "object",
             "properties": {
                 "DataChannelType": {
-                    "$ref": "#/$defs/DataChannelType"
+                    "$ref": "#/definitions/DataChannelType"
                 },
                 "Format": {
-                    "$ref": "#/$defs/Format"
+                    "$ref": "#/definitions/Format"
                 },
                 "Range": {
-                    "$ref": "#/$defs/Range"
+                    "$ref": "#/definitions/Range"
                 },
                 "Unit": {
-                    "$ref": "#/$defs/Unit"
+                    "$ref": "#/definitions/Unit"
                 },
                 "QualityCoding": {
                     "type": "string"
@@ -195,7 +195,7 @@
                     "type": "string"
                 },
                 "Restriction": {
-                    "$ref": "#/$defs/Restriction"
+                    "$ref": "#/definitions/Restriction"
                 }
             },
             "required": [

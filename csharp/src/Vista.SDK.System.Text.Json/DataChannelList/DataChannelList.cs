@@ -42,7 +42,7 @@ namespace Vista.SDK.Transport.Json.DataChannel
     {
         [System.Text.Json.Serialization.JsonConstructor]
 
-        public Header(string? @author, ConfigurationReference @dataChannelListID, System.DateTimeOffset? @dateCreated, string @shipID, VersionInformation? @versionInformation)
+        public Header(string? @author, ConfigurationReference @dataChannelListID, System.DateTimeOffset? @dateCreated, string @shipID, System.Collections.Generic.IReadOnlyList<VersionInformation>? @versionInformation)
 
 
         {
@@ -67,7 +67,7 @@ namespace Vista.SDK.Transport.Json.DataChannel
 
 
         [System.Text.Json.Serialization.JsonPropertyName("VersionInformation")]
-        public VersionInformation? VersionInformation { get; }
+        public System.Collections.Generic.IReadOnlyList<VersionInformation>? VersionInformation { get; }
 
 
         [System.Text.Json.Serialization.JsonPropertyName("Author")]
