@@ -549,7 +549,7 @@ public sealed record GmodPath
         if (string.IsNullOrWhiteSpace(item))
             return false;
 
-        item = item!.Trim().TrimStart('/');
+        item = item.Trim().TrimStart('/');
 
         var parts = new Queue<PathNode>();
         foreach (var partStr in item.Split('/'))
@@ -640,7 +640,11 @@ public sealed record GmodPath
                     var n = i < pathParents.Count ? pathParents[i] : endNode;
                     var set = visitor.Visit(n, i, pathParents, endNode);
                     if (set is null)
+                    {
+                        if (n.Location is not null)
+                            return TraversalHandlerResult.Stop;
                         continue;
+                    }
 
                     var (start, end, location) = set.Value;
                     if (start == end)

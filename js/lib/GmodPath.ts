@@ -433,7 +433,11 @@ export class GmodPath {
                         var n = i < pathParents.length ? pathParents[i] : endNode;
                         const set = visit(n, i, pathParents, endNode);
                         if (set === null)
+                        {
+                            if (!!n.location)
+                                return TraversalHandlerResult.Stop;
                             continue;
+                        }
 
                         const [start, end, location] = set;
                         if (start === end)

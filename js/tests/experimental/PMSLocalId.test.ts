@@ -263,9 +263,9 @@ describe("LocalId", () => {
     });
 
     const otherTestData = [
-        "/dnv-v2-experimental/vis-3-7a/623-1/meta/act.type-inspection",
-        "/dnv-v2-experimental/vis-3-7a/623-2/sec/411/meta/cmd-activate/act.type-inspection",
-        "/dnv-v2-experimental/vis-3-7a/623-3/meta/state-abnormal/act.type-inspection",
+        "/dnv-v2-experimental/vis-3-7a/623/meta/act.type-inspection",
+        "/dnv-v2-experimental/vis-3-7a/623/sec/411/meta/cmd-activate/act.type-inspection",
+        "/dnv-v2-experimental/vis-3-7a/623/meta/state-abnormal/act.type-inspection",
         "/dnv-v2-experimental/vis-3-7a/623/sec/411/meta/act.type-inspection",
         "/dnv-v2-experimental/vis-3-7a/621.24i/C623/sec/411/meta/act.type-inspection",
         "/dnv-v2-experimental/vis-3-7a/631.22i/S110.2/E31/meta/maint.cat-preventive/act.type-inspection",

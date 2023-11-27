@@ -127,5 +127,5 @@ public sealed record class LocationsTestDataItem(
 
 public sealed record IndividualizableSetData(
     [property: JsonPropertyName("path")] string Path,
-    [property: JsonPropertyName("expected")] string[][] Expected
+    [property: JsonPropertyName("expected")] string[][]? Expected
 );

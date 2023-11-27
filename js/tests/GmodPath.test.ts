@@ -129,6 +129,12 @@ describe("GmodPath", () => {
         const gmod = await gmodPromise;
         const locations = await locationsPromise;
 
+        if (!testCase.expected)
+        {
+            expect(gmod.tryParsePath(testCase.path, locations)).toBeFalsy();
+            return;
+        }
+
         const path = gmod.parsePath(testCase.path, locations);
         const sets = path.individualizableSets;
         expect(sets.length).toBe(testCase.expected.length);
@@ -140,6 +146,12 @@ describe("GmodPath", () => {
     test.each(IndividualizableSets)("Individualizable sets fullpath %s", async testCase => {
         const gmod = await gmodPromise;
         const locations = await locationsPromise;
+
+        if (!testCase.expected)
+        {
+            expect(gmod.tryParsePath(testCase.path, locations)).toBeFalsy();
+            return;
+        }
 
         const path = gmod.parseFromFullPath(gmod.parsePath(testCase.path, locations).toFullPathString(), locations);
         const sets = path.individualizableSets;

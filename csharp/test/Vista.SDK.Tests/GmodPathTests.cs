@@ -124,10 +124,17 @@ public class GmodPathTests
 
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddIndividualizableSetsData), MemberType = typeof(VistaSDKTestData))]
-    public void Test_IndividualizableSets(string inputPath, string[][] expected)
+    public void Test_IndividualizableSets(string inputPath, string[][]? expected)
     {
         var version = VisVersion.v3_4a;
         var gmod = VIS.Instance.GetGmod(version);
+
+        if (expected is null)
+        {
+            Assert.False(gmod.TryParsePath(inputPath, out var parsed));
+            Assert.Null(parsed);
+            return;
+        }
 
         var path = gmod.ParsePath(inputPath);
         var sets = path.IndividualizableSets;
@@ -140,10 +147,17 @@ public class GmodPathTests
 
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddIndividualizableSetsData), MemberType = typeof(VistaSDKTestData))]
-    public void Test_IndividualizableSets_FullPath(string inputPath, string[][] expected)
+    public void Test_IndividualizableSets_FullPath(string inputPath, string[][]? expected)
     {
         var version = VisVersion.v3_4a;
         var gmod = VIS.Instance.GetGmod(version);
+
+        if (expected is null)
+        {
+            Assert.False(gmod.TryParsePath(inputPath, out var parsed));
+            Assert.Null(parsed);
+            return;
+        }
 
         var path = GmodPath.ParseFullPath(gmod.ParsePath(inputPath).ToFullPathString(), version);
         var sets = path.IndividualizableSets;
@@ -162,6 +176,16 @@ public class GmodPathTests
         var path = gmod.ParsePath("411.1/C101.62/S205");
         var sets = path.IndividualizableSets;
         Assert.Equal(2, sets.Count);
+    }
+
+    [Fact]
+    public void Test_GmodPath_Does_Not_Individualize()
+    {
+        var version = VisVersion.v3_7a;
+        var gmod = VIS.Instance.GetGmod(version);
+        var parsed = gmod.TryParsePath("500a-1", out var path);
+        Assert.False(parsed);
+        Assert.Null(path);
     }
 
     [Fact]
