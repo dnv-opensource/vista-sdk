@@ -12,13 +12,13 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
     public GmodNode RootNode => _rootNode;
 
-    internal static readonly string[] PotentialParentScopeTypes = new[] { "SELECTION", "GROUP", "LEAF" };
+    internal static readonly string[] PotentialParentScopeTypes = ["SELECTION", "GROUP", "LEAF"];
 
-    private static readonly (string Category, string Type)[] LeafTypes = new[]
-    {
+    private static readonly (string Category, string Type)[] LeafTypes =
+    [
         ("ASSET FUNCTION", "LEAF"),
         ("PRODUCT FUNCTION", "LEAF"),
-    };
+    ];
 
     private static bool IsLeafNode(string category, string type)
     {
