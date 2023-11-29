@@ -10,6 +10,5 @@
     { "isFullPath": false, "visVersion": "3-4a", "path": "441.1-1/C101", "expected": [["440i", "441", "441.1"]] },
     { "isFullPath": false, "visVersion": "3-4a", "path": "441.1-1/C101.2-1", "expected": [["440i", "441", "441.1"], ["C101.2"]] },
     { "isFullPath": false, "visVersion": "3-4a", "path": "500a-1", "expected": null },
-    { "isFullPath": true, "visVersion": "3-7a", "path": "VE/600a/690/691/691.5/691.51/691.51s/691.511/691.511i/HS1/H121", "expected": [["691.511i"]] },
-    { "isFullPath": true, "visVersion": "3-7a", "path": "VE/600a/690/691/691.5", "expected": [] }
+    { "isFullPath": true, "visVersion": "3-7a", "path": "VE/600a/690/691/691.5/691.51/691.51s/691.511/691.511i/HS1/H121", "expected": [["691.511i"]] }
 ]

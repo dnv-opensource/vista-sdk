@@ -534,7 +534,11 @@ public sealed record GmodPath
                         for (int j = nodes.Value.Start; j <= nodes.Value.End; j++)
                         {
                             var setNode = j < parents.Count ? parents[j] : target;
-                            hasLeafNode |= setNode.IsLeafNode;
+                            if (setNode.IsLeafNode)
+                            {
+                                hasLeafNode = true;
+                                break;
+                            }
                         }
                         if (hasLeafNode)
                             return nodes;

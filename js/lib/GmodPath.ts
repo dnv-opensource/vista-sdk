@@ -561,13 +561,30 @@ export class GmodPath {
 
 
         const visit = locationSetsVisitor();
+        let prevNonNullLocation: number | null = null;
         for (let i = 0; i < pathParents.length + 1; i++) {
-            var n = i < pathParents.length ? pathParents[i] : endNode;
+            const n = i < pathParents.length ? pathParents[i] : endNode;
             const set = visit(n, i, pathParents, endNode);
             if (set === null)
+            {
+                if (prevNonNullLocation === null && !!n.location)
+                    prevNonNullLocation = i;
                 continue;
+            }
 
             const [start, end, location] = set;
+
+            if (prevNonNullLocation !== null)
+            {
+                for (let j = prevNonNullLocation; j < start; j++)
+                {
+                    const pn = i < pathParents.length ? pathParents[i] : endNode;
+                    if (!!pn.location)
+                        return;
+                }
+            }
+            prevNonNullLocation = null;
+
             if (start === end)
                 continue;
 
@@ -667,7 +684,19 @@ function locationSetsVisitor() {
 
                 currentParentStart = i;
                 if (nodes !== null)
-                    return nodes;
+                {
+                    let hasLeafNode = false;
+                    for (let j = nodes[0]; j <= nodes[1]; j++)
+                    {
+                        const setNode = j < parents.length ? parents[j] : target;
+                        if (setNode.isLeafNode) {
+                            hasLeafNode = true;
+                            break;
+                        }
+                    }
+                    if (hasLeafNode)
+                        return nodes;
+                }
             }
 
             if (isTargetNode && isIndividualizable(node, isTargetNode))

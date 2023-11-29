@@ -1,4 +1,4 @@
-import { GmodPath, VIS, VisVersion } from "../lib";
+import { GmodPath, VIS, VisVersion, VisVersions } from "../lib";
 import GmodPaths from "../../testdata/GmodPaths.json";
 import IndividualizableSets from "../../testdata/IndividualizableSets.json";
 import { GmodIndividualizableSet } from "../lib/GmodPath";
@@ -126,16 +126,18 @@ describe("GmodPath", () => {
     });
 
     test.each(IndividualizableSets)("Individualizable sets %s", async testCase => {
-        const gmod = await gmodPromise;
-        const locations = await locationsPromise;
+        const version = VisVersions.parse(testCase.visVersion);
+        const gmod = await vis.getGmod(version);
+        const locations = await vis.getLocations(version);
 
         if (!testCase.expected)
         {
-            expect(gmod.tryParsePath(testCase.path, locations)).toBeFalsy();
+            const parsed = testCase.isFullPath ? gmod.tryParseFromFullPath(testCase.path, locations) : gmod.tryParsePath(testCase.path, locations);
+            expect(parsed).toBeFalsy();
             return;
         }
 
-        const path = gmod.parsePath(testCase.path, locations);
+        const path = testCase.isFullPath ? gmod.parseFromFullPath(testCase.path, locations) : gmod.parsePath(testCase.path, locations);
         const sets = path.individualizableSets;
         expect(sets.length).toBe(testCase.expected.length);
         for (let i = 0; i < testCase.expected.length; i++) {
@@ -144,8 +146,12 @@ describe("GmodPath", () => {
     });
 
     test.each(IndividualizableSets)("Individualizable sets fullpath %s", async testCase => {
-        const gmod = await gmodPromise;
-        const locations = await locationsPromise;
+        const version = VisVersions.parse(testCase.visVersion);
+        const gmod = await vis.getGmod(version);
+        const locations = await vis.getLocations(version);
+
+        if (testCase.isFullPath)
+            return;
 
         if (!testCase.expected)
         {
