@@ -91,7 +91,7 @@ public class VistaSDKTestData
     {
         foreach (var set in data)
         {
-            yield return new object?[] { set.Path, set.Expected, };
+            yield return new object?[] { set.IsFullPath, set.VisVersion, set.Path, set.Expected, };
         }
     }
 }
@@ -126,6 +126,8 @@ public sealed record class LocationsTestDataItem(
 );
 
 public sealed record IndividualizableSetData(
+    [property: JsonPropertyName("isFullPath")] bool IsFullPath,
+    [property: JsonPropertyName("visVersion")] string VisVersion,
     [property: JsonPropertyName("path")] string Path,
     [property: JsonPropertyName("expected")] string[][]? Expected
 );

@@ -1,13 +1,15 @@
 [
-    { "path": "511.11-1/C101.663i-1/C663", "expected": [["511.1i", "511.11"], ["C101.663i"]] },
-    { "path": "652.4/I101", "expected": [["652.4"]] },
-    { "path": "652.5/S271.1/S90.1/S41", "expected": [["652.5"], ["S271.1"], ["S90.1"]] },
-    { "path": "411.1/C101.62/S205", "expected": [["411i", "411.1"], ["C101.62"]] },
-    { "path": "411.1/C101.3i-3", "expected": [["411i", "411.1"], ["C101.3i"]] },
-    { "path": "440i-1", "expected": [["440i"]] },
-    { "path": "441-1", "expected": [["441"]] },
-    { "path": "440.1-1/H233", "expected": [["440i", "440.1"]] },
-    { "path": "441.1-1/C101", "expected": [["440i", "441", "441.1"]] },
-    { "path": "441.1-1/C101.2-1", "expected": [["440i", "441", "441.1"], ["C101.2"]] },
-    { "path": "500a-1", "expected": null }
+    { "isFullPath": false, "visVersion": "3-4a", "path": "511.11-1/C101.663i-1/C663", "expected": [["511.1i", "511.11"], ["C101.663i"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "652.4/I101", "expected": [["652.4"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "652.5/S271.1/S90.1/S41", "expected": [["652.5"], ["S271.1"], ["S90.1"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "411.1/C101.62/S205", "expected": [["411i", "411.1"], ["C101.62"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "411.1/C101.3i-3", "expected": [["411i", "411.1"], ["C101.3i"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "440i-1", "expected": [["440i"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "441-1", "expected": [["441"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "440.1-1/H233", "expected": [["440i", "440.1"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "441.1-1/C101", "expected": [["440i", "441", "441.1"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "441.1-1/C101.2-1", "expected": [["440i", "441", "441.1"], ["C101.2"]] },
+    { "isFullPath": false, "visVersion": "3-4a", "path": "500a-1", "expected": null },
+    { "isFullPath": true, "visVersion": "3-7a", "path": "VE/600a/690/691/691.5/691.51/691.51s/691.511/691.511i/HS1/H121", "expected": [["691.511i"]] },
+    { "isFullPath": true, "visVersion": "3-7a", "path": "VE/600a/690/691/691.5", "expected": [] }
 ]
