@@ -645,7 +645,7 @@ function locationSetsVisitor() {
             if (isIndividualizable(node, isTargetNode))
                 return [i, i, node.location];
         } else {
-            if (isParent) {
+            if (isParent || isTargetNode) {
                 let nodes: [number, number, Location | undefined] | null = null;
                 if (currentParentStart + 1 === i) {
                     if (isIndividualizable(node, isTargetNode))
@@ -689,7 +689,7 @@ function locationSetsVisitor() {
                     for (let j = nodes[0]; j <= nodes[1]; j++)
                     {
                         const setNode = j < parents.length ? parents[j] : target;
-                        if (setNode.isLeafNode) {
+                        if (setNode.isLeafNode || j === parents.length) {
                             hasLeafNode = true;
                             break;
                         }

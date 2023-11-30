@@ -168,6 +168,14 @@ describe("Pmod", () => {
         expect(context.nodes[0].code).toEqual(rootNodeCode);
     });
 
+    test.each(testData.fullPaths)("Tree parse paths %s", async (testPath) => {
+        const gmod = await gmod36Promise;
+        const locations = await locations36Promise;
+
+        const path = gmod.parseFromFullPath(testPath, locations);
+        expect(path).toBeTruthy();
+    });
+
     test("Tree", async () => {
         const gmod = await gmod36Promise;
         const locations = await locations36Promise;

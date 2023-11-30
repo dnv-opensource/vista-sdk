@@ -480,7 +480,7 @@ public sealed record GmodPath
             }
             else
             {
-                if (isParent)
+                if (isParent || isTargetNode)
                 {
                     (int Start, int End, Location? Location)? nodes = null;
                     if (currentParentStart + 1 == i)
@@ -534,7 +534,7 @@ public sealed record GmodPath
                         for (int j = nodes.Value.Start; j <= nodes.Value.End; j++)
                         {
                             var setNode = j < parents.Count ? parents[j] : target;
-                            if (setNode.IsLeafNode)
+                            if (setNode.IsLeafNode || j == parents.Count)
                             {
                                 hasLeafNode = true;
                                 break;
