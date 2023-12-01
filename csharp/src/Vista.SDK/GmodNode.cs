@@ -1,35 +1,9 @@
-using System.Collections.Frozen;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
+#if NET8_0_OR_GREATER
+using System.Collections.Frozen;
+#endif
 
 namespace Vista.SDK;
-
-[StructLayout(LayoutKind.Sequential)]
-public readonly struct Code : IEquatable<Code>
-{
-    private readonly byte _a;
-    private readonly byte _b;
-    private readonly byte _c;
-    private readonly byte _d;
-
-    private ReadOnlySpan<byte> _value => MemoryMarshal.CreateReadOnlySpan(in _a, 4);
-
-    internal Code(string code)
-    {
-        _a = (byte)code[0];
-        _b = (byte)code[1];
-        _c = (byte)code[2];
-        _d = (byte)code[3];
-    }
-
-    public bool Equals(Code other) => _value.SequenceEqual(other._value);
-
-    public override bool Equals([NotNullWhen(true)] object? obj) => obj is Code other && Equals(other);
-
-    public override int GetHashCode() => Unsafe.As<byte, int>(ref Unsafe.AsRef(in _a));
-}
 
 public record class GmodNode
 {

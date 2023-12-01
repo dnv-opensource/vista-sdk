@@ -72,7 +72,7 @@ public sealed class VIS : IVIS
         );
     }
 
-    private GmodDto GetGmodDto(VisVersion visVersion)
+    internal GmodDto GetGmodDto(VisVersion visVersion)
     {
         return _gmodDtoCache.GetOrCreate(
             visVersion,

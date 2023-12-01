@@ -1,4 +1,7 @@
+using System.Diagnostics;
+using FluentAssertions;
 using Vista.SDK;
+using Vista.SDK.Internal;
 
 namespace Vista.SDK.Tests;
 
@@ -16,6 +19,112 @@ public class GmodTests
         Assert.NotNull(gmod);
 
         Assert.True(gmod.TryGetNode("400a", out _));
+    }
+
+    [Theory]
+    [MemberData(nameof(Test_Vis_Versions))]
+    public void Test_Gmod_Properties(VisVersion visVersion)
+    {
+        // This test ensures certain properties of the Gmod data
+        // that we make some design desicisions based on,
+        // i.e for hashing of the node code
+
+        var (_, vis) = VISTests.GetVis();
+
+        var gmod = vis.GetGmod(visVersion);
+        Assert.NotNull(gmod);
+
+        var minLength = gmod.MinBy(n => n.Code.Length);
+        var maxLength = gmod.MaxBy(n => n.Code.Length);
+        Assert.NotNull(minLength);
+        Assert.NotNull(maxLength);
+        Assert.Equal(2, minLength.Code.Length);
+        Assert.Equal("VE", minLength.Code);
+        Assert.Equal(10, maxLength.Code.Length);
+        string[] expectedMax = ["C1053.3112", "H346.11112"];
+        Assert.Contains(maxLength.Code, expectedMax);
+
+        var count = gmod.Count();
+        int[] expectedCounts = [6420, 6557, 6672];
+        Assert.Contains(count, expectedCounts);
+    }
+
+    // [Theory]
+    // [MemberData(nameof(Test_Vis_Versions))]
+    // public void Test_NodeMap_No_Hash_Collisions(VisVersion visVersion)
+    // {
+    //     var (_, vis) = VISTests.GetVis();
+
+    //     var gmod = vis.GetGmod(visVersion);
+    //     Assert.NotNull(gmod);
+
+    //     var hashes = new Dictionary<uint, List<string>>();
+    //     var indices = new Dictionary<uint, List<string>>();
+
+    //     foreach (var node in gmod)
+    //     {
+    //         var hash = NodeMap.Hash(node.Code);
+    //         if (!hashes.TryGetValue(hash, out var hashCodes))
+    //             hashes[hash] = hashCodes = new List<string>(1);
+    //         var index = hash % NodeMap.Size;
+    //         if (!indices.TryGetValue(index, out var indexCodes))
+    //             indices[index] = indexCodes = new List<string>(1);
+
+    //         hashCodes.Add(node.Code);
+    //         indexCodes.Add(node.Code);
+    //     }
+
+    //     var hashCollisions = hashes.Where(kvp => kvp.Value.Count > 1).ToArray();
+    //     var hashCollisionsCounts = hashCollisions.Select(c => c.Value.Count).ToArray();
+    //     Assert.Equal([], hashCollisions);
+    //     Assert.Empty(hashCollisionsCounts);
+
+    //     var indexCollisions = indices.Where(kvp => kvp.Value.Count > 1).ToArray();
+    //     var idexCollisionCounts = indexCollisions.Select(c => c.Value.Count).ToArray();
+    //     Assert.Equal([], indexCollisions);
+    //     Assert.Empty(idexCollisionCounts);
+    // }
+
+    [Theory]
+    [MemberData(nameof(Test_Vis_Versions))]
+    public void Test_NodeMap_Init(VisVersion visVersion)
+    {
+        var map = new NodeMap(visVersion, VIS.Instance.GetGmodDto(visVersion));
+        Assert.NotNull(map);
+
+        Assert.NotNull(map._table.SingleOrDefault(n => n?.Code == "400a"));
+
+        GmodNode? node;
+        Assert.True(map.TryGetValue("400a", out node));
+        Assert.True(map.TryGetValue("VE", out node));
+    }
+
+    [Theory]
+    [MemberData(nameof(Test_Vis_Versions))]
+    public void Test_NodeMap_Lookup(VisVersion visVersion)
+    {
+        var map = new NodeMap(visVersion, VIS.Instance.GetGmodDto(visVersion));
+        Assert.NotNull(map);
+
+        var (_, vis) = VISTests.GetVis();
+
+        var gmod = vis.GetGmod(visVersion);
+        Assert.NotNull(gmod);
+
+        foreach (var node in gmod)
+        {
+            Assert.True(map.TryGetValue(node.Code, out var foundNode));
+            Assert.NotNull(foundNode);
+            Assert.Equal(node.Code, foundNode.Code);
+        }
+    }
+
+    [Fact]
+    public void Test_NodeMap_Hash()
+    {
+        var code = "U101.2324";
+        var hash = NodeMap.Hash(code);
+        Assert.NotEqual(0ul, hash);
     }
 
     [Fact]
