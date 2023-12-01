@@ -1,6 +1,35 @@
+using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Vista.SDK;
+
+[StructLayout(LayoutKind.Sequential)]
+public readonly struct Code : IEquatable<Code>
+{
+    private readonly byte _a;
+    private readonly byte _b;
+    private readonly byte _c;
+    private readonly byte _d;
+
+    private ReadOnlySpan<byte> _value => MemoryMarshal.CreateReadOnlySpan(in _a, 4);
+
+    internal Code(string code)
+    {
+        _a = (byte)code[0];
+        _b = (byte)code[1];
+        _c = (byte)code[2];
+        _d = (byte)code[3];
+    }
+
+    public bool Equals(Code other) => _value.SequenceEqual(other._value);
+
+    public override bool Equals([NotNullWhen(true)] object? obj) => obj is Code other && Equals(other);
+
+    public override int GetHashCode() => Unsafe.As<byte, int>(ref Unsafe.AsRef(in _a));
+}
 
 public record class GmodNode
 {
@@ -12,6 +41,9 @@ public record class GmodNode
     public GmodNodeMetadata Metadata { get; }
 
     internal readonly List<GmodNode> _children;
+#if NET8_0_OR_GREATER
+    internal FrozenSet<string> _childrenSet;
+#endif
     internal readonly List<GmodNode> _parents;
 
     public IReadOnlyList<GmodNode> Children => _children;
@@ -33,6 +65,9 @@ public record class GmodNode
             dto.NormalAssignmentNames ?? new Dictionary<string, string>(0)
         );
         _children = new List<GmodNode>();
+#if NET8_0_OR_GREATER
+        _childrenSet = FrozenSet<string>.Empty;
+#endif
         _parents = new List<GmodNode>();
     }
 
@@ -93,8 +128,8 @@ public record class GmodNode
     }
 
     public bool IsFunctionComposition =>
-        Metadata.Category == "ASSET FUNCTION" && Metadata.Type == "COMPOSITION"
-        || Metadata.Category == "PRODUCT FUNCTION" && Metadata.Type == "COMPOSITION";
+        (Metadata.Category == "ASSET FUNCTION" || Metadata.Category == "PRODUCT FUNCTION")
+        && Metadata.Type == "COMPOSITION";
 
     public bool IsMappable
     {
@@ -166,6 +201,9 @@ public record class GmodNode
 
     public bool IsChild(string code)
     {
+#if NET8_0_OR_GREATER
+        return _childrenSet.Contains(code);
+#else
         for (int i = 0; i < _children.Count; i++)
         {
             if (_children[i].Code == code)
@@ -173,6 +211,7 @@ public record class GmodNode
         }
 
         return false;
+#endif
     }
 
     public virtual bool Equals(GmodNode? other) => Code == other?.Code && Location == other?.Location;
@@ -203,6 +242,9 @@ public record class GmodNode
     {
         _children.TrimExcess();
         _parents.TrimExcess();
+#if NET8_0_OR_GREATER
+        _childrenSet = _children.Select(c => c.Code).ToFrozenSet(StringComparer.Ordinal);
+#endif
     }
 
     public bool IsLeafNode => Gmod.IsLeafNode(Metadata);
@@ -223,4 +265,7 @@ public sealed record class GmodNodeMetadata(
     string? CommonDefinition,
     bool? InstallSubstructure,
     IReadOnlyDictionary<string, string> NormalAssignmentNames
-);
+)
+{
+    public string FullType { get; } = $"{Category} {Type}";
+}

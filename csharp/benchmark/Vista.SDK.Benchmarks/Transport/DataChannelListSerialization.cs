@@ -224,6 +224,8 @@ public class DataChannelListSerialization
         public string Unit => SizeUnit.B.Name;
         public bool TheGreaterTheBetter => false;
         public int PriorityInCategory => 0;
+
+        public bool GetIsAvailable(Metric metric) => true;
     }
 
     public class PayloadSizeDiagnoser : IDiagnoser

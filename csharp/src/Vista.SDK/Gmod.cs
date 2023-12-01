@@ -1,5 +1,10 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+#if NET8_0_OR_GREATER
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+#endif
 
 namespace Vista.SDK;
 
@@ -8,30 +13,49 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
     public VisVersion VisVersion { get; }
 
     private readonly GmodNode _rootNode;
+
+#if NET8_0_OR_GREATER
+    private readonly FrozenDictionary<string, GmodNode> _nodeMap;
+#else
     private readonly Dictionary<string, GmodNode> _nodeMap;
+#endif
 
     public GmodNode RootNode => _rootNode;
 
-    internal static readonly string[] PotentialParentScopeTypes = ["SELECTION", "GROUP", "LEAF"];
+    private static readonly string[] PotentialParentScopeTypes = ["SELECTION", "GROUP", "LEAF"];
+#if NET8_0_OR_GREATER
+    private static readonly FrozenSet<string> PotentialParentScopeTypesSet = PotentialParentScopeTypes.ToFrozenSet(
+        StringComparer.Ordinal
+    );
+#endif
 
-    private static readonly (string Category, string Type)[] LeafTypes =
-    [
-        ("ASSET FUNCTION", "LEAF"),
-        ("PRODUCT FUNCTION", "LEAF"),
-    ];
-
-    private static bool IsLeafNode(string category, string type)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsPotentialParent(string type)
     {
-        foreach (var leafType in LeafTypes)
-        {
-            if (leafType.Category == category && leafType.Type == type)
-                return true;
-        }
-
-        return false;
+#if NET8_0_OR_GREATER
+        return PotentialParentScopeTypesSet.Contains(type);
+#else
+        return PotentialParentScopeTypes.Contains(type);
+#endif
     }
 
-    public static bool IsLeafNode(GmodNodeMetadata metadata) => IsLeafNode(metadata.Category, metadata.Type);
+    private static readonly string[] LeafTypes = ["ASSET FUNCTION LEAF", "PRODUCT FUNCTION LEAF",];
+#if NET8_0_OR_GREATER
+    internal static readonly FrozenSet<string> LeafTypesSet = LeafTypes.ToFrozenSet(StringComparer.Ordinal);
+#endif
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsLeafNode(string fullType)
+    {
+#if NET8_0_OR_GREATER
+        return LeafTypesSet.Contains(fullType);
+#else
+        return LeafTypes.Contains(fullType);
+#endif
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsLeafNode(GmodNodeMetadata metadata) => IsLeafNode(metadata.FullType);
 
     private static bool IsFunctionNode(string category) => category != "PRODUCT" && category != "ASSET";
 
@@ -51,12 +75,12 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
     {
         VisVersion = version;
 
-        _nodeMap = new Dictionary<string, GmodNode>(dto.Items.Length);
+        var nodeMap = new Dictionary<string, GmodNode>(dto.Items.Length);
 
         foreach (var nodeDto in dto.Items)
         {
             var node = new GmodNode(VisVersion, nodeDto);
-            _nodeMap.Add(nodeDto.Code, node);
+            nodeMap.Add(nodeDto.Code, node);
         }
 
         foreach (var relation in dto.Relations)
@@ -64,17 +88,23 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
             var parentCode = relation[0];
             var childCode = relation[1];
 
-            var parentNode = _nodeMap[parentCode];
-            var childNode = _nodeMap[childCode];
+            var parentNode = nodeMap[parentCode];
+            var childNode = nodeMap[childCode];
 
             parentNode.AddChild(childNode);
             childNode.AddParent(parentNode);
         }
 
-        foreach (var node in _nodeMap.Values)
+        foreach (var node in nodeMap.Values)
             node.Trim();
 
-        _rootNode = _nodeMap["VE"];
+        _rootNode = nodeMap["VE"];
+
+#if NET8_0_OR_GREATER
+        _nodeMap = nodeMap.ToFrozenDictionary(StringComparer.Ordinal);
+#else
+        _nodeMap = nodeMap;
+#endif
     }
 
     public GmodNode this[string key] => _nodeMap[key];
@@ -95,9 +125,37 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
     public bool TryParseFromFullPath(string item, [NotNullWhen(true)] out GmodPath? path) =>
         GmodPath.TryParseFullPath(item, VisVersion, out path);
 
-    public Dictionary<string, GmodNode>.ValueCollection.Enumerator GetEnumerator() => _nodeMap.Values.GetEnumerator();
+    public Enumerator GetEnumerator()
+    {
+        var enumerator = new Enumerator { Inner = _nodeMap.Values.GetEnumerator() };
+        return enumerator;
+    }
 
     IEnumerator<GmodNode> IEnumerable<GmodNode>.GetEnumerator() => GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public struct Enumerator : IEnumerator<GmodNode>
+    {
+#if NET8_0_OR_GREATER
+        internal ImmutableArray<GmodNode>.Enumerator Inner;
+#else
+        internal Dictionary<string, GmodNode>.ValueCollection.Enumerator Inner;
+#endif
+
+        public GmodNode Current => Inner.Current;
+
+        object IEnumerator.Current => Inner.Current;
+
+        public void Dispose()
+        {
+#if !NET8_0_OR_GREATER
+            Inner.Dispose();
+#endif
+        }
+
+        public bool MoveNext() => Inner.MoveNext();
+
+        public void Reset() { }
+    }
 }

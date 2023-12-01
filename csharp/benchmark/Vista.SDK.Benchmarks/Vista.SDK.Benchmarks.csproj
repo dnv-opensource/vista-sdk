@@ -16,11 +16,13 @@
     <Using Include="BenchmarkDotNet.Diagnosers" />
     <Using Include="BenchmarkDotNet.Loggers" />
     <Using Include="BenchmarkDotNet.Diagnostics.Windows.Configs" />
+    <Using Include="BenchmarkDotNet.Diagnostics.dotTrace" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.1" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.13.10" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.10" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(DotNetVersion)" />
     <PackageReference Include="SharpZipLib" Version="1.3.3" />
   </ItemGroup>
@@ -50,20 +52,8 @@
   </ItemGroup>
 
   <Target Name="CopySomeFiles" AfterTargets="AfterBuild">
-    <Copy
-      SourceFiles="@(VisSchemaFiles)"
-      DestinationFolder="$(OutDir)\schemas\%(RecursiveDir)"
-      SkipUnchangedFiles="true"
-      OverwriteReadOnlyFiles="true"
-      Retries="3"
-      RetryDelayMilliseconds="300"/>
-    <Copy
-      SourceFiles="@(VisSchemaFiles)"
-      DestinationFolder="$(MSBuildThisFileDirectory)\schemas\%(RecursiveDir)"
-      SkipUnchangedFiles="true"
-      OverwriteReadOnlyFiles="true"
-      Retries="3"
-      RetryDelayMilliseconds="300"/>
+    <Copy SourceFiles="@(VisSchemaFiles)" DestinationFolder="$(OutDir)\schemas\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" Retries="3" RetryDelayMilliseconds="300" />
+    <Copy SourceFiles="@(VisSchemaFiles)" DestinationFolder="$(MSBuildThisFileDirectory)\schemas\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" Retries="3" RetryDelayMilliseconds="300" />
   </Target>
 
 

@@ -194,11 +194,11 @@ public sealed record GmodPath
             return false;
 
 #if NETCOREAPP3_1_OR_GREATER
-        var set = new HashSet<string>(parents.Count);
+        var set = new HashSet<string>(parents.Count + 1, StringComparer.Ordinal) { "VE" };
 #else
         var set = new HashSet<string>();
-#endif
         set.Add("VE");
+#endif
 
         for (int i = 0; i < parents.Count; i++)
         {
@@ -469,7 +469,7 @@ public sealed record GmodPath
             GmodNode target
         )
         {
-            var isParent = Gmod.PotentialParentScopeTypes.Contains(node.Metadata.Type);
+            var isParent = Gmod.IsPotentialParent(node.Metadata.Type);
             var isTargetNode = i == parents.Count;
             if (currentParentStart == -1)
             {
