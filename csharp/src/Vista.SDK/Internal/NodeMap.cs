@@ -14,26 +14,13 @@ internal sealed class NodeMap
     internal readonly GmodNode[] _table;
     internal readonly int[] _seeds;
 
-    // public NodeMap(VisVersion version, GmodDto dto)
-    // {
-    //     _table = new GmodNode[Size];
-    //     _seeds = [];
-
-    //     foreach (var node in dto.Items)
-    //     {
-    //         var hash = Hash(node.Code);
-    //         // var index = FastMod(hash);
-    //         var index = hash % Size;
-    //         Debug.Assert(_table[index] is null, $"{node.Code} collided with {_table[index]?.Code}");
-    //         _table[index] = new GmodNode(version, node);
-    //     }
-    // }
-
     public NodeMap(VisVersion version, GmodDto dto)
     {
         ulong size = 1;
         while (size < (ulong)dto.Items.Length)
             size *= 2;
+
+        size *= 2;
 
         var h = new List<(int Index, uint Hash)>[size];
 
@@ -143,12 +130,10 @@ internal sealed class NodeMap
         uint hash = 0x01000193;
         for (int i = 0; i < code.Length; i += 2)
         {
-            // if (Sse42.IsSupported)
-            //     hash = Hashing.Crc32(hash, code[i]);
-            // else
-            //     hash = Hashing.LarssonHash(hash, code[i]);
-
-            hash = Hashing.LarssonHash(hash, code[i]);
+            if (Sse42.IsSupported)
+                hash = Hashing.Crc32(hash, code[i]);
+            else
+                hash = Hashing.Fnv(hash, code[i]);
         }
 
         return hash;

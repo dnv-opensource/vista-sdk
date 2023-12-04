@@ -15,6 +15,8 @@
     <Using Include="BenchmarkDotNet.Jobs" />
     <Using Include="BenchmarkDotNet.Diagnosers" />
     <Using Include="BenchmarkDotNet.Loggers" />
+    <Using Include="BenchmarkDotNet.Reports" />
+    <Using Include="BenchmarkDotNet.Columns" />
     <Using Include="BenchmarkDotNet.Diagnostics.Windows.Configs" />
     <Using Include="BenchmarkDotNet.Diagnostics.dotTrace" />
   </ItemGroup>
