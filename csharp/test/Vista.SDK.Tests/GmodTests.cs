@@ -41,7 +41,7 @@ public class GmodTests
         Assert.Equal(2, minLength.Code.Length);
         Assert.Equal("VE", minLength.Code);
         Assert.Equal(10, maxLength.Code.Length);
-        string[] expectedMax = ["C1053.3112", "H346.11112"];
+        string[] expectedMax = ["C1053.3112", "H346.11113"];
         Assert.Contains(maxLength.Code, expectedMax);
 
         var count = gmod.Count();
@@ -49,82 +49,62 @@ public class GmodTests
         Assert.Contains(count, expectedCounts);
     }
 
-    // [Theory]
-    // [MemberData(nameof(Test_Vis_Versions))]
-    // public void Test_NodeMap_No_Hash_Collisions(VisVersion visVersion)
-    // {
-    //     var (_, vis) = VISTests.GetVis();
-
-    //     var gmod = vis.GetGmod(visVersion);
-    //     Assert.NotNull(gmod);
-
-    //     var hashes = new Dictionary<uint, List<string>>();
-    //     var indices = new Dictionary<uint, List<string>>();
-
-    //     foreach (var node in gmod)
-    //     {
-    //         var hash = NodeMap.Hash(node.Code);
-    //         if (!hashes.TryGetValue(hash, out var hashCodes))
-    //             hashes[hash] = hashCodes = new List<string>(1);
-    //         var index = hash % NodeMap.Size;
-    //         if (!indices.TryGetValue(index, out var indexCodes))
-    //             indices[index] = indexCodes = new List<string>(1);
-
-    //         hashCodes.Add(node.Code);
-    //         indexCodes.Add(node.Code);
-    //     }
-
-    //     var hashCollisions = hashes.Where(kvp => kvp.Value.Count > 1).ToArray();
-    //     var hashCollisionsCounts = hashCollisions.Select(c => c.Value.Count).ToArray();
-    //     Assert.Equal([], hashCollisions);
-    //     Assert.Empty(hashCollisionsCounts);
-
-    //     var indexCollisions = indices.Where(kvp => kvp.Value.Count > 1).ToArray();
-    //     var idexCollisionCounts = indexCollisions.Select(c => c.Value.Count).ToArray();
-    //     Assert.Equal([], indexCollisions);
-    //     Assert.Empty(idexCollisionCounts);
-    // }
-
     [Theory]
     [MemberData(nameof(Test_Vis_Versions))]
-    public void Test_NodeMap_Init(VisVersion visVersion)
+    public void Test_Gmod_Lookup(VisVersion visVersion)
     {
-        var map = new NodeMap(visVersion, VIS.Instance.GetGmodDto(visVersion));
-        Assert.NotNull(map);
-
-        Assert.NotNull(map._table.SingleOrDefault(n => n?.Code == "400a"));
-
-        GmodNode? node;
-        Assert.True(map.TryGetValue("400a", out node));
-        Assert.True(map.TryGetValue("VE", out node));
-    }
-
-    [Theory]
-    [MemberData(nameof(Test_Vis_Versions))]
-    public void Test_NodeMap_Lookup(VisVersion visVersion)
-    {
-        var map = new NodeMap(visVersion, VIS.Instance.GetGmodDto(visVersion));
-        Assert.NotNull(map);
-
         var (_, vis) = VISTests.GetVis();
 
         var gmod = vis.GetGmod(visVersion);
         Assert.NotNull(gmod);
 
-        foreach (var node in gmod)
-        {
-            Assert.True(map.TryGetValue(node.Code, out var foundNode));
-            Assert.NotNull(foundNode);
-            Assert.Equal(node.Code, foundNode.Code);
-        }
-    }
+        var gmodDto = VIS.Instance.GetGmodDto(visVersion);
+        Assert.NotNull(gmodDto);
 
-    [Fact]
-    public void Test_NodeMap_Hash()
-    {
-        var code = "U101.2324";
-        var hash = NodeMap.Hash(code);
-        Assert.NotEqual(0ul, hash);
+        {
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            var counter = 0;
+            foreach (var node in gmodDto.Items)
+            {
+                Assert.NotNull(node?.Code);
+                Assert.True(seen.Add(node.Code), $"Code: {node.Code}");
+
+                Assert.NotNull(node.Code);
+                Assert.True(gmod.TryGetNode(node.Code.AsSpan(), out var foundNode));
+                Assert.NotNull(foundNode);
+                Assert.Equal(node.Code, foundNode.Code);
+                counter++;
+            }
+        }
+
+        {
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            var counter = 0;
+            foreach (var node in gmod)
+            {
+                Assert.NotNull(node?.Code);
+                Assert.True(seen.Add(node.Code), $"Code: {node.Code}");
+
+                Assert.NotNull(node.Code);
+                Assert.True(gmod.TryGetNode(node.Code.AsSpan(), out var foundNode));
+                Assert.NotNull(foundNode);
+                Assert.Equal(node.Code, foundNode.Code);
+                counter++;
+            }
+
+            Assert.Equal(gmodDto.Items.Length, counter);
+        }
+
+        Assert.False(gmod.TryGetNode("ABC", out _));
+        Assert.False(gmod.TryGetNode(null!, out _));
+        Assert.False(gmod.TryGetNode("", out _));
+        Assert.False(gmod.TryGetNode("SDFASDFSDAFb", out _));
+        Assert.False(gmod.TryGetNode("✅", out _));
+        Assert.False(gmod.TryGetNode("a✅b", out _));
+        Assert.False(gmod.TryGetNode("ac✅bc", out _));
+        Assert.False(gmod.TryGetNode("✅bc", out _));
+        Assert.False(gmod.TryGetNode("a✅", out _));
+        Assert.False(gmod.TryGetNode("ag✅", out _));
     }
 
     [Fact]

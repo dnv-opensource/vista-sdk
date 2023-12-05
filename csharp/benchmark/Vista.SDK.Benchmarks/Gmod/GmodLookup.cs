@@ -7,25 +7,28 @@ public class GmodLookup
 {
     private Dictionary<string, GmodNode> _dict;
     private FrozenDictionary<string, GmodNode> _frozenDict;
-    private SDK.Internal.NodeMap _nodeMap;
+    private SDK.Gmod _gmod;
 
     [GlobalSetup]
     public void Setup()
     {
         var vis = VIS.Instance;
         // Load cache
-        var gmod = vis.GetGmod(VisVersion.v3_7a);
 
+        _gmod = vis.GetGmod(VisVersion.v3_7a);
         _dict = new Dictionary<string, GmodNode>(StringComparer.Ordinal);
-        _nodeMap = new SDK.Internal.NodeMap(gmod.VisVersion, vis.GetGmodDto(gmod.VisVersion));
-        foreach (var node in gmod)
+        foreach (var node in _gmod)
             _dict[node.Code] = node;
 
         _frozenDict = _dict.ToFrozenDictionary(StringComparer.Ordinal);
     }
 
-    // [Benchmark]
-    // public bool Dict() => _dict.TryGetValue("400a", out _);
+    [Benchmark(Baseline = true)]
+    public bool Dict() =>
+        _dict.TryGetValue("VE", out _)
+        && _dict.TryGetValue("400a", out _)
+        && _dict.TryGetValue("400", out _)
+        && _dict.TryGetValue("H346.11112", out _);
 
     [Benchmark]
     public bool FrozenDict() =>
@@ -35,11 +38,11 @@ public class GmodLookup
         && _frozenDict.TryGetValue("H346.11112", out _);
 
     [Benchmark]
-    public bool NodeMap() =>
-        _nodeMap.TryGetValue("VE", out _)
-        && _nodeMap.TryGetValue("400a", out _)
-        && _nodeMap.TryGetValue("400", out _)
-        && _nodeMap.TryGetValue("H346.11112", out _);
+    public bool Gmod() =>
+        _gmod.TryGetNode("VE", out _)
+        && _gmod.TryGetNode("400a", out _)
+        && _gmod.TryGetNode("400", out _)
+        && _gmod.TryGetNode("H346.11112", out _);
 
     internal sealed class Config : ManualConfig
     {
@@ -49,6 +52,7 @@ public class GmodLookup
             this.AddColumn(RankColumn.Arabic);
             this.Orderer = new DefaultOrderer(SummaryOrderPolicy.SlowestToFastest, MethodOrderPolicy.Declared);
             this.AddDiagnoser(MemoryDiagnoser.Default);
+            // this.AddDiagnoser(new DotTraceDiagnoser());
         }
     }
 }

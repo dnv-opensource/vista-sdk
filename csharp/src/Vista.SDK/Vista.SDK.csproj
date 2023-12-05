@@ -6,6 +6,7 @@
     <RootNamespace>Vista.SDK</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>DNV.Vista.SDK</PackageId>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,17 +1,17 @@
-``` ini
+```
 
-BenchmarkDotNet=v0.13.1, OS=Windows 10.0.19044.2728 (21H2)
+BenchmarkDotNet v0.13.10, Windows 10 (10.0.19045.3570/22H2/2022Update)
 11th Gen Intel Core i9-11950H 2.60GHz, 1 CPU, 16 logical and 8 physical cores
-.NET SDK=6.0.406
-  [Host]     : .NET 6.0.14 (6.0.1423.7309), X64 RyuJIT
-  DefaultJob : .NET 6.0.14 (6.0.1423.7309), X64 RyuJIT
+.NET SDK 8.0.100
+  [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+  DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
 
 
 ```
-|                         Method |    Categories |     Mean |     Error |    StdDev |   Median |  Gen 0 |  Gen 1 | Allocated |
-|------------------------------- |-------------- |---------:|----------:|----------:|---------:|-------:|-------:|----------:|
-|               TryParseFullPath |   No location | 1.253 μs | 0.0353 μs | 0.0972 μs | 1.235 μs | 0.1431 |      - |      2 KB |
-|                       TryParse |   No location | 4.563 μs | 0.1376 μs | 0.3813 μs | 4.528 μs | 0.3052 |      - |      4 KB |
-|                                |               |          |           |           |          |        |        |           |
-| TryParseFullPathIndividualized | With location | 1.364 μs | 0.0426 μs | 0.1159 μs | 1.330 μs | 0.1545 |      - |      2 KB |
-|         TryParseIndividualized | With location | 1.796 μs | 0.0393 μs | 0.1076 μs | 1.757 μs | 0.3433 | 0.0019 |      4 KB |
+| Method                         | Categories    | Mean       | Error    | StdDev   | Gen0   | Gen1   | Allocated |
+|------------------------------- |-------------- |-----------:|---------:|---------:|-------:|-------:|----------:|
+| TryParseFullPath               | No location   |   742.5 ns | 11.02 ns | 10.31 ns | 0.0572 |      - |     728 B |
+| TryParse                       | No location   | 3,850.0 ns | 53.65 ns | 47.56 ns | 0.2670 |      - |    3416 B |
+|                                |               |            |          |          |        |        |           |
+| TryParseFullPathIndividualized | With location |   980.8 ns | 19.39 ns | 19.04 ns | 0.0896 |      - |    1144 B |
+| TryParseIndividualized         | With location | 1,952.1 ns | 38.65 ns | 46.00 ns | 0.3548 | 0.0038 |    4496 B |

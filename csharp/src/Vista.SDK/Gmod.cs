@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Vista.SDK.Internal;
 #if NET8_0_OR_GREATER
 using System.Collections.Frozen;
 using System.Collections.Immutable;
@@ -14,11 +15,7 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
     private readonly GmodNode _rootNode;
 
-#if NET8_0_OR_GREATER
-    private readonly FrozenDictionary<string, GmodNode> _nodeMap;
-#else
-    private readonly Dictionary<string, GmodNode> _nodeMap;
-#endif
+    private readonly ChdDictionary<GmodNode> _nodeMap;
 
     public GmodNode RootNode => _rootNode;
 
@@ -100,20 +97,16 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
         _rootNode = nodeMap["VE"];
 
-#if NET8_0_OR_GREATER
-        _nodeMap = nodeMap.ToFrozenDictionary(StringComparer.Ordinal);
-#else
-        _nodeMap = nodeMap;
-#endif
+        _nodeMap = new ChdDictionary<GmodNode>(nodeMap.Select(kvp => (kvp.Key, kvp.Value)).ToArray());
     }
 
-    public GmodNode this[string key] => _nodeMap[key];
+    public GmodNode this[string key] => _nodeMap[key.AsSpan()];
 
     public bool TryGetNode(string code, [MaybeNullWhen(false)] out GmodNode node) =>
-        _nodeMap.TryGetValue(code, out node);
+        _nodeMap.TryGetValue(code.AsSpan(), out node);
 
     public bool TryGetNode(ReadOnlySpan<char> code, [MaybeNullWhen(false)] out GmodNode node) =>
-        _nodeMap.TryGetValue(code.ToString(), out node);
+        _nodeMap.TryGetValue(code, out node);
 
     public GmodPath ParsePath(string item) => GmodPath.Parse(item, VisVersion);
 
@@ -127,7 +120,7 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
     public Enumerator GetEnumerator()
     {
-        var enumerator = new Enumerator { Inner = _nodeMap.Values.GetEnumerator() };
+        var enumerator = new Enumerator { Inner = _nodeMap.GetEnumerator() };
         return enumerator;
     }
 
@@ -137,25 +130,16 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
     public struct Enumerator : IEnumerator<GmodNode>
     {
-#if NET8_0_OR_GREATER
-        internal ImmutableArray<GmodNode>.Enumerator Inner;
-#else
-        internal Dictionary<string, GmodNode>.ValueCollection.Enumerator Inner;
-#endif
+        internal ChdDictionary<GmodNode>.Enumerator Inner;
 
-        public GmodNode Current => Inner.Current;
+        public GmodNode Current => Inner.Current.Value;
 
-        object IEnumerator.Current => Inner.Current;
+        object IEnumerator.Current => Inner.Current.Value;
 
-        public void Dispose()
-        {
-#if !NET8_0_OR_GREATER
-            Inner.Dispose();
-#endif
-        }
+        public void Dispose() => Inner.Dispose();
 
         public bool MoveNext() => Inner.MoveNext();
 
-        public void Reset() { }
+        public void Reset() => Inner.Reset();
     }
 }
