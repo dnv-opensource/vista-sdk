@@ -81,7 +81,7 @@ public sealed class VIS : IVIS
                 entry.Size = 1;
                 entry.SlidingExpiration = TimeSpan.FromHours(1);
 
-                var dto = EmbeddedResource.GetGmod(visVersion.ToVersionString());
+                var dto = LoadGmodDto(visVersion);
                 if (dto is null)
                     throw new Exception("Invalid state");
 
@@ -89,6 +89,9 @@ public sealed class VIS : IVIS
             }
         )!;
     }
+
+    internal static GmodDto? LoadGmodDto(VisVersion visVersion) =>
+        EmbeddedResource.GetGmod(visVersion.ToVersionString());
 
     public Gmod GetGmod(VisVersion visVersion)
     {
