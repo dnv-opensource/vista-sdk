@@ -292,7 +292,7 @@ export class GmodNode {
     }
 }
 
-export function isIndividualizable(node: GmodNode, isTargetNode: boolean, isInSet: boolean = false) {
+export function isIndividualizable(node: GmodNode, isTargetNode: boolean, isInSet: boolean = false): boolean {
     if (node.metadata.type === "GROUP")
         return false;
     if (node.metadata.type === "SELECTION")

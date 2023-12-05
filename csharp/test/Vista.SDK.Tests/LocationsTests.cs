@@ -18,6 +18,19 @@ public class LocationsTests
         Assert.NotNull(locations.Groups);
     }
 
+    [Fact]
+    public void Test_LocationGroups_Properties()
+    {
+        var values = Enum.GetValues(typeof(LocationGroup)).Cast<int>().ToArray();
+        Assert.Equal(values.Length, new HashSet<int>(values).Count);
+        Assert.Equal(5, values.Length); // If this changes, wee need to chaneg the way LocationCharDict is used
+        Assert.Equal(0, (int)LocationGroup.Number);
+        for (int i = 0; i < values.Length - 1; i++) // Start at one
+        {
+            Assert.Equal(i, values[i + 1] - 1);
+        }
+    }
+
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddLocationsData), MemberType = typeof(VistaSDKTestData))]
     public void Test_Locations(string value, bool success, string? output, string[] expectedErrorMessages)

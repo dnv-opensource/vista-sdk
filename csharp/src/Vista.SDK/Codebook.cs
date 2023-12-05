@@ -39,7 +39,7 @@ public sealed record class Codebook
             .Where(v => v.Value != "<number>")
             .ToArray();
 
-        RawData = dto.Values.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<string>)kvp.Value.ToList());
+        RawData = dto.Values.ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<string>)kvp.Value.ToArray());
 
         foreach (var t in data)
             _groupMap[t.Value] = t.Group;

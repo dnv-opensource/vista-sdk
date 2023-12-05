@@ -24,4 +24,16 @@ public class CodebooksTests
 
         Assert.True(codebooks[CodebookName.Position].HasStandardValue("centre"));
     }
+
+    [Fact]
+    public void Test_CodebookName_Properties()
+    {
+        var values = Enum.GetValues(typeof(CodebookName)).Cast<int>().ToArray();
+        Assert.Equal(values.Length, new HashSet<int>(values).Count);
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            Assert.Equal(i, values[i] - 1);
+        }
+    }
 }

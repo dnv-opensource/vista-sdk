@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Vista.SDK.Internal;
@@ -170,7 +171,8 @@ public sealed class Locations
         int? charsStartIndex = null;
         int? number = null;
 
-        var charDict = new LocationCharDict();
+        Debug.Assert(Enum.GetValues(typeof(LocationGroup)).Length == 5);
+        var charDict = new LocationCharDict(stackalloc char?[4]);
 
         for (int i = 0; i < span.Length; i++)
         {
@@ -238,12 +240,12 @@ public sealed class Locations
                     return false;
                 }
 
-                if (!charDict.TryAdd(group, ch))
+                if (!charDict.TryAdd(group, ch, out var existingCh))
                 {
                     AddError(
                         ref errorBuilder,
                         LocationValidationResult.Invalid,
-                        $"Invalid location: Multiple '{Enum.GetName(typeof(LocationGroup), group)}' values. Got both '{charDict.GetValueOrDefault(group)}' and '{ch}' in '{originalStr ?? originalSpan.ToString()}'"
+                        $"Invalid location: Multiple '{Enum.GetName(typeof(LocationGroup), group)}' values. Got both '{existingCh}' and '{ch}' in '{originalStr ?? originalSpan.ToString()}'"
                     );
                     return false;
                 }
@@ -294,72 +296,39 @@ public sealed class Locations
     }
 }
 
-internal struct LocationCharDict
+internal ref struct LocationCharDict
 {
-    private char? _side = null;
-    private char? _vertical = null;
-    private char? _transverse = null;
-    private char? _longitudinal = null;
+    private readonly Span<char?> _table;
 
-    public LocationCharDict() { }
-
-    public bool ContainsKey(LocationGroup key)
+    public LocationCharDict(Span<char?> table)
     {
-        return key switch
-        {
-            LocationGroup.Side => _side is not null,
-            LocationGroup.Vertical => _vertical is not null,
-            LocationGroup.Transverse => _transverse is not null,
-            LocationGroup.Longitudinal => _longitudinal is not null,
-            _ => throw new Exception($"Unsupported code: {key}")
-        };
+        Debug.Assert(table.Length == Enum.GetValues(typeof(LocationGroup)).Length - 1);
+        _table = table;
     }
 
-    public char? GetValueOrDefault(LocationGroup group)
+    private ref char? this[LocationGroup key]
     {
-        if (!TryGetValue(group, out var val))
-            return null;
-        return val;
-    }
-
-    public bool TryGetValue(LocationGroup key, [MaybeNullWhen(false)] out char value)
-    {
-        value = default;
-        var temp = key switch
+        get
         {
-            LocationGroup.Side => _side,
-            LocationGroup.Vertical => _vertical,
-            LocationGroup.Transverse => _transverse,
-            LocationGroup.Longitudinal => _longitudinal,
-            _ => throw new Exception($"Unsupported code: {key}")
-        };
+            var index = (int)key - 1;
+            if (index >= _table.Length)
+                throw new Exception($"Unsupported code: {key}");
 
-        if (temp is null)
-            return false;
-        value = temp.Value;
-        return true;
-    }
-
-    public bool TryAdd(LocationGroup key, char value)
-    {
-        if (ContainsKey(key))
-            return false;
-
-        switch (key)
-        {
-            case LocationGroup.Side:
-                _side = value;
-                break;
-            case LocationGroup.Vertical:
-                _vertical = value;
-                break;
-            case LocationGroup.Transverse:
-                _transverse = value;
-                break;
-            case LocationGroup.Longitudinal:
-                _longitudinal = value;
-                break;
+            return ref _table[index];
         }
+    }
+
+    public bool TryAdd(LocationGroup key, char value, [MaybeNullWhen(true)] out char? existingValue)
+    {
+        ref var v = ref this[key];
+        if (v is not null)
+        {
+            existingValue = v;
+            return false;
+        }
+
+        existingValue = null;
+        v = value;
         return true;
     }
 }
