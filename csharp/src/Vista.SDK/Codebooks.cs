@@ -6,74 +6,90 @@ public sealed class Codebooks : IEnumerable<(CodebookName Name, Codebook Codeboo
 {
     public VisVersion VisVersion { get; }
 
-    private readonly Dictionary<CodebookName, Codebook> _codebooks;
+    private readonly Codebook[] _codebooks;
 
     internal Codebooks(VisVersion version, CodebooksDto dto)
     {
         VisVersion = version;
 
-        _codebooks = new Dictionary<CodebookName, Codebook>(dto.Items.Length);
+        _codebooks = new Codebook[Enum.GetValues(typeof(CodebookName)).Length];
 
         foreach (var typeDto in dto.Items)
         {
             var type = new Codebook(typeDto);
-            _codebooks.Add(type.Name, type);
+            _codebooks[(int)type.Name - 1] = type;
         }
 
         var detailsCodebook = new Codebook(new CodebookDto("detail", new Dictionary<string, string[]>()));
-        _codebooks.Add(detailsCodebook.Name, detailsCodebook);
+        _codebooks[(int)detailsCodebook.Name - 1] = detailsCodebook;
     }
 
     public Codebook this[CodebookName name]
     {
         get
         {
-            if (!_codebooks.TryGetValue(name, out var codebook))
+            var index = (int)name - 1;
+            if (index >= _codebooks.Length)
                 throw new ArgumentException("Invalid codebook name: " + name);
 
-            return codebook;
+            return _codebooks[index];
         }
     }
 
-    public MetadataTag? TryCreateTag(CodebookName name, string? value) =>
-        _codebooks.GetValueOrDefault(name)?.TryCreateTag(value);
+    public MetadataTag? TryCreateTag(CodebookName name, string? value) => this[name].TryCreateTag(value);
 
-    public MetadataTag CreateTag(CodebookName name, string value) => _codebooks[name].CreateTag(value);
+    public MetadataTag CreateTag(CodebookName name, string value) => this[name].CreateTag(value);
 
-    public Codebook GetCodebook(CodebookName name)
-    {
-        if (!_codebooks.TryGetValue(name, out var codebook))
-            throw new ArgumentException("Invalid codebook name: " + name);
+    public Codebook GetCodebook(CodebookName name) => this[name];
 
-        return codebook;
-    }
-
-    public Enumerator GetEnumerator() => new Enumerator(this);
+    public Enumerator GetEnumerator() => new Enumerator(_codebooks);
 
     IEnumerator<(CodebookName Name, Codebook Codebook)> IEnumerable<(
         CodebookName Name,
         Codebook Codebook
-    )>.GetEnumerator() => new Enumerator(this);
+    )>.GetEnumerator() => new Enumerator(_codebooks);
 
-    IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
+    IEnumerator IEnumerable.GetEnumerator() => new Enumerator(_codebooks);
 
     public struct Enumerator : IEnumerator<(CodebookName Name, Codebook Codebook)>
     {
-        private Dictionary<CodebookName, Codebook>.Enumerator _inner;
+        private readonly Codebook[] _table;
+        private int _index;
 
-        public Enumerator(Codebooks parent)
+        internal Enumerator(Codebook[] table)
         {
-            _inner = parent._codebooks.GetEnumerator();
+            _table = table;
+            _index = -1;
         }
 
-        public (CodebookName Name, Codebook Codebook) Current => (_inner.Current.Key, _inner.Current.Value);
+        public bool MoveNext()
+        {
+            _index++;
+            if ((uint)_index < (uint)_table.Length)
+            {
+                return true;
+            }
+
+            _index = _table.Length;
+            return false;
+        }
+
+        public readonly (CodebookName Name, Codebook Codebook) Current
+        {
+            get
+            {
+                if ((uint)_index >= (uint)_table.Length)
+                    throw new InvalidOperationException();
+
+                var codebook = _table[_index];
+                return (codebook.Name, codebook);
+            }
+        }
 
         object IEnumerator.Current => Current;
 
-        public void Dispose() => _inner.Dispose();
+        public void Reset() => _index = -1;
 
-        public bool MoveNext() => _inner.MoveNext();
-
-        public void Reset() { }
+        public void Dispose() { }
     }
 }
