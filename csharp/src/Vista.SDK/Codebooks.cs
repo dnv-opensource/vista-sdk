@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 namespace Vista.SDK;
 
@@ -26,6 +27,7 @@ public sealed class Codebooks : IEnumerable<(CodebookName Name, Codebook Codeboo
 
     public Codebook this[CodebookName name]
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             var index = (int)name - 1;
