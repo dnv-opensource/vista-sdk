@@ -39,25 +39,25 @@ public partial class IsoMessageTests
                                 )
                             ),
                             new Property(
-                                new DataChannelType("Inst", UpdateCycle: "1", CalculationPeriod: null),
+                                new DataChannelType("Inst", UpdateCycle: 1, CalculationPeriod: null),
                                 new Format(
                                     "Decimal",
                                     new Restriction(
                                         Enumeration: null,
-                                        FractionDigits: "1",
+                                        FractionDigits: 1,
                                         Length: null,
                                         MaxExclusive: null,
-                                        MaxInclusive: "200.0",
+                                        MaxInclusive: 200.0,
                                         MaxLength: null,
                                         MinExclusive: null,
-                                        MinInclusive: "-150.0",
+                                        MinInclusive: -150.0,
                                         MinLength: null,
                                         Pattern: null,
                                         TotalDigits: null,
                                         WhiteSpace: null
                                     )
                                 ),
-                                new Vista.SDK.Transport.DataChannel.Range("150.0", "0.0"),
+                                new Vista.SDK.Transport.DataChannel.Range(150.0, 0.0),
                                 new Unit("°C", "Temperature", new Dictionary<string, object>()),
                                 "OPC_QUALITY",
                                 AlertPriority: null,

@@ -38,8 +38,8 @@ public partial class IsoMessageTests
                         TabularData: new[]
                         {
                             new TabularData(
-                                "2",
-                                "2",
+                                2,
+                                2,
                                 new[] { DataChannelId.Parse("0010"), DataChannelId.Parse("0020") },
                                 new[]
                                 {
@@ -56,8 +56,8 @@ public partial class IsoMessageTests
                                 }
                             ),
                             new TabularData(
-                                "3",
-                                "1",
+                                3,
+                                1,
                                 new[] { DataChannelId.Parse("0110") },
                                 new[]
                                 {
@@ -80,7 +80,7 @@ public partial class IsoMessageTests
                             )
                         },
                         EventData: new EventData(
-                            "3",
+                            3,
                             new[]
                             {
                                 new EventDataSet(
@@ -110,8 +110,8 @@ public partial class IsoMessageTests
                         TabularData: new[]
                         {
                             new TabularData(
-                                "1",
-                                "2",
+                                1,
+                                2,
                                 new[] { DataChannelId.Parse("0010"), DataChannelId.Parse("0020"), },
                                 new[]
                                 {
@@ -123,8 +123,8 @@ public partial class IsoMessageTests
                                 }
                             ),
                             new TabularData(
-                                "2",
-                                "1",
+                                2,
+                                1,
                                 new[] { DataChannelId.Parse("0110"), },
                                 new[]
                                 {

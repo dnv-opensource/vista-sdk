@@ -39,7 +39,7 @@ public static class Extensions
                                             .DataSet
                                             ?.Select(
                                                 d =>
-                                                    new EventDataSet(
+                                                    new DataSet_Event(
                                                         d.DataChannelId.ToString(),
                                                         d.Quality,
                                                         d.TimeStamp,
@@ -57,7 +57,7 @@ public static class Extensions
                                                 d.DataSet
                                                     ?.Select(
                                                         td =>
-                                                            new TabularDataSet(
+                                                            new DataSet_Tabular(
                                                                 td.Quality?.ToList(),
                                                                 td.TimeStamp,
                                                                 td.Value

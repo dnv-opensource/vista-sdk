@@ -13,6 +13,7 @@ public class JsonTests
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
     [InlineData("schemas/json/DataChannelList.sample.json")]
+    [InlineData("schemas/json/DataChannelList.sample.compact.json")]
     public async Task Test_DataChannelList_File_Serialization(string file)
     {
         await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -37,6 +38,7 @@ public class JsonTests
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
     [InlineData("schemas/json/DataChannelList.sample.json")]
+    [InlineData("schemas/json/DataChannelList.sample.compact.json")]
     public async Task Test_DataChannelList_Deserialization(string file)
     {
         await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -63,6 +65,7 @@ public class JsonTests
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
     [InlineData("schemas/json/DataChannelList.sample.json")]
+    [InlineData("schemas/json/DataChannelList.sample.compact.json")]
     public async Task Test_DataChannelList_Serialization_Roundtrip(string file)
     {
         await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -79,6 +82,7 @@ public class JsonTests
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
     [InlineData("schemas/json/DataChannelList.sample.json")]
+    // [InlineData("schemas/json/DataChannelList.sample.compact.json")]
     public async Task Test_DataChannelList_Domain_Model_Roundtrip(string file)
     {
         await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -86,7 +90,7 @@ public class JsonTests
         var package = await Serializer.DeserializeDataChannelListAsync(reader);
         Assert.NotNull(package);
 
-        var domainPackage = package!.ToDomainModel();
+        var domainPackage = package.ToDomainModel();
         var dto = domainPackage.ToJsonDto();
 
         dto.Should().BeEquivalentTo(package, DataChannelListEquivalency);
@@ -95,6 +99,7 @@ public class JsonTests
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
     [InlineData("schemas/json/DataChannelList.sample.json")]
+    [InlineData("schemas/json/DataChannelList.sample.compact.json")]
     public async Task Test_DataChannelList_Compression(string file)
     {
         await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);

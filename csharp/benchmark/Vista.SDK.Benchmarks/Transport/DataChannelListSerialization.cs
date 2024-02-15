@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Text.Json;
-using Avro.IO;
-using Avro.Specific;
+// using Avro.IO;
+// using Avro.Specific;
 using BenchmarkDotNet.Analysers;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Engines;
@@ -18,10 +18,10 @@ using BenchmarkDotNet.Toolchains.InProcess.NoEmit;
 using BenchmarkDotNet.Validators;
 using ICSharpCode.SharpZipLib.BZip2;
 using Microsoft.Diagnostics.Tracing.Parsers.IIS_Trace;
-using Vista.SDK.Transport.Avro.DataChannel;
+// using Vista.SDK.Transport.Avro.DataChannel;
 using Vista.SDK.Transport.Json;
 using Vista.SDK.Transport.Json.DataChannel;
-using DataChannelListAvroPackage = Vista.SDK.Transport.Avro.DataChannel.DataChannelListPackage;
+// using DataChannelListAvroPackage = Vista.SDK.Transport.Avro.DataChannel.DataChannelListPackage;
 using DataChannelListJsonPackage = Vista.SDK.Transport.Json.DataChannel.DataChannelListPackage;
 using RunMode = BenchmarkDotNet.Diagnosers.RunMode;
 
@@ -35,9 +35,10 @@ public class DataChannelListSerialization
     private MemoryStream _compressionStream;
 
     private DataChannelListJsonPackage _jsonPackage;
-    private DataChannelListAvroPackage _avroPackage;
-    private BinaryEncoder _avroEncoder;
-    private SpecificWriter<DataChannelListAvroPackage> _avroWriter;
+
+    // private DataChannelListAvroPackage _avroPackage;
+    // private BinaryEncoder _avroEncoder;
+    // private SpecificWriter<DataChannelListAvroPackage> _avroWriter;
 
     private static readonly Lazy<DataChannelListSerialization> _bench =
         new(() =>
@@ -104,24 +105,24 @@ public class DataChannelListSerialization
         var text = File.ReadAllText("schemas/json/DataChannelList.sample.compact.json");
         _jsonPackage = Serializer.DeserializeDataChannelList(text);
         var domainModel = _jsonPackage!.ToDomainModel();
-        _avroPackage = domainModel.ToAvroDto();
+        // _avroPackage = domainModel.ToAvroDto();
 
         _memoryStream = new MemoryStream();
         _compressionStream = new MemoryStream();
-        _avroWriter = new SpecificWriter<DataChannelListAvroPackage>(DataChannelListAvroPackage._SCHEMA);
-        _avroEncoder = new BinaryEncoder(_memoryStream);
+        // _avroWriter = new SpecificWriter<DataChannelListAvroPackage>(DataChannelListAvroPackage._SCHEMA);
+        // _avroEncoder = new BinaryEncoder(_memoryStream);
 
         Json();
         _payloadSizes[nameof(Json)] = _memoryStream.Length;
 
-        Avro();
-        _payloadSizes[nameof(Avro)] = _memoryStream.Length;
+        // Avro();
+        // _payloadSizes[nameof(Avro)] = _memoryStream.Length;
 
         Json_Brotli();
         _payloadSizes[nameof(Json_Brotli)] = _compressionStream.Length;
 
-        Avro_Brotli();
-        _payloadSizes[nameof(Avro_Brotli)] = _compressionStream.Length;
+        // Avro_Brotli();
+        // _payloadSizes[nameof(Avro_Brotli)] = _compressionStream.Length;
 
         foreach (var compressionLevelArgs in GetCompressionLevels())
         {
@@ -130,8 +131,8 @@ public class DataChannelListSerialization
             Json_Bzip2(compressionLevel);
             _payloadSizes[$"{nameof(Json_Bzip2)}-{compressionLevel}"] = _compressionStream.Length;
 
-            Avro_Bzip2(compressionLevel);
-            _payloadSizes[$"{nameof(Avro_Bzip2)}-{compressionLevel}"] = _compressionStream.Length;
+            // Avro_Bzip2(compressionLevel);
+            // _payloadSizes[$"{nameof(Avro_Bzip2)}-{compressionLevel}"] = _compressionStream.Length;
         }
     }
 
@@ -174,38 +175,38 @@ public class DataChannelListSerialization
         _brotliStream.Flush();
     }
 
-    [Benchmark(Description = "Avro")]
-    [BenchmarkCategory("Uncompressed")]
-    public void Avro()
-    {
-        _memoryStream.SetLength(0);
-        _avroWriter.Write(_avroPackage, _avroEncoder);
-    }
+    // [Benchmark(Description = "Avro")]
+    // [BenchmarkCategory("Uncompressed")]
+    // public void Avro()
+    // {
+    //     _memoryStream.SetLength(0);
+    //     _avroWriter.Write(_avroPackage, _avroEncoder);
+    // }
 
-    [Benchmark(Description = "Avro")]
-    [ArgumentsSource(nameof(GetCompressionLevels))]
-    [BenchmarkCategory("Bzip2")]
-    public void Avro_Bzip2(int CompressionLevel)
-    {
-        _memoryStream.SetLength(0);
-        _compressionStream.SetLength(0);
-        _avroWriter.Write(_avroPackage, _avroEncoder);
-        _memoryStream.Position = 0;
-        BZip2.Compress(_memoryStream, _compressionStream, false, CompressionLevel);
-    }
+    // [Benchmark(Description = "Avro")]
+    // [ArgumentsSource(nameof(GetCompressionLevels))]
+    // [BenchmarkCategory("Bzip2")]
+    // public void Avro_Bzip2(int CompressionLevel)
+    // {
+    //     _memoryStream.SetLength(0);
+    //     _compressionStream.SetLength(0);
+    //     _avroWriter.Write(_avroPackage, _avroEncoder);
+    //     _memoryStream.Position = 0;
+    //     BZip2.Compress(_memoryStream, _compressionStream, false, CompressionLevel);
+    // }
 
-    [Benchmark(Description = "Avro")]
-    [BenchmarkCategory("Brotli")]
-    public void Avro_Brotli()
-    {
-        _memoryStream.SetLength(0);
-        _compressionStream.SetLength(0);
-        _avroWriter.Write(_avroPackage, _avroEncoder);
-        _memoryStream.Position = 0;
-        _brotliStream = new BrotliStream(_compressionStream, CompressionLevel.SmallestSize, true);
-        _memoryStream.CopyTo(_brotliStream);
-        _brotliStream.Flush();
-    }
+    // [Benchmark(Description = "Avro")]
+    // [BenchmarkCategory("Brotli")]
+    // public void Avro_Brotli()
+    // {
+    //     _memoryStream.SetLength(0);
+    //     _compressionStream.SetLength(0);
+    //     _avroWriter.Write(_avroPackage, _avroEncoder);
+    //     _memoryStream.Position = 0;
+    //     _brotliStream = new BrotliStream(_compressionStream, CompressionLevel.SmallestSize, true);
+    //     _memoryStream.CopyTo(_brotliStream);
+    //     _brotliStream.Flush();
+    // }
 
     public static IEnumerable<object[]> GetCompressionLevels()
     {

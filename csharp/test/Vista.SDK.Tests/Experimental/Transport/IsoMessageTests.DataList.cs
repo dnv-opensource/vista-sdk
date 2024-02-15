@@ -37,25 +37,25 @@ public partial class IsoMessageTests
                                 )
                             ),
                             new Property(
-                                new DataType("Inst", UpdateCycle: "1", CalculationPeriod: null),
+                                new DataType("Inst", UpdateCycle: 1, CalculationPeriod: null),
                                 new Format(
                                     "Decimal",
                                     new Restriction(
                                         Enumeration: null,
-                                        FractionDigits: "1",
+                                        FractionDigits: 1,
                                         Length: null,
                                         MaxExclusive: null,
-                                        MaxInclusive: "200.0",
+                                        MaxInclusive: 200.0,
                                         MaxLength: null,
                                         MinExclusive: null,
-                                        MinInclusive: "-150.0",
+                                        MinInclusive: -150.0,
                                         MinLength: null,
                                         Pattern: null,
                                         TotalDigits: null,
                                         WhiteSpace: null
                                     )
                                 ),
-                                new Experimental.Transport.DataList.Range("1.0", "0.0"),
+                                new Experimental.Transport.DataList.Range(1.0, 0.0),
                                 null,
                                 "OPC_QUALITY",
                                 AlertPriority: null,

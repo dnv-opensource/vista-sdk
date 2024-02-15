@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://vista.dnv.com/DataChannelListPackage.schema.json",
+    "$id": "urn:ISO19848:Ship_Data_Definition",
     "title": "DataChannelListPackage",
     "description": "A DataChannelList package for ISO19848",
     "type": "object",
@@ -10,9 +10,7 @@
         }
     },
     "additionalProperties": false,
-    "required": [
-        "Package"
-    ],
+    "required": ["Package"],
     "definitions": {
         "Package": {
             "type": "object",
@@ -24,10 +22,7 @@
                     "$ref": "#/definitions/DataChannelList"
                 }
             },
-            "required": [
-                "Header",
-                "DataChannelList"
-            ],
+            "required": ["Header", "DataChannelList"],
             "additionalProperties": false
         },
         "Header": {
@@ -50,10 +45,7 @@
                     "format": "date-time"
                 }
             },
-            "required": [
-                "ShipID",
-                "DataChannelListID"
-            ]
+            "required": ["ShipID", "DataChannelListID"]
         },
         "VersionInformation": {
             "type": "object",
@@ -68,10 +60,7 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "NamingRule",
-                "NamingSchemeVersion"
-            ],
+            "required": ["NamingRule", "NamingSchemeVersion"],
             "additionalProperties": false
         },
         "DataChannelList": {
@@ -84,9 +73,7 @@
                     }
                 }
             },
-            "required": [
-                "DataChannel"
-            ],
+            "required": ["DataChannel"],
             "additionalProperties": false
         },
         "DataChannel": {
@@ -99,10 +86,7 @@
                     "$ref": "#/definitions/Property"
                 }
             },
-            "required": [
-                "DataChannelID",
-                "Property"
-            ],
+            "required": ["DataChannelID", "Property"],
             "additionalProperties": false
         },
         "DataChannelID": {
@@ -118,9 +102,7 @@
                     "$ref": "#/definitions/NameObject"
                 }
             },
-            "required": [
-                "LocalID"
-            ],
+            "required": ["LocalID"],
             "additionalProperties": false
         },
         "NameObject": {
@@ -130,9 +112,7 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "NamingRule"
-            ]
+            "required": ["NamingRule"]
         },
         "Property": {
             "type": "object",
@@ -162,10 +142,7 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "DataChannelType",
-                "Format"
-            ]
+            "required": ["DataChannelType", "Format"]
         },
         "DataChannelType": {
             "type": "object",
@@ -174,15 +151,13 @@
                     "type": "string"
                 },
                 "UpdateCycle": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "CalculationPeriod": {
-                    "type": "string"
+                    "type": "number"
                 }
             },
-            "required": [
-                "Type"
-            ],
+            "required": ["Type"],
             "additionalProperties": false
         },
         "Format": {
@@ -195,25 +170,20 @@
                     "$ref": "#/definitions/Restriction"
                 }
             },
-            "required": [
-                "Type"
-            ],
+            "required": ["Type"],
             "additionalProperties": false
         },
         "Range": {
             "type": "object",
             "properties": {
                 "High": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "Low": {
-                    "type": "string"
+                    "type": "number"
                 }
             },
-            "required": [
-                "High",
-                "Low"
-            ],
+            "required": ["High", "Low"],
             "additionalProperties": false
         },
         "Unit": {
@@ -226,9 +196,7 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "UnitSymbol"
-            ]
+            "required": ["UnitSymbol"]
         },
         "Restriction": {
             "type": "object",
@@ -240,42 +208,43 @@
                     }
                 },
                 "FractionDigits": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "Length": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "MaxExclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MaxInclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MaxLength": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "MinExclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MinInclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MinLength": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "Pattern": {
                     "type": "string"
                 },
                 "TotalDigits": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "WhiteSpace": {
                     "type": "string",
-                    "enum": [
-                        "Preserve",
-                        "Replace",
-                        "Collapse"
-                    ]
+                    "enum": ["Preserve", "Replace", "Collapse"]
                 }
             },
             "additionalProperties": false
@@ -294,10 +263,7 @@
                     "format": "date-time"
                 }
             },
-            "required": [
-                "ID",
-                "TimeStamp"
-            ],
+            "required": ["ID", "TimeStamp"],
             "additionalProperties": false
         }
     }

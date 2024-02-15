@@ -30,19 +30,19 @@
           "Property": {
             "DataChannelType": {
               "Type": "Inst",
-              "UpdateCycle": "1"
+              "UpdateCycle": 1
             },
             "Format": {
               "Type": "Decimal",
               "Restriction": {
-                "FractionDigits": "1",
-                "MaxInclusive": "200.0",
-                "MinInclusive": "-150.0"
+                "FractionDigits": 1,
+                "MaxInclusive": 200.0,
+                "MinInclusive": -150.0
               }
             },
             "Range": {
-              "High": "150.0",
-              "Low": "0.0"
+              "High": 150.0,
+              "Low": 0.0
             },
             "Unit": {
               "UnitSymbol": "°C",
@@ -66,21 +66,21 @@
           "Property": {
             "DataChannelType": {
               "Type": "Average",
-              "UpdateCycle": "60",
-              "CalculationPeriod": "3600"
+              "UpdateCycle": 60,
+              "CalculationPeriod": 3600
             },
             "Format": {
               "Type": "Integer",
               "Restriction": {
-                "FractionDigits": "1",
-                "MaxInclusive": "200.0",
-                "MinInclusive": "-150.0",
+                "FractionDigits": 1,
+                "MaxInclusive": 200.0,
+                "MinInclusive": -150.0,
                 "WhiteSpace": "Preserve"
               }
             },
             "Range": {
-              "High": "150.0",
-              "Low": "0.0"
+              "High": 150.0,
+              "Low": 0.0
             },
             "Unit": {
               "UnitSymbol": "°C",

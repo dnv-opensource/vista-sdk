@@ -26,8 +26,8 @@ public sealed record TimeSeriesData(
 );
 
 public sealed record TabularData(
-    string? NumberOfDataSet,
-    string? NumberOfDataPoints,
+    int? NumberOfDataSet,
+    int? NumberOfDataPoints,
     IReadOnlyList<DataId>? DataId,
     IReadOnlyList<TabularDataSet>? DataSet
 );
@@ -38,6 +38,6 @@ public sealed record TabularDataSet(
     IReadOnlyList<string>? Quality
 );
 
-public sealed record EventData(string? NumberOfDataSet, IReadOnlyList<EventDataSet>? DataSet);
+public sealed record EventData(int? NumberOfDataSet, IReadOnlyList<EventDataSet>? DataSet);
 
 public sealed record EventDataSet(DateTimeOffset TimeStamp, DataId DataId, string Value, string? Quality);

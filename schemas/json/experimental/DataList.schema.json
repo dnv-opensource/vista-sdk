@@ -151,10 +151,10 @@
                     "type": "string"
                 },
                 "UpdateCycle": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "CalculationPeriod": {
-                    "type": "string"
+                    "type": "number"
                 }
             },
             "required": ["Type"],
@@ -177,10 +177,10 @@
             "type": "object",
             "properties": {
                 "High": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "Low": {
-                    "type": "string"
+                    "type": "number"
                 }
             },
             "required": ["High", "Low"],
@@ -208,34 +208,39 @@
                     }
                 },
                 "FractionDigits": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "Length": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "MaxExclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MaxInclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MaxLength": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "MinExclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MinInclusive": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "MinLength": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "Pattern": {
                     "type": "string"
                 },
                 "TotalDigits": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "WhiteSpace": {
                     "type": "string",

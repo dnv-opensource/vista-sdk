@@ -25,20 +25,20 @@ public sealed record DataId(ILocalId LocalId, string? ShortId, NameObject? NameO
 
 public sealed record NameObject(string NamingRule, IReadOnlyDictionary<string, object> CustomProperties);
 
-public sealed record DataType(string Type, string? UpdateCycle, string? CalculationPeriod);
+public sealed record DataType(string Type, double? UpdateCycle, double? CalculationPeriod);
 
 public sealed record Restriction(
     IReadOnlyList<string>? Enumeration,
-    string? FractionDigits,
-    string? Length,
-    string? MaxExclusive,
-    string? MaxInclusive,
-    string? MaxLength,
-    string? MinExclusive,
-    string? MinInclusive,
-    string? MinLength,
+    int? FractionDigits,
+    int? Length,
+    double? MaxExclusive,
+    double? MaxInclusive,
+    int? MaxLength,
+    double? MinExclusive,
+    double? MinInclusive,
+    int? MinLength,
     string? Pattern,
-    string? TotalDigits,
+    int? TotalDigits,
     WhiteSpace? WhiteSpace
 );
 
@@ -51,7 +51,7 @@ public enum WhiteSpace
 
 public sealed record Format(string Type, Restriction? Restriction);
 
-public sealed record Range(string High, string Low);
+public sealed record Range(double High, double Low);
 
 public sealed record Unit(
     string UnitSymbol,

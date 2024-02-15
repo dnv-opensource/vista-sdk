@@ -57,16 +57,16 @@ static class TimeSeries
 
         var data = new TimeSeriesData(
             dataConfiguration: null, // May optionally refer to a specific DataChannelList,
-            eventData: new EventData(Array.Empty<EventDataSet>(), "0"),
+            eventData: new EventData([], 0),
             tabularData: new[]
             {
                 new TabularData(
                     dataChannelID: dataChannelId,
                     dataSet: dataAsTable
-                        .Select(d => new TabularDataSet(quality: null, timeStamp: d.Timestamp, value: d.Data))
+                        .Select(d => new DataSet_Tabular(quality: null, timeStamp: d.Timestamp, value: d.Data))
                         .ToArray(),
-                    numberOfDataChannel: dataChannelId.Length.ToString(CultureInfo.InvariantCulture),
-                    numberOfDataSet: dataAsTable.Length.ToString(CultureInfo.InvariantCulture) // One sample per datachannel/timestamp for this scenario
+                    numberOfDataChannel: dataChannelId.Length,
+                    numberOfDataSet: dataAsTable.Length // One sample per datachannel/timestamp for this scenario
                 )
             }
         );

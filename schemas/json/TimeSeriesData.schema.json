@@ -1,6 +1,6 @@
 ﻿{
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://vista.dnv.com/TimeSeriesDataPackage.schema.json",
+    "$id": "urn:ISO19848:Ship_Data_Transport",
     "title": "TimeSeriesDataPackage",
     "description": "A TimeSeriesData package for ISO19848",
     "type": "object",
@@ -9,13 +9,12 @@
             "$ref": "#/definitions/Package"
         }
     },
-    "required": [
-        "Package"
-    ],
     "additionalProperties": false,
+    "required": ["Package"],
     "definitions": {
         "Package": {
             "type": "object",
+            "required": ["TimeSeriesData"],
             "properties": {
                 "Header": {
                     "$ref": "#/definitions/Header"
@@ -27,13 +26,11 @@
                     }
                 }
             },
-            "required": [
-                "TimeSeriesData"
-            ],
             "additionalProperties": false
         },
         "Header": {
             "type": "object",
+            "required": ["ShipID"],
             "properties": {
                 "ShipID": {
                     "type": "string"
@@ -58,13 +55,40 @@
                         "$ref": "#/definitions/ConfigurationReference"
                     }
                 }
+            }
+        },
+        "TimeSpan": {
+            "type": "object",
+            "required": ["Start", "End"],
+            "properties": {
+                "Start": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "End": {
+                    "type": "string",
+                    "format": "date-time"
+                }
             },
-            "required": [
-                "ShipID"
-            ]
+            "additionalProperties": false
+        },
+        "ConfigurationReference": {
+            "type": "object",
+            "required": ["ID", "TimeStamp"],
+            "properties": {
+                "ID": {
+                    "type": "string"
+                },
+                "TimeStamp": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "additionalProperties": false
         },
         "TimeSeriesData": {
             "type": "object",
+            "required": [],
             "properties": {
                 "DataConfiguration": {
                     "$ref": "#/definitions/ConfigurationReference"
@@ -80,49 +104,17 @@
                 }
             }
         },
-        "TimeSpan": {
-            "type": "object",
-            "properties": {
-                "Start": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "End": {
-                    "type": "string",
-                    "format": "date-time"
-                }
-            },
-            "required": [
-                "Start",
-                "End"
-            ],
-            "additionalProperties": false
-        },
-        "ConfigurationReference": {
-            "type": "object",
-            "properties": {
-                "ID": {
-                    "type": "string"
-                },
-                "TimeStamp": {
-                    "type": "string",
-                    "format": "date-time"
-                }
-            },
-            "required": [
-                "ID",
-                "TimeStamp"
-            ],
-            "additionalProperties": false
-        },
         "TabularData": {
             "type": "object",
+            "required": [],
             "properties": {
                 "NumberOfDataSet": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "NumberOfDataChannel": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "DataChannelID": {
                     "type": "array",
@@ -133,55 +125,55 @@
                 "DataSet": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/TabularDataSet"
+                        "$ref": "#/definitions/DataSet_Tabular"
                     }
                 }
             },
-            "additionalProperties": false
-        },
-        "TabularDataSet": {
-            "type": "object",
-            "properties": {
-                "TimeStamp": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "Value": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "Quality": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "TimeStamp",
-                "Value"
-            ],
             "additionalProperties": false
         },
         "EventData": {
             "type": "object",
+            "required": [],
             "properties": {
                 "NumberOfDataSet": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "DataSet": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/EventDataSet"
+                        "$ref": "#/definitions/DataSet_Event"
                     }
                 }
             },
             "additionalProperties": false
         },
-        "EventDataSet": {
+        "DataSet_Tabular": {
             "type": "object",
+            "required": ["TimeStamp", "Value"],
+            "properties": {
+                "TimeStamp": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "Value": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "Quality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "DataSet_Event": {
+            "type": "object",
+            "required": ["TimeStamp", "DataChannelID", "Value"],
             "properties": {
                 "TimeStamp": {
                     "type": "string",
@@ -197,11 +189,6 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "TimeStamp",
-                "DataChannelID",
-                "Value"
-            ],
             "additionalProperties": false
         }
     }

@@ -107,10 +107,12 @@
             "type": "object",
             "properties": {
                 "NumberOfDataSet": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "NumberOfDataPoints": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "DataId": {
                     "type": "array",
@@ -154,7 +156,8 @@
             "type": "object",
             "properties": {
                 "NumberOfDataSet": {
-                    "type": "string"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "DataSet": {
                     "type": "array",
