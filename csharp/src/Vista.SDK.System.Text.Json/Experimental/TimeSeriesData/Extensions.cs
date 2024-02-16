@@ -24,7 +24,7 @@ public static class Extensions
                         h.TimeSpan is null ? null : new TimeSpan(h.TimeSpan.End, h.TimeSpan.Start)
                     )
                     {
-                        AdditionalProperties = h.CustomHeaders.CopyProperties(),
+                        CustomHeaders = h.CustomHeaders.CopyProperties(),
                     },
                 p.TimeSeriesData
                     .Select(
@@ -72,7 +72,7 @@ public static class Extensions
                                     .ToList()
                             )
                             {
-                                AdditionalProperties = t.CustomProperties.CopyProperties(),
+                                CustomData = t.CustomProperties.CopyProperties(),
                             }
                     )
                     .ToList()
@@ -97,7 +97,7 @@ public static class Extensions
                         h.SystemConfiguration
                             ?.Select(c => new Domain.ConfigurationReference(c.ID, c.TimeStamp))
                             .ToList(),
-                        h.AdditionalProperties.CopyProperties()
+                        h.CustomHeaders.CopyProperties()
                     ),
                 p.TimeSeriesData
                     .Select(
@@ -146,7 +146,7 @@ public static class Extensions
                                             )
                                             .ToList()
                                     ),
-                                t.AdditionalProperties.CopyProperties()
+                                t.CustomData.CopyProperties()
                             )
                     )
                     .ToList()

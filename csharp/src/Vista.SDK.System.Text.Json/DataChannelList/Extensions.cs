@@ -24,7 +24,7 @@ public static class Extensions
                                             ? null
                                             : new NameObject(c.DataChannelId.NameObject.NamingRule)
                                             {
-                                                AdditionalProperties = c.DataChannelId
+                                                CustomProperties = c.DataChannelId
                                                     .NameObject
                                                     .CustomProperties
                                                     .CopyProperties(),
@@ -67,14 +67,11 @@ public static class Extensions
                                             ? null
                                             : new Unit(c.Property.Unit.QuantityName, c.Property.Unit.UnitSymbol)
                                             {
-                                                AdditionalProperties = c.Property
-                                                    .Unit
-                                                    .CustomProperties
-                                                    .CopyProperties(),
+                                                CustomProperties = c.Property.Unit.CustomProperties.CopyProperties(),
                                             }
                                     )
                                     {
-                                        AdditionalProperties = c.Property.CustomProperties.CopyProperties(),
+                                        CustomProperties = c.Property.CustomProperties.CopyProperties(),
                                     }
                                 )
                         )
@@ -98,7 +95,7 @@ public static class Extensions
                         )
                 )
                 {
-                    AdditionalProperties = package.Package.Header.CustomHeaders.CopyProperties(),
+                    CustomHeaders = package.Package.Header.CustomHeaders.CopyProperties(),
                 }
             )
         );
@@ -125,7 +122,7 @@ public static class Extensions
                         ),
                     p.Header.Author,
                     p.Header.DateCreated,
-                    p.Header.AdditionalProperties.CopyProperties()
+                    p.Header.CustomHeaders.CopyProperties()
                 ),
                 new Domain.DataChannelList(
                     p.DataChannelList
@@ -144,7 +141,7 @@ public static class Extensions
                                             ? null
                                             : new Domain.NameObject(
                                                 c.DataChannelID.NameObject.NamingRule,
-                                                c.DataChannelID.NameObject.AdditionalProperties.CopyProperties()
+                                                c.DataChannelID.NameObject.CustomProperties.CopyProperties()
                                             )
                                     ),
                                     new Domain.Property(
@@ -180,13 +177,13 @@ public static class Extensions
                                             : new Domain.Unit(
                                                 c.Property.Unit.UnitSymbol,
                                                 c.Property.Unit.QuantityName,
-                                                c.Property.Unit.AdditionalProperties.CopyProperties()
+                                                c.Property.Unit.CustomProperties.CopyProperties()
                                             ),
                                         c.Property.QualityCoding,
                                         c.Property.AlertPriority,
                                         c.Property.Name,
                                         c.Property.Remarks,
-                                        c.Property.AdditionalProperties.CopyProperties()
+                                        c.Property.CustomProperties.CopyProperties()
                                     )
                                 )
                         )
