@@ -1,6 +1,6 @@
 {
     "name": "dnv-vista-sdk",
-    "version": "0.0.2-preview",
+    "version": "0.1",
     "description": "In this package we codify the rules and principles of VIS and related ISO-standards to enable and support users and implementers of the standards.",
     "main": "./dist/index.js",
     "scripts": {

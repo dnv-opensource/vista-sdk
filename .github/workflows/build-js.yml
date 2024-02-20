@@ -2,7 +2,7 @@ name: JS Package
 
 on:
   push:
-    branches: [main]
+    branches: [main, release/v**]
     paths: ["js/**", ".github/workflows/build-js.yml"]
   pull_request:
     branches: [main]
@@ -39,6 +39,6 @@ jobs:
 
       - name: Publish
         if: ${{ success() && !github.base_ref }}
-        run: npm version $(node -p "require('./package.json').version")-$(node -p "114 + ${{ github.run_number }}"); npm publish --access public;
+        run: npm version $(node -p "require('./package.json').version").$(node -p "${{ github.run_number }}"); npm publish --access public;
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
