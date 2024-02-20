@@ -2,10 +2,7 @@ name: .NET Package
 
 on:
   push:
-    branches: [main, release/v**]
-    paths: ["csharp/**", ".github/workflows/build-csharp.yml"]
-  pull_request:
-    branches: [main]
+    branches: [release/v0.1]
     paths: ["csharp/**", ".github/workflows/build-csharp.yml"]
   workflow_dispatch:
 

@@ -2,10 +2,7 @@ name: JS Package
 
 on:
   push:
-    branches: [main, release/v**]
-    paths: ["js/**", ".github/workflows/build-js.yml"]
-  pull_request:
-    branches: [main]
+    branches: [release/v0.1]
     paths: ["js/**", ".github/workflows/build-js.yml"]
   workflow_dispatch:
 
