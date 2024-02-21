@@ -1,7 +1,15 @@
 {
     "name": "dnv-vista-sdk",
     "version": "0.1",
-    "description": "In this package we codify the rules and principles of VIS and related ISO-standards to enable and support users and implementers of the standards.",
+    "description": "The Vista SDK packages codify the rules and principles of DNV Vessel Information Structure (VIS) and ISO19848/19847 standards to enable and support users and implementers.",
+    "keywords": [
+        "dnv",
+        "dnvgl",
+        "vis",
+        "maritime",
+        "iso-19847",
+        "iso-19848"
+    ],
     "main": "./dist/index.js",
     "scripts": {
         "test": "jest --silent=false --verbose=true --logHeapUsage",
@@ -9,7 +17,6 @@
         "build": "rimraf rm -rf dist && tsc -p tsconfig.build.json",
         "test:debug": "jest --runInBand"
     },
-    "keywords": [],
     "author": "",
     "license": "MIT",
     "devDependencies": {
