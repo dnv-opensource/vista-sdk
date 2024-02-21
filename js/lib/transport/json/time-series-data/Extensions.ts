@@ -25,7 +25,7 @@ export class Extensions {
                           TimeSpan: h.timeSpan
                               ? { End: h.timeSpan.end, Start: h.timeSpan.start }
                               : undefined,
-                          AdditionalProperties: h.customHeaders,
+                          ...h.customHeaders,
                       }
                     : undefined,
                 TimeSeriesData: p.timeSeriesData.map((t) => ({
@@ -58,7 +58,7 @@ export class Extensions {
                             Value: td.value,
                         })),
                     })),
-                    AdditionalProperties: t.customProperties,
+                    ...t.customProperties,
                 })),
             },
         };
@@ -67,17 +67,19 @@ export class Extensions {
     public static async toDomainModel(
         dto: TimeSeriesDto.TimeSeriesDataPackage
     ): Promise<TimeSeries.TimeSeriesDataPackage> {
-        const p = dto.Package;
-        const h = dto.Package.Header;
-
         const timeSeriesData: TimeSeries.TimeSeriesData[] = [];
 
-        for (let t of p.TimeSeriesData) {
+        for (let {
+            DataConfiguration,
+            EventData,
+            TabularData,
+            ...customProperties
+        } of dto.Package.TimeSeriesData) {
             const eventDataSet: TimeSeries.EventDataSet[] = [];
             const tabularData: TimeSeries.TabularData[] = [];
 
-            if (t.EventData?.DataSet) {
-                for (let ed of t.EventData.DataSet) {
+            if (EventData?.DataSet) {
+                for (let ed of EventData.DataSet) {
                     const dataChannelId = await DataChannelId.parseAsync(
                         ed.DataChannelID
                     );
@@ -90,8 +92,8 @@ export class Extensions {
                 }
             }
 
-            if (t.TabularData) {
-                for (let td of t.TabularData) {
+            if (TabularData) {
+                for (let td of TabularData) {
                     const dataChannelIds: DataChannelId[] = [];
                     for (let i of td.DataChannelID ?? []) {
                         const dataChannelId = await DataChannelId.parseAsync(i);
@@ -115,36 +117,52 @@ export class Extensions {
             }
 
             timeSeriesData.push({
-                dataConfiguration: t.DataConfiguration && {
-                    timeStamp: t.DataConfiguration.TimeStamp,
-                    id: t.DataConfiguration.ID,
-                },
-                customProperties: t.AdditionalProperties,
+                dataConfiguration: DataConfiguration
+                    ? {
+                          timeStamp: DataConfiguration.TimeStamp,
+                          id: DataConfiguration.ID,
+                      }
+                    : undefined,
                 eventData: {
                     dataSet: eventDataSet.length > 0 ? eventDataSet : undefined,
-                    numberOfDataSet: t.EventData?.NumberOfDataSet,
+                    numberOfDataSet: EventData?.NumberOfDataSet,
                 },
                 tabularData: tabularData.length > 0 ? tabularData : undefined,
+                customProperties: customProperties,
             });
         }
 
+        const mapHeader = (): TimeSeries.Header | undefined => {
+            if (!dto.Package.Header) return undefined;
+
+            const {
+                ShipID,
+                TimeSpan,
+                DateCreated,
+                DateModified,
+                Author,
+                SystemConfiguration,
+                ...custom
+            } = dto.Package.Header;
+            return {
+                shipId: ShipId.parse(ShipID),
+                timeSpan: TimeSpan
+                    ? { end: TimeSpan.End, start: TimeSpan.Start }
+                    : undefined,
+                dateCreated: DateCreated,
+                dateModified: DateModified,
+                author: Author,
+                systemConfiguration: SystemConfiguration?.map((c) => ({
+                    id: c.ID,
+                    timeStamp: c.TimeStamp,
+                })),
+                customHeaders: custom,
+            };
+        };
+
         return {
             package: {
-                header: h
-                    ? {
-                          shipId: ShipId.parse(h.ShipID),
-                          timeSpan: h.TimeSpan
-                              ? { end: h.TimeSpan.End, start: h.TimeSpan.Start }
-                              : undefined,
-                          dateCreated: h.DateCreated,
-                          dateModified: h.DateModified,
-                          author: h.Author,
-                          systemConfiguration: h.SystemConfiguration?.map(
-                              (c) => ({ id: c.ID, timeStamp: c.TimeStamp })
-                          ),
-                          customHeaders: h.AdditionalProperties,
-                      }
-                    : undefined,
+                header: mapHeader(),
                 timeSeriesData: timeSeriesData,
             },
         };

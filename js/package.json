@@ -12,7 +12,7 @@
     ],
     "main": "./dist/index.js",
     "scripts": {
-        "test": "jest --silent=false --verbose=true --logHeapUsage",
+        "test": "jest --silent=false --logHeapUsage",
         "prebuild": "ts-node ./prebuild.ts",
         "build": "rimraf rm -rf dist && tsc -p tsconfig.build.json",
         "test:debug": "jest --runInBand"

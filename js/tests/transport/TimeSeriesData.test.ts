@@ -25,7 +25,7 @@ describe("TimeSeriesDataPackage", () => {
                                     quality: quality,
                                 },
                             ],
-                            numberOfDataSet: "1",
+                            numberOfDataSet: 1,
                         },
                         tabularData: [
                             {
@@ -37,8 +37,8 @@ describe("TimeSeriesDataPackage", () => {
                                         quality: [quality],
                                     },
                                 ],
-                                numberOfDataChannel: "1",
-                                numberOfDataSet: "1",
+                                numberOfDataChannel: 1,
+                                numberOfDataSet: 1,
                             },
                         ],
                         dataConfiguration: {
@@ -73,7 +73,7 @@ describe("TimeSeriesDataPackage", () => {
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
                 .numberOfDataSet
-        ).toEqual("1");
+        ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
                 .dataSet![0]!.value
@@ -87,11 +87,11 @@ describe("TimeSeriesDataPackage", () => {
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
                 .numberOfDataSet
-        ).toEqual("1");
+        ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
                 .numberOfDataChannel
-        ).toEqual("1");
+        ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
                 .dataChannelId![0]

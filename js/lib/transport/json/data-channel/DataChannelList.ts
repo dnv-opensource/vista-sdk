@@ -4,9 +4,8 @@ export namespace DataChannelListDto {
      *
      * A DataChannelList package for ISO19848
      *
-     *      Make sure to
-     *      replace [k: string]: unknown; with AdditionalProperties
-     *      replace string to Date where needed
+     * Make sure to
+     * - replace string to Date where needed
      */
     export interface DataChannelListPackage {
         Package: Package;
@@ -21,9 +20,7 @@ export namespace DataChannelListDto {
         VersionInformation?: VersionInformation;
         Author?: string;
         DateCreated?: Date;
-        AdditionalProperties?: {
-            [k: string]: any;
-        };
+        [k: string]: unknown;
     }
     export interface ConfigurationReference {
         ID: string;
@@ -49,9 +46,7 @@ export namespace DataChannelListDto {
     }
     export interface NameObject {
         NamingRule: string;
-        AdditionalProperties?: {
-            [k: string]: any;
-        };
+        [k: string]: unknown;
     }
     export interface Property {
         DataChannelType: DataChannelType;
@@ -62,14 +57,12 @@ export namespace DataChannelListDto {
         AlertPriority?: string;
         Name?: string;
         Remarks?: string;
-        AdditionalProperties?: {
-            [k: string]: any;
-        };
+        [k: string]: unknown;
     }
     export interface DataChannelType {
         Type: string;
-        UpdateCycle?: string;
-        CalculationPeriod?: string;
+        UpdateCycle?: number;
+        CalculationPeriod?: number;
     }
     export interface Format {
         Type: string;
@@ -77,33 +70,30 @@ export namespace DataChannelListDto {
     }
     export interface Restriction {
         Enumeration?: string[];
-        FractionDigits?: string;
-        Length?: string;
-        MaxExclusive?: string;
-        MaxInclusive?: string;
-        MaxLength?: string;
-        MinExclusive?: string;
-        MinInclusive?: string;
-        MinLength?: string;
+        FractionDigits?: number;
+        Length?: number;
+        MaxExclusive?: number;
+        MaxInclusive?: number;
+        MaxLength?: number;
+        MinExclusive?: number;
+        MinInclusive?: number;
+        MinLength?: number;
         Pattern?: string;
-        TotalDigits?: string;
-        WhiteSpace?: RestrictionWhiteSpace;
+        TotalDigits?: number;
+        WhiteSpace?: WhiteSpace;
     }
     export interface Range {
-        High: string;
-        Low: string;
+        High: number;
+        Low: number;
     }
     export interface Unit {
         UnitSymbol: string;
         QuantityName?: string;
-        AdditionalProperties?: {
-            [k: string]: any;
-        };
+        [k: string]: unknown;
     }
-
-    export enum RestrictionWhiteSpace {
-        Preserve = 0,
-        Replace = 1,
-        Collapse = 2,
+    export enum WhiteSpace {
+        Preserve = 'Preserve',
+        Replace = 'Replace',
+        Collapse = 'Collapse',
     }
 }

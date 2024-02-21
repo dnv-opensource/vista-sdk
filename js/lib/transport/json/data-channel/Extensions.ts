@@ -33,7 +33,7 @@ export class Extensions implements IExtension {
                               ReferenceURL: h.versionInformation.referenceUrl,
                           }
                         : undefined,
-                    AdditionalProperties: h.customHeaders,
+                    ...h.customHeaders,
                 },
                 DataChannelList: {
                     DataChannel: p.dataChannelList.dataChannel.map(
@@ -47,36 +47,41 @@ export class Extensions implements IExtension {
     public static async toDomainModel(
         dto: DataChannelListDto.DataChannelListPackage
     ): Promise<DataChannelList.DataChannelListPackage> {
-        const p = dto.Package;
-        const h = dto.Package.Header;
-
         const dataChannels: DataChannelList.DataChannel[] = [];
 
-        for (let c of p.DataChannelList.DataChannel) {
-            const dc = await DataChannelExtension.toDomainModel(c);
-            dataChannels.push(dc);
+        for (let dataChannel of dto.Package.DataChannelList.DataChannel) {
+            dataChannels.push(await DataChannelExtension.toDomainModel(dataChannel));
         }
+
+        const {
+            DataChannelListID,
+            DateCreated,
+            ShipID,
+            Author,
+            VersionInformation,
+            ...customHeaders
+        } = dto.Package.Header;
 
         return {
             package: {
                 header: {
                     dataChannelListId: {
-                        id: h.DataChannelListID.ID,
-                        timestamp: h.DataChannelListID.TimeStamp,
-                        version: Version.parse(h.DataChannelListID.Version),
+                        id: DataChannelListID.ID,
+                        timestamp: DataChannelListID.TimeStamp,
+                        version: Version.parse(DataChannelListID.Version),
                     },
-                    dateCreated: h.DateCreated,
-                    shipId: ShipId.parse(h.ShipID),
-                    author: h.Author,
-                    versionInformation: h.VersionInformation
+                    dateCreated: DateCreated,
+                    shipId: ShipId.parse(ShipID),
+                    author: Author,
+                    versionInformation: VersionInformation
                         ? {
-                              namingRule: h.VersionInformation.NamingRule,
+                              namingRule: VersionInformation.NamingRule,
                               namingSchemeVersion:
-                                  h.VersionInformation.NamingSchemeVersion,
-                              referenceUrl: h.VersionInformation.ReferenceURL,
+                                  VersionInformation.NamingSchemeVersion,
+                              referenceUrl: VersionInformation.ReferenceURL,
                           }
                         : undefined,
-                    customHeaders: h.AdditionalProperties,
+                    customHeaders: customHeaders,
                 },
                 dataChannelList: {
                     dataChannel: dataChannels,
@@ -88,137 +93,169 @@ export class Extensions implements IExtension {
 
 export class DataChannelExtension {
     public static toJsonDto(
-        c: DataChannelList.DataChannel
+        dataChannel: DataChannelList.DataChannel
     ): DataChannelListDto.DataChannel {
         return {
             DataChannelID: {
-                LocalID: c.dataChannelId.localId.verboseMode
-                    ? c.dataChannelId.localId.builder
+                LocalID: dataChannel.dataChannelId.localId.verboseMode
+                    ? dataChannel.dataChannelId.localId.builder
                           .withoutVerboseMode()
                           .build()
                           .toString()
-                    : c.dataChannelId.localId.toString(),
-                ShortID: c.dataChannelId.shortId,
-                NameObject: c.dataChannelId.nameObject
+                    : dataChannel.dataChannelId.localId.toString(),
+                ShortID: dataChannel.dataChannelId.shortId,
+                NameObject: dataChannel.dataChannelId.nameObject
                     ? {
-                          NamingRule: c.dataChannelId.nameObject.namingRule,
-                          AdditionalProperties:
-                              c.dataChannelId.nameObject.customProperties,
+                          NamingRule: dataChannel.dataChannelId.nameObject.namingRule,
+                          ...dataChannel.dataChannelId.nameObject.customProperties,
                       }
                     : undefined,
             },
             Property: {
                 DataChannelType: {
-                    Type: c.property.dataChannelType.type,
+                    Type: dataChannel.property.dataChannelType.type,
                     CalculationPeriod:
-                        c.property.dataChannelType.calculationPeriod,
-                    UpdateCycle: c.property.dataChannelType.updateCycle,
+                        dataChannel.property.dataChannelType.calculationPeriod,
+                    UpdateCycle: dataChannel.property.dataChannelType.updateCycle,
                 },
                 Format: {
-                    Type: c.property.format.type,
-                    Restriction: c.property.format.restriction && {
-                        Enumeration: c.property.format.restriction.enumeration,
-                        FractionDigits:
-                            c.property.format.restriction.fractionDigits,
-                        Length: c.property.format.restriction.length,
-                        MaxExclusive:
-                            c.property.format.restriction.maxExclusive,
-                        MaxInclusive:
-                            c.property.format.restriction.maxInclusive,
-                        MaxLength: c.property.format.restriction.maxLength,
-                        MinExclusive:
-                            c.property.format.restriction.minExclusive,
-                        MinInclusive:
-                            c.property.format.restriction.minInclusive,
-                        MinLength: c.property.format.restriction.minLength,
-                        Pattern: c.property.format.restriction.pattern,
-                        TotalDigits: c.property.format.restriction.totalDigits,
-                        WhiteSpace: c.property.format.restriction.whiteSpace
-                            ? (c.property.format.restriction
-                                  .whiteSpace as unknown as DataChannelListDto.RestrictionWhiteSpace)
-                            : undefined,
-                    },
+                    Type: dataChannel.property.format.type,
+                    Restriction: dataChannel.property.format.restriction
+                        ? {
+                              Enumeration:
+                                  dataChannel.property.format.restriction.enumeration,
+                              FractionDigits:
+                                  dataChannel.property.format.restriction.fractionDigits,
+                              Length: dataChannel.property.format.restriction.length,
+                              MaxExclusive:
+                                  dataChannel.property.format.restriction.maxExclusive,
+                              MaxInclusive:
+                                  dataChannel.property.format.restriction.maxInclusive,
+                              MaxLength:
+                                  dataChannel.property.format.restriction.maxLength,
+                              MinExclusive:
+                                  dataChannel.property.format.restriction.minExclusive,
+                              MinInclusive:
+                                  dataChannel.property.format.restriction.minInclusive,
+                              MinLength:
+                                  dataChannel.property.format.restriction.minLength,
+                              Pattern: dataChannel.property.format.restriction.pattern,
+                              TotalDigits:
+                                  dataChannel.property.format.restriction.totalDigits,
+                              WhiteSpace: dataChannel.property.format.restriction
+                                  .whiteSpace
+                                  ? (dataChannel.property.format.restriction
+                                        .whiteSpace as unknown as DataChannelListDto.WhiteSpace)
+                                  : undefined,
+                          }
+                        : undefined,
                 },
-                Range: c.property.range
+                Range: dataChannel.property.range
                     ? {
-                          Low: c.property.range.low,
-                          High: c.property.range.high,
+                          Low: dataChannel.property.range.low,
+                          High: dataChannel.property.range.high,
                       }
                     : undefined,
-                Unit: c.property.unit
+                Unit: dataChannel.property.unit
                     ? {
-                          UnitSymbol: c.property.unit.unitSymbol,
-                          QuantityName: c.property.unit.quantityName,
-                          AdditionalProperties: c.property.customProperties,
+                          UnitSymbol: dataChannel.property.unit.unitSymbol,
+                          QuantityName: dataChannel.property.unit.quantityName,
+                          ...dataChannel.property.unit.customProperties,
                       }
                     : undefined,
-                QualityCoding: c.property.qualityCoding,
-                AlertPriority: c.property.alertPriority,
-                Name: c.property.name,
-                Remarks: c.property.remarks,
-                AdditionalProperties: c.property.customProperties,
+                QualityCoding: dataChannel.property.qualityCoding,
+                AlertPriority: dataChannel.property.alertPriority,
+                Name: dataChannel.property.name,
+                Remarks: dataChannel.property.remarks,
+                ...dataChannel.property.customProperties,
             },
         };
     }
 
     public static async toDomainModel(
-        c: DataChannelListDto.DataChannel
+        dataChannel: DataChannelListDto.DataChannel
     ): Promise<DataChannelList.DataChannel> {
-        const localId = await LocalId.parseAsync(c.DataChannelID.LocalID);
+        const localId = await LocalId.parseAsync(
+            dataChannel.DataChannelID.LocalID
+        );
+
+        const mapNameObject = (): DataChannelList.NameObject | undefined => {
+            if (!dataChannel.DataChannelID.NameObject) return undefined;
+
+            const { NamingRule, ...custom } =
+                dataChannel.DataChannelID.NameObject;
+            return {
+                namingRule: NamingRule,
+                customProperties: custom,
+            };
+        };
+
+        const {
+            DataChannelType,
+            Format,
+            Range,
+            Unit,
+            QualityCoding,
+            AlertPriority,
+            Name,
+            Remarks,
+            ...customProperties
+        } = dataChannel.Property;
+
+        const mapUnit = (): DataChannelList.Unit | undefined => {
+            if (!Unit) return undefined;
+
+            const { UnitSymbol, QuantityName, ...custom } = Unit;
+            return {
+                unitSymbol: Unit.UnitSymbol,
+                quantityName: Unit.QuantityName,
+                customProperties: custom,
+            };
+        };
+
         return {
             dataChannelId: {
                 localId: localId,
-                shortId: c.DataChannelID.ShortID,
-                nameObject: c.DataChannelID.NameObject && {
-                    namingRule: c.DataChannelID.NameObject.NamingRule,
-                    customProperties:
-                        c.DataChannelID.NameObject.AdditionalProperties,
-                },
+                shortId: dataChannel.DataChannelID.ShortID,
+                nameObject: mapNameObject(),
             },
             property: {
                 dataChannelType: {
-                    type: c.Property.DataChannelType.Type,
-                    calculationPeriod:
-                        c.Property.DataChannelType.CalculationPeriod,
-                    updateCycle: c.Property.DataChannelType.UpdateCycle,
+                    type: DataChannelType.Type,
+                    calculationPeriod: DataChannelType.CalculationPeriod,
+                    updateCycle: DataChannelType.UpdateCycle,
                 },
                 format: {
-                    type: c.Property.Format.Type,
-                    restriction: c.Property.Format.Restriction && {
-                        enumeration: c.Property.Format.Restriction.Enumeration,
-                        fractionDigits:
-                            c.Property.Format.Restriction.FractionDigits,
-                        length: c.Property.Format.Restriction.Length,
-                        maxExclusive:
-                            c.Property.Format.Restriction.MaxExclusive,
-                        maxInclusive:
-                            c.Property.Format.Restriction.MaxInclusive,
-                        maxLength: c.Property.Format.Restriction?.MaxLength,
-                        minExclusive:
-                            c.Property.Format.Restriction.MinExclusive,
-                        minInclusive:
-                            c.Property.Format.Restriction.MinInclusive,
-                        minLength: c.Property.Format.Restriction.MinLength,
-                        pattern: c.Property.Format.Restriction.Pattern,
-                        totalDigits: c.Property.Format.Restriction.TotalDigits,
-                        whiteSpace: c.Property.Format.Restriction
-                            .WhiteSpace as unknown as DataChannelList.WhiteSpace,
-                    },
+                    type: Format.Type,
+                    restriction: Format.Restriction
+                        ? {
+                              enumeration: Format.Restriction.Enumeration,
+                              fractionDigits: Format.Restriction.FractionDigits,
+                              length: Format.Restriction.Length,
+                              maxExclusive: Format.Restriction.MaxExclusive,
+                              maxInclusive: Format.Restriction.MaxInclusive,
+                              maxLength: Format.Restriction?.MaxLength,
+                              minExclusive: Format.Restriction.MinExclusive,
+                              minInclusive: Format.Restriction.MinInclusive,
+                              minLength: Format.Restriction.MinLength,
+                              pattern: Format.Restriction.Pattern,
+                              totalDigits: Format.Restriction.TotalDigits,
+                              whiteSpace: Format.Restriction.WhiteSpace,
+                          }
+                        : undefined,
                 },
-                range: c.Property.Range && {
-                    low: c.Property.Range.Low,
-                    high: c.Property.Range.High,
-                },
-                unit: c.Property.Unit && {
-                    unitSymbol: c.Property.Unit.UnitSymbol,
-                    quantityName: c.Property.Unit.QuantityName,
-                    customProperties: c.Property.Unit.AdditionalProperties,
-                },
-                qualityCoding: c.Property.QualityCoding,
-                alertPriority: c.Property.AlertPriority,
-                name: c.Property.Name,
-                remarks: c.Property.Remarks,
-                customProperties: c.Property.AdditionalProperties,
+                range: Range
+                    ? {
+                          low: Range.Low,
+                          high: Range.High,
+                      }
+                    : undefined,
+                unit: mapUnit(),
+                qualityCoding: QualityCoding,
+                alertPriority: AlertPriority,
+                name: Name,
+                remarks: Remarks,
+                customProperties: customProperties,
             },
         };
     }

@@ -17,7 +17,7 @@ export namespace TimeSeries {
         dateModified?: Date;
         author?: string;
         systemConfiguration?: ConfigurationReference[];
-        customHeaders?: { [k: string]: object };
+        customHeaders?: { [k: string]: unknown };
     };
 
     export type ConfigurationReference = {
@@ -31,12 +31,12 @@ export namespace TimeSeries {
         dataConfiguration?: ConfigurationReference;
         tabularData?: TabularData[];
         eventData?: EventData;
-        customProperties?: { [k: string]: object };
+        customProperties?: { [k: string]: unknown };
     };
 
     export type TabularData = {
-        numberOfDataSet?: string;
-        numberOfDataChannel?: string;
+        numberOfDataSet?: number;
+        numberOfDataChannel?: number;
         dataChannelId?: DataChannelId[];
         dataSet?: TabularDataSet[];
     };
@@ -48,7 +48,7 @@ export namespace TimeSeries {
     };
 
     export type EventData = {
-        numberOfDataSet?: string;
+        numberOfDataSet?: number;
         dataSet?: EventDataSet[];
     };
 

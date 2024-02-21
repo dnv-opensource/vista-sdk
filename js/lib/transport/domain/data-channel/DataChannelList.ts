@@ -18,7 +18,7 @@ export namespace DataChannelList {
         versionInformation?: VersionInformation;
         author?: string;
         dateCreated?: Date;
-        customHeaders?: { [k: string]: object };
+        customHeaders?: { [k: string]: unknown };
     };
 
     export type ConfigurationReference = {
@@ -50,7 +50,7 @@ export namespace DataChannelList {
 
     export type NameObject = {
         namingRule: string;
-        customProperties?: { [k: string]: object };
+        customProperties?: { [k: string]: unknown };
     };
 
     export type Property = {
@@ -62,7 +62,7 @@ export namespace DataChannelList {
         alertPriority?: string;
         name?: string;
         remarks?: string;
-        customProperties?: { [k: string]: object };
+        customProperties?: { [k: string]: unknown };
     };
 
     export type Format = {
@@ -71,40 +71,40 @@ export namespace DataChannelList {
     };
 
     export type Range = {
-        high: string;
-        low: string;
+        high: number;
+        low: number;
     };
 
     export type Unit = {
         unitSymbol: string;
         quantityName?: string;
-        customProperties?: { [k: string]: object };
+        customProperties?: { [k: string]: unknown };
     };
 
     export type DataChannelType = {
         type: string;
-        updateCycle?: string;
-        calculationPeriod?: string;
+        updateCycle?: number;
+        calculationPeriod?: number;
     };
 
     export type Restriction = {
         enumeration?: string[];
-        fractionDigits?: string;
-        length?: string;
-        maxExclusive?: string;
-        maxInclusive?: string;
-        maxLength?: string;
-        minExclusive?: string;
-        minInclusive?: string;
-        minLength?: string;
+        fractionDigits?: number;
+        length?: number;
+        maxExclusive?: number;
+        maxInclusive?: number;
+        maxLength?: number;
+        minExclusive?: number;
+        minInclusive?: number;
+        minLength?: number;
         pattern?: string;
-        totalDigits?: string;
+        totalDigits?: number;
         whiteSpace?: WhiteSpace;
     };
 
     export enum WhiteSpace {
-        Preserve = 0,
-        Replace = 1,
-        Collapse = 2,
+        Preserve = 'Preserve',
+        Replace = 'Replace',
+        Collapse = 'Collapse',
     }
 }

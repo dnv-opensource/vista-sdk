@@ -4,10 +4,8 @@ export namespace TimeSeriesDto {
      *
      * A TimeSeriesData package for ISO19848
      *
-     *
      * Make sure to
-     *      replace [k: string]: unknown; with AdditionalProperties
-     *      replace string to Date where needed
+     * - replace string to Date where needed
      */
     export interface TimeSeriesDataPackage {
         Package: Package;
@@ -23,9 +21,7 @@ export namespace TimeSeriesDto {
         DateModified?: Date;
         Author?: string;
         SystemConfiguration?: ConfigurationReference[];
-        AdditionalProperties?: {
-            [k: string]: object;
-        };
+        [k: string]: unknown;
     }
     export interface TimeSpan {
         Start: Date;
@@ -39,26 +35,24 @@ export namespace TimeSeriesDto {
         DataConfiguration?: ConfigurationReference;
         TabularData?: TabularData[];
         EventData?: EventData;
-        AdditionalProperties?: {
-            [k: string]: object;
-        };
+        [k: string]: unknown;
     }
     export interface TabularData {
-        NumberOfDataSet?: string;
-        NumberOfDataChannel?: string;
+        NumberOfDataSet?: number;
+        NumberOfDataChannel?: number;
         DataChannelID?: string[];
-        DataSet?: TabularDataSet[];
+        DataSet?: DataSet_Tabular[];
     }
-    export interface TabularDataSet {
+    export interface DataSet_Tabular {
         TimeStamp: Date;
         Value: string[];
         Quality?: string[];
     }
     export interface EventData {
-        NumberOfDataSet?: string;
-        DataSet?: EventDataSet[];
+        NumberOfDataSet?: number;
+        DataSet?: DataSet_Event[];
     }
-    export interface EventDataSet {
+    export interface DataSet_Event {
         TimeStamp: Date;
         DataChannelID: string;
         Value: string;

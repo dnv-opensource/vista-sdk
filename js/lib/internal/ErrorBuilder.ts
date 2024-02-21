@@ -13,7 +13,7 @@ export abstract class ErrorBuilder<T> {
     }
 
     public push(error: T | Error<T>) {
-        if (typeof error === "object" && "message" in error) {
+        if (typeof error === "object" && !!error && "message" in error) {
             this._errors.push(error);
             return;
         }
