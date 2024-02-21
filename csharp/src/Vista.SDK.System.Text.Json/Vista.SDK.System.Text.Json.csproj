@@ -4,6 +4,10 @@
     <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <PackageId>DNV.Vista.SDK.System.Text.Json</PackageId>
+    <Description>
+      The Vista SDK packages codify the rules and principles of DNV Vessel Information Structure (VIS) and ISO19848/19847 standards to enable and support users and implementers.
+      DNV.Vista.SDK.System.Text.Json implements JSON support for the ISO19848 packages.
+    </Description>
   </PropertyGroup>
 
   <ItemGroup>

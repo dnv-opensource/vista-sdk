@@ -47,7 +47,7 @@ jobs:
         run: echo echo "$(pwd)" && find . -path "src/*/*.*sproj"
 
       - name: Pack
-        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.0.2-preview-$GITHUB_RUN_NUMBER
+        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.2.0-preview-$GITHUB_RUN_NUMBER
 
       - name: Push
         if: ${{ success() && !github.base_ref }}

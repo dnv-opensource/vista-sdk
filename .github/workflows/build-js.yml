@@ -39,6 +39,6 @@ jobs:
 
       - name: Publish
         if: ${{ success() && !github.base_ref }}
-        run: npm version $(node -p "require('./package.json').version")-$(node -p "114 + ${{ github.run_number }}"); npm publish --access public;
+        run: cp ../README.md ./README.md; npm version $(node -p "require('./package.json').version").$(node -p "${{ github.run_number }}"); npm publish --access public --tag preview;
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}

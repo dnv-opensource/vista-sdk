@@ -14,7 +14,6 @@
     <Author>DNV AS</Author>
     <Company>DNV AS</Company>
     <Copyright>DNV AS</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
     <Copyright>Copyright 2022 DNV AS</Copyright>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
