@@ -1,3 +1,11 @@
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dnv-opensource/vista-sdk/build-csharp.yml?branch=main&label=C%23)](https://github.com/dnv-opensource/vista-sdk/actions)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dnv-opensource/vista-sdk/build-js.yml?branch=main&label=JS)](https://github.com/dnv-opensource/vista-sdk/actions)
+[![GitHub](https://img.shields.io/github/license/dnv-opensource/vista-sdk?style=flat-square)](https://github.com/dnv-opensource/vista-sdk/blob/main/LICENSE)<br/>
+[![SDK NuGet current](https://img.shields.io/nuget/v/DNV.Vista.SDK?label=NuGet%20DNV.Vista.SDK)](https://www.nuget.org/packages/DNV.Vista.SDK)
+[![SDK NuGet prerelease](https://img.shields.io/nuget/vpre/DNV.Vista.SDK?label=NuGet%20DNV.Vista.SDK)](https://www.nuget.org/packages/DNV.Vista.SDK)<br/>
+[![SDK NPM current](https://img.shields.io/npm/v/dnv-vista-sdk?label=NPM%20dnv-vista-sdk)](https://www.npmjs.com/package/dnv-vista-sdk)
+[![SDK NPM current](https://img.shields.io/npm/v/dnv-vista-sdk/preview?label=NPM%20dnv-vista-sdk)](https://www.npmjs.com/package/dnv-vista-sdk)<br/>
+
 ## Vista SDK
 The Vista team at DNV are working on tooling related to
 * DNV Vessel Information Structure (VIS)
@@ -10,9 +18,16 @@ users and implementers of the standards.
 Our plan is to develop SDKs for some of the most common platforms. We are starting with .NET, Python and JavaScript.
 We will be developing these SDKs as open source projects. Feel free to provide input, request changes or make contributions by creating issues in this repository.
 
-For general documentation relating to VIS and relating standard. See [vista.dnv.com/docs](https://vista.dnv.com/docs).
+For general documentation relating to VIS and relating standard. See [docs.vista.dnv.com](https://docs.vista.dnv.com).
 
-> **_NOTE:_**  These SDKs are currently being used in production at DNV, and will be open sourced and released under preview initially.
+### Status
+
+> [!NOTE]
+> The **v0.1** versions of the SDK are currently in production use at DNV for various services.
+> We are currently working on the **v0.2** version of the SDKs where we are adressing several usability and API design issues.
+> When **v0.2** is finalized we are hoping that **v1.0** will quickly follow.
+> New users should stick to **v0.1** currently while we work on stabilizing APIs and design.
+> Functionally (in terms of domain), not much will change
 
 ### Content
 
@@ -24,15 +39,9 @@ Each SDK makes use of the contents of the resources and schemas folders to gener
  ┃ ┣ 📜codebooks-vis-3-4a.json.gz
  ┃ ┗ 📜gmod-vis-3-4a.json.gz
  ┣ 📂schemas
- ┃ ┣ 📂avro
- ┃ ┃ ┣ 📜DataChannelList.avsc
- ┃ ┃ ┗ 📜TimeSeriesData.avsc
  ┃ ┣ 📂json
  ┃ ┃ ┣ 📜DataChannelList.schema.json
  ┃ ┃ ┗ 📜TimeSeriesData.schema.json
- ┃ ┗ 📂xml
- ┃ ┃ ┣ 📜DataChannelList.xsd
- ┃ ┃ ┗ 📜TimeSeriesData.xsd
  ┣ 📂csharp
  ┣ 📂python
  ┣ 📂js
@@ -46,19 +55,25 @@ This section will outline the various components and modules in our SDKs.
 
 #### Vessel Information Structure
 
-There are two codified components of VIS in our SDKs
+There are various components of VIS in our SDKs:
 
-* Generic product model (Gmod)
-* Codebooks
-* Coming soon - versioning support, ability to convert gmod nodes and paths between versions of gmod
+* Generic product model (Gmod) - C#, JS
+* Product model (Pmod) - JS
+* Codebooks (metadata tags) - C#, JS
+* Locations - C#, JS
 
-For more information on this concepts, check out [vista.dnv.com/docs](https://vista.dnv.com/docs).
+For more information on this concepts, check out [docs.vista.dnv.com](https://docs.vista.dnv.com).
 
 #### ISO-19848 and ISO-19847
 
 Part of these standards are the definition of datastructures used for communicating and sharing sensor data.
 Note that while compression isnt explicitly mentioned in these standards, the standard doesnt prohibit use
 of compression when implementing these standards, as long as the datastructures remain the same.
+
+Related components:
+
+* Universal ID & Local ID - C#, JS
+* DataChannelList & TimeSeriesData - C#, JS
 
 ### Benchmarks
 
@@ -101,17 +116,25 @@ WarmupCount=3
 |   Avro |        Bzip2 |                9 |  13,762.6 μs |   2,310.1 μs |    126.62 μs |      19.5 KB |
 
 
-## Builder pattern
-Typically, when the SDK provides code for building classes, it does so in a Builder Pattern. It provides possibility to chain using With, TryWith and Without methods. 
+### API patterns
+
+#### Immutability
+
+Domain models exposed in the SDKs are generally immutable,
+the builder APIs construct new instances while passing along the old data that is not modified by the builder method invoked.
+
+#### Builder pattern
+
+Typically, when the SDK provides code for building classes, it does so in a Builder Pattern. It provides possibility to chain using With, TryWith and Without methods.
+
+```csharp
+builder = Create(someIntro)
+    .WithSomeValue(someValue)
+    .TryWithSomeOtherValue(someOtherValue)
+    .WithoutSomeThirdValue() // usually without/limited arguments
+builder = builder.TryWithValue(item, out var success)
 ```
-        builder = Create(someIntro)
-            .WithSomeValue(in someValue)
-            .TryWithSomeOtherValue(in someOtherValue)
-            .WithoutSomeThirdValue() // usually without/limited arguments
-        builder.TryWithValue(item, out var success)
-        if(!success)
-          throw
-```
+
 * `With` should be used when the operation is expected to receive non-nullable values and succeed without further checking. It will throw error if provided with wrong arguments.
 * `TryWith` should be used in two cases: When you don't want to be bothered by failures behind the scene, and when you want to know if it went ok, but without exceptions. If you want to check if the opration went as expected, you can use the try do out param - "succeeded" e.g. TryWithSomething(intput, out bool succeeded).
 * `Without` provides functionality for removing certain elements from the chain. Typically without arguments/limited arguments
