@@ -73,7 +73,7 @@ describe("TimeSeriesDataPackage", () => {
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
                 .numberOfDataSet
-        ).toEqual("1");
+        ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
                 .dataSet![0]!.value
@@ -87,11 +87,11 @@ describe("TimeSeriesDataPackage", () => {
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
                 .numberOfDataSet
-        ).toEqual("1");
+        ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
                 .numberOfDataPoints
-        ).toEqual("1");
+        ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
                 .dataId![0]
