@@ -1,6 +1,8 @@
 import { LocalId, LocalIdBuilder, VisVersion } from "../../lib";
 import { DataChannelList, ShipId } from "../../lib/transport/domain";
 import { Version } from "../../lib/transport/domain/data-channel/Version";
+import { validate } from "jsonschema";
+import { readFile } from "fs/promises";
 
 describe("DataChannel", () => {
     const validLocalIdStr =
@@ -112,5 +114,14 @@ describe("DataChannel", () => {
             dataChannelListPackage.package.dataChannelList.dataChannel[0]!
                 .property.dataChannelType.type
         ).toEqual("Inst");
+    });
+
+    it("JSONSchema validation", async () => {
+        var sample = await readFile('../schemas/json/DataChannelList.sample.json', { encoding: 'utf8', flag: 'r' });
+        var schema = await readFile('../schemas/json/DataChannelList.schema.json', { encoding: 'utf8', flag: 'r' });
+
+        const result = validate(JSON.parse(sample), JSON.parse(schema));
+        expect(result.errors).toHaveLength(0);
+        expect(result.valid).toBe(true);
     });
 });

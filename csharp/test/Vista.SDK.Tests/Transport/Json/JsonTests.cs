@@ -2,6 +2,8 @@ using System.Text.Json;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using ICSharpCode.SharpZipLib.BZip2;
+using Json.Schema;
+using Json.Schema.Serialization;
 using Vista.SDK.Transport.Json;
 using Vista.SDK.Transport.Json.DataChannel;
 using Vista.SDK.Transport.Json.TimeSeriesData;
@@ -10,6 +12,45 @@ namespace Vista.SDK.Tests.Transport.Json;
 
 public class JsonTests
 {
+    [Theory]
+    [InlineData("schemas/json/DataChannelList.sample.json")]
+    [InlineData("schemas/json/DataChannelList.sample.compact.json")]
+    public async Task Test_DataChannelList_JSONSchema_Validation(string file)
+    {
+        var schemaStr = await File.ReadAllTextAsync("schemas/json/DataChannelList.schema.json");
+        var schema = JsonSerializer.Deserialize<JsonSchema>(schemaStr);
+        Assert.NotNull(schema);
+
+        var jsonStr = await File.ReadAllTextAsync(file);
+        ValidatingJsonConverter.MapType<DataChannelListPackage>(schema);
+        var options = new JsonSerializerOptions { Converters = { new ValidatingJsonConverter() } };
+        var package = JsonSerializer.Deserialize<DataChannelListPackage>(jsonStr, options);
+        Assert.NotNull(package);
+
+        var jsonDoc = JsonDocument.Parse(jsonStr);
+        var results = schema.Evaluate(jsonDoc);
+        Assert.Empty(results.Errors ?? new Dictionary<string, string>());
+    }
+
+    [Theory]
+    [InlineData("schemas/json/TimeSeriesData.sample.json")]
+    public async Task Test_TimeSeriesData_JSONSchema_Validation(string file)
+    {
+        var schemaStr = await File.ReadAllTextAsync("schemas/json/TimeSeriesData.schema.json");
+        var schema = JsonSerializer.Deserialize<JsonSchema>(schemaStr);
+        Assert.NotNull(schema);
+
+        var jsonStr = await File.ReadAllTextAsync(file);
+        ValidatingJsonConverter.MapType<TimeSeriesDataPackage>(schema);
+        var options = new JsonSerializerOptions { Converters = { new ValidatingJsonConverter() } };
+        var package = JsonSerializer.Deserialize<TimeSeriesDataPackage>(jsonStr, options);
+        Assert.NotNull(package);
+
+        var jsonDoc = JsonDocument.Parse(jsonStr);
+        var results = schema.Evaluate(jsonDoc);
+        Assert.Empty(results.Errors ?? new Dictionary<string, string>());
+    }
+
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
     [InlineData("schemas/json/DataChannelList.sample.json")]

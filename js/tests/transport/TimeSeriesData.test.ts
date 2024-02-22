@@ -1,3 +1,5 @@
+import { readFile } from "fs/promises";
+import { validate } from "jsonschema";
 import { DataChannelId, ShipId, TimeSeries } from "../../lib/transport/domain";
 
 describe("TimeSeriesDataPackage", () => {
@@ -104,5 +106,14 @@ describe("TimeSeriesDataPackage", () => {
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
                 .dataSet![0]!.value[0]
         ).toEqual(value);
+    });
+
+    it("JSONSchema validation", async () => {
+        var sample = await readFile('../schemas/json/TimeSeriesData.sample.json', { encoding: 'utf8', flag: 'r' });
+        var schema = await readFile('../schemas/json/TimeSeriesData.schema.json', { encoding: 'utf8', flag: 'r' });
+
+        const result = validate(JSON.parse(sample), JSON.parse(schema));
+        expect(result.errors).toHaveLength(0);
+        expect(result.valid).toBe(true);
     });
 });

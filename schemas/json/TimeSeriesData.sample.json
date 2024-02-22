@@ -28,8 +28,8 @@
         },
         "TabularData": [
           {
-            "NumberOfDataSet": "2",
-            "NumberOfDataChannel": "2",
+            "NumberOfDataSet": 2,
+            "NumberOfDataChannel": 2,
             "DataChannelID": [
               "0010",
               "0020"
@@ -60,8 +60,8 @@
             ]
           },
           {
-            "NumberOfDataSet": "3",
-            "NumberOfDataChannel": "1",
+            "NumberOfDataSet": 3,
+            "NumberOfDataChannel": 1,
             "DataChannelID": [
               "0110"
             ],
@@ -97,7 +97,7 @@
           }
         ],
         "EventData": {
-          "NumberOfDataSet": "3",
+          "NumberOfDataSet": 3,
           "DataSet": [
             {
               "TimeStamp": "2016-01-01T12:00:01Z",
@@ -127,8 +127,8 @@
         },
         "TabularData": [
           {
-            "NumberOfDataSet": "1",
-            "NumberOfDataChannel": "2",
+            "NumberOfDataSet": 1,
+            "NumberOfDataChannel": 2,
             "DataChannelID": [
               "0010",
               "0020"
@@ -148,8 +148,8 @@
             ]
           },
           {
-            "NumberOfDataSet": "2",
-            "NumberOfDataChannel": "1",
+            "NumberOfDataSet": 2,
+            "NumberOfDataChannel": 1,
             "DataChannelID": [
               "0110"
             ],
