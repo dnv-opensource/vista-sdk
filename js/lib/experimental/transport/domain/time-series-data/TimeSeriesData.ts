@@ -36,8 +36,8 @@ export namespace TimeSeries {
     };
 
     export type TabularData = {
-        numberOfDataSet?: string;
-        numberOfDataPoints?: string;
+        numberOfDataSet?: number;
+        numberOfDataPoints?: number;
         dataId?: DataId[];
         dataSet?: TabularDataSet[];
     };
@@ -49,7 +49,7 @@ export namespace TimeSeries {
     };
 
     export type EventData = {
-        numberOfDataSet?: string;
+        numberOfDataSet?: number;
         dataSet?: EventDataSet[];
     };
 

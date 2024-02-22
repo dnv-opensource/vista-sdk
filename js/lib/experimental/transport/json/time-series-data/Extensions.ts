@@ -129,10 +129,12 @@ export class Extensions {
             }
 
             timeSeriesData.push({
-                dataConfiguration: t.DataConfiguration && {
-                    timeStamp: t.DataConfiguration.TimeStamp,
-                    id: t.DataConfiguration.ID,
-                },
+                dataConfiguration: t.DataConfiguration
+                    ? {
+                          timeStamp: t.DataConfiguration.TimeStamp,
+                          id: t.DataConfiguration.ID,
+                      }
+                    : undefined,
                 eventData: {
                     dataSet: eventDataSet.length > 0 ? eventDataSet : undefined,
                     numberOfDataSet: t.EventData?.NumberOfDataSet,

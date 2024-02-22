@@ -71,8 +71,8 @@ export namespace DataList {
     };
 
     export type Range = {
-        high: string;
-        low: string;
+        high: number;
+        low: number;
     };
 
     export type Unit = {
@@ -83,22 +83,28 @@ export namespace DataList {
 
     export type DataType = {
         type: string;
-        updateCycle?: string;
-        calculationPeriod?: string;
+        updateCycle?: number;
+        calculationPeriod?: number;
     };
 
     export type Restriction = {
         enumeration?: string[];
-        fractionDigits?: string;
-        length?: string;
-        maxExclusive?: string;
-        maxInclusive?: string;
-        maxLength?: string;
-        minExclusive?: string;
-        minInclusive?: string;
-        minLength?: string;
+        fractionDigits?: number;
+        length?: number;
+        maxExclusive?: number;
+        maxInclusive?: number;
+        maxLength?: number;
+        minExclusive?: number;
+        minInclusive?: number;
+        minLength?: number;
         pattern?: string;
-        totalDigits?: string;
-        whiteSpace?: "Preserve" | "Replace" | "Collapse";
+        totalDigits?: number;
+        whiteSpace?: WhiteSpace;
     };
+
+    export enum WhiteSpace {
+        Preserve = "Preserve",
+        Replace = "Replace",
+        Collapse = "Collapse",
+    }
 }
