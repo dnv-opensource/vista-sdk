@@ -25,7 +25,7 @@ describe("TimeSeriesDataPackage", () => {
                                     quality: quality,
                                 },
                             ],
-                            numberOfDataSet: "1",
+                            numberOfDataSet: 1,
                         },
                         tabularData: [
                             {
@@ -37,8 +37,8 @@ describe("TimeSeriesDataPackage", () => {
                                         quality: [quality],
                                     },
                                 ],
-                                numberOfDataPoints: "1",
-                                numberOfDataSet: "1",
+                                numberOfDataPoints: 1,
+                                numberOfDataSet: 1,
                             },
                         ],
                         dataConfiguration: {
