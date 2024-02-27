@@ -1,3 +1,4 @@
+import { VIS } from "../../../..";
 import { ILocalId } from "../../../../ILocalId";
 import { Version } from "../../../../transport/domain/data-channel/Version";
 import { AssetIdentifier } from "../../domain/AssetIdentifier";
@@ -50,13 +51,24 @@ export class Extensions implements IExtension {
     ): Promise<DataList.DataListPackage> {
         const p = dto.Package;
         const h = dto.Package.Header;
+        const version = h.DataListID.Version
+            ? Version.parse(h.DataListID.Version)
+            : undefined;
 
-        const dataPromises: Promise<DataList.Data>[] = [];
+        if (version) {
+            // Cache expected Vis version
+            await version.match<Promise<void>>(
+                async (v) => {
+                    await VIS.instance.getGmod(v);
+                },
+                (_) => Promise.resolve()
+            );
+        }
+
+        const datas: DataList.Data[] = [];
 
         for (let c of p.DataList.Data)
-            dataPromises.push(DataExtension.toDomainModel(c));
-
-        const datas = await Promise.all(dataPromises);
+            datas.push(await DataExtension.toDomainModel(c));
 
         const {
             AssetId,
@@ -73,9 +85,7 @@ export class Extensions implements IExtension {
                     dataListId: {
                         id: h.DataListID.ID,
                         timestamp: new Date(h.DataListID.TimeStamp),
-                        version: h.DataListID.Version
-                            ? Version.parse(h.DataListID.Version)
-                            : undefined,
+                        version,
                     },
                     dateCreated: h.DateCreated
                         ? new Date(h.DateCreated)
@@ -121,27 +131,34 @@ export class DataExtension {
                 },
                 Format: {
                     Type: c.property.format.type,
-                    Restriction: c.property.format.restriction && {
-                        Enumeration: c.property.format.restriction.enumeration,
-                        FractionDigits:
-                            c.property.format.restriction.fractionDigits,
-                        Length: c.property.format.restriction.length,
-                        MaxExclusive:
-                            c.property.format.restriction.maxExclusive,
-                        MaxInclusive:
-                            c.property.format.restriction.maxInclusive,
-                        MaxLength: c.property.format.restriction.maxLength,
-                        MinExclusive:
-                            c.property.format.restriction.minExclusive,
-                        MinInclusive:
-                            c.property.format.restriction.minInclusive,
-                        MinLength: c.property.format.restriction.minLength,
-                        Pattern: c.property.format.restriction.pattern,
-                        TotalDigits: c.property.format.restriction.totalDigits,
-                        WhiteSpace: c.property.format.restriction.whiteSpace
-                            ? c.property.format.restriction.whiteSpace
-                            : undefined,
-                    },
+                    Restriction: c.property.format.restriction
+                        ? {
+                              Enumeration:
+                                  c.property.format.restriction.enumeration,
+                              FractionDigits:
+                                  c.property.format.restriction.fractionDigits,
+                              Length: c.property.format.restriction.length,
+                              MaxExclusive:
+                                  c.property.format.restriction.maxExclusive,
+                              MaxInclusive:
+                                  c.property.format.restriction.maxInclusive,
+                              MaxLength:
+                                  c.property.format.restriction.maxLength,
+                              MinExclusive:
+                                  c.property.format.restriction.minExclusive,
+                              MinInclusive:
+                                  c.property.format.restriction.minInclusive,
+                              MinLength:
+                                  c.property.format.restriction.minLength,
+                              Pattern: c.property.format.restriction.pattern,
+                              TotalDigits:
+                                  c.property.format.restriction.totalDigits,
+                              WhiteSpace: c.property.format.restriction
+                                  .whiteSpace
+                                  ? c.property.format.restriction.whiteSpace
+                                  : undefined,
+                          }
+                        : undefined,
                 },
                 Range: c.property.range
                     ? {
@@ -153,14 +170,14 @@ export class DataExtension {
                     ? {
                           UnitSymbol: c.property.unit.unitSymbol,
                           QuantityName: c.property.unit.quantityName,
-                          AdditionalProperties: c.property.customProperties,
+                          ...c.property.customProperties,
                       }
                     : undefined,
                 QualityCoding: c.property.qualityCoding,
                 AlertPriority: c.property.alertPriority,
                 Name: c.property.name,
                 Remarks: c.property.remarks,
-                AdditionalProperties: c.property.customProperties,
+                ...c.property.customProperties,
             },
         };
     }
@@ -209,26 +226,36 @@ export class DataExtension {
             },
             format: {
                 type: c.Property.Format.Type,
-                restriction: c.Property.Format.Restriction && {
-                    enumeration: c.Property.Format.Restriction.Enumeration,
-                    fractionDigits:
-                        c.Property.Format.Restriction.FractionDigits,
-                    length: c.Property.Format.Restriction.Length,
-                    maxExclusive: c.Property.Format.Restriction.MaxExclusive,
-                    maxInclusive: c.Property.Format.Restriction.MaxInclusive,
-                    maxLength: c.Property.Format.Restriction?.MaxLength,
-                    minExclusive: c.Property.Format.Restriction.MinExclusive,
-                    minInclusive: c.Property.Format.Restriction.MinInclusive,
-                    minLength: c.Property.Format.Restriction.MinLength,
-                    pattern: c.Property.Format.Restriction.Pattern,
-                    totalDigits: c.Property.Format.Restriction.TotalDigits,
-                    whiteSpace: c.Property.Format.Restriction.WhiteSpace,
-                },
+                restriction: c.Property.Format.Restriction
+                    ? {
+                          enumeration:
+                              c.Property.Format.Restriction.Enumeration,
+                          fractionDigits:
+                              c.Property.Format.Restriction.FractionDigits,
+                          length: c.Property.Format.Restriction.Length,
+                          maxExclusive:
+                              c.Property.Format.Restriction.MaxExclusive,
+                          maxInclusive:
+                              c.Property.Format.Restriction.MaxInclusive,
+                          maxLength: c.Property.Format.Restriction?.MaxLength,
+                          minExclusive:
+                              c.Property.Format.Restriction.MinExclusive,
+                          minInclusive:
+                              c.Property.Format.Restriction.MinInclusive,
+                          minLength: c.Property.Format.Restriction.MinLength,
+                          pattern: c.Property.Format.Restriction.Pattern,
+                          totalDigits:
+                              c.Property.Format.Restriction.TotalDigits,
+                          whiteSpace: c.Property.Format.Restriction.WhiteSpace,
+                      }
+                    : undefined,
             },
-            range: c.Property.Range && {
-                low: c.Property.Range.Low,
-                high: c.Property.Range.High,
-            },
+            range: c.Property.Range
+                ? {
+                      low: c.Property.Range.Low,
+                      high: c.Property.Range.High,
+                  }
+                : undefined,
             unit,
             qualityCoding: c.Property.QualityCoding,
             alertPriority: c.Property.AlertPriority,
