@@ -286,7 +286,8 @@ public class LocalIdTests
         var localId = LocalIdBuilder.Parse(localIdAsString);
     }
 
-    [Fact(Skip = "LocalIds have a lot of location errors")]
+    // [Fact(Skip = "LocalIds have a lot of location errors")]
+    [Fact]
     public async Task SmokeTest_Parsing()
     {
         await using (var file = File.OpenRead("testdata/LocalIds.txt"))

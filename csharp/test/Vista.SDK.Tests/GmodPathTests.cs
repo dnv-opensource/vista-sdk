@@ -1,17 +1,17 @@
-using System.Reflection.Metadata;
-using Vista.SDK;
-
 namespace Vista.SDK.Tests;
 
 public class GmodPathTests
 {
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddValidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
-    public void Test_GmodPath_Parse(string inputPath)
+    public void Test_GmodPath_Parse(GmodPathTestItem item)
     {
+        var visVersion = VisVersions.Parse(item.VisVersion);
+        var inputPath = item.Path;
+
         var (_, vis) = VISTests.GetVis();
 
-        var parsed = GmodPath.TryParse(inputPath, VisVersion.v3_4a, out var path);
+        var parsed = GmodPath.TryParse(inputPath, visVersion, out var path);
         Assert.True(parsed);
         Assert.NotNull(path);
         Assert.Equal(inputPath, path?.ToString());
@@ -19,11 +19,14 @@ public class GmodPathTests
 
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddInvalidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
-    public void Test_GmodPath_Parse_Invalid(string inputPath)
+    public void Test_GmodPath_Parse_Invalid(GmodPathTestItem item)
     {
+        var visVersion = VisVersions.Parse(item.VisVersion);
+        var inputPath = item.Path;
+
         var (_, vis) = VISTests.GetVis();
 
-        var parsed = GmodPath.TryParse(inputPath, VisVersion.v3_4a, out var path);
+        var parsed = GmodPath.TryParse(inputPath, visVersion, out var path);
         Assert.False(parsed);
         Assert.Null(path);
     }
@@ -227,9 +230,11 @@ public class GmodPathTests
 
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddValidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
-    public void Test_Valid_GmodPath_IndividualizableSets(string inputPath)
+    public void Test_Valid_GmodPath_IndividualizableSets(GmodPathTestItem item)
     {
-        var version = VisVersion.v3_4a;
+        var version = VisVersions.Parse(item.VisVersion);
+        var inputPath = item.Path;
+
         var gmod = VIS.Instance.GetGmod(version);
 
         var path = gmod.ParsePath(inputPath);
@@ -245,9 +250,11 @@ public class GmodPathTests
 
     [Theory]
     [MemberData(nameof(VistaSDKTestData.AddValidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
-    public void Test_Valid_GmodPath_IndividualizableSets_FullPath(string inputPath)
+    public void Test_Valid_GmodPath_IndividualizableSets_FullPath(GmodPathTestItem item)
     {
-        var version = VisVersion.v3_4a;
+        var version = VisVersions.Parse(item.VisVersion);
+        var inputPath = item.Path;
+
         var gmod = VIS.Instance.GetGmod(version);
 
         var path = GmodPath.ParseFullPath(gmod.ParsePath(inputPath).ToFullPathString(), version);

@@ -109,9 +109,14 @@ public record InvalidLocalIds(
 
 public record LocalIdTestData([property: JsonPropertyName("InvalidLocalIds")] InvalidLocalIds[] InvalidLocalIds);
 
+public record GmodPathTestItem(
+    [property: JsonPropertyName("path")] string Path,
+    [property: JsonPropertyName("visVersion")] string VisVersion
+);
+
 public record GmodPathTestData(
-    [property: JsonPropertyName("Valid")] string[] Valid,
-    [property: JsonPropertyName("Invalid")] string[] Invalid
+    [property: JsonPropertyName("Valid")] GmodPathTestItem[] Valid,
+    [property: JsonPropertyName("Invalid")] GmodPathTestItem[] Invalid
 );
 
 public record CodebookTestData(

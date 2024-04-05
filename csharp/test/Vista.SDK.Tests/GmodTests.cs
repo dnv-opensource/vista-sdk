@@ -233,7 +233,8 @@ public class GmodTests
         var gmod = vis.GetGmod(VisVersion.v3_4a);
 
         var paths = new List<GmodPath>();
-
+        var maxExpected = TraversalOptions.DEFAULT_MAX_TRAVERSAL_OCCURRENCE;
+        int maxOccurrence = 0;
         var completed = gmod.Traverse(
             (parents, node) =>
             {
@@ -244,9 +245,43 @@ public class GmodTests
                     paths.Add(new GmodPath(parents.ToList(), node));
                 }
 
+                var skipOccurenceCheck = Gmod.IsProductSelectionAssignment(parents.LastOrDefault(), node);
+                if (skipOccurenceCheck)
+                    return TraversalHandlerResult.Continue;
+                var occ = Occurrences(parents, node);
+                if (occ > maxOccurrence)
+                    maxOccurrence = occ;
+
                 return TraversalHandlerResult.Continue;
             }
         );
+        Assert.Equal(maxExpected, maxOccurrence);
+        Assert.True(completed);
+    }
+
+    [Fact]
+    public void Test_Full_Traversal_With_Options()
+    {
+        var (_, vis) = VISTests.GetVis();
+
+        var gmod = vis.GetGmod(VisVersion.v3_4a);
+
+        var maxExpected = 2;
+        int maxOccurrence = 0;
+        var completed = gmod.Traverse(
+            (parents, node) =>
+            {
+                var skipOccurenceCheck = Gmod.IsProductSelectionAssignment(parents.LastOrDefault(), node);
+                if (skipOccurenceCheck)
+                    return TraversalHandlerResult.Continue;
+                var occ = Occurrences(parents, node);
+                if (occ > maxOccurrence)
+                    maxOccurrence = occ;
+                return TraversalHandlerResult.Continue;
+            },
+            new TraversalOptions { MaxTraversalOccurrence = maxExpected }
+        );
+        Assert.Equal(maxExpected, maxOccurrence);
         Assert.True(completed);
     }
 
@@ -300,4 +335,6 @@ public class GmodTests
     {
         public int NodeCount { get; set; }
     }
+
+    private int Occurrences(IReadOnlyList<GmodNode> parents, GmodNode node) => parents.Count(p => p.Code == node.Code);
 }

@@ -14,16 +14,41 @@ public enum TraversalHandlerResult
     Continue,
 }
 
+public record TraversalOptions()
+{
+    internal const int DEFAULT_MAX_TRAVERSAL_OCCURRENCE = 1;
+
+    /// <summary>The maximum number of times a node can occur in a path. The traversal will stop and the first node to reach the limit, and include it as the end node. Increasing this will drastically reduce performance</summary>
+    /// <remarks>The default value is 1.</remarks>
+    /// <example>411.1/C101.63/S206.22/S110.2/C101 = MaxTraversalOccurrence 1. The travesal algorithm finds the second instance of C101 in the path, and stop, but include the node in the result.</example>
+    public int MaxTraversalOccurrence { get; set; } = DEFAULT_MAX_TRAVERSAL_OCCURRENCE;
+}
+
 public sealed partial class Gmod
 {
-    public bool Traverse(TraverseHandler handler) =>
-        Traverse(handler, _rootNode, (handler, parents, node) => handler(parents, node));
+    public bool Traverse(TraverseHandler handler, TraversalOptions? options = null) =>
+        Traverse(handler, _rootNode, (handler, parents, node) => handler(parents, node), options);
 
-    public bool Traverse<TState>(TState state, TraverseHandlerWithState<TState> handler) =>
-        Traverse(state, _rootNode, handler);
+    public bool Traverse<TState>(
+        TState state,
+        TraverseHandlerWithState<TState> handler,
+        TraversalOptions? options = null
+    ) => Traverse(state, _rootNode, handler, options);
 
-    public bool Traverse(GmodNode rootNode, TraverseHandler handler) =>
-        Traverse(handler, rootNode, (handler, parents, node) => handler(parents, node));
+    public bool Traverse(GmodNode rootNode, TraverseHandler handler, TraversalOptions? options = null) =>
+        Traverse(handler, rootNode, (handler, parents, node) => handler(parents, node), options);
+
+    public bool Traverse<TState>(
+        TState state,
+        GmodNode rootNode,
+        TraverseHandlerWithState<TState> handler,
+        TraversalOptions? options = null
+    )
+    {
+        var opts = options ?? new TraversalOptions();
+        var context = new TraversalContext<TState>(new Parents(), handler, state, opts.MaxTraversalOccurrence);
+        return TraverseNode(in context, rootNode) == TraversalHandlerResult.Continue;
+    }
 
     internal bool PathExistsBetween(
         IEnumerable<GmodNode> fromPath,
@@ -36,7 +61,7 @@ public sealed partial class Gmod
 
         var state = new PathExistsContext(to) { RemainingParents = remainingParents, };
 
-        var reachedEnd = this.Traverse(
+        var reachedEnd = Traverse(
             state,
             lastAssetFunction ?? RootNode,
             (state, parents, node) =>
@@ -80,23 +105,25 @@ public sealed partial class Gmod
         public IEnumerable<GmodNode> RemainingParents = Enumerable.Empty<GmodNode>();
     }
 
-    public bool Traverse<TState>(TState state, GmodNode rootNode, TraverseHandlerWithState<TState> handler)
-    {
-        var context = new TraversalContext<TState>(new Parents(), handler, state);
-        return TraverseNode(in context, rootNode) == TraversalHandlerResult.Continue;
-    }
-
     private TraversalHandlerResult TraverseNode<TState>(in TraversalContext<TState> context, GmodNode node)
     {
-        if (context.Parents.Has(node))
-            // Avoid cycles
-            // note: installSubstructure doesn't work - martinothamar
+        if (node.Metadata.InstallSubstructure == false)
             return TraversalHandlerResult.Continue;
 
         var result = context.Handler(context.State, context.Parents.AsList, node);
         if (result is TraversalHandlerResult.Stop or TraversalHandlerResult.SkipSubtree)
             return result;
 
+        var skipOccurenceCheck = IsProductSelectionAssignment(context.Parents.LastOrDefault(), node);
+        // Skip the occurence check for "hidden" nodes such as selections, etc.
+        if (!skipOccurenceCheck)
+        {
+            var occ = context.Parents.Occurrences(node);
+            if (occ == context.MaxTraversalOccerance)
+                return TraversalHandlerResult.SkipSubtree;
+            if (occ > context.MaxTraversalOccerance)
+                throw new Exception("Invalid state - node occured more than expected");
+        }
         context.Parents.Push(node);
 
         for (int i = 0; i < node.Children.Count; i++)
@@ -116,34 +143,43 @@ public sealed partial class Gmod
     private readonly record struct TraversalContext<TState>(
         Parents Parents,
         TraverseHandlerWithState<TState> Handler,
-        TState State
+        TState State,
+        int MaxTraversalOccerance
     );
 
     private readonly struct Parents
     {
-#if NETCOREAPP3_1_OR_GREATER
-        private readonly HashSet<string> _codes = new(64);
-#else
-        private readonly HashSet<string> _codes = new();
-#endif
+        private readonly Dictionary<string, int> _occurrences = new(4);
         private readonly List<GmodNode> _parents = new(64);
 
         public Parents() { }
 
         public readonly void Push(GmodNode parent)
         {
-            _codes.Add(parent.Code);
             _parents.Add(parent);
+            if (_occurrences.ContainsKey(parent.Code))
+                _occurrences[parent.Code]++;
+            else
+                _occurrences.Add(parent.Code, 1);
         }
 
         public readonly void Pop()
         {
             var parent = _parents[_parents.Count - 1];
             _parents.RemoveAt(_parents.Count - 1);
-            _codes.Remove(parent.Code);
+
+            if (_occurrences.TryGetValue(parent.Code, out var occ))
+            {
+                if (occ == 1)
+                    _occurrences.Remove(parent.Code);
+                else
+                    _occurrences[parent.Code]--;
+            }
         }
 
-        public readonly bool Has(GmodNode parent) => _codes.Contains(parent.Code);
+        public readonly int Occurrences(GmodNode node) => _occurrences.TryGetValue(node.Code, out var occ) ? occ : 0;
+
+        public readonly GmodNode? LastOrDefault() => _parents.Count > 0 ? _parents[_parents.Count - 1] : null;
 
         public readonly IReadOnlyList<GmodNode> ToList() => _parents.ToList();
 

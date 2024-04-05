@@ -3,7 +3,10 @@ import { isNullOrWhiteSpace } from "../util/util";
 import { VisVersion, VisVersions } from "../VisVersion";
 import { LocalIdParsingErrorBuilder } from "./LocalIdParsingErrorBuilder";
 
-export function parseVisVersion(str?: string, errorBuilder?: LocalIdParsingErrorBuilder): VisVersion | undefined {
+export function parseVisVersion(
+    str?: string,
+    errorBuilder?: LocalIdParsingErrorBuilder
+): VisVersion | undefined {
     if (isNullOrWhiteSpace(str)) {
         errorBuilder?.push(ParsingState.EmptyState);
         return;
@@ -17,9 +20,7 @@ export function parseVisVersion(str?: string, errorBuilder?: LocalIdParsingError
         });
         return;
     }
-    const versionSegmentEnd = str
-        .slice(versionSegmentStart)
-        .indexOf("/");
+    const versionSegmentEnd = str.slice(versionSegmentStart).indexOf("/");
     if (versionSegmentStart === -1) {
         errorBuilder?.push({
             message: "Failed to find version signature end '/'",

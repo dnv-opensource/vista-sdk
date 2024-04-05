@@ -165,8 +165,8 @@ public sealed record GmodPath
                 if (!parent.IsChild(child))
                     throw new ArgumentException($"Invalid gmod path - {child.Code} not child of {parent.Code}");
 
-                if (!set.Add(child.Code))
-                    throw new ArgumentException($"Recursion in gmod path argument for code: {child.Code}");
+                // if (!set.Add(child.Code))
+                //     throw new ArgumentException($"Recursion in gmod path argument for code: {child.Code}");
             }
 
             var visitor = new LocationSetsVisitor();
@@ -211,8 +211,8 @@ public sealed record GmodPath
                 return false;
             }
 
-            if (!set.Add(child.Code))
-                return false;
+            // if (!set.Add(child.Code))
+            //     return false;
         }
         return true;
     }
@@ -450,10 +450,14 @@ public sealed record GmodPath
 
     public static GmodPath Parse(string item, Gmod gmod, Locations locations)
     {
-        if (!TryParse(item, gmod, locations, out var path))
-            throw new ArgumentException("Couldnt parse path");
+        var result = ParseInternal(item, gmod, locations);
 
-        return path;
+        return result switch
+        {
+            GmodParsePathResult.Ok r => r.Path,
+            GmodParsePathResult.Err e => throw new ArgumentException(e.Error),
+            _ => throw new Exception("Unexpected result")
+        };
     }
 
     private record struct LocationSetsVisitor
@@ -555,12 +559,23 @@ public sealed record GmodPath
 
     public static bool TryParse(string? item, Gmod gmod, Locations locations, [NotNullWhen(true)] out GmodPath? path)
     {
+        var result = ParseInternal(item, gmod, locations);
+        path = null;
+        if (result is GmodParsePathResult.Ok r)
+        {
+            path = r.Path;
+            return true;
+        }
+        return false;
+    }
+
+    private static GmodParsePathResult ParseInternal(string? item, Gmod gmod, Locations locations)
+    {
         if (gmod.VisVersion != locations.VisVersion)
             throw new ArgumentException("Got different VIS versions for Gmod and Locations arguments");
 
-        path = null;
         if (string.IsNullOrWhiteSpace(item))
-            return false;
+            return new GmodParsePathResult.Err("Item is empty");
 
         item = item!.Trim().TrimStart('/');
 
@@ -571,27 +586,27 @@ public sealed record GmodPath
             {
                 var split = partStr.Split('-');
                 if (!gmod.TryGetNode(split[0], out _))
-                    return false;
+                    return new GmodParsePathResult.Err($"Failed to get GmodNode for {partStr}");
                 if (!locations.TryParse(split[1], out var location))
-                    return false;
+                    return new GmodParsePathResult.Err($"Failed to parse location {split[1]}");
                 parts.Enqueue(new PathNode(split[0], location));
             }
             else
             {
                 if (!gmod.TryGetNode(partStr, out _))
-                    return false;
+                    return new GmodParsePathResult.Err($"Failed to get GmodNode for {partStr}");
                 parts.Enqueue(new PathNode(partStr));
             }
         }
 
         if (parts.Count == 0)
-            return false;
+            return new GmodParsePathResult.Err("Failed find any parts");
         if (parts.Any(p => string.IsNullOrWhiteSpace(p.Code)))
-            return false;
+            return new GmodParsePathResult.Err("Failed find any parts");
 
         var toFind = parts.Dequeue();
         if (!gmod.TryGetNode(toFind.Code, out var baseNode))
-            return false;
+            return new GmodParsePathResult.Err("Failed to find base node");
 
         var context = new ParseContext(parts) { ToFind = toFind };
 
@@ -682,18 +697,24 @@ public sealed record GmodPath
         );
 
         if (context.Path is null)
-            return false;
+            return new GmodParsePathResult.Err("Failed to find path after travesal");
 
-        path = context.Path;
-        return true;
+        return new GmodParsePathResult.Ok(context.Path);
     }
 
     public static GmodPath ParseFullPath(string pathStr, VisVersion visVersion)
     {
-        if (!TryParseFullPath(pathStr, visVersion, out var path))
-            throw new ArgumentException("Couldnt parse path");
+        var vis = VIS.Instance;
+        var gmod = vis.GetGmod(visVersion);
+        var locations = vis.GetLocations(visVersion);
+        var result = ParseFullPathInternal(pathStr.AsSpan(), gmod, locations);
 
-        return path;
+        return result switch
+        {
+            GmodParsePathResult.Ok r => r.Path,
+            GmodParsePathResult.Err e => throw new ArgumentException(e.Error),
+            _ => throw new Exception("Unexpected result")
+        };
     }
 
     public static bool TryParseFullPath(
@@ -705,7 +726,7 @@ public sealed record GmodPath
         var vis = VIS.Instance;
         var gmod = vis.GetGmod(visVersion);
         var locations = vis.GetLocations(visVersion);
-        return TryParseFullPathInternal(pathStr.AsSpan(), gmod, locations, out path);
+        return TryParseFullPath(pathStr.AsSpan(), gmod, locations, out path);
     }
 
     public static bool TryParseFullPath(
@@ -717,7 +738,7 @@ public sealed record GmodPath
         var vis = VIS.Instance;
         var gmod = vis.GetGmod(visVersion);
         var locations = vis.GetLocations(visVersion);
-        return TryParseFullPathInternal(pathStr, gmod, locations, out path);
+        return TryParseFullPath(pathStr, gmod, locations, out path);
     }
 
     public static bool TryParseFullPath(
@@ -725,30 +746,34 @@ public sealed record GmodPath
         Gmod gmod,
         Locations locations,
         [MaybeNullWhen(false)] out GmodPath path
-    ) => TryParseFullPathInternal(pathStr.AsSpan(), gmod, locations, out path);
+    ) => TryParseFullPath(pathStr.AsSpan(), gmod, locations, out path);
 
-    public static bool TryParseFullPath(
-        ReadOnlySpan<char> pathStr,
-        Gmod gmod,
-        Locations locations,
-        [MaybeNullWhen(false)] out GmodPath path
-    ) => TryParseFullPathInternal(pathStr, gmod, locations, out path);
-
-    private static bool TryParseFullPathInternal(
+    private static bool TryParseFullPath(
         ReadOnlySpan<char> span,
         Gmod gmod,
         Locations locations,
         [MaybeNullWhen(false)] out GmodPath path
     )
     {
+        var result = ParseFullPathInternal(span, gmod, locations);
+        if (result is GmodParsePathResult.Ok r)
+        {
+            path = r.Path;
+            return true;
+        }
+        path = null;
+        return false;
+    }
+
+    private static GmodParsePathResult ParseFullPathInternal(ReadOnlySpan<char> span, Gmod gmod, Locations locations)
+    {
         Debug.Assert(gmod.VisVersion == locations.VisVersion);
 
-        path = default;
         if (span.IsEmpty || span.IsWhiteSpace())
-            return false;
+            return new GmodParsePathResult.Err("Item is empty");
 
         if (!span.StartsWith(gmod.RootNode.Code.AsSpan(), StringComparison.Ordinal))
-            return false;
+            return new GmodParsePathResult.Err($"Path must start with {gmod.RootNode.Code}");
 
         var nodes = new List<GmodNode>(span.Length / 3);
         foreach (ReadOnlySpan<char> nodeStr in span.Split('/'))
@@ -759,16 +784,17 @@ public sealed record GmodPath
             if (dashIndex == -1)
             {
                 if (!gmod.TryGetNode(nodeStr, out node))
-                    return false;
+                    return new GmodParsePathResult.Err($"Failed to get GmodNode for {nodeStr.ToString()}");
             }
             else
             {
-                if (!gmod.TryGetNode(nodeStr.Slice(0, dashIndex), out node))
-                    return false;
+                var slice = nodeStr.Slice(0, dashIndex);
+                if (!gmod.TryGetNode(slice, out node))
+                    return new GmodParsePathResult.Err($"Failed to get GmodNode for {slice.ToString()}");
 
                 var locationStr = nodeStr.Slice(dashIndex + 1);
                 if (!locations.TryParse(locationStr, out var location))
-                    return false;
+                    return new GmodParsePathResult.Err($"Failed to parse location - {locationStr.ToString()}");
 
                 node = node.WithLocation(location);
             }
@@ -777,12 +803,12 @@ public sealed record GmodPath
         }
 
         if (nodes.Count == 0)
-            return false;
+            return new GmodParsePathResult.Err("Failed to find any nodes");
 
         var endNode = nodes[nodes.Count - 1];
         nodes.RemoveAt(nodes.Count - 1);
         if (!IsValid(nodes, endNode))
-            return false;
+            return new GmodParsePathResult.Err("Sequence of nodes are invalid");
 
         var visitor = new LocationSetsVisitor();
         int? prevNonNullLocation = null;
@@ -806,7 +832,9 @@ public sealed record GmodPath
                 {
                     var pn = j < nodes.Count ? nodes[j] : endNode;
                     if (pn.Location is not null)
-                        return false; // This one is between
+                        return new GmodParsePathResult.Err(
+                            $"Expected all nodes in the set to be without individualization. Found {pn}"
+                        ); // This one is between
                 }
             }
             prevNonNullLocation = null;
@@ -840,16 +868,28 @@ public sealed record GmodPath
             if (insideSet)
             {
                 if (n.Location != expectedLocationNode.Location)
-                    return false;
+                    return new GmodParsePathResult.Err(
+                        $"Expected all nodes in the set to be individualized the same. Found {n.Code} with location {n.Location}"
+                    );
             }
             else
             {
                 if (n.Location is not null)
-                    return false;
+                    return new GmodParsePathResult.Err(
+                        $"Expected all nodes in the set to be without individualization. Found {n}"
+                    );
             }
         }
 
-        path = new GmodPath(nodes, endNode, skipVerify: true);
-        return true;
+        return new GmodParsePathResult.Ok(new GmodPath(nodes, endNode, skipVerify: true));
     }
+}
+
+public abstract record GmodParsePathResult
+{
+    private GmodParsePathResult() { }
+
+    public record Ok(GmodPath Path) : GmodParsePathResult;
+
+    public record Err(string Error) : GmodParsePathResult;
 }

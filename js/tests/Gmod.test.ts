@@ -1,4 +1,4 @@
-import { Gmod, GmodPath, VisVersion, VisVersions } from "../lib";
+import { Gmod, GmodNode, GmodPath, VisVersion, VisVersions } from "../lib";
 import { TraversalHandlerResult } from "../lib/types/Gmod";
 import { naturalSort } from "../lib/util/util";
 import { VIS } from "../lib/VIS";
@@ -129,8 +129,12 @@ describe("Gmod", () => {
 
         const context: {
             paths: Map<string, GmodPath>;
+            readonly maxTraversalOccurrence: number;
+            maxOccurrence: number;
         } = {
             paths: new Map(),
+            maxTraversalOccurrence: 1,
+            maxOccurrence: 0,
         };
 
         const punctureTests = ["I121", "651.21s", "F201.11"];
@@ -143,11 +147,54 @@ describe("Gmod", () => {
                 ) {
                     context.paths.set(node.code, new GmodPath(parents, node));
                 }
+
+                var skipOccurenceCheck = Gmod.isProductSelectionAssignment(
+                    parents.length > 0
+                        ? parents[parents.length - 1]
+                        : undefined,
+                    node
+                );
+                if (skipOccurenceCheck) return TraversalHandlerResult.Continue;
+                var occ = occurrences(parents, node);
+                if (occ > context.maxOccurrence) context.maxOccurrence = occ;
                 return TraversalHandlerResult.Continue;
             },
             { state: context }
         );
+        expect(context.maxOccurrence).toEqual(context.maxTraversalOccurrence);
         expect(context.paths.size).toBe(punctureTests.length);
+    });
+
+    it("Full traversal with options", () => {
+        const { gmod } = getVIS(version);
+
+        const context: {
+            readonly maxTraversalOccurrence: number;
+            maxOccurrence: number;
+        } = {
+            maxTraversalOccurrence: 2,
+            maxOccurrence: 0,
+        };
+
+        gmod.traverse(
+            (parents, node, context) => {
+                var skipOccurenceCheck = Gmod.isProductSelectionAssignment(
+                    parents.length > 0
+                        ? parents[parents.length - 1]
+                        : undefined,
+                    node
+                );
+                if (skipOccurenceCheck) return TraversalHandlerResult.Continue;
+                var occ = occurrences(parents, node);
+                if (occ > context.maxOccurrence) context.maxOccurrence = occ;
+                return TraversalHandlerResult.Continue;
+            },
+            {
+                maxTraversalOccurrence: context.maxTraversalOccurrence,
+                state: context,
+            }
+        );
+        expect(context.maxOccurrence).toEqual(context.maxTraversalOccurrence);
     });
 
     it("Partial traversal", () => {
@@ -192,4 +239,11 @@ describe("Gmod", () => {
 
         expect(context.invalidPaths.length).toBe(0);
     });
+
+    function occurrences(parents: GmodNode[], node: GmodNode) {
+        return parents.reduce((acc, parent) => {
+            if (parent.code == node.code) return acc + 1;
+            return acc;
+        }, 0);
+    }
 });

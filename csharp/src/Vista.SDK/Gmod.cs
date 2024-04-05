@@ -68,6 +68,28 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
 
     public static bool IsAssetFunctionNode(GmodNodeMetadata metadata) => metadata.Category == "ASSET FUNCTION";
 
+    public static bool IsProductTypeAssignment(GmodNode? parent, GmodNode? child)
+    {
+        if (parent is null || child is null)
+            return false;
+        if (!parent.Metadata.Category.Contains("FUNCTION"))
+            return false;
+        if (child.Metadata.Category != "PRODUCT" || child.Metadata.Type != "TYPE")
+            return false;
+        return true;
+    }
+
+    public static bool IsProductSelectionAssignment(GmodNode? parent, GmodNode? child)
+    {
+        if (parent is null || child is null)
+            return false;
+        if (!parent.Metadata.Category.Contains("FUNCTION"))
+            return false;
+        if (!child.Metadata.Category.Contains("PRODUCT") || child.Metadata.Type != "SELECTION")
+            return false;
+        return true;
+    }
+
     internal Gmod(VisVersion version, GmodDto dto)
     {
         VisVersion = version;

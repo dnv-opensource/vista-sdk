@@ -2,6 +2,32 @@ import { Gmod } from "..";
 import { GmodNode } from "../GmodNode";
 import { PmodNode } from "../PmodNode";
 
+export interface ConstructorOf<CLASS> {
+    new (...args: ReadonlyArray<never>): CLASS;
+}
+
+export function match<T, TResult>(shape: T) {
+    let out: TResult;
+    const actions = {
+        ofType<TInternal extends T>(ShapeType: ConstructorOf<TInternal>) {
+            return {
+                do(fn: (shape: TInternal) => TResult) {
+                    if (shape instanceof ShapeType) {
+                        out = fn(shape);
+                    }
+
+                    return actions;
+                },
+            };
+        },
+        unwrap(): TResult {
+            return out;
+        },
+    };
+
+    return actions;
+}
+
 export const isNullOrWhiteSpace = (s?: string): s is undefined => {
     return !s || !s.trim();
 };

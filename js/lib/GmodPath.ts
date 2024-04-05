@@ -4,7 +4,7 @@ import { GmodNode, isIndividualizable } from "./GmodNode";
 import { Locations, Location } from "./Location";
 import { TraversalHandlerResult } from "./types/Gmod";
 import { PathNode, ParseContext } from "./types/GmodPath";
-import { isNullOrWhiteSpace } from "./util/util";
+import { match, isNullOrWhiteSpace } from "./util/util";
 
 export class GmodIndividualizableSet {
     public get location(): Location | undefined {
@@ -352,11 +352,30 @@ export class GmodPath {
         locations: Locations,
         gmod: Gmod
     ): GmodPath | undefined {
-        const ERROR_IDENTIFIER = "GModPath - TryParse: ";
+        const result = this.parseInternal(item, locations, gmod);
+        const out = match<GmodParsePathResult, GmodPath | undefined>(result)
+            .ofType(GmodParsePathResult.Ok)
+            .do((result) => {
+                return result.path;
+            })
+            .ofType(GmodParsePathResult.Err)
+            .do(() => {
+                return undefined;
+            })
+            .unwrap();
+        return out;
+    }
+
+    private static parseInternal(
+        item: string | undefined,
+        locations: Locations,
+        gmod: Gmod
+    ): GmodParsePathResult {
         try {
             if (!item || !gmod || !locations)
-                throw new Error("Missing parameters");
-            if (isNullOrWhiteSpace(item)) throw new Error("Item is falsy");
+                return new GmodParsePathResult.Err("Missing parameters");
+            if (isNullOrWhiteSpace(item))
+                return new GmodParsePathResult.Err("Item is empty");
 
             item = item.trim();
 
@@ -370,25 +389,38 @@ export class GmodPath {
                 if (partStr.includes("-")) {
                     const split = partStr.split("-");
                     const parsedLocation = locations.tryParse(split[1]);
-                    if (!gmod.tryGetNode(split[0])) return;
+                    if (!gmod.tryGetNode(split[0]))
+                        return new GmodParsePathResult.Err(
+                            `Failed to get GmodNode for ${split[0]}`
+                        );
                     if (!parsedLocation)
-                        throw new Error("Failed to parse location");
+                        return new GmodParsePathResult.Err(
+                            `Failed to parse location ${split[1]}`
+                        );
                     parts.push({ code: split[0], location: parsedLocation });
                 } else {
-                    if (!gmod.tryGetNode(partStr)) return;
+                    if (!gmod.tryGetNode(partStr))
+                        return new GmodParsePathResult.Err(
+                            `Failed to get GmodNode for ${partStr}`
+                        );
                     parts.push({ code: partStr });
                 }
             }
 
-            if (parts.length === 0) throw new Error("Failed find any parts");
+            if (parts.length === 0)
+                return new GmodParsePathResult.Err("Failed find any parts");
+
             if (parts.find((p) => isNullOrWhiteSpace(p.code)))
-                throw new Error("Some of the parts where empty");
+                return new GmodParsePathResult.Err("Failed find any parts");
 
             const toFind = parts.shift();
             if (!toFind)
-                throw new Error("Invalid queue operation - Shift empty array");
+                return new GmodParsePathResult.Err(
+                    "Invalid queue operation - Shift empty array"
+                );
             const baseNode = gmod.tryGetNode(toFind.code);
-            if (!baseNode) throw new Error("Failed to find base node");
+            if (!baseNode)
+                return new GmodParsePathResult.Err("Failed to find base node");
 
             const context: ParseContext = {
                 parts,
@@ -400,7 +432,7 @@ export class GmodPath {
                 (parents, current, context) => {
                     const toFind = context.toFind;
                     const found = current.code === toFind.code;
-
+                    const leafNode = Gmod.isLeafNode(current.metadata);
                     if (!found && Gmod.isLeafNode(current.metadata))
                         return TraversalHandlerResult.SkipSubtree;
                     if (!found) return TraversalHandlerResult.Continue;
@@ -493,13 +525,17 @@ export class GmodPath {
                 { state: context, rootNode: baseNode }
             );
 
-            if (context.path === undefined) {
-                throw new Error("Failed to find path after travesal");
+            if (!context.path) {
+                return new GmodParsePathResult.Err(
+                    "Failed to find path after travesal"
+                );
             }
 
-            return context.path;
-        } catch (error) {
-            return;
+            return new GmodParsePathResult.Ok(context.path);
+        } catch {
+            return new GmodParsePathResult.Err(
+                "Unknown error occured during parsing"
+            );
         }
     }
 
@@ -542,22 +578,51 @@ export class GmodPath {
 
         return path;
     }
-
     public static tryParseFromFullPath(
         item: string,
         gmod: Gmod,
         locations: Locations
-    ): GmodPath | undefined {
-        if (isNullOrWhiteSpace(item)) return;
+    ) {
+        const result = this.parseFromFullPathInternal(item, gmod, locations);
+        const out = match<GmodParsePathResult, GmodPath | undefined>(result)
+            .ofType(GmodParsePathResult.Ok)
+            .do((result) => {
+                return result.path;
+            })
+            .ofType(GmodParsePathResult.Err)
+            .do(() => {
+                return undefined;
+            })
+            .unwrap();
+        return out;
+    }
 
-        if (!item.startsWith(gmod.rootNode.code)) return;
+    private static parseFromFullPathInternal(
+        item: string,
+        gmod: Gmod,
+        locations: Locations
+    ): GmodParsePathResult {
+        if (isNullOrWhiteSpace(item))
+            return new GmodParsePathResult.Err("Item is empty");
+
+        if (!item.startsWith(gmod.rootNode.code))
+            return new GmodParsePathResult.Err(
+                `Path must start with ${gmod.rootNode.code}`
+            );
 
         const parts: string[] = item.split("/");
 
-        for (const part of parts) if (!VIS.isISOString(part)) return;
+        for (const part of parts)
+            if (!VIS.isISOString(part))
+                return new GmodParsePathResult.Err(
+                    `Input string contains invalid characters in part - ${part}`
+                );
 
         const endPathNode = parts.pop();
-        if (!endPathNode) return;
+        if (!endPathNode)
+            return new GmodParsePathResult.Err(
+                "No nodes found in input string"
+            );
 
         const getNode = (
             code: string,
@@ -581,16 +646,21 @@ export class GmodPath {
         };
 
         let endNode = getNode(endPathNode, gmod, locations);
-        if (!endNode) return;
+        if (!endNode)
+            return new GmodParsePathResult.Err("Failed to get end node");
 
         const parents = parts.map((code) => getNode(code, gmod, locations));
-        if (parents.some((n) => !n)) return;
+        if (parents.some((n) => n === undefined))
+            return new GmodParsePathResult.Err("Failed to find any nodes");
 
         const pathParents = parents as GmodNode[];
-        if (!GmodPath.isValid(pathParents, endNode)) return;
+        if (!GmodPath.isValid(pathParents, endNode))
+            return new GmodParsePathResult.Err("Sequence of nodes are invalid");
 
         const visit = locationSetsVisitor();
         let prevNonNullLocation: number | null = null;
+        const sets: [number, number][] = [];
+        let setCounter = 0;
         for (let i = 0; i < pathParents.length + 1; i++) {
             const n = i < pathParents.length ? pathParents[i] : endNode;
             const set = visit(n, i, pathParents, endNode);
@@ -606,11 +676,14 @@ export class GmodPath {
                 for (let j = prevNonNullLocation; j < start; j++) {
                     const pn =
                         i < pathParents.length ? pathParents[i] : endNode;
-                    if (!!pn.location) return;
+                    if (pn.location !== undefined)
+                        return new GmodParsePathResult.Err(
+                            `Expected all nodes in the set to be without individualization. Found ${pn.toString()}`
+                        );
                 }
             }
             prevNonNullLocation = null;
-
+            sets[setCounter++] = [start, end];
             if (start === end) continue;
 
             for (let j = start; j <= end; j++) {
@@ -625,8 +698,36 @@ export class GmodPath {
             }
         }
 
-        const path = new GmodPath(pathParents, endNode, true);
-        return path;
+        let currentSet: [number, number] = [1, -1];
+        let currentSetIndex = 0;
+        for (let i = 0; i < pathParents.length + 1; i++) {
+            while (currentSetIndex < setCounter && currentSet[1] < i)
+                currentSet = sets[currentSetIndex++];
+
+            let insideSet = i >= currentSet[0] && i <= currentSet[1];
+
+            var n = i < pathParents.length ? pathParents[i] : endNode;
+            var expectedLocationNode =
+                currentSet[1] != -1 && currentSet[1] < pathParents.length
+                    ? pathParents[currentSet[1]]
+                    : endNode;
+
+            if (insideSet) {
+                if (n.location?.equals(expectedLocationNode.location) === false)
+                    return new GmodParsePathResult.Err(
+                        `Expected all nodes in the set to be individualized the same. Found ${n.code} with location ${n.location}. Expected location ${expectedLocationNode.location}`
+                    );
+            } else {
+                if (n.location !== undefined)
+                    return new GmodParsePathResult.Err(
+                        `Expected all nodes in the set to be without individualization. Found ${n}`
+                    );
+            }
+        }
+
+        return new GmodParsePathResult.Ok(
+            new GmodPath(pathParents, endNode, true)
+        );
     }
 
     public static async tryParseAsync(item: string, visVersion: VisVersion) {
@@ -748,5 +849,20 @@ function locationSetsVisitor() {
                 return [i, i, node.location];
         }
         return null;
+    };
+}
+
+abstract class GmodParsePathResult {
+    private constructor() {}
+    static Ok = class Ok extends GmodParsePathResult {
+        constructor(public path: GmodPath) {
+            super();
+        }
+    };
+
+    static Err = class Err extends GmodParsePathResult {
+        constructor(public error: string) {
+            super();
+        }
     };
 }

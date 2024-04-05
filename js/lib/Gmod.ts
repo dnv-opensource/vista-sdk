@@ -7,6 +7,7 @@ import {
     TraversalHandlerWithState,
     TraversalContext,
     TraversalHandlerResult,
+    TraversalOptions,
 } from "./types/Gmod";
 import { GmodDto } from "./types/GmodDto";
 import { GmodNodeMetadata } from "./types/GmodNode";
@@ -164,12 +165,7 @@ export class Gmod {
 
     // Parsing
     public parseFromFullPath(item: string, locations: Locations): GmodPath {
-        const path = this.tryParseFromFullPath(item, locations);
-
-        if (!path) {
-            throw new Error("Couldn't parse GmodPath");
-        }
-        return path;
+        return GmodPath.parseFromFullPath(item, this, locations);
     }
 
     public tryParseFromFullPath(
@@ -182,12 +178,13 @@ export class Gmod {
     // Traversal
     public traverse<T>(
         handler: TraversalHandler | TraversalHandlerWithState<T>,
-        params?: {
-            rootNode?: GmodNode;
-            state?: T;
-        }
+        params?: TraversalOptions<T>
     ): boolean {
-        const { rootNode = this._rootNode, state } = params || {};
+        const {
+            rootNode = this._rootNode,
+            state,
+            maxTraversalOccurrence,
+        } = params ?? {};
 
         if (!state) {
             return this.traverseFromNodeWithState(
@@ -200,19 +197,22 @@ export class Gmod {
         return this.traverseFromNodeWithState(
             state,
             rootNode,
-            handler as TraversalHandlerWithState<T>
+            handler as TraversalHandlerWithState<T>,
+            { maxTraversalOccurrence }
         );
     }
 
     public traverseFromNodeWithState<T>(
         state: T,
         rootNode: GmodNode,
-        handler: TraversalHandlerWithState<T>
+        handler: TraversalHandlerWithState<T>,
+        options?: Pick<TraversalOptions<T>, "maxTraversalOccurrence">
     ): boolean {
         const context: TraversalContext<T> = {
             parents: new Parents(),
             handler,
             state,
+            maxTraversalOccurrence: options?.maxTraversalOccurrence ?? 1,
         };
         return (
             this.traverseNode<T>(context, rootNode) ===
@@ -224,7 +224,8 @@ export class Gmod {
         context: TraversalContext<T>,
         node: GmodNode
     ): TraversalHandlerResult {
-        if (context.parents.has(node)) return TraversalHandlerResult.Continue;
+        if (node.metadata.installSubstructure === false)
+            return TraversalHandlerResult.Continue;
 
         let result = context.handler(
             context.parents.asList,
@@ -237,6 +238,21 @@ export class Gmod {
             result === TraversalHandlerResult.SkipSubtree
         )
             return result;
+
+        var skipOccurenceCheck = Gmod.isProductSelectionAssignment(
+            context.parents.last(),
+            node
+        );
+        // Skip the occurence check for "hidden" nodes such as selections, etc.
+        if (!skipOccurenceCheck) {
+            var occ = context.parents.occurrences(node);
+            if (occ == context.maxTraversalOccurrence)
+                return TraversalHandlerResult.SkipSubtree;
+            if (occ > context.maxTraversalOccurrence)
+                throw new Error(
+                    "Invalid state - node occured more than expected"
+                );
+        }
 
         context.parents.push(node);
 
