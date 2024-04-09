@@ -1,0 +1,3 @@
+[bindings.csharp]
+cdylib_name = "bindings"
+access_modifier = "public"

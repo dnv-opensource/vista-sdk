@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.Build.Traversal/3.1.6">
+  <ItemGroup>
+    <ProjectReference Include="src/**/*.*proj" />
+  </ItemGroup>
+</Project>

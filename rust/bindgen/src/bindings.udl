@@ -1,0 +1,73 @@
+namespace bindings {
+};
+
+
+
+/* Structs */
+
+interface Vis {
+    [Name=instance]
+    constructor();
+
+    Gmod get_gmod(VisVersion version);
+};
+
+interface Gmod {
+    VisVersion version();
+    GmodNode root_node();
+    GmodNode get_node([ByRef] string code);
+    GmodNode? try_get_node([ByRef] string code);
+    sequence<GmodNode> get_parents([ByRef] GmodNode node);
+    boolean traverse(TraversalCallback callback);
+};
+
+interface GmodNode {
+    string code();
+    string location();
+    GmodNode with_location(string location);
+};
+
+/* Extensions */
+interface VisVersionExtensions {
+    constructor();
+    string to_version_string(VisVersion version);
+};
+
+interface VisVersions {
+    constructor();
+    VisVersion parse([ByRef] string input);
+    sequence<VisVersion> all();
+};
+
+/* Enums */
+
+// This must be manually updated each release
+enum VisVersion {
+    "V3_4a",
+    "V3_5a",
+    "V3_6a",
+    "V3_7a",
+};
+
+enum TraversalHandlerResult {
+    "Stop",
+    "SkipSubtree",
+    "Continue",
+};
+
+/* Traits / callbacks */
+
+callback interface TraversalCallback {
+    [Throws=TraversalError]
+    TraversalHandlerResult handler(sequence<GmodNode> parents, GmodNode node);
+};
+
+/* Errors */
+
+[Error]
+enum TraversalError {
+    "Failed",
+};
+
+
+

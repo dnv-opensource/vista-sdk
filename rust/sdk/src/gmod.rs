@@ -1,4 +1,5 @@
 use crate::vis::VisVersion;
+use core::fmt;
 use sdk_resources::gmod::GmodDto;
 use std::{collections::HashMap, str::FromStr};
 
@@ -63,6 +64,16 @@ impl GmodNode {
     }
 }
 
+impl fmt::Display for GmodNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.code)?;
+        if !self.location.is_empty() {
+            write!(f, "-{}", self.location)?;
+        };
+        Ok(())
+    }
+}
+
 #[derive(PartialEq)]
 pub enum TraversalHandlerResult {
     Stop,
@@ -92,8 +103,11 @@ impl Gmod {
                     common_name: node.common_name.clone(),
                     definition: node.definition.clone(),
                     common_definition: node.common_definition.clone(),
-                    install_substructure: node.install_substructure,
-                    normal_assignment_names: node.normal_assignment_names.clone().unwrap_or_default(),
+                    install_substructure: node.install_substructure.clone(),
+                    normal_assignment_names: node
+                        .normal_assignment_names
+                        .clone()
+                        .unwrap_or_default(),
                 },
             });
 
@@ -108,8 +122,8 @@ impl Gmod {
             let children = &mut children[(*parent) as usize];
             let parents = &mut parents[(*child) as usize];
 
-            children.push(*child);
-            parents.push(*parent);
+            children.push((*child) as u32);
+            parents.push((*parent) as u32);
         }
 
         Gmod {
@@ -139,7 +153,9 @@ impl Gmod {
 
     pub fn get_children(&self, node: &GmodNode) -> impl Iterator<Item = &GmodNode> {
         let index = self.get_index(node);
-        self.children[index].iter().map(|child| &self.nodes[(*child) as usize])
+        self.children[index]
+            .iter()
+            .map(|child| &self.nodes[(*child) as usize])
     }
 
     pub fn get_product_type_for(&self, node: &GmodNode) -> Option<&GmodNode> {
@@ -178,21 +194,36 @@ impl Gmod {
         Some(child)
     }
 
+    pub fn get_node(&self, code: &str) -> &GmodNode {
+        &self.nodes[(self.index[code]) as usize]
+    }
+
+    pub fn try_get_node(&self, code: &str) -> Option<&GmodNode> {
+        match self.index.get(code) {
+            Some(index) => Some(&self.nodes[(*index) as usize]),
+            None => None,
+        }
+    }
+
     fn get_index(&self, node: &GmodNode) -> usize {
         self.index[&node.code] as usize
     }
 
-    fn traverse_node<THandler>(&self, context: &mut TraversalContext<THandler>, index: u32) -> TraversalHandlerResult
+    fn traverse_node<THandler>(
+        &self,
+        context: &mut TraversalContext<THandler>,
+        index: u32,
+    ) -> TraversalHandlerResult
     where
-        THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+        THandler: FnMut(&mut dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
     {
         if context.has(index) {
             return TraversalHandlerResult::Continue;
         }
 
-        let parents = context.parents.iter().map(|i| &self.nodes[(*i) as usize]);
+        let mut parents = context.parents.iter().map(|i| &self.nodes[(*i) as usize]);
         let node = &self.nodes[index as usize];
-        let result = (context.handler)(&parents, node);
+        let result = (context.handler)(&mut parents, node);
         if result == TraversalHandlerResult::Stop || result == TraversalHandlerResult::SkipSubtree {
             return result;
         }
@@ -215,7 +246,7 @@ impl Gmod {
 
     pub fn traverse<THandler>(&self, handler: THandler) -> bool
     where
-        THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+        THandler: FnMut(&mut dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
     {
         let index = self.index["VE"];
         self.traverse_from(&self.nodes[index as usize], handler)
@@ -223,13 +254,13 @@ impl Gmod {
 
     pub fn traverse_from<THandler>(&self, from_node: &GmodNode, handler: THandler) -> bool
     where
-        THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+        THandler: FnMut(&mut dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
     {
         let index = self.index[&from_node.code];
         let mut context = TraversalContext {
             ids: VecSet::new(16),
             parents: Vec::with_capacity(16),
-            handler,
+            handler: handler,
         };
 
         let result = self.traverse_node(&mut context, index);
@@ -239,7 +270,7 @@ impl Gmod {
 
 struct TraversalContext<THandler>
 where
-    THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+    THandler: FnMut(&mut dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
 {
     ids: VecSet,
     pub parents: Vec<u32>,
@@ -248,7 +279,7 @@ where
 
 impl<THandler> TraversalContext<THandler>
 where
-    THandler: FnMut(&dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
+    THandler: FnMut(&mut dyn Iterator<Item = &GmodNode>, &GmodNode) -> TraversalHandlerResult,
 {
     pub fn has(&self, index: u32) -> bool {
         self.ids.contains(index)
@@ -304,14 +335,14 @@ mod tests {
     #[test]
     fn ve_is_root() {
         let instance = Vis::instance();
-        let gmod = instance.get_gmod(VisVersion::v3_4a);
+        let gmod = instance.get_gmod(VisVersion::V3_4a);
         assert_eq!("VE", gmod.root_node().code);
     }
 
     #[test]
     fn ve_has_300a() {
         let instance = Vis::instance();
-        let gmod = instance.get_gmod(VisVersion::v3_4a);
+        let gmod = instance.get_gmod(VisVersion::V3_4a);
         let root_node = gmod.root_node();
 
         assert!(gmod.get_children(root_node).any(|n| n.code == "300a"))
@@ -320,7 +351,7 @@ mod tests {
     #[test]
     fn ve_has_no_parents() {
         let instance = Vis::instance();
-        let gmod = instance.get_gmod(VisVersion::v3_4a);
+        let gmod = instance.get_gmod(VisVersion::V3_4a);
         let root_node = gmod.root_node();
 
         let parent_count = gmod.get_parents(root_node).count();
@@ -330,12 +361,17 @@ mod tests {
     #[test]
     fn traverse() {
         let instance = Vis::instance();
-        let gmod = instance.get_gmod(VisVersion::v3_4a);
+        let gmod = instance.get_gmod(VisVersion::V3_4a);
 
         let traverse_count = {
             let mut count = 0;
+            let mut num_parents = 0;
             let reached_end = gmod.traverse(|_parents, _node| {
                 count += 1;
+
+                for _ in _parents {
+                    num_parents += 1;
+                }
 
                 TraversalHandlerResult::Continue
             });

@@ -1,6 +1,10 @@
-[workspace]
 
-members = [
-    "sdk",
-    "sdk_resources",
-]
+[workspace]
+members = ["bindgen", "sdk", "sdk_resources", "tools/uniffi-bindgen"]
+resolver = "2"
+
+
+[workspace.dependencies]
+uniffi = "0.25.3"
+moka = "0.8"
+once_cell = "1.10"

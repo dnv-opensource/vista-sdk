@@ -1,16 +1,24 @@
 #[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
-#[allow(non_camel_case_types)]
 pub enum VisVersion {
 {% for version in vis_versions %}
-    v{{ version.enum_version }},
+    V{{ version.enum_version }},
 {% endfor %}
 }
+
+impl VisVersion {
+    pub const ALL: [Self; {{ vis_versions.size }}] = [
+        {% for version in vis_versions %}
+            VisVersion::V{{ version.enum_version }},
+        {% endfor %}
+    ];
+}
+
 
 impl std::fmt::Display for VisVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let value = match self {
         {% for version in vis_versions %}
-            VisVersion::v{{ version.enum_version }} => "{{ version.display_version }}",
+            VisVersion::V{{ version.enum_version }} => "{{ version.display_version }}",
         {% endfor %}
         };
         write!(f, "{}", value)
@@ -23,9 +31,9 @@ impl std::str::FromStr for VisVersion {
     fn from_str(input: &str) -> std::result::Result<VisVersion, Self::Err> {
         match input {
         {% for version in vis_versions %}
-        "{{ version.display_version }}" => Ok(VisVersion::v{{ version.enum_version }}),
+        "{{ version.display_version }}" => Ok(VisVersion::V{{ version.enum_version }}),
         {% endfor %}
-            _ => Err(input.to_string()),
+            _ => Err(format!("{}", input)),
         }
     }
 }

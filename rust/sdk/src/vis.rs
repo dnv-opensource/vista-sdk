@@ -9,7 +9,7 @@ use sdk_resources::gmod::get_gmod_dto;
 
 include!(concat!(env!("OUT_DIR"), "/vis.g.rs"));
 
-static INSTANCE: Lazy<Box<Vis>> = Lazy::new(|| {
+pub static INSTANCE: Lazy<Box<Vis>> = Lazy::new(|| {
     Box::new(Vis {
         gmod_cache: Cache::builder()
             .max_capacity(2)
@@ -43,13 +43,15 @@ impl Vis {
     }
 
     pub fn get_gmod(&self, version: VisVersion) -> Arc<Gmod> {
-        self.gmod_cache.get_with(version, move || {
-            let dto = get_gmod_dto(version.to_string().as_str())
-                .map_err(|e| VisError::FailedToLoad(e.to_string()))
+        let gmod = self.gmod_cache.get_with(version, move || {
+            let dto =
+                get_gmod_dto(version.to_string().as_str()).map_err(|e| VisError::FailedToLoad(e.to_string()))
                 .expect("We should always end up having a valid gmod mapped to the binary");
 
             Arc::new(Gmod::new(&dto))
-        })
+        });
+
+        gmod
     }
 }
 
@@ -65,14 +67,14 @@ mod tests {
     #[test]
     fn can_get_gmod() {
         let instance = Vis::instance();
-        let version = VisVersion::v3_4a;
+        let version = VisVersion::V3_4a;
         let gmod = instance.get_gmod(version);
         assert_eq!(gmod.version(), version);
     }
 
     #[test]
     fn vis_versions() {
-        assert_eq!(VisVersion::v3_4a.to_string(), "3-4a");
-        assert_eq!(VisVersion::v3_4a, "3-4a".parse().expect("Should be parseable"));
+        assert_eq!(VisVersion::V3_4a.to_string(), "3-4a");
+        assert_eq!(VisVersion::V3_4a, "3-4a".parse().expect("Should be parseable"));
     }
 }
