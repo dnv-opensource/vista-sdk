@@ -63,7 +63,7 @@ public sealed record GmodPath
 {
     internal List<GmodNode> _parents { get; init; }
     public IReadOnlyList<GmodNode> Parents => _parents;
-
+    public VisVersion VisVersion { get; private set; }
     public GmodNode Node { get; internal set; }
 
     public int Length => _parents.Count + 1;
@@ -141,6 +141,7 @@ public sealed record GmodPath
 
     internal GmodPath(List<GmodNode> parents, GmodNode node, bool skipVerify = true)
     {
+        VisVersion = node.VisVersion;
         if (!skipVerify)
         {
             if (parents.Count == 0)

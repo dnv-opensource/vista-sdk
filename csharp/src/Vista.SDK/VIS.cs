@@ -261,8 +261,14 @@ public sealed class VIS : IVIS
         return (VisVersion[])Enum.GetValues(typeof(VisVersion));
     }
 
+    public GmodNode? ConvertNode(GmodNode sourceNode, VisVersion targetVersion) =>
+        GetGmodVersioning().ConvertNode(sourceNode.VisVersion, sourceNode, targetVersion);
+
     public GmodNode? ConvertNode(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion) =>
         GetGmodVersioning().ConvertNode(sourceVersion, sourceNode, targetVersion);
+
+    public GmodPath? ConvertPath(GmodPath sourcePath, VisVersion targetVersion) =>
+        ConvertPath(sourcePath.VisVersion, sourcePath, targetVersion);
 
     public GmodPath? ConvertPath(VisVersion sourceVersion, GmodPath sourcePath, VisVersion targetVersion) =>
         GetGmodVersioning().ConvertPath(sourceVersion, sourcePath, targetVersion);

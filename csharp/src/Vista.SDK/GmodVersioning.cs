@@ -57,7 +57,10 @@ internal sealed class GmodVersioning
 
         if (!targetGmod.TryGetNode(nextCode, out var targetNode))
             return null;
-        return targetNode.TryWithLocation(sourceNode.Location);
+        var result = targetNode.TryWithLocation(sourceNode.Location);
+        if (sourceNode.Location is not null && result.Location != sourceNode.Location)
+            throw new Exception("Failed to set location");
+        return result;
     }
 
     public LocalIdBuilder? ConvertLocalId(LocalIdBuilder sourceLocalId, VisVersion targetVersion)
@@ -164,7 +167,26 @@ internal sealed class GmodVersioning
                             }
                             else
                             {
-                                path.AddRange(remaining);
+                                var nodes = new List<GmodNode>();
+                                if (node.Location is not null)
+                                {
+                                    foreach (var n in remaining)
+                                    {
+                                        if (!n.IsIndividualizable(false, true))
+                                        {
+                                            nodes.Add(n);
+                                        }
+                                        else
+                                        {
+                                            nodes.Add(n.WithLocation(node.Location));
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    nodes.AddRange(remaining);
+                                }
+                                path.AddRange(nodes);
                                 break;
                             }
                         }
