@@ -324,7 +324,7 @@ public class LocalIdQueryTests
 
         var query = LocalIdQueryBuilder
             .From(localId)
-            .WithPrimaryItem(localId.PrimaryItem, builder => builder.WithNode(nodes => nodes["433.1"], true).Build())
+            .WithPrimaryItem(builder => builder.WithNode(nodes => nodes["433.1"], MatchAllLocations: true).Build())
             .Build();
         Assert.True(query.Match(localId));
         Assert.True(

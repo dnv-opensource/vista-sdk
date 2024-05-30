@@ -2,11 +2,11 @@ namespace Vista.SDK;
 
 public sealed record GmodPathQuery
 {
-    private readonly GmodPathQueryBuilder _builder;
+    internal readonly GmodPathQueryBuilder Builder;
 
-    internal GmodPathQuery(GmodPathQueryBuilder builder) => _builder = builder;
+    internal GmodPathQuery(GmodPathQueryBuilder builder) => Builder = builder;
 
-    public bool Match(GmodPath? other) => _builder.Match(other);
+    public bool Match(GmodPath? other) => Builder.Match(other);
 }
 
 public abstract record GmodPathQueryBuilder
@@ -26,6 +26,7 @@ public abstract record GmodPathQueryBuilder
 
     public sealed record Path : GmodPathQueryBuilder
     {
+        public readonly GmodPath GmodPath;
         private Dictionary<string, GmodNode> _setNodes;
 
         internal Path(GmodPath path)
@@ -42,6 +43,8 @@ public abstract record GmodPathQueryBuilder
                     locations.Add(set.Location.Value);
                 _filter.Add(setNode.Code, new(setNode.Code, locations));
             }
+
+            GmodPath = p;
         }
 
         public Path WithNode(

@@ -15,6 +15,9 @@ public sealed record LocalIdQueryBuilder
 
     public static LocalIdQueryBuilder Empty() => new();
 
+    public GmodPath? PrimaryItem => _primaryItem?.Builder is GmodPathQueryBuilder.Path p ? p.GmodPath : null;
+    public GmodPath? SecondaryItem => _secondaryItem?.Builder is GmodPathQueryBuilder.Path p ? p.GmodPath : null;
+
     public static LocalIdQueryBuilder From(LocalId localId)
     {
         var builder = new LocalIdQueryBuilder().WithPrimaryItem(GmodPathQueryBuilder.From(localId.PrimaryItem).Build());
@@ -65,6 +68,15 @@ public sealed record LocalIdQueryBuilder
     }
 
     /// <summary>See documentation for <see cref="WithPrimaryItem(GmodPath, PathQueryConfiguration)"/></summary>
+    /// <remarks>Should only be used in combination with the <see cref="From(LocalId)"/> overload, or previously configured Path item/></remarks>
+    public LocalIdQueryBuilder WithPrimaryItem(PathQueryConfiguration configure)
+    {
+        if (PrimaryItem is null)
+            throw new InvalidOperationException("Primary item is null");
+        return WithPrimaryItem(PrimaryItem, configure);
+    }
+
+    /// <summary>See documentation for <see cref="WithPrimaryItem(GmodPath, PathQueryConfiguration)"/></summary>
     public LocalIdQueryBuilder WithPrimaryItem(GmodPath primaryItem)
     {
         return WithPrimaryItem(GmodPathQueryBuilder.From(primaryItem).Build());
@@ -80,6 +92,13 @@ public sealed record LocalIdQueryBuilder
     public LocalIdQueryBuilder WithSecondaryItem(NodesQueryConfiguration configure)
     {
         return WithSecondaryItem(configure(GmodPathQueryBuilder.Empty()));
+    }
+
+    public LocalIdQueryBuilder WithSecondaryItem(PathQueryConfiguration configure)
+    {
+        if (SecondaryItem is null)
+            throw new InvalidOperationException("Secondary item is null");
+        return WithSecondaryItem(SecondaryItem, configure);
     }
 
     /// <summary>See documentation for <see cref="WithPrimaryItem(GmodPath, PathQueryConfiguration)"/></summary>
