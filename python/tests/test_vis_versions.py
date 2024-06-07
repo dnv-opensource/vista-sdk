@@ -1,5 +1,4 @@
 import unittest
-# from src.VisVersions import VisVersion, VisVersionExtension, VisVersions
 from src.VisVersions import VisVersions, VisVersion, VisVersionExtension
 
 class TestVisVersions(unittest.TestCase):

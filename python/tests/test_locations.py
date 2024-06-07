@@ -1,6 +1,5 @@
 import unittest
-from unittest.mock import Mock
-from src.Locations import Locations, Location, LocationParsingErrorBuilder, LocationGroup
+from src.Locations import  LocationGroup
 from src.VisVersions import VisVersion
 from src.LocationBuilder import LocationBuilder
 from src.VIS import VIS
@@ -8,7 +7,7 @@ from src.VIS import VIS
 class TestLocations(unittest.TestCase):
 
     def setUp(self):
-        self.vis = VIS.instance()
+        self.vis = VIS()
         self.locations = self.vis.get_locations(VisVersion.v3_4a)
 
     def test_locations_loads(self):
@@ -28,10 +27,10 @@ class TestLocations(unittest.TestCase):
         value = "some_string"
         expected_error_messages = ["error_message1", "error_message2"]
         success, string_parsed_location = self.locations.try_parse(value)
-        success, span_parsed_location = self.locations.try_parse(value)
+        success = self.locations.try_parse(value)
         self.verify(success, string_parsed_location, expected_error_messages)
 
-    def verify(self, succeeded, parsed_location, expected_error_messages):
+    def verify(self, succeeded, parsed_location, _):
         if not succeeded:
             self.assertFalse(succeeded)
             self.assertIsNone(parsed_location)
@@ -41,13 +40,13 @@ class TestLocations(unittest.TestCase):
 
     def test_location_parse_throwing(self):
         with self.assertRaises(ValueError):
-            self.locations.parse_location(None)
+            self.locations.parse(None)
         with self.assertRaises(ValueError):
-            self.locations.parse_location('') 
+            self.locations.parse('') 
 
     def test_location_builder(self):
         location_str = "11FIPU"
-        location = self.locations.parse_location(location_str)
+        location = self.locations.parse(location_str)
         builder = LocationBuilder.create(self.locations)
 
     

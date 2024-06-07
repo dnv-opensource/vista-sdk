@@ -51,7 +51,7 @@ class VisVersions:
         raise ValueError(f"Invalid VisVersion string: {version_str}")
 
     @staticmethod
-    def parse(version_str) -> VisVersion:
+    def parse(version_str : str) -> VisVersion:
         v = VisVersions.try_parse(version_str)
         if(v is None):
             raise ValueError(f"Invalid VisVersion string: {version_str}")

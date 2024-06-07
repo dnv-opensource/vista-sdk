@@ -12,13 +12,14 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "./python/tests",
+        "./python",
         "-p",
         "test_*.py"
     ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
     "python.testing.pytestArgs": [
-        "python"
+        
     ]
 }

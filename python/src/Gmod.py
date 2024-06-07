@@ -1,30 +1,21 @@
+from __future__ import annotations
+from collections import deque
 from dataclasses import dataclass, field
-from typing import Dict, Optional, List, Callable, Optional, TypeVar, Generic,Iterable
-from src.GmodPath import GmodPath
+import inspect
+from math import e
+from types import NoneType
+from typing import Dict, Optional, List, Callable, Optional, Tuple, TypeVar, Generic,Iterable, cast, overload
 from src.GmodDto import GmodDto
 from src.internal.ChdDictionary import ChdDictionary
-from src.GmodNode import GmodNode
-from src.GmodNode import GmodNodeMetadata
+from src.GmodNode import GmodNode, GmodNodeMetadata
 from src.VisVersions import VisVersion
 from dataclasses import dataclass, field
-from enum import Enum
-from .GmodNode import GmodNode
+from .TraversalHandlerResult import TraversalHandlerResult
 
 TState = TypeVar('TState')
 
-class TraversalHandlerResult(Enum):
-    STOP = 0
-    SKIP_SUBTREE = 1
-    CONTINUE = 2
-
 TraversalHandler = Callable[[List[GmodNode], GmodNode], TraversalHandlerResult]
-
-class TraversalHandlerWithState(Generic[TState]):
-    def __init__(self, func: Callable[[TState, List[GmodNode], GmodNode], TraversalHandlerResult]):
-        self.func = func
-
-    def __call__(self, state: TState, parents: List[GmodNode], node: GmodNode) -> TraversalHandlerResult:
-        return self.func(state, parents, node)
+TraversalHandlerWithState = Callable[[TState, List[GmodNode], GmodNode], TraversalHandlerResult]
 
 @dataclass
 class TraversalOptions:
@@ -32,28 +23,50 @@ class TraversalOptions:
     max_traversal_occurrence: int = DEFAULT_MAX_TRAVERSAL_OCCURRENCE
 
 
-@dataclass
+
 class Gmod:
-    vis_version: VisVersion
-    _node_map: ChdDictionary
 
     PotentialParentScopeTypes = {"SELECTION", "GROUP", "LEAF"}
     LeafTypes = {"ASSET FUNCTION LEAF", "PRODUCT FUNCTION LEAF"}
 
+    def __init__ (self, vis_version: VisVersion, dto : GmodDto):
+        self.vis_version = vis_version
+
+        node_map: Dict[str, GmodNode] = {}
+
+        for node_dto in dto.items:
+            node = GmodNode(self.vis_version, node_dto)
+            node_map[node_dto.code] = node
+
+        for relation in dto.relations:
+            parent_code, child_code = relation
+            parent_node = node_map[parent_code]
+            child_node = node_map[child_code]
+            parent_node.add_child(child_node)
+            child_node.add_parent(parent_node)
+
+        if "VE" not in node_map:
+            raise Exception("Invalid state - root node not found")
+        else:
+            root_node = node_map.get("VE")
+            if root_node is None:
+                raise Exception("Invalid state - root node is None despite 'VE' being in node_map")
+            self._root_node: GmodNode = root_node
+        self._node_map = ChdDictionary([(key, value) for key, value in node_map.items()])
 
     @property
-    def root_node(self):
+    def root_node(self) -> GmodNode:
         return self._root_node
 
     def __iter__(self):
         return iter(self._node_map)
         
     @staticmethod
-    def is_potential_parent(type_str : str):
+    def is_potential_parent(type_str : str) -> bool:
         return type_str in Gmod.PotentialParentScopeTypes
 
     @staticmethod
-    def is_leaf_node(full_type : str):
+    def is_leaf_node(full_type : str) -> bool:
         return full_type in Gmod.LeafTypes
     
     @staticmethod
@@ -106,110 +119,126 @@ class Gmod:
             return False
         return True
     
-    def __init__ (self, vis_version: VisVersion, dto : GmodDto):
-        self.vis_version = vis_version
-
-        node_map: Dict[str, GmodNode] = {}
-
-        for node_dto in dto.items:
-            node = GmodNode(self.vis_version, node_dto)
-            node_map[node_dto.code] = node
-
-        for relation in dto.relations:
-            parent_code, child_code = relation
-            parent_node = node_map[parent_code]
-            child_node = node_map[child_code]
-            parent_node.add_child(child_node)
-            child_node.add_parent(parent_node)
-
-        self._root_node: Optional[GmodNode] = node_map.get("VE")
-        self._node_map = ChdDictionary(node_map.items())
+   
 
     def __getitem__(self, key: str) -> GmodNode:
-        return self._node_map[key]
+        node = self._node_map[key]
+        if node is not None:
+            return node
+        else:
+            raise KeyError(f"Key not found: {key}")
     
-    def try_get_node(self, code):
+    def try_get_node(self, code : str) -> tuple[bool, Optional[GmodNode]]:
         node = self._node_map.try_get_value(code)
-        return (node is not None, node)
+        return (node[1], node[0])
 
-    def parse_path(self, item):
-        return GmodPath.parse(item, self.vis_version)
+    def parse_path(self, item : str):
+        from src.GmodPath import GmodPath
+        return GmodPath.parse(item, arg = self.vis_version)
 
-    def try_parse_path(self, item):
-        return GmodPath.try_parse_visversion(item, self.vis_version)
+    def try_parse_path(self, item : str):
+        from src.GmodPath import GmodPath
+        return GmodPath.try_parse(item, arg = self.vis_version)
 
-    def parse_from_full_path(self, item):
+    def parse_from_full_path(self, item : str):
+        from src.GmodPath import GmodPath
         return GmodPath.parse_full_path(item, self.vis_version)
 
-    def try_parse_from_full_path(self, item):
-        return GmodPath.try_parse_full_path_string(item, self.vis_version)
-
-
-    class Enumerator:
-        def __init__(self, inner : ChdDictionary.Enumerator):
-            self.inner = inner
-
-        @property
-        def current(self):
-            return self.inner.current[1] 
-
-        def __iter__(self):
-            return self
-
-        def __next__(self):
-            if self.inner.__next__():
-                return self.current
-            else:
-                raise StopIteration
-
-        def reset(self):
-            self.inner.reset()
-
-
-    def traverse(self, handler : TraversalHandler, options : Optional[TraversalOptions] = None) -> bool:
-        return self.traverse_rootnode(handler, )
+    def try_parse_from_full_path(self, item : str):
+        from src.GmodPath import GmodPath
+        return GmodPath.try_parse_full_path(item, arg = self.vis_version)
     
+    def check_signature(self, handler : TraversalHandler | TraversalHandlerWithState, param_count : int):
+        sig = inspect.signature(handler)
+        return len(sig.parameters) == param_count
 
-    def traverse_state(self, state, handler, options : Optional[TraversalOptions] = None) -> bool:
-        return self.traverse_rootnode()
 
+    @overload
+    def traverse(self, args1: TraversalHandler, args2: Optional[TraversalOptions] = None) -> bool:
+        ...
+    
+    @overload
+    def traverse(self, args1: GmodNode, args2 : TraversalHandler, args3: Optional[TraversalOptions] = None) -> bool:
+        ...
 
-    def traverse_rootnode(self, state, root_node, handler, options : Optional[TraversalOptions] = None) -> bool:
+    @overload
+    def traverse(self, args1: TState, args2: TraversalHandlerWithState[TState], args3: Optional[TraversalOptions] = None) -> bool:
+        ...
+    
+    @overload
+    def traverse(self, args1: TState, args2: GmodNode, args3: TraversalHandlerWithState[TState], args4: Optional[TraversalOptions] = None) -> bool:
+        ...
+
+    def traverse(self, args1 = None, args2 = None, args3 = None, args4 = None) -> bool:
+        state: Optional[TState] = None # type: ignore
+        root_node: Optional[GmodNode] = None
+        handler : Optional[TraversalHandlerWithState | TraversalHandler] = None
+        options : Optional[TraversalOptions] = None
+
+        arg1Type = type(args1) 
+        arg2Type = type(args2)
+        arg3Type = type(args3)
+        arg4Type = type(args4)
+        
+        if(callable(args1) and self.check_signature(args1, 2)  and arg3Type is NoneType and arg4Type is NoneType):
+            handler = lambda handler, parents, node: handler(parents, node)
+            options = args2
+            state = args1
+            root_node = self.root_node
+        elif(callable(args1) and self.check_signature(args1, 2)  and arg2Type is GmodNode and arg4Type is NoneType):
+            handler = lambda handler, parents, node: handler(parents, node)
+            root_node = self.root_node
+            options = args3
+        elif(arg1Type is not None and callable(args2) and self.check_signature(args2, 3) and arg3Type is NoneType and arg4Type is NoneType):
+            state = args1
+            handler = args2
+            options = args3
+            root_node = self.root_node
+        elif(arg1Type is not None and arg2Type is GmodNode and callable(args3) and self.check_signature(args3, 3)):
+            state = args1
+            root_node = args2
+            handler = args3
+            options = args4
+        else:
+            raise ValueError("Invalid arguments")
+            
+
+        return self._traverse_internal(state, cast(GmodNode, root_node), cast(TraversalHandlerWithState, handler), options)
+    
+    def _traverse_internal(self, state: TState, node: GmodNode, handler: TraversalHandlerWithState[TState],
+                            options: Optional[TraversalOptions]) -> bool:
         opts = options if options is not None else TraversalOptions()
-        context = Gmod.TraversalContext(Gmod.Parents(), handler, state, opts.max_traversal_occurrence)
-        return self.traverse_node(context, root_node) == TraversalHandlerResult.CONTINUE
-    
+        parents = Gmod.Parents()
+        context  = Gmod.TraversalContext(parents, handler, state, opts.max_traversal_occurrence)
+        return self.traverse_node(context=context, node=node) == TraversalHandlerResult.CONTINUE
 
-    def path_exists_between(self, from_path: Iterable[GmodNode], to_node: GmodNode) -> tuple[bool, Iterable[GmodNode]]:
-        last_asset_function = next((node for node in reversed(list(from_path)) if node.is_asset_function_node), None)
-        
-        state = Gmod.PathExistsContext(to_node)
-        
+    def _path_exists_between(self, from_path: Iterable[GmodNode], to_node: GmodNode) -> tuple[bool, Iterable[GmodNode]]:
+        last_asset_function = next((node for node in reversed(list(from_path)) if node.is_asset_function_node), None)        
         start_node = last_asset_function if last_asset_function is not None else self._root_node
-        
-        def handler(state, parents, node):
+
+        state = self.PathExistsContext(to=to_node)
+
+        def handler(state, parents : List[GmodNode] , node : GmodNode):
             if node.code != state.to.code:
                 return TraversalHandlerResult.CONTINUE
 
             actual_parents = []
-            current_parents = list(parents) 
+            current_parents = list(parents)
 
-            while not current_parents[0].is_root:
+            while current_parents and not current_parents[0].is_root:
                 parent = current_parents[0]
                 if len(parent.parents) != 1:
                     raise Exception("Invalid state - expected one parent")
                 actual_parents.insert(0, parent.parents[0])
                 current_parents = [parent.parents[0]] + current_parents
-            
+
             if all(qn.code in (p.code for p in current_parents) for qn in from_path):
                 state.remaining_parents = [p for p in current_parents if all(pp.code != p.code for pp in from_path)]
                 return TraversalHandlerResult.STOP
 
             return TraversalHandlerResult.CONTINUE
 
-        reached_end = self.traverse(state, start_node, handler) 
-
-      
+        reached_end = self.traverse(args1=state, args2=start_node, args3 = handler)
         return not reached_end, state.remaining_parents
 
     @dataclass
@@ -218,15 +247,15 @@ class Gmod:
         remaining_parents: List[GmodNode] = field(default_factory=list)
 
 
-    def traverse_node(self, context, node):
-        if not node.metadata.install_substructure:
+    def traverse_node(self, context : Gmod.TraversalContext[TState], node : GmodNode) -> TraversalHandlerResult:
+        if node.metadata.install_substructure == False:
             return TraversalHandlerResult.CONTINUE
 
-        result = context.handler(context.state, context.parents.as_list, node)
+        result = context.handler(context.state, context.parents.nodes, node)
         if result in (TraversalHandlerResult.STOP, TraversalHandlerResult.SKIP_SUBTREE):
             return result
 
-        skip_occurrence_check = self.is_product_selection_assignment(context.parents.last_or_default(), node) 
+        skip_occurrence_check = Gmod.is_product_selection_assignment(context.parents.last_or_default(), node) 
         if not skip_occurrence_check:
             occ = context.parents.occurrences(node)
             if occ == context.max_traversal_occurrence:
@@ -246,24 +275,25 @@ class Gmod:
         return TraversalHandlerResult.CONTINUE
 
 
-
-    
     class Parents:
         def __init__(self):
             self._occurrences: Dict[str, int] = {}
-            self._parents: List[GmodNode] = []
+            self.nodes: List[GmodNode] = []
+        
+        def contains(self, node: GmodNode) -> bool:
+            return node.code in self._occurrences
 
         def push(self, parent: GmodNode) -> None:
-            self._parents.append(parent)
+            self.nodes.append(parent)
             if parent.code in self._occurrences:
                 self._occurrences[parent.code] += 1
             else:
                 self._occurrences[parent.code] = 1
 
         def pop(self) -> None:
-            if not self._parents:
+            if not self.nodes:
                 return 
-            parent = self._parents.pop()
+            parent = self.nodes.pop()
             if self._occurrences[parent.code] == 1:
                 del self._occurrences[parent.code]
             else:
@@ -273,19 +303,17 @@ class Gmod:
             return self._occurrences.get(node.code, 0)
 
         def last_or_default(self) -> Optional[GmodNode]:
-            return self._parents[-1] if self._parents else None
+            return self.nodes[-1] if len(self.nodes)>0 else None
 
         def to_list(self) -> List[GmodNode]:
-            return self._parents.copy()
-
-        @property
-        def as_list(self) -> List[GmodNode]:
-            return self._parents
+            return self.nodes.copy()
         
 
-    @dataclass(frozen=True)
+    @dataclass
     class TraversalContext(Generic[TState]):
-        parents: 'Gmod.Parents'
+        parents: Gmod.Parents
         handler: TraversalHandlerWithState[TState]
         state: TState
-        max_traversal_occurrence: int
+        max_traversal_occurrence: int = 1
+
+    

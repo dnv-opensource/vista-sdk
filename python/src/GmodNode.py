@@ -1,12 +1,10 @@
-from dataclasses import dataclass, field
-from typing import List, Optional
-
-# Assuming these are imported from other modules
-from .Locations import Locations, Location
+from __future__ import annotations
+from dataclasses import dataclass, field ,replace
+from typing import List, Optional, Tuple
+from .Locations import Location
 from .VisVersions import VisVersion
 from .GmodDto import GmodNodeDto
 from .ParsingErrors import ParsingErrors
-from .VIS import VIS
 
 class GmodNodeMetadata:
     def __init__(self, category, type, name, common_name, definition, common_definition, install_substructure, normal_assignment_names):
@@ -18,9 +16,9 @@ class GmodNodeMetadata:
         self.common_definition = common_definition
         self.install_substructure = install_substructure
         self.normal_assignment_names = normal_assignment_names
-
+    
     @property
-    def full_type(self):
+    def full_type(self) -> str:
         return f"{self.category} {self.type}"
 
 @dataclass
@@ -28,44 +26,61 @@ class GmodNode:
     vis_version: VisVersion
     dto : GmodNodeDto
     location: Optional[Location] = None
-    children: List['GmodNode'] = field(default_factory=list)
-    parents: List['GmodNode'] = field(default_factory=list)
+    children: List[GmodNode] = field(default_factory=list)
+    parents: List[GmodNode] = field(default_factory=list)
+    
+    def __eq__(self, other: GmodNode) -> bool:
+        if(self.code != other.code): return False
+        if(self.location is not None and other.location is not None and self.location.value != other.location.value): return False
+        if(self.location is None and other.location is not None): return False
+        if(self.location is not None and other.location is None): return False
+        return True
 
     def __post_init__(self):
-        self._children = list(self.children)
-        self._parents = list(self.parents)
-        self.metadata = GmodNodeMetadata(**self.dto.model_dump())
+        self.metadata = GmodNodeMetadata(
+            self.dto.category,
+            self.dto.type,
+            self.dto.name,
+            self.dto.common_name,
+            self.dto.definition,
+            self.dto.common_definition,
+            self.dto.install_substructure,
+            normal_assignment_names = self.dto.normal_assignment_names if self.dto.normal_assignment_names is not None else {} 
+        )
         self.code = self.dto.code
 
-    def without_location(self):
+    def without_location(self) -> GmodNode:
         return GmodNode(vis_version=self.vis_version, dto=self.dto, location=None, children=self.children, parents=self.parents)
 
-    def with_location(self, location_str: str):
-        locations = VIS.instance().get_locations(self.vis_version)
-        new_location = locations.parse_location(location_str)
-        return GmodNode(vis_version=self.vis_version, dto=self.dto, location=new_location, children=self.children, parents=self.parents)
+    def with_location(self, location_str: str) -> GmodNode:
+        node = self.try_with_location(location_str)
+        if node:
+            return node
+        raise ValueError(f"Invalid location: {location_str}")
 
-    def try_with_location(self, location_str: Optional[str]):
+    def try_with_location(self, location_str: Optional[str]) -> GmodNode:
+        from .VIS import VIS
         if location_str is None:
             return self
-        locations = VIS.instance().get_locations(self.vis_version)
+        locations = VIS().get_locations(self.vis_version)
         try:
             new_location = locations.try_parse(location_str)[1]
             return GmodNode(vis_version=self.vis_version, dto=self.dto, location=new_location, children=self.children, parents=self.parents)
         except ValueError:
             return self
 
-    def try_with_location_errors(self, location_str: Optional[str], errors: List[ParsingErrors]):
+    def try_with_location_errors(self, location_str: Optional[str], errors: List[ParsingErrors]) -> Tuple[GmodNode, List[ParsingErrors]]:
+        from .VIS import VIS
         if location_str is None:
             return self, errors
-        locations = VIS.instance().get_locations(self.vis_version)
+        locations = VIS().get_locations(self.vis_version)
         if locations.try_parse(location_str):
-            new_location = locations.parse_location(location_str)
+            new_location = locations.parse(location_str)
             return GmodNode(vis_version=self.vis_version, dto=self.dto, location=new_location, children=self.children, parents=self.parents), errors
         return self, errors
 
 
-    def is_individualizable(self, is_target_node=False, is_in_set=False):
+    def is_individualizable(self, is_target_node : bool =False, is_in_set : bool =False) -> bool:
         if self.metadata.type in ["GROUP", "SELECTION"]:
             return False
         if self.is_product_type:
@@ -82,26 +97,26 @@ class GmodNode:
                 self.metadata.type == "COMPOSITION")
 
     @property
-    def is_mappable(self):
+    def is_mappable(self) -> bool:
         if self.product_type or self.product_selection or self.is_product_selection or self.is_asset:
             return False
         last_char = self.code[-1]
         return last_char not in ['a', 's']
 
     @property
-    def is_product_selection(self):
-        return any(child.is_product_selection for child in self.children)
+    def is_product_selection(self) -> bool:
+        return self.metadata.category == "PRODUCT" and self.metadata.type == "SELECTION"
 
     @property
-    def is_product_type(self):
-        return any(child.is_product_type for child in self.children)
+    def is_product_type(self) -> bool:
+        return self.metadata.category == "PRODUCT" and self.metadata.type == "TYPE"
 
     @property
-    def is_asset(self):
+    def is_asset(self) -> bool:
         return self.metadata.category == "ASSET" and self.metadata.type in ["TYPE", "SELECTION"]
 
     @property
-    def product_type(self):
+    def product_type(self) -> Optional[GmodNode]:
         if len(self.children) == 1:
             child = self.children[0]
             if "FUNCTION" in self.metadata.category and child.metadata.category == "PRODUCT" and child.metadata.type == "TYPE":
@@ -109,35 +124,41 @@ class GmodNode:
         return None
 
     @property
-    def product_selection(self):
+    def product_selection(self) ->  Optional[GmodNode]:
         if len(self.children) == 1:
             child = self.children[0]
             if "FUNCTION" in self.metadata.category and "PRODUCT" in child.metadata.category and child.metadata.type == "SELECTION":
                 return child
         return None
 
+    def clone(self, **changes) -> GmodNode:
+        return replace(self, **changes)
 
 
-    def add_child(self, child: 'GmodNode'):
-        if child not in self._children:
-            self._children.append(child)
+    def add_child(self, child: GmodNode) -> None:
+        if child not in self.children:
+            self.children.append(child)
 
-    def add_parent(self, parent: 'GmodNode'):
-        if parent not in self._parents:
-            self._parents.append(parent)
+    def add_parent(self, parent: GmodNode) -> None:
+        if parent not in self.parents:
+            self.parents.append(parent)
 
-    def is_child(self, node_or_code):
+    def is_child(self, node_or_code) -> bool:
         code = node_or_code if isinstance(node_or_code, str) else node_or_code.code
-        return any(child.code == code for child in self._children)
+        return any(child.code == code for child in self.children)
 
-    def is_leaf_node(self):
-        return len(self._children) == 0
+    def is_leaf_node(self) -> bool:
+        full_type : str = self.metadata.full_type
+        return full_type in ["ASSET FUNCTION LEAF", "PRODUCT FUNCTION LEAF"]
 
-    def is_function_node(self):
+    def is_function_node(self) -> bool:
         return self.metadata.category in ["FUNCTION", "SYSTEM FUNCTION"]
 
-    def is_asset_function_node(self):
+    def is_asset_function_node(self) -> bool:
         return self.metadata.category == "ASSET FUNCTION" and self.metadata.type == "FUNCTION"
 
-    def is_root(self):
+    def is_root(self) -> bool:
         return self.code == "VE"
+    
+    def __str__(self):
+        return f"{self.code}-{self.location}" if self.location is not None else self.code

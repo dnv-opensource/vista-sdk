@@ -5,7 +5,7 @@ class GmodNodeDto(BaseModel):
     category: str = Field(..., alias='category')
     type: str = Field(..., alias='type')
     code: str = Field(..., alias='code')
-    name: str = Field(..., alias='name')
+    name: str = Field("", alias='name')
     common_name: Optional[str] = Field(None, alias='commonName')
     definition: Optional[str] = Field(None, alias='definition')
     common_definition: Optional[str] = Field(None, alias='commonDefinition')
@@ -16,3 +16,5 @@ class GmodDto(BaseModel):
     vis_version: str = Field(..., alias='visRelease')
     items: List[GmodNodeDto] = Field(..., alias='items')
     relations: List[List[str]] = Field(..., alias='relations')
+
+
