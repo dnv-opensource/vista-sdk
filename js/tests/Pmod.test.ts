@@ -6,6 +6,7 @@ import {
     Pmod,
     PmodNode,
     VisVersion,
+    VisVersions,
 } from "../lib";
 import { TraversalHandlerResult } from "../lib/types/Gmod";
 import { Ok } from "../lib/types/Result";
@@ -29,7 +30,21 @@ describe("Pmod", () => {
         return getVISMap();
     });
 
-    it("From LocalIds", () => {
+    var testDataArr = Object.entries(testData).filter(
+        ([k, _]) => k !== "default"
+    );
+    var fullPaths = testDataArr.flatMap<[VisVersion, string]>(
+        ([version, data]) => {
+            var visVersion = VisVersions.parse(version);
+            return data.fullPaths.map<[VisVersion, string]>((fullPath) => [
+                visVersion,
+                fullPath,
+            ]);
+        }
+    );
+
+    it.each(testDataArr)("From LocalIds", (visVersion, testData) => {
+        var version = VisVersions.parse(visVersion);
         const { gmod, codebooks: codeBooks, locations } = getVIS(version);
 
         const localIds = testData.localIds.map((localIdStr) =>
@@ -61,7 +76,8 @@ describe("Pmod", () => {
         expect(pmod.isValid).toBeTruthy();
     });
 
-    it("Traverse pmod from node", () => {
+    it.each(testDataArr)("Traverse pmod from node", (visVersion, testData) => {
+        var version = VisVersions.parse(visVersion);
         const { gmod, codebooks: codeBooks, locations } = getVIS(version);
 
         const localIds = testData.localIds.map((localIdStr) =>
@@ -162,18 +178,20 @@ describe("Pmod", () => {
         expect(context.nodes[0].code).toEqual(rootNodeCode);
     });
 
-    it.each(testData.fullPaths)("Tree parse paths %s", (testPath) => {
-        const { gmod, locations } = getVIS(VisVersion.v3_6a);
+    it.each(fullPaths)("Tree parse paths %s", (visVersion, testPath) => {
+        var version = VisVersions.parse(visVersion);
+        const { gmod, locations } = getVIS(version);
 
         const path = gmod.parseFromFullPath(testPath, locations);
         expect(path).toBeTruthy();
     });
 
-    it("Tree", () => {
-        const { gmod, locations } = getVIS(VisVersion.v3_6a);
+    it.each(testDataArr)("Tree", (visVersion, testData) => {
+        var version = VisVersions.parse(visVersion);
+        const { gmod, locations } = getVIS(version);
 
-        const paths = testData.fullPaths.map((localIdStr) =>
-            gmod.parseFromFullPath(localIdStr, locations)
+        const paths = testData.fullPaths.map((path) =>
+            gmod.parseFromFullPath(path, locations)
         );
 
         const pmod = Pmod.createFromPaths(VisVersion.v3_6a, paths, {
