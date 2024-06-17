@@ -83,6 +83,18 @@ public partial class IsoMessageTests
     }
 
     [Fact]
+    public void Test_LocalId_Lookup()
+    {
+        var message = TestDataChannelListPackage;
+        var dataChannel = message.Package.DataChannelList[0];
+        var localId = dataChannel.DataChannelId.LocalId;
+        var lookup = message.Package.DataChannelList[localId];
+        Assert.True(message.Package.DataChannelList.TryGetByLocalId(localId, out var lookup2));
+        dataChannel.Should().BeEquivalentTo(lookup);
+        dataChannel.Should().BeEquivalentTo(lookup2);
+    }
+
+    [Fact]
     public void Test_ShortId_Lookup()
     {
         var message = TestDataChannelListPackage;
