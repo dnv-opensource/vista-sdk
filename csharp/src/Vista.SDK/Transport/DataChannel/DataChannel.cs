@@ -24,6 +24,7 @@ public sealed record VersionInformation(string NamingRule, string NamingSchemeVe
 public sealed record DataChannelList : IEnumerable<DataChannel>
 {
     private ChdDictionary<DataChannel> _shortIdMap;
+    private Dictionary<LocalId, DataChannel> _localIdMap;
     public IReadOnlyList<DataChannel> DataChannel;
 
     public DataChannelList(IReadOnlyList<DataChannel> dataChannel)
@@ -31,11 +32,13 @@ public sealed record DataChannelList : IEnumerable<DataChannel>
         DataChannel = dataChannel;
 
         var shortIdMap = new Dictionary<string, DataChannel>();
+        _localIdMap = new Dictionary<LocalId, DataChannel>();
         foreach (var dc in dataChannel)
         {
             if (dc.DataChannelId.ShortId is null)
                 continue;
             shortIdMap.Add(dc.DataChannelId.ShortId, dc);
+            _localIdMap.Add(dc.DataChannelId.LocalId, dc);
         }
         _shortIdMap = new ChdDictionary<DataChannel>(shortIdMap.Select((kvp) => (kvp.Key, kvp.Value)).ToArray());
     }
@@ -43,8 +46,12 @@ public sealed record DataChannelList : IEnumerable<DataChannel>
     public bool TryGetByShortId(string shortId, [MaybeNullWhen(false)] out DataChannel dataChannel) =>
         _shortIdMap.TryGetValue(shortId.AsSpan(), out dataChannel);
 
+    public bool TryGetByLocalId(LocalId localId, [MaybeNullWhen(false)] out DataChannel dataChannel) =>
+        _localIdMap.TryGetValue(localId, out dataChannel);
+
     public DataChannel this[string shortId] => _shortIdMap[shortId.AsSpan()];
     public DataChannel this[int index] => DataChannel[index];
+    public DataChannel this[LocalId localId] => _localIdMap[localId];
 
     public IEnumerator<DataChannel> GetEnumerator()
     {
