@@ -256,7 +256,7 @@ public class LocalIdQueryTests
     }
 
     [Theory]
-    [InlineData("schemas/json/DataChannelList.sample.json", 3, 8, 3, 1, 4)]
+    [InlineData("schemas/json/DataChannelList.sample.json", 3, 7, 3, 1, 4)]
     public async void Test_DataChannelList_Filter(string file, params int[] queryMatches)
     {
         var gmod = VIS.Instance.GetGmod(VisVersion.v3_4a);

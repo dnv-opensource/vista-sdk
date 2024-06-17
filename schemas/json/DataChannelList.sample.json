@@ -300,30 +300,6 @@
                 },
                 {
                     "DataChannelID": {
-                        "LocalID": "/dnv-v2/vis-3-4a/621.11i-C/H122/meta/qty-level/cnt-low.sulphur.heavy.fuel.oil",
-                        "ShortID": "ba4fd5f9-7444-5983-9a01-4436a418d59f"
-                    },
-                    "Property": {
-                        "DataChannelType": {
-                            "Type": "Inst",
-                            "UpdateCycle": 1
-                        },
-                        "Format": {
-                            "Type": "Decimal"
-                        },
-                        "Range": {
-                            "High": 100,
-                            "Low": 0
-                        },
-                        "Unit": {
-                            "UnitSymbol": "% LEL",
-                            "QuantityName": "level"
-                        },
-                        "Name": "Fuel oil centre tank | % LEL level low.sulphur.heavy.fuel.oil"
-                    }
-                },
-                {
-                    "DataChannelID": {
                         "LocalID": "/dnv-v2/vis-3-4a/621.11i-C/H122/meta/qty-volume/cnt-low.sulphur.heavy.fuel.oil",
                         "ShortID": "552444b5-2906-5258-b4dd-c36fab19b4df"
                     },
