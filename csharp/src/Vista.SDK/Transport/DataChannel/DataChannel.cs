@@ -1,3 +1,7 @@
+using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+using Vista.SDK.Internal;
+
 namespace Vista.SDK.Transport.DataChannel;
 
 public sealed record DataChannelListPackage(Package Package);
@@ -17,7 +21,41 @@ public sealed record ConfigurationReference(string Id, string? Version, DateTime
 
 public sealed record VersionInformation(string NamingRule, string NamingSchemeVersion, string? ReferenceUrl);
 
-public sealed record DataChannelList(IReadOnlyList<DataChannel> DataChannel);
+public sealed record DataChannelList : IEnumerable<DataChannel>
+{
+    private ChdDictionary<DataChannel> _shortIdMap;
+    public IReadOnlyList<DataChannel> DataChannel;
+
+    public DataChannelList(IReadOnlyList<DataChannel> dataChannel)
+    {
+        DataChannel = dataChannel;
+
+        var shortIdMap = new Dictionary<string, DataChannel>();
+        foreach (var dc in dataChannel)
+        {
+            if (dc.DataChannelId.ShortId is null)
+                continue;
+            shortIdMap.Add(dc.DataChannelId.ShortId, dc);
+        }
+        _shortIdMap = new ChdDictionary<DataChannel>(shortIdMap.Select((kvp) => (kvp.Key, kvp.Value)).ToArray());
+    }
+
+    public bool TryGetByShortId(string shortId, [MaybeNullWhen(false)] out DataChannel dataChannel) =>
+        _shortIdMap.TryGetValue(shortId.AsSpan(), out dataChannel);
+
+    public DataChannel this[string shortId] => _shortIdMap[shortId.AsSpan()];
+    public DataChannel this[int index] => DataChannel[index];
+
+    public IEnumerator<DataChannel> GetEnumerator()
+    {
+        return DataChannel.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return DataChannel.GetEnumerator();
+    }
+}
 
 public sealed record DataChannel(DataChannelId DataChannelId, Property Property);
 

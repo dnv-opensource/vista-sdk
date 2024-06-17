@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Vista.SDK.Transport;
 using Vista.SDK.Transport.DataChannel;
 
@@ -80,6 +80,36 @@ public partial class IsoMessageTests
         var message = TestDataChannelListPackage;
 
         Assert.NotNull(message);
+    }
+
+    [Fact]
+    public void Test_ShortId_Lookup()
+    {
+        var message = TestDataChannelListPackage;
+        var dataChannel = message.Package.DataChannelList[0];
+        var shortId = dataChannel.DataChannelId.ShortId;
+        Assert.NotNull(shortId);
+        var lookup = message.Package.DataChannelList[shortId];
+        Assert.True(message.Package.DataChannelList.TryGetByShortId(shortId, out var lookup2));
+        dataChannel.Should().BeEquivalentTo(lookup);
+        dataChannel.Should().BeEquivalentTo(lookup2);
+    }
+
+    [Fact]
+    public void Test_DataChannelList_Enumerator()
+    {
+        var message = TestDataChannelListPackage;
+
+        var expectedLength = message.Package.DataChannelList.DataChannel.Count;
+        var actualLength = message.Package.DataChannelList.ToList().Count;
+        var counter = 0;
+        Assert.Equal(expectedLength, actualLength);
+        foreach (var dc in TestDataChannelListPackage.Package.DataChannelList)
+        {
+            Assert.NotNull(dc);
+            counter++;
+        }
+        Assert.Equal(expectedLength, counter);
     }
 
     [Fact]
