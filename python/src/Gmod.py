@@ -35,7 +35,7 @@ class Gmod:
         node_map: Dict[str, GmodNode] = {}
 
         for node_dto in dto.items:
-            node = GmodNode(self.vis_version, node_dto)
+            node = GmodNode.create_from_dto(self.vis_version, node_dto)
             node_map[node_dto.code] = node
 
         for relation in dto.relations:

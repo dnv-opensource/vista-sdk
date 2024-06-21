@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Optional
+from math import sin
+from typing import Optional, overload
 from cachetools import TTLCache
 
 from src.LocationsDto import LocationsDto
@@ -109,3 +110,27 @@ class VIS(IVIS):
 
     def get_vis_versions(self):
         return list(VisVersion)
+
+  
+    @staticmethod
+    def is_iso_string(span: str) -> bool:
+        for char in span:
+            if not VIS.match_ascii_decimal(ord(char)):
+                return False
+        return True
+    
+    @staticmethod
+    def match_ascii_decimal(code: int) -> bool:
+        # Number
+        if 48 <= code <= 57:
+            return True
+        # Large character A-Z
+        if 65 <= code <= 90:
+            return True
+        # Small character a-z
+        if 97 <= code <= 122:
+            return True
+        # ["-", ".", "_", "~"] respectively
+        if code in (45, 46, 95, 126):
+            return True
+        return False

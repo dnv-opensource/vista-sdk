@@ -240,3 +240,38 @@ class TestGmodPath(unittest.TestCase):
                     for node in individual_set.nodes:
                         unique_codes.add(node.code)
                         self.assertTrue(node.is_individualizable)
+
+    def test_common_names(self):
+        for item in self.gmod_test_data.valid:
+            with self.subTest(item=item):
+                vis_version = VisVersions.parse(item.vis_version)
+                input_path = item.path
+
+                gmod = self.vis.get_gmod(vis_version=vis_version)
+                path = gmod.parse_path(input_path)
+                sets = path.individualizable_sets
+
+                unique_codes = set()
+                for individual_set in sets:
+                    for node in individual_set.nodes:
+                        unique_codes.add(node.code)
+                        self.assertTrue(node.is_individualizable)
+                        self.assertTrue(node.metadata.common_name is not None)
+                        self.assertTrue(node.metadata.common_name != "")
+
+                        #411.1-1/C101 = propulsion engine 1
+
+    
+    def test_verbose_path(self):
+        path_strs = ["411.1-1/C101.71/I101", "411.1/C102.321/C502", "1000.1/F401.2"]
+        target_strs = ["propulsion engine 1/control monitoring and alarm system", 
+                       "propulsion steam turbine/intermediate pressure turbine rotor blade arrangement",
+                       "cargo data/deadweight carried"]
+        for(i, path_str) in enumerate(path_strs):
+            with self.subTest(path_str=path_str):
+                path = GmodPath.parse(path_str, arg=VisVersion.v3_7a)
+                verbose_path = path.to_verbose_string()
+                test = verbose_path
+                self.assertEqual(target_strs[i], verbose_path)
+
+    

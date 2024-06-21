@@ -24,10 +24,29 @@ class GmodNodeMetadata:
 @dataclass
 class GmodNode:
     vis_version: VisVersion
-    dto : GmodNodeDto
+    code: str
+    metadata: GmodNodeMetadata
     location: Optional[Location] = None
     children: List[GmodNode] = field(default_factory=list)
     parents: List[GmodNode] = field(default_factory=list)
+
+    @staticmethod
+    def create_from_dto(vis_version: VisVersion, dto: GmodNodeDto) -> GmodNode:
+        metadata = GmodNodeMetadata(
+            dto.category,
+            dto.type,
+            dto.name,
+            dto.common_name,
+            dto.definition,
+            dto.common_definition,
+            dto.install_substructure,
+            dto.normal_assignment_names if dto.normal_assignment_names is not None else {}
+        )
+        return GmodNode(
+            vis_version=vis_version,
+            code=dto.code,
+            metadata=metadata
+        )
     
     def __eq__(self, other: GmodNode) -> bool:
         if(self.code != other.code): return False
@@ -35,22 +54,16 @@ class GmodNode:
         if(self.location is None and other.location is not None): return False
         if(self.location is not None and other.location is None): return False
         return True
-
-    def __post_init__(self):
-        self.metadata = GmodNodeMetadata(
-            self.dto.category,
-            self.dto.type,
-            self.dto.name,
-            self.dto.common_name,
-            self.dto.definition,
-            self.dto.common_definition,
-            self.dto.install_substructure,
-            normal_assignment_names = self.dto.normal_assignment_names if self.dto.normal_assignment_names is not None else {} 
-        )
-        self.code = self.dto.code
+    
 
     def without_location(self) -> GmodNode:
-        return GmodNode(vis_version=self.vis_version, dto=self.dto, location=None, children=self.children, parents=self.parents)
+        return GmodNode(
+            vis_version=self.vis_version,
+            code=self.code,
+            metadata=self.metadata,
+            children=self.children,
+            parents=self.parents
+        )
 
     def with_location(self, location_str: str) -> GmodNode:
         node = self.try_with_location(location_str)
@@ -65,7 +78,14 @@ class GmodNode:
         locations = VIS().get_locations(self.vis_version)
         try:
             new_location = locations.try_parse(location_str)[1]
-            return GmodNode(vis_version=self.vis_version, dto=self.dto, location=new_location, children=self.children, parents=self.parents)
+            return GmodNode(
+                vis_version=self.vis_version,
+                code=self.code,
+                metadata=self.metadata,
+                location=new_location,
+                children=self.children,
+                parents=self.parents
+            )
         except ValueError:
             return self
 
@@ -76,7 +96,14 @@ class GmodNode:
         locations = VIS().get_locations(self.vis_version)
         if locations.try_parse(location_str):
             new_location = locations.parse(location_str)
-            return GmodNode(vis_version=self.vis_version, dto=self.dto, location=new_location, children=self.children, parents=self.parents), errors
+            return GmodNode(
+                vis_version=self.vis_version,
+                code=self.code,
+                metadata=self.metadata,
+                location=new_location,
+                children=self.children,
+                parents=self.parents
+            ), errors
         return self, errors
 
 
@@ -152,7 +179,7 @@ class GmodNode:
         return full_type in ["ASSET FUNCTION LEAF", "PRODUCT FUNCTION LEAF"]
 
     def is_function_node(self) -> bool:
-        return self.metadata.category in ["FUNCTION", "SYSTEM FUNCTION"]
+        return self.metadata.category != "PRODUCT" and self.metadata.type != "ASSET"
 
     def is_asset_function_node(self) -> bool:
         return self.metadata.category == "ASSET FUNCTION" and self.metadata.type == "FUNCTION"

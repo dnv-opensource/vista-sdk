@@ -2,7 +2,9 @@ from __future__ import annotations
 from abc import ABC
 from collections import deque
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Deque, overload
+from io import StringIO
+from optparse import Option
+from typing import Generator, Optional, Dict, List, Deque, overload
 from typing import Optional, Tuple
 from src.Gmod import Gmod
 from src.TraversalHandlerResult import TraversalHandlerResult
@@ -176,6 +178,22 @@ class GmodPath:
     def __str__(self) -> str:
         return "/".join([parent.__str__() for parent in self.parents if parent.is_leaf_node()] + [self.node.__str__()])
 
+    # def to_string(self, builder: StringIO, separator: str = '/'):
+    #     for parent in self._parents:
+    #         if not Gmod.is_leaf_node_metadata(parent.metadata):
+    #             continue
+    #         builder.write(parent.__str__())
+    #         builder.write(separator)
+    #     builder.write(self.node.__str__())
+
+    # def __str__(self) -> str:
+    #     with StringBuilderPool() as pool:
+    #         builder = pool.get()
+    #         self.to_string(builder)
+    #         result = builder.getvalue()
+    #         pool.release(builder)
+    #         return result
+
     def to_full_path_string(self) -> str:
         return "/".join([node[1].__str__() for node in self.get_full_path()])
 
@@ -239,8 +257,12 @@ class GmodPath:
         def reset(self) -> None:
             self._current_index = self._from_depth - 1 if self._from_depth is not None else -1
 
-    def get_full_path(self) -> GmodPath.Enumerator:
-        return self.Enumerator(self)
+    def get_full_path(self) -> Generator[Tuple[int, GmodNode], None, None]:
+        # return self.Enumerator(self)
+
+        for i in range(len(self.parents)):
+            yield (i, self.parents[i])
+        yield (len(self.parents), self.node)
 
     def get_full_path_from(self, from_depth : int) -> GmodPath.Enumerator:
         if from_depth < 0 or from_depth > len(self.parents):
@@ -263,13 +285,13 @@ class GmodPath:
         return None
 
     def get_common_names(self):
-        for depth, node in enumerate(self.get_full_path()):
+        for depth, node in self.get_full_path():
             is_target = depth == len(self.parents)
-            if not (node[1].is_leaf_node() or is_target) or not node[1].is_function_node():
+            if not (node.is_leaf_node() or is_target) or not node.is_function_node():
                 continue
 
-            name = node[1].metadata.common_name or node[1].metadata.name
-            normal_assignment_names = node[1].metadata.normal_assignment_names
+            name = node.metadata.common_name or node.metadata.name
+            normal_assignment_names = node.metadata.normal_assignment_names
 
             if normal_assignment_names:
                 assignment = normal_assignment_names.get(self.node.code)
@@ -283,8 +305,39 @@ class GmodPath:
 
             yield (depth, name)
 
-    def get_verbose_path(self):
-        return "/".join([f"{node[1].code} ({node[1].metadata.name})" for node in self.get_full_path()])
+    def to_verbose_string(self, space_delimiter: str = " ", end_delimiter : str = "/") -> str:
+        builder = []
+        for depth, common_name in self.get_common_names():
+            location = str(self[depth].location)
+            prev = None
+            for ch in common_name:
+                if ch == '/':
+                    continue
+                if prev == ' ' and ch == ' ':
+                    continue
+
+                current = ch
+                if ch == ' ':
+                    current = space_delimiter
+                else:
+                    match = VIS.is_iso_string(ch)
+                    if not match:
+                        current = space_delimiter
+                    else:
+                        current = ch.lower()
+
+                if current == '.' and prev == '.':
+                    continue
+                builder.append(current)
+                prev = current
+
+            if location and location != "None":
+                builder.append(space_delimiter)
+                builder.append(location)
+            builder.append(end_delimiter)
+        builder.pop(-1)
+        return ''.join(builder)
+        
 
     @dataclass(frozen=True)
     class PathNode:

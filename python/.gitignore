@@ -8,6 +8,5 @@ __pycache__/
 .env
 
 # Ignore editor-specific files
-.vscode/
 .idea/
 *.sublime-*
