@@ -178,22 +178,7 @@ class GmodPath:
     def __str__(self) -> str:
         return "/".join([parent.__str__() for parent in self.parents if parent.is_leaf_node()] + [self.node.__str__()])
 
-    # def to_string(self, builder: StringIO, separator: str = '/'):
-    #     for parent in self._parents:
-    #         if not Gmod.is_leaf_node_metadata(parent.metadata):
-    #             continue
-    #         builder.write(parent.__str__())
-    #         builder.write(separator)
-    #     builder.write(self.node.__str__())
-
-    # def __str__(self) -> str:
-    #     with StringBuilderPool() as pool:
-    #         builder = pool.get()
-    #         self.to_string(builder)
-    #         result = builder.getvalue()
-    #         pool.release(builder)
-    #         return result
-
+  
     def to_full_path_string(self) -> str:
         return "/".join([node[1].__str__() for node in self.get_full_path()])
 
@@ -258,8 +243,6 @@ class GmodPath:
             self._current_index = self._from_depth - 1 if self._from_depth is not None else -1
 
     def get_full_path(self) -> Generator[Tuple[int, GmodNode], None, None]:
-        # return self.Enumerator(self)
-
         for i in range(len(self.parents)):
             yield (i, self.parents[i])
         yield (len(self.parents), self.node)
