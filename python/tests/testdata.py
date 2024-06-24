@@ -88,10 +88,7 @@ class TestData:
     @staticmethod
     def get_Individualizable_sets_data(test_name: str) -> IndividualizableSetDataList:
         return TestData.get_data(test_name, IndividualizableSetDataList)
-    
-    @staticmethod
-    def add_codebook_data(data: List[List[str]]) -> List[Tuple[Any]]:
-        return [tuple(state) for state in data]
+
 
 
 
