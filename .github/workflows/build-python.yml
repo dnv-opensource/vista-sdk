@@ -14,12 +14,12 @@ env:
 
 jobs:
   build:
-    name: Build, test and publish
+    name: Build, test, and publish
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout entire repository
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -29,41 +29,37 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools wheel twine
-          pip install -r requirements.txt 
-
+          pip install setuptools wheel twine pytest
+          pip install -r python/requirements.txt
 
       - name: Generate VisVersion script
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python  # Set PYTHONPATH to the python directory
         run: |
-          python src/SourceGenerator/VisVersionsGenerator.py --resources-dir ../resources
-
-      - name: Install test dependencies
-        run: |
-          pip install pytest
+          python python/src/SourceGenerator/VisVersionsGenerator.py --resources-dir resources
 
       - name: Run tests
         env:
-          PYTHONPATH: ${{ github.workspace }}/python
+          PYTHONPATH: ${{ github.workspace }}/python  # Ensure PYTHONPATH is set for tests as well
         run: |
-          pytest tests 
+          pytest python/tests
 
       - name: Checkout python directory only
         uses: actions/checkout@v2
         with:
           path: python
           fetch-depth: 1
-          
+
       - name: Build package
         if: success()
         env:
-          PYTHONPATH: ${{ github.workspace }}/python
+          PYTHONPATH: ${{ github.workspace }}/python  # Set PYTHONPATH to the python directory
         run: python setup.py sdist bdist_wheel
 
       - name: Publish package
-        if: success() 
+        if: success()
         env:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         run: |
           twine upload dist/*
-
