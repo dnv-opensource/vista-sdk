@@ -37,8 +37,10 @@ jobs:
 
 
       - name: Generate VisVersion script
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python
         run: |
-          python python/src/SourceGenerator/VisVersionsGenerator.py
+          python python/src/SourceGenerator/VisVersionsGenerator.py --resources-dir ../resources
 
       - name: Install test dependencies
         run: |
@@ -46,7 +48,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest python/tests 
+          pytest tests 
           
       - name: Build package
         run: python setup.py sdist bdist_wheel
