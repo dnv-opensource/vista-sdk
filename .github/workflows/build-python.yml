@@ -44,15 +44,11 @@ jobs:
         run: |
           pytest python/tests
 
-      - name: Remove initial checkout
+      - name: Move Python directory to root
         run: |
-          rm -rf ${{ github.workspace }}
-
-      - name: Checkout python directory only
-        uses: actions/checkout@v2
-        with:
-          path: .
-          fetch-depth: 1
+          mv python/* ./
+          mv python/.[!.]* ./
+          rm -rf python
 
       - name: Set up Python again
         uses: actions/setup-python@v2
@@ -75,4 +71,4 @@ jobs:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         run: |
-          twine upload python/dist/*
+          twine upload dist/*
