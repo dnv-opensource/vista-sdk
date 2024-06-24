@@ -3,12 +3,12 @@ import sys
 from setuptools import setup, find_packages
 
 # Default version number
-version = "0.0.1"
+version = "0.1.0-preview-"
 
 if len(sys.argv) > 1:
     for arg in sys.argv:
         if arg.startswith("--version="):
-            version = arg.split("=")[1]
+            version += arg.split("=")[1]
             sys.argv.remove(arg)
 
 setup(
