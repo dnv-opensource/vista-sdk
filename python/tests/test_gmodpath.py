@@ -4,11 +4,11 @@ import unittest
 
 from pydantic import ValidationError
 
-from src.GmodPath import GmodPath
-from src.VIS import VIS
+from vista_sdk.GmodPath import GmodPath
+from vista_sdk.VIS import VIS
 from .test_vis import TestVis
-from src.VisVersions import VisVersion, VisVersionExtension, VisVersions
-from src.Client import Client
+from vista_sdk.VisVersions import VisVersion, VisVersionExtension, VisVersions
+from vista_sdk.Client import Client
 from .testdata import IndividualizableSetData, TestData
 from parameterized import parameterized
 
@@ -167,7 +167,7 @@ class TestGmodPath(unittest.TestCase):
                 gmod = self.vis.get_gmod(version)
 
                 if is_full_path:
-                    return  # Already is full path
+                    return  
 
                 if item.expected is None:
                     result, parsed = gmod.try_parse_path(item.path)
@@ -258,8 +258,6 @@ class TestGmodPath(unittest.TestCase):
                         self.assertTrue(node.is_individualizable)
                         self.assertTrue(node.metadata.common_name is not None)
                         self.assertTrue(node.metadata.common_name != "")
-
-                        #411.1-1/C101 = propulsion engine 1
 
     
     def test_verbose_path(self):

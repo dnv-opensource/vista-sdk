@@ -6,7 +6,7 @@ from typing import List
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(root_dir)
 
-from src.GmodDto import GmodDto
+from vista_sdk.GmodDto import GmodDto
 
 class EmbeddedResource:
     @staticmethod

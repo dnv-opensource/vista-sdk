@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from typing import List
 import unittest
-from src.VIS import VIS
+from vista_sdk.VIS import VIS
 
-from src.GmodNode import GmodNode
+from vista_sdk.GmodNode import GmodNode
 from .test_vis import TestVis
-from src.GmodDto import GmodDto  
-from src.VisVersions import VisVersion, VisVersionExtension
-from src.Gmod import TraversalOptions, Gmod, TraversalHandlerResult
-from src.GmodPath import GmodPath
-from src.Client import Client
+from vista_sdk.GmodDto import GmodDto  
+from vista_sdk.VisVersions import VisVersion, VisVersionExtension
+from vista_sdk.Gmod import TraversalOptions, Gmod, TraversalHandlerResult
+from vista_sdk.GmodPath import GmodPath
+from vista_sdk.Client import Client
 
 
 class TestGmod(unittest.TestCase):

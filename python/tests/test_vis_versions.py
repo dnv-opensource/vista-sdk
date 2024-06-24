@@ -1,7 +1,7 @@
 import os
 import unittest
-from src.VisVersions import VisVersions, VisVersion, VisVersionExtension
-from src.SourceGenerator.VisVersionsGenerator import generate_vis_version_script
+from vista_sdk.VisVersions import VisVersions, VisVersion, VisVersionExtension
+from vista_sdk.SourceGenerator.VisVersionsGenerator import generate_vis_version_script
 
 class TestVisVersions(unittest.TestCase):
     def test_to_version_string(self):
@@ -36,7 +36,7 @@ class TestVisVersions(unittest.TestCase):
     def test_Vis_generation(self):
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
         resources_dir = os.path.join(root_dir, "resources")
-        output_file = os.path.join(root_dir, "python", "src", "VisVersions.py")
+        output_file = os.path.join(root_dir, "python", "vista_sdk", "VisVersions.py")
 
         generate_vis_version_script(resources_dir, output_file)
         

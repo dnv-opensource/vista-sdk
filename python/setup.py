@@ -1,4 +1,8 @@
+import os
 from setuptools import setup, find_packages
+
+#get github run number
+run_number = os.getenv('GITHUB_RUN_NUMBER', '0')
 
 setup(
     name="vista-sdk",

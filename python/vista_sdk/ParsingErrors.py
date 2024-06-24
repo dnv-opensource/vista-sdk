@@ -1,4 +1,4 @@
-from src.internal.LocationParsingErrorBuilder import LocationValidationResult
+from vista_sdk.internal.LocationParsingErrorBuilder import LocationValidationResult
 
 
 class ParsingErrors:

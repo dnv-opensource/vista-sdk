@@ -6,13 +6,13 @@ from io import StringIO
 from optparse import Option
 from typing import Generator, Optional, Dict, List, Deque, overload
 from typing import Optional, Tuple
-from src.Gmod import Gmod
-from src.TraversalHandlerResult import TraversalHandlerResult
-from src.VIS import VIS
-from src.VisVersions import VisVersion
-from src.GmodNode import GmodNode
-from src.Locations import Location, Locations
-from src.LocationSetsVisitor import LocationSetsVisitor
+from vista_sdk.Gmod import Gmod
+from vista_sdk.TraversalHandlerResult import TraversalHandlerResult
+from vista_sdk.VIS import VIS
+from vista_sdk.VisVersions import VisVersion
+from vista_sdk.GmodNode import GmodNode
+from vista_sdk.Locations import Location, Locations
+from vista_sdk.LocationSetsVisitor import LocationSetsVisitor
 
 class GmodIndividualizableSet:
     def __init__(self, nodes : List[int], path : GmodPath):

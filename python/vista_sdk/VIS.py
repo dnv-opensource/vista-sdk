@@ -4,7 +4,7 @@ from math import sin
 from typing import Optional, overload
 from cachetools import TTLCache
 
-from src.LocationsDto import LocationsDto
+from vista_sdk.LocationsDto import LocationsDto
 
 from .Gmod import Gmod
 from .GmodDto import GmodDto

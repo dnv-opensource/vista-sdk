@@ -1,8 +1,8 @@
 import unittest
-from src.Locations import  LocationGroup
-from src.VisVersions import VisVersion
-from src.LocationBuilder import LocationBuilder
-from src.VIS import VIS
+from vista_sdk.Locations import  LocationGroup
+from vista_sdk.VisVersions import VisVersion
+from vista_sdk.LocationBuilder import LocationBuilder
+from vista_sdk.VIS import VIS
 
 class TestLocations(unittest.TestCase):
 

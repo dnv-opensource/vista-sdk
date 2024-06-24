@@ -1,8 +1,8 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, overload
-from src.LocationsDto import LocationsDto
-from src.VisVersions import VisVersion
+from vista_sdk.LocationsDto import LocationsDto
+from vista_sdk.VisVersions import VisVersion
 from .internal.LocationParsingErrorBuilder import LocationParsingErrorBuilder, LocationValidationResult, ParsingErrors
 
 

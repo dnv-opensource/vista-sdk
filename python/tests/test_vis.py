@@ -1,12 +1,12 @@
-from src.VisVersions import VisVersion
-from src.VIS import VIS
+from vista_sdk.VisVersions import VisVersion
+from vista_sdk.VIS import VIS
 import unittest
 
 class TestVis:
 
     @staticmethod
     def get_vis() -> VIS:
-        from src.VIS import VIS 
+        from vista_sdk.VIS import VIS 
         return VIS()
     
     

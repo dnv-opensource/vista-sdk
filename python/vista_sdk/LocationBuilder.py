@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional, TypeVar
 from xml.dom import ValidationErr
-from src.Locations import Location, LocationGroup, Locations
+from vista_sdk.Locations import Location, LocationGroup, Locations
 from copy import copy as copy
 
 T = TypeVar('T')

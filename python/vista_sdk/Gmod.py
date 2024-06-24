@@ -5,10 +5,10 @@ import inspect
 from math import e
 from types import NoneType
 from typing import Dict, Optional, List, Callable, Optional, Tuple, TypeVar, Generic,Iterable, cast, overload
-from src.GmodDto import GmodDto
-from src.internal.ChdDictionary import ChdDictionary
-from src.GmodNode import GmodNode, GmodNodeMetadata
-from src.VisVersions import VisVersion
+from vista_sdk.GmodDto import GmodDto
+from vista_sdk.internal.ChdDictionary import ChdDictionary
+from vista_sdk.GmodNode import GmodNode, GmodNodeMetadata
+from vista_sdk.VisVersions import VisVersion
 from dataclasses import dataclass, field
 from .TraversalHandlerResult import TraversalHandlerResult
 
@@ -133,19 +133,19 @@ class Gmod:
         return (node[1], node[0])
 
     def parse_path(self, item : str):
-        from src.GmodPath import GmodPath
+        from vista_sdk.GmodPath import GmodPath
         return GmodPath.parse(item, arg = self.vis_version)
 
     def try_parse_path(self, item : str):
-        from src.GmodPath import GmodPath
+        from vista_sdk.GmodPath import GmodPath
         return GmodPath.try_parse(item, arg = self.vis_version)
 
     def parse_from_full_path(self, item : str):
-        from src.GmodPath import GmodPath
+        from vista_sdk.GmodPath import GmodPath
         return GmodPath.parse_full_path(item, self.vis_version)
 
     def try_parse_from_full_path(self, item : str):
-        from src.GmodPath import GmodPath
+        from vista_sdk.GmodPath import GmodPath
         return GmodPath.try_parse_full_path(item, arg = self.vis_version)
     
     def check_signature(self, handler : TraversalHandler | TraversalHandlerWithState, param_count : int):

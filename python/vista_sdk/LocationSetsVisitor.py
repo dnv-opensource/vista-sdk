@@ -1,13 +1,13 @@
 from typing import List, Optional, Tuple
-from src.GmodNode import GmodNode
-from src.Locations import Location
+from vista_sdk.GmodNode import GmodNode
+from vista_sdk.Locations import Location
 
 
 class LocationSetsVisitor:
         current_parent_start: int = -1
         
         def visit(self, node: GmodNode, i: int, parents: List[GmodNode], target: GmodNode) -> Optional[Tuple[int, int, Optional[Location]]]:
-            from src.Gmod import Gmod
+            from vista_sdk.Gmod import Gmod
             is_parent = Gmod.is_potential_parent(node.metadata.type)
             is_target_node = i == len(parents)
             
