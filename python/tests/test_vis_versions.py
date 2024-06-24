@@ -17,7 +17,6 @@ class TestVisVersions(unittest.TestCase):
         self.assertIn("3-5a", builder)
 
     def test_is_valid(self):
-        # self.assertTrue(VisVersionExtension.is_valid(VisVersion.v3_6a))
         self.assertFalse(VisVersionExtension.is_valid("3-8a")) 
 
     def test_all_versions(self):
