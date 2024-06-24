@@ -67,7 +67,7 @@ jobs:
 
       - name: Build package
         if: success()
-        run: 
+        run: |
           cd python
           python setup.py sdist bdist_wheel
 
