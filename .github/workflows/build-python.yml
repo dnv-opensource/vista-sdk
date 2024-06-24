@@ -37,8 +37,6 @@ jobs:
 
 
       - name: Generate VisVersion script
-        env:
-          PYTHONPATH: ${{ github.workspace }}/python
         run: |
           python src/SourceGenerator/VisVersionsGenerator.py --resources-dir ../resources
 
