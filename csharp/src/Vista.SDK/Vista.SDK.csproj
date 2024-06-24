@@ -6,7 +6,8 @@
     <RootNamespace>Vista.SDK</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>DNV.Vista.SDK</PackageId>
-    <Description>The Vista SDK packages codify the rules and principles of DNV Vessel Information Structure (VIS) and ISO19848/19847 standards to enable and support users and implementers.</Description>
+    <Description>The Vista SDK packages codify the rules and principles of DNV Vessel Information
+      Structure (VIS) and ISO19848/19847 standards to enable and support users and implementers.</Description>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -33,16 +34,27 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="$(DotNetVersion)" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="$(DotNetVersion)" />
+
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
     <PackageReference Include="System.Text.Json" Version="$(DotNetVersion)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(DotNetVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+      Version="$(DotNetVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+    <PackageReference Include="PolySharp" Version="1.14.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Vista.SDK.SourceGenerator\Vista.SDK.SourceGenerator.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Vista.SDK.SourceGenerator\Vista.SDK.SourceGenerator.csproj"
+      SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

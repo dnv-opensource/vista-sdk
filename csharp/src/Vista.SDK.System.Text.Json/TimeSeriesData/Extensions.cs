@@ -23,7 +23,7 @@ public static class Extensions
                         h.TimeSpan is null ? null : new TimeSpan(h.TimeSpan.End, h.TimeSpan.Start)
                     )
                     {
-                        CustomHeaders = h.CustomHeaders.CopyProperties(),
+                        CustomHeaders = h.CustomHeaders?.CopyProperties()
                     },
                 p.TimeSeriesData
                     .Select(
@@ -53,25 +53,20 @@ public static class Extensions
                                     ?.Select(
                                         d =>
                                             new TabularData(
-                                                d.DataChannelId?.Select(i => i.ToString()).ToList(),
-                                                d.DataSet
+                                                d.DataChannelIds?.Select(i => i.ToString()).ToList(),
+                                                d.DataSets
                                                     ?.Select(
-                                                        td =>
-                                                            new DataSet_Tabular(
-                                                                td.Quality?.ToList(),
-                                                                td.TimeStamp,
-                                                                td.Value
-                                                            )
+                                                        td => new DataSet_Tabular(td.Quality, td.TimeStamp, td.Value)
                                                     )
                                                     .ToList(),
-                                                d.NumberOfDataChannel,
-                                                d.NumberOfDataSet
+                                                d.NumberOfDataChannels,
+                                                d.NumberOfDataSets
                                             )
                                     )
                                     .ToList()
                             )
                             {
-                                CustomData = t.CustomProperties.CopyProperties(),
+                                CustomData = t.CustomDataKinds?.CopyProperties()
                             }
                     )
                     .ToList()
@@ -83,73 +78,91 @@ public static class Extensions
     {
         var p = package.Package;
         var h = package.Package.Header;
-        return new Domain.TimeSeriesDataPackage(
-            new Domain.Package(
-                h is null
+        return new Domain.TimeSeriesDataPackage
+        {
+            Package = new Domain.Package
+            {
+                Header = h is null
                     ? null
-                    : new Domain.Header(
-                        ShipId.Parse(h.ShipID),
-                        h.TimeSpan is null ? null : new Domain.TimeSpan(h.TimeSpan.Start, h.TimeSpan.End),
-                        h.DateCreated,
-                        h.DateModified,
-                        h.Author,
-                        h.SystemConfiguration
-                            ?.Select(c => new Domain.ConfigurationReference(c.ID, c.TimeStamp))
+                    : new Domain.Header
+                    {
+                        ShipId = ShipId.Parse(h.ShipID),
+                        TimeSpan = h.TimeSpan is null
+                            ? null
+                            : new Domain.TimeSpan { Start = h.TimeSpan.Start, End = h.TimeSpan.End },
+                        DateCreated = h.DateCreated,
+                        DateModified = h.DateModified,
+                        Author = h.Author,
+                        SystemConfiguration = h.SystemConfiguration
+                            ?.Select(c => new Domain.ConfigurationReference { Id = c.ID, TimeStamp = c.TimeStamp })
                             .ToList(),
-                        h.CustomHeaders.CopyProperties()
-                    ),
-                p.TimeSeriesData
+                        CustomHeaders = h.CustomHeaders?.CopyProperties()
+                    },
+                TimeSeriesData = p.TimeSeriesData
                     .Select(
                         t =>
-                            new Domain.TimeSeriesData(
-                                t.DataConfiguration is null
+                            new Domain.TimeSeriesData
+                            {
+                                DataConfiguration = t.DataConfiguration is null
                                     ? null
-                                    : new Domain.ConfigurationReference(
-                                        t.DataConfiguration.ID,
-                                        t.DataConfiguration.TimeStamp
-                                    ),
-                                t.TabularData
-                                    ?.Select(
-                                        td =>
-                                            new Domain.TabularData(
-                                                td.NumberOfDataSet,
-                                                td.NumberOfDataChannel,
-                                                td.DataChannelID?.Select(i => DataChannelId.Parse(i)).ToList(),
-                                                td.DataSet
-                                                    ?.Select(
-                                                        tds =>
-                                                            new Domain.TabularDataSet(
-                                                                tds.TimeStamp,
-                                                                tds.Value.ToList(),
-                                                                tds.Quality?.ToList()
-                                                            )
-                                                    )
-                                                    .ToList()
-                                            )
-                                    )
+                                    : new Domain.ConfigurationReference
+                                    {
+                                        Id = t.DataConfiguration.ID,
+                                        TimeStamp = t.DataConfiguration.TimeStamp
+                                    },
+                                TabularData = t.TabularData
+                                    ?.Select(td =>
+                                    {
+                                        if (td.NumberOfDataChannel != td.DataChannelID?.Count)
+                                            throw new ArgumentException(
+                                                "Number of data channels does not match the expected count"
+                                            );
+                                        if (td.NumberOfDataSet != td.DataSet?.Count)
+                                            throw new ArgumentException(
+                                                "Number of data sets does not match the expected count"
+                                            );
+                                        return new Domain.TabularData
+                                        {
+                                            DataChannelIds = td.DataChannelID
+                                                ?.Select(i => DataChannelId.Parse(i))
+                                                .ToList(),
+                                            DataSets = td.DataSet
+                                                ?.Select(
+                                                    tds =>
+                                                        new Domain.TabularDataSet
+                                                        {
+                                                            TimeStamp = tds.TimeStamp,
+                                                            Value = tds.Value.ToList(),
+                                                            Quality = tds.Quality?.ToList()
+                                                        }
+                                                )
+                                                .ToList()
+                                        };
+                                    })
                                     .ToList(),
-                                t.EventData is null
+                                EventData = t.EventData is null
                                     ? null
-                                    : new Domain.EventData(
-                                        t.EventData.NumberOfDataSet,
-                                        t.EventData
+                                    : new Domain.EventData
+                                    {
+                                        DataSet = t.EventData
                                             .DataSet
                                             ?.Select(
                                                 ed =>
-                                                    new Domain.EventDataSet(
-                                                        ed.TimeStamp,
-                                                        DataChannelId.Parse(ed.DataChannelID),
-                                                        ed.Value,
-                                                        ed.Quality
-                                                    )
+                                                    new Domain.EventDataSet
+                                                    {
+                                                        TimeStamp = ed.TimeStamp,
+                                                        DataChannelId = DataChannelId.Parse(ed.DataChannelID),
+                                                        Value = ed.Value,
+                                                        Quality = ed.Quality
+                                                    }
                                             )
                                             .ToList()
-                                    ),
-                                t.CustomData.CopyProperties()
-                            )
+                                    },
+                                CustomDataKinds = t.CustomData?.CopyProperties()
+                            }
                     )
                     .ToList()
-            )
-        );
+            }
+        };
     }
 }

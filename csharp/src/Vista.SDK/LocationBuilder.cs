@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Vista.SDK;
@@ -43,7 +42,7 @@ public sealed record LocationBuilder
                 else
                 {
                     if (!Locations.TryParseInt(span, 0, i + 1, out var num))
-                        throw new ValidationException("Should include a valid number");
+                        throw new ArgumentException("Should include a valid number");
                     n = num;
                 }
                 continue;
