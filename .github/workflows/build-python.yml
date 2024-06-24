@@ -16,12 +16,9 @@ jobs:
   build:
     name: Build, test and publish
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: python/
-
 
     steps:
+      - name: Checkout entire repository
       - uses: actions/checkout@v2
 
       - name: Set up Python
@@ -49,6 +46,12 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/python
         run: |
           pytest tests 
+
+      - name: Checkout python directory only
+        uses: actions/checkout@v2
+        with:
+          path: python
+          fetch-depth: 1
           
       - name: Build package
         if: success()
