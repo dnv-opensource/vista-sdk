@@ -44,16 +44,15 @@ jobs:
         run: |
           pytest python/tests
 
-      - name: Clean up workspace
+      - name: Remove initial checkout
         run: |
-          rm -rf *
+          rm -rf ${{ github.workspace }}
 
       - name: Checkout python directory only
         uses: actions/checkout@v2
         with:
-          path: python
+          path: .
           fetch-depth: 1
-          submodules: recursive
 
       - name: Set up Python again
         uses: actions/setup-python@v2
@@ -68,7 +67,6 @@ jobs:
       - name: Build package
         if: success()
         run: |
-          cd python
           python setup.py sdist bdist_wheel
 
       - name: Publish package
