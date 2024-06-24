@@ -1,12 +1,19 @@
 import os
+import sys
 from setuptools import setup, find_packages
 
-#get github run number
-run_number = os.getenv('github.run_number', '0')
+# Default version number
+version = "0.0.1"
+
+if len(sys.argv) > 1:
+    for arg in sys.argv:
+        if arg.startswith("--version="):
+            version = arg.split("=")[1]
+            sys.argv.remove(arg)
 
 setup(
     name="vista-sdk",
-    version=f"0.0.1.{run_number}",
+    version=version,
     author="Anders Fredriksen",
     author_email="anders.fredriksen@dnv.com",
     description="SDKs and tools relating to DNVs Vessel Information Structure (VIS), ISO 19847, ISO 19848 standards",

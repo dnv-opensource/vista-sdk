@@ -63,7 +63,7 @@ jobs:
       - name: Build package
         if: success()
         run: |
-          python setup.py sdist bdist_wheel
+          python setup.py sdist bdist_wheel --version=${{ github.run_number }}
 
       - name: Publish package
         if: success()
