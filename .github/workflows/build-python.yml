@@ -2,10 +2,10 @@ name: Python Package
 
 on:
   push:
-    branches: [main]
+    branches: [feature/python-sdk]
     paths: ["python/**", ".github/workflows/build-python.yml"]
   pull_request:
-    branches: [main]
+    branches: [feature/python-sdk]
     paths: ["python/**", ".github/workflows/build-python.yml"]
   workflow_dispatch:
 
