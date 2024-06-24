@@ -1,8 +1,20 @@
+import argparse
+import os
+import sys
+
+
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.append(root_dir)
+
 from src.SourceGenerator.EmbeddedResources import EmbeddedResource
 
 
 @staticmethod
 def generate_vis_version_script(directory: str, output_file: str):
+    output_dir = os.path.dirname(output_file)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
     vis_versions = EmbeddedResource.get_vis_versions(directory)
 
     with open(output_file, 'w') as f:
@@ -38,10 +50,23 @@ def generate_vis_version_script(directory: str, output_file: str):
         for version in vis_versions:
             f.write(f"        if version_str == \"{version}\":\n")
             f.write(f"            return VisVersion.v{version.replace('-', '_')}\n")
-        f.write("        return None\n")
+        f.write("        raise ValueError(f\"Invalid VisVersion string : {version_str}\")\n")
         f.write("\n    @staticmethod\n")
         f.write("    def parse(version_str: str) -> VisVersion:\n")
         f.write("        version = VisVersions.try_parse(version_str)\n")
         f.write("        if version is None:\n")
         f.write("            raise ValueError(f\"Invalid VisVersion string: {version_str}\")\n")
         f.write("        return version\n")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Generate VisVersion script.')
+    parser.add_argument('--resources-dir', type=str, required=True, help='The directory containing the .gz files')
+    args = parser.parse_args()
+    
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    #go one level up on the path below 
+    resources_dir = os.path.abspath(os.path.join('..', args.resources_dir))
+    output_file = os.path.join(root_dir, "python", "src", "VisVersions.py")
+
+    generate_vis_version_script(resources_dir, output_file)

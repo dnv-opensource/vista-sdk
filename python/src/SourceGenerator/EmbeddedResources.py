@@ -1,8 +1,12 @@
-import enum
 import gzip
-import json
 import os
+import sys
 from typing import List
+
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(root_dir)
+
+from src.GmodDto import GmodDto
 
 class EmbeddedResource:
     @staticmethod
@@ -24,7 +28,7 @@ class EmbeddedResource:
         for resource_name in resource_names:
             if "gmod" in resource_name and "versioning" not in resource_name:
                 stream_content = EmbeddedResource.get_decompressed_stream(os.path.join(directory, resource_name))
-                gmod = json.loads(stream_content)
-                vis_versions.append(gmod["VisVersion"])
+                gmod = GmodDto.parse_raw(stream_content)
+                vis_versions.append(gmod.vis_version)
         
         return vis_versions

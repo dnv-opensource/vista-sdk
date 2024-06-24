@@ -264,9 +264,9 @@ class TestGmodPath(unittest.TestCase):
     
     def test_verbose_path(self):
         path_strs = ["411.1-1/C101.71/I101", "411.1/C102.321/C502", "1000.1/F401.2"]
-        target_strs = ["propulsion engine 1/control monitoring and alarm system", 
-                       "propulsion steam turbine/intermediate pressure turbine rotor blade arrangement",
-                       "cargo data/deadweight carried"]
+        target_strs = ["Propulsion engine 1/Control monitoring and alarm system", 
+                       "Propulsion steam turbine/Intermediate pressure turbine rotor blade arrangement",
+                       "Cargo data/Deadweight carried"]
         for(i, path_str) in enumerate(path_strs):
             with self.subTest(path_str=path_str):
                 path = GmodPath.parse(path_str, arg=VisVersion.v3_7a)

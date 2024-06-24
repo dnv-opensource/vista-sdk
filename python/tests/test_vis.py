@@ -20,6 +20,5 @@ class TestVISSingleton(unittest.TestCase):
         vis_c = VIS()
         vis_c.get_gmod(VisVersion.v3_7a)
         
-        # Check if both instances are the same (reference equality)
         self.assertIs(vis_a, vis_c, "VIS instances are not the same")
         

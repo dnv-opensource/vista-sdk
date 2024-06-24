@@ -49,7 +49,4 @@ class TestLocations(unittest.TestCase):
         location = self.locations.parse(location_str)
         builder = LocationBuilder.create(self.locations)
 
-    
 
-if __name__ == '__main__':
-    unittest.main()

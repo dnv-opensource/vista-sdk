@@ -307,7 +307,7 @@ class GmodPath:
                     if not match:
                         current = space_delimiter
                     else:
-                        current = ch.lower()
+                        current = ch
 
                 if current == '.' and prev == '.':
                     continue

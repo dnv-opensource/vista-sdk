@@ -92,3 +92,6 @@ lerna-debug.log
 Thumbs.db
 
 .vs
+
+# Python test files
+*.pytest_cache/
