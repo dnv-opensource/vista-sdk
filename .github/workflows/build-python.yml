@@ -13,8 +13,13 @@ env:
   CI_BUILD: true
 
 jobs:
-  deploy:
+  build:
+    name: Build, test and publish
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python/
+
 
     steps:
       - uses: actions/checkout@v2
@@ -28,6 +33,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
+
+      - name: Generate VisVersion script
+        run: |
+          python python/src/SourceGenerator/VisVersionsGenerator.py
 
       - name: Build package
         run: python setup.py sdist bdist_wheel
