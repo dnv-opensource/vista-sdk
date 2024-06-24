@@ -52,8 +52,6 @@ jobs:
 
       - name: Build package
         if: success()
-        env:
-          PYTHONPATH: ${{ github.workspace }}/python  # Set PYTHONPATH to the python directory
         run: python setup.py sdist bdist_wheel
 
       - name: Publish package
