@@ -40,17 +40,22 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/python
         run: |
-          python python/src/SourceGenerator/VisVersionsGenerator.py --resources-dir ../resources
+          python src/SourceGenerator/VisVersionsGenerator.py --resources-dir ../resources
 
       - name: Install test dependencies
         run: |
           pip install pytest
 
       - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python
         run: |
           pytest tests 
           
       - name: Build package
+        if: success()
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python
         run: python setup.py sdist bdist_wheel
 
       - name: Publish package
