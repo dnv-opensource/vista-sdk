@@ -1,0 +1,68 @@
+name: Python Package
+
+on:
+  push:
+    branches: [feature/python-sdk]
+    paths: ["python/**", ".github/workflows/build-python.yml"]
+  pull_request:
+    branches: [feature/python-sdk]
+    paths: ["python/**", ".github/workflows/build-python.yml"]
+  workflow_dispatch:
+
+env:
+  CI_BUILD: true
+
+jobs:
+  build:
+    name: Build, test and publish
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python/
+
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
+          pip install -r python/requirements.txt 
+
+
+      - name: Generate VisVersion script
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python
+        run: |
+          python src/SourceGenerator/VisVersionsGenerator.py --resources-dir ../resources
+
+      - name: Install test dependencies
+        run: |
+          pip install pytest
+
+      - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python
+        run: |
+          pytest tests 
+          
+      - name: Build package
+        if: success()
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python
+        run: python setup.py sdist bdist_wheel
+
+      - name: Publish package
+        if: success() 
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+        run: |
+          twine upload dist/*
+
