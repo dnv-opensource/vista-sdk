@@ -1,14 +1,56 @@
-﻿using System.Text.Json;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Vista.SDK.Transport.Json.DataChannel;
 using Vista.SDK.Transport.Json.TimeSeriesData;
 
 namespace Vista.SDK.Transport.Json;
 
+public class DateTimeConverter : JsonConverter<DateTime>
+{
+    public static readonly string Pattern = "yyyy-MM-ddTHH:mm:ssZ";
+    public static readonly IFormatProvider Provider = CultureInfo.InvariantCulture.DateTimeFormat;
+    public static readonly DateTimeStyles Style = DateTimeStyles.None;
+
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        Debug.Assert(typeToConvert == typeof(DateTime));
+        return DateTime.ParseExact(reader.GetString() ?? string.Empty, Pattern, Provider, Style);
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString(Pattern, CultureInfo.InvariantCulture));
+    }
+}
+
+public class DatetimeOffsetConverter : JsonConverter<DateTimeOffset>
+{
+    public static readonly string Pattern = DateTimeConverter.Pattern;
+    public static readonly IFormatProvider Provider = DateTimeConverter.Provider;
+    public static readonly DateTimeStyles Style = DateTimeConverter.Style;
+
+    public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        Debug.Assert(typeToConvert == typeof(DateTimeOffset));
+        return DateTimeOffset.ParseExact(reader.GetString() ?? string.Empty, Pattern, Provider, Style);
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString(Pattern, CultureInfo.InvariantCulture));
+    }
+}
+
 public static class Serializer
 {
-    public static JsonSerializerOptions Options =
-        new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, };
+    public static readonly JsonSerializerOptions Options =
+        new()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new DateTimeConverter(), new DatetimeOffsetConverter() }
+        };
 
     public static string Serialize(this DataChannelListPackage package) => JsonSerializer.Serialize(package, Options);
 

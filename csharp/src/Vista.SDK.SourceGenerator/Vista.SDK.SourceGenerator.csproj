@@ -17,64 +17,95 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Vista.SDK\GmodDto.cs">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Vista.SDK\Transport\ISO19848Dtos.cs">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Vista.SDK\CodebooksDto.cs">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Vista.SDK\LocationsDto.cs">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Vista.SDK\GmodVersioningDto.cs">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs"
+      Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="$(DotNetVersion)"
+      GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="$(DotNetVersion)"
+      GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Buffers" Version="4.5.1" GeneratePathProperty="true"
+      PrivateAssets="all" />
+    <PackageReference Include="System.Memory" Version="4.5.5" GeneratePathProperty="true"
+      PrivateAssets="all" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" GeneratePathProperty="true"
+      PrivateAssets="all" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0"
+      GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(DotNetVersion)"
+      GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4"
+      GeneratePathProperty="true" PrivateAssets="all" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GetDependencyTargetPaths">
     <ItemGroup>
-        <Compile Include="..\Vista.SDK\GmodDto.cs">
-            <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-        </Compile>
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PKGSystem_Text_Json)\lib\netstandard2.0\System.Text.Json.dll"
+        IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PKGMicrosoft_Bcl_AsyncInterfaces)\lib\netstandard2.0\Microsoft.Bcl.AsyncInterfaces.dll"
+        IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PKGSystem_Buffers)\lib\netstandard2.0\System.Buffers.dll"
+        IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PKGSystem_Memory)\lib\netstandard2.0\System.Memory.dll"
+        IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PKGSystem_Numerics_Vectors)\lib\netstandard2.0\System.Numerics.Vectors.dll"
+        IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PKGSystem_Runtime_CompilerServices_Unsafe)\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll"
+        IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PKGSystem_Text_Encodings_Web)\lib\netstandard2.0\System.Text.Encodings.Web.dll"
+        IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker
+        Include="$(PKGSystem_Threading_Tasks_Extensions)\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll"
+        IncludeRuntimeDependency="false" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Compile Include="..\Vista.SDK\CodebooksDto.cs">
-            <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-        </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Include="..\Vista.SDK\LocationsDto.cs">
-          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-      </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Include="..\Vista.SDK\GmodVersioningDto.cs">
-            <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-        </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="System.Text.Json" Version="$(DotNetVersion)" GeneratePathProperty="true" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="$(DotNetVersion)" GeneratePathProperty="true" PrivateAssets="all" />
-        <PackageReference Include="System.Buffers" Version="4.5.1" GeneratePathProperty="true" PrivateAssets="all" />
-        <PackageReference Include="System.Memory" Version="4.5.5" GeneratePathProperty="true" PrivateAssets="all" />
-        <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" GeneratePathProperty="true" PrivateAssets="all" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-        <PackageReference Include="System.Text.Encodings.Web" Version="$(DotNetVersion)" GeneratePathProperty="true" PrivateAssets="all" />
-        <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" GeneratePathProperty="true" PrivateAssets="all" />
-    </ItemGroup>
-
-    <PropertyGroup>
-        <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
-    </PropertyGroup>
-
-    <Target Name="GetDependencyTargetPaths">
-        <ItemGroup>
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Text_Json)\lib\netstandard2.0\System.Text.Json.dll" IncludeRuntimeDependency="false" />
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Bcl_AsyncInterfaces)\lib\netstandard2.0\Microsoft.Bcl.AsyncInterfaces.dll" IncludeRuntimeDependency="false" />
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Buffers)\lib\netstandard2.0\System.Buffers.dll" IncludeRuntimeDependency="false" />
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Memory)\lib\netstandard2.0\System.Memory.dll" IncludeRuntimeDependency="false" />
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Numerics_Vectors)\lib\netstandard2.0\System.Numerics.Vectors.dll" IncludeRuntimeDependency="false" />
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Runtime_CompilerServices_Unsafe)\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll" IncludeRuntimeDependency="false" />
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Text_Encodings_Web)\lib\netstandard2.0\System.Text.Encodings.Web.dll" IncludeRuntimeDependency="false" />
-            <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Threading_Tasks_Extensions)\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll" IncludeRuntimeDependency="false" />
-        </ItemGroup>
-    </Target>
+  </Target>
 </Project>

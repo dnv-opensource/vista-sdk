@@ -5,7 +5,7 @@
             "DataChannelListID": {
                 "ID": "export-IMO1234567",
                 "Version": "1",
-                "TimeStamp": "2022-04-04T20:44:31.113+00:00"
+                "TimeStamp": "2022-04-04T20:44:31Z"
             },
             "VersionInformation": {
                 "NamingRule": "dnv",
@@ -13,7 +13,7 @@
                 "ReferenceURL": "https://docs.vista.dnv.com"
             },
             "Author": "DNV",
-            "DateCreated": "2022-04-04T20:44:31.113+00:00"
+            "DateCreated": "2022-04-04T20:44:31Z"
         },
         "DataChannelList": {
             "DataChannel": [

@@ -68,14 +68,8 @@ public sealed class Header
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyList<ConfigurationReference>? SystemConfiguration { get; }
 
-    private IDictionary<string, object>? _customHeaders;
-
     [JsonExtensionData]
-    public IDictionary<string, object> CustomHeaders
-    {
-        get { return _customHeaders ?? (_customHeaders = new Dictionary<string, object>()); }
-        set { _customHeaders = value; }
-    }
+    public IDictionary<string, object>? CustomHeaders { get; set; }
 }
 
 public sealed class TimeSpan
@@ -140,14 +134,8 @@ public sealed class TimeSeriesData
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public EventData? EventData { get; }
 
-    private IDictionary<string, object>? _customData;
-
     [JsonExtensionData]
-    public IDictionary<string, object> CustomData
-    {
-        get { return _customData ?? (_customData = new Dictionary<string, object>()); }
-        set { _customData = value; }
-    }
+    public IDictionary<string, object>? CustomData { get; set; }
 }
 
 public sealed class TabularData

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
@@ -12,6 +13,19 @@ namespace Vista.SDK.Tests.Transport.Json;
 
 public class JsonTests
 {
+    [Fact]
+    public void Test_ISO8601_DateTimeOffset()
+    {
+        var pattern = DateTimeConverter.Pattern;
+        var provider = DateTimeConverter.Provider;
+        var styles = DateTimeConverter.Style;
+
+        var str = "2022-04-04T20:44:31Z";
+
+        Assert.True(DateTimeOffset.TryParseExact(str, pattern, provider, styles, out var dto));
+        Assert.Equal(str, dto.ToString(pattern, provider));
+    }
+
     [Theory]
     [InlineData("schemas/json/DataChannelList.sample.json")]
     [InlineData("schemas/json/DataChannelList.sample.compact.json")]

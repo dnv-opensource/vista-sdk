@@ -120,4 +120,40 @@ internal static class EmbeddedResource
 
         return JsonSerializer.Deserialize<LocationsDto>(stream);
     }
+
+    internal static DataChannelTypeNamesDto? GetDataChannelTypeNames(string version)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var dataResourceName = GetResourceNames(assembly)
+            .Where(x => x.Contains("data-channel-type-names") && x.EndsWith(".gz"))
+            .Where(x => x.Contains("iso19848"))
+            .Where(x => x.Contains(version))
+            .SingleOrDefault();
+
+        if (dataResourceName is null)
+            return null;
+
+        using var stream = GetDecompressedStream(assembly, dataResourceName);
+
+        return JsonSerializer.Deserialize<DataChannelTypeNamesDto>(stream);
+    }
+
+    internal static FormatDataTypesDto? GetFormatDataTypes(string version)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var dataResourceName = GetResourceNames(assembly)
+            .Where(x => x.Contains("format-data-types") && x.EndsWith(".gz"))
+            .Where(x => x.Contains("iso19848"))
+            .Where(x => x.Contains(version))
+            .SingleOrDefault();
+
+        if (dataResourceName is null)
+            return null;
+
+        using var stream = GetDecompressedStream(assembly, dataResourceName);
+
+        return JsonSerializer.Deserialize<FormatDataTypesDto>(stream);
+    }
 }

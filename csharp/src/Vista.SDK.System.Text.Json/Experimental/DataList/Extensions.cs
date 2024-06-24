@@ -66,11 +66,15 @@ public static class Extensions
                                             ? null
                                             : new Unit(c.Property.Unit.QuantityName, c.Property.Unit.UnitSymbol)
                                             {
-                                                CustomProperties = c.Property.Unit.CustomProperties.CopyProperties(),
+                                                CustomProperties =
+                                                    c.Property.Unit.CustomProperties?.CopyProperties()
+                                                    ?? new Dictionary<string, object>()
                                             }
                                     )
                                     {
-                                        CustomProperties = c.Property.CustomProperties.CopyProperties(),
+                                        CustomProperties =
+                                            c.Property.CustomProperties?.CopyProperties()
+                                            ?? new Dictionary<string, object>()
                                     }
                                 )
                         )

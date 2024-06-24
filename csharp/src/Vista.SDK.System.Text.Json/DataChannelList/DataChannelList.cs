@@ -58,14 +58,8 @@ public sealed class Header
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public DateTimeOffset? DateCreated { get; }
 
-    private IDictionary<string, object>? _customHeaders;
-
     [JsonExtensionData]
-    public IDictionary<string, object> CustomHeaders
-    {
-        get { return _customHeaders ?? (_customHeaders = new Dictionary<string, object>()); }
-        set { _customHeaders = value; }
-    }
+    public IDictionary<string, object>? CustomHeaders { get; set; }
 }
 
 public sealed class VersionInformation
@@ -155,14 +149,8 @@ public sealed class NameObject
     [JsonPropertyName("NamingRule")]
     public string NamingRule { get; }
 
-    private IDictionary<string, object>? _customProperties;
-
     [JsonExtensionData]
-    public IDictionary<string, object> CustomProperties
-    {
-        get { return _customProperties ?? (_customProperties = new Dictionary<string, object>()); }
-        set { _customProperties = value; }
-    }
+    public IDictionary<string, object>? CustomProperties { get; set; }
 }
 
 public sealed class Property
@@ -226,14 +214,8 @@ public sealed class Property
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Remarks { get; }
 
-    private IDictionary<string, object>? _customProperties;
-
     [JsonExtensionData]
-    public IDictionary<string, object> CustomProperties
-    {
-        get { return _customProperties ?? (_customProperties = new Dictionary<string, object>()); }
-        set { _customProperties = value; }
-    }
+    public IDictionary<string, object>? CustomProperties { get; set; }
 }
 
 public sealed class DataChannelType
@@ -312,14 +294,8 @@ public sealed class Unit
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? QuantityName { get; }
 
-    private IDictionary<string, object>? _customProperties;
-
     [JsonExtensionData]
-    public IDictionary<string, object> CustomProperties
-    {
-        get { return _customProperties ?? (_customProperties = new Dictionary<string, object>()); }
-        set { _customProperties = value; }
-    }
+    public IDictionary<string, object>? CustomProperties { get; set; }
 }
 
 public sealed class Restriction

@@ -1,157 +1,150 @@
 ﻿{
-  "Package": {
-    "Header": {
-      "ShipID": "IMO1234567",
-      "DataChannelListID": {
-        "ID": "DataChannelList.xml",
-        "Version": "1.0",
-        "TimeStamp": "2016-01-01T00:00:00Z"
-      },
-      "VersionInformation": {
-        "NamingRule": "some_naming_rule",
-        "NamingSchemeVersion": "2.0",
-        "ReferenceURL": "http://somewhere.net"
-      },
-      "Author": "Author1",
-      "DateCreated": "2015-12-01T00:00:00Z",
-      "nr:CustomHeaderElement": "Vender specific headers"
-    },
-    "DataChannelList": {
-      "DataChannel": [
-        {
-          "DataChannelID": {
-            "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air",
-            "ShortID": "0010",
-            "NameObject": {
-              "NamingRule": "Naming_Rule",
-              "nr:CustomNameObject": "Vender specific NameObject"
-            }
-          },
-          "Property": {
-            "DataChannelType": {
-              "Type": "Inst",
-              "UpdateCycle": 1
+    "Package": {
+        "Header": {
+            "ShipID": "IMO1234567",
+            "DataChannelListID": {
+                "ID": "DataChannelList.xml",
+                "Version": "1.0",
+                "TimeStamp": "2016-01-01T00:00:00Z"
             },
-            "Format": {
-              "Type": "Decimal",
-              "Restriction": {
-                "FractionDigits": 1,
-                "MaxInclusive": 200.0,
-                "MinInclusive": -150.0
-              }
+            "VersionInformation": {
+                "NamingRule": "some_naming_rule",
+                "NamingSchemeVersion": "2.0",
+                "ReferenceURL": "http://somewhere.net"
             },
-            "Range": {
-              "High": 150.0,
-              "Low": 0.0
-            },
-            "Unit": {
-              "UnitSymbol": "°C",
-              "QuantityName": "Temperature"
-            },
-            "QualityCoding": "OPC_QUALITY",
-            "Name": "M/E #1 Air Cooler CFW OUT Temp",
-            "Remarks": " Location: ECR, Manufacturer: AAA Company, Type: TYPE-AAA ",
-            "nr:CustomPropertyElement": "Vender specific Property"
-          }
+            "Author": "Author1",
+            "DateCreated": "2015-12-01T00:00:00Z",
+            "nr:CustomHeaderElement": "Vender specific headers"
         },
-        {
-          "DataChannelID": {
-            "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air/calc-mean",
-            "ShortID": "0020",
-            "NameObject": {
-              "NamingRule": "Naming_Rule",
-              "nr:CustomNameObject": "Vender specific NameObject"
-            }
-          },
-          "Property": {
-            "DataChannelType": {
-              "Type": "Average",
-              "UpdateCycle": 60,
-              "CalculationPeriod": 3600
-            },
-            "Format": {
-              "Type": "Integer",
-              "Restriction": {
-                "FractionDigits": 1,
-                "MaxInclusive": 200.0,
-                "MinInclusive": -150.0,
-                "WhiteSpace": "Preserve"
-              }
-            },
-            "Range": {
-              "High": 150.0,
-              "Low": 0.0
-            },
-            "Unit": {
-              "UnitSymbol": "°C",
-              "QuantityName": "Temp"
-            },
-            "QualityCoding": "OPC_QUALITY",
-            "Name": " M/E #1 Air Cooler CFW OUT Average Temp ",
-            "Remarks": " Location: ECR, Manufacturer: AAA Company, Type: TYPE-AAA ",
-            "nr:CustomPropertyElement": "Vender specific Property"
-          }
-        },
-        {
-          "DataChannelID": {
-            "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air/type-status",
-            "ShortID": "0011",
-            "NameObject": {
-              "NamingRule": "Naming_Rule",
-              "nr:CustomNameObject": "Vender specific NameObject"
-            }
-          },
-          "Property": {
-            "DataChannelType": {
-              "Type": "Alert"
-            },
-            "Format": {
-              "Type": "String",
-              "Restriction": {
-                "Enumeration": [
-                  "High",
-                  "Low",
-                  "Normal"
-                ]
-              }
-            },
-            "QualityCoding": "OPC_QUALITY",
-            "AlertPriority": "Alarm",
-            "Name": " M/E #1 Air Cooler CFW OUT Temp Status ",
-            "Remarks": " Location: ECR, Manufacturer: AAA Company, Type: TYPE-AAA ",
-            "nr:CustomPropertyElement": "Vender specific Property"
-          }
-        },
-        {
-          "DataChannelID": {
-            "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-pressure/cnt-cooling.air/type-status",
-            "ShortID": "0021",
-            "NameObject": {
-              "NamingRule": "Naming_Rule",
-              "nr:CustomNameObject": "Vender specific NameObject"
-            }
-          },
-          "Property": {
-            "DataChannelType": {
-              "Type": "Alert"
-            },
-            "Format": {
-              "Type": "String",
-              "Restriction": {
-                "Enumeration": [
-                  "High",
-                  "Low",
-                  "Normal"
-                ]
-              }
-            },
-            "QualityCoding": "OPC_QUALITY",
-            "Name": " M/E #1 Air Cooler CFW OUT Press Status ",
-            "Remarks": " Location: ECR, Manufacturer: AAA Company, Type: TYPE-AAA ",
-            "nr:CustomPropertyElement": "Vender specific Property"
-          }
+        "DataChannelList": {
+            "DataChannel": [
+                {
+                    "DataChannelID": {
+                        "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air",
+                        "ShortID": "0010",
+                        "NameObject": {
+                            "NamingRule": "Naming_Rule",
+                            "nr:CustomNameObject": "Vender specific NameObject"
+                        }
+                    },
+                    "Property": {
+                        "DataChannelType": {
+                            "Type": "Inst",
+                            "UpdateCycle": 1
+                        },
+                        "Format": {
+                            "Type": "Decimal",
+                            "Restriction": {
+                                "FractionDigits": 1,
+                                "MaxInclusive": 200.0,
+                                "MinInclusive": -150.0
+                            }
+                        },
+                        "Range": {
+                            "High": 150.0,
+                            "Low": 0.0
+                        },
+                        "Unit": {
+                            "UnitSymbol": "°C",
+                            "QuantityName": "Temperature"
+                        },
+                        "QualityCoding": "OPC_QUALITY",
+                        "Name": "M/E #1 Air Cooler CFW OUT Temp",
+                        "Remarks": " Location: ECR, Manufacturer: AAA Company, Type: TYPE-AAA ",
+                        "nr:CustomPropertyElement": "Vender specific Property"
+                    }
+                },
+                {
+                    "DataChannelID": {
+                        "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air/calc-mean",
+                        "ShortID": "0020",
+                        "NameObject": {
+                            "NamingRule": "Naming_Rule",
+                            "nr:CustomNameObject": "Vender specific NameObject"
+                        }
+                    },
+                    "Property": {
+                        "DataChannelType": {
+                            "Type": "Average",
+                            "UpdateCycle": 60,
+                            "CalculationPeriod": 3600
+                        },
+                        "Format": {
+                            "Type": "Integer",
+                            "Restriction": {
+                                "FractionDigits": 1,
+                                "MaxInclusive": 200.0,
+                                "MinInclusive": -150.0,
+                                "WhiteSpace": "Preserve"
+                            }
+                        },
+                        "Range": {
+                            "High": 150.0,
+                            "Low": 0.0
+                        },
+                        "Unit": {
+                            "UnitSymbol": "°C",
+                            "QuantityName": "Temp"
+                        },
+                        "QualityCoding": "OPC_QUALITY",
+                        "Name": " M/E #1 Air Cooler CFW OUT Average Temp ",
+                        "Remarks": " Location: ECR, Manufacturer: AAA Company, Type: TYPE-AAA ",
+                        "nr:CustomPropertyElement": "Vender specific Property"
+                    }
+                },
+                {
+                    "DataChannelID": {
+                        "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-temperature/cnt-cooling.air/type-status",
+                        "ShortID": "0011",
+                        "NameObject": {
+                            "NamingRule": "Naming_Rule",
+                            "nr:CustomNameObject": "Vender specific NameObject"
+                        }
+                    },
+                    "Property": {
+                        "DataChannelType": {
+                            "Type": "Alert"
+                        },
+                        "Format": {
+                            "Type": "String",
+                            "Restriction": {
+                                "Enumeration": ["High", "Low", "Normal"]
+                            }
+                        },
+                        "QualityCoding": "OPC_QUALITY",
+                        "AlertPriority": "Alarm",
+                        "Name": " M/E #1 Air Cooler CFW OUT Temp Status ",
+                        "Remarks": " Location: ECR, Manufacturer: AAA Company, Type: TYPE-AAA ",
+                        "nr:CustomPropertyElement": "Vender specific Property"
+                    }
+                },
+                {
+                    "DataChannelID": {
+                        "LocalID": "/dnv-v2/vis-3-4a/411.1-1/C101.63/S206/meta/qty-pressure/cnt-cooling.air/type-status",
+                        "ShortID": "0021",
+                        "NameObject": {
+                            "NamingRule": "Naming_Rule",
+                            "nr:CustomNameObject": "Vender specific NameObject"
+                        }
+                    },
+                    "Property": {
+                        "DataChannelType": {
+                            "Type": "Alert"
+                        },
+                        "Format": {
+                            "Type": "String",
+                            "Restriction": {
+                                "Enumeration": ["High", "Low", "Normal"]
+                            }
+                        },
+                        "QualityCoding": "OPC_QUALITY",
+                        "AlertPriority": "Alarm",
+                        "Name": " M/E #1 Air Cooler CFW OUT Press Status ",
+                        "Remarks": " Location: ECR, Manufacturer: AAA Company, Type: TYPE-AAA ",
+                        "nr:CustomPropertyElement": "Vender specific Property"
+                    }
+                }
+            ]
         }
-      ]
     }
-  }
 }
