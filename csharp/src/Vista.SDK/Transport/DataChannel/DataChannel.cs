@@ -254,9 +254,9 @@ public sealed record Format
     internal FormatDataType DataType => dataType ?? throw new InvalidOperationException("Format type not set");
     internal bool IsDecimal => Type == "Decimal";
 
-    public ValidateResult ValidateValue(string value)
+    public ValidateResult ValidateValue(string value, out Value parsedValue)
     {
-        if (DataType.Validate(value, out _) is ValidateResult.Invalid invalid)
+        if (DataType.Validate(value, out parsedValue) is ValidateResult.Invalid invalid)
             return invalid;
         if (Restriction is not null)
             return Restriction.ValidateValue(value, this);

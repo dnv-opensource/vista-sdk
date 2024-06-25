@@ -45,8 +45,8 @@ public sealed record TimeSeriesData
 
     public ValidateResult Validate(
         DataChannelListPackage dcPackage,
-        Func<DateTimeOffset, DataChannel.DataChannel, string, string?, ValidateResult> onTabularData,
-        Func<DateTimeOffset, DataChannel.DataChannel, string, string?, ValidateResult> onEventData
+        ValidateData onTabularData,
+        ValidateData onEventData
     )
     {
         if (DataConfiguration is not null)
@@ -117,7 +117,10 @@ public sealed record TimeSeriesData
                     if (dataChannel is null)
                         continue;
 
-                    var typeValidation = dataChannel.Property.Format.ValidateValue(dataset.Value[j]);
+                    var typeValidation = dataChannel
+                        .Property
+                        .Format
+                        .ValidateValue(dataset.Value[j], out var parsedValue);
 
                     if (typeValidation is ValidateResult.Invalid invalid)
                     {
@@ -125,7 +128,7 @@ public sealed record TimeSeriesData
                         continue;
                     }
 
-                    result = onTabularData(dataset.TimeStamp, dataChannel, dataset.Value[j], dataset.Quality?[j]);
+                    result = onTabularData(dataset.TimeStamp, dataChannel, parsedValue, dataset.Quality?[j]);
 
                     if (result is not ValidateResult.Ok)
                     {
@@ -172,14 +175,17 @@ public sealed record TimeSeriesData
                     if (dataChannel is null)
                         continue;
 
-                    var typeValidation = dataChannel.Property.Format.ValidateValue(eventData.Value);
+                    var typeValidation = dataChannel
+                        .Property
+                        .Format
+                        .ValidateValue(eventData.Value, out var parsedValue);
                     if (typeValidation is ValidateResult.Invalid invalid)
                     {
                         errorneousDataChannels.Add((eventData.DataChannelId, string.Join(", ", invalid.Messages)));
                         continue;
                     }
 
-                    result = onEventData(eventData.TimeStamp, dataChannel, eventData.Value, eventData.Quality);
+                    result = onEventData(eventData.TimeStamp, dataChannel, parsedValue, eventData.Quality);
 
                     if (result is not ValidateResult.Ok)
                     {
@@ -258,3 +264,11 @@ public sealed record EventDataSet
     public required string Value { get; set; }
     public required string? Quality { get; set; }
 }
+
+// Custom definitions
+public delegate ValidateResult ValidateData(
+    DateTimeOffset timeStamp,
+    DataChannel.DataChannel dataChannel,
+    Value value,
+    string? quality
+);

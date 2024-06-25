@@ -182,20 +182,20 @@ public sealed record FormatDataType(string Type, string Description)
             case ValidateResult.Ok:
                 switch (obj)
                 {
-                    case decimal d:
-                        onDecimal(d);
+                    case Value.Decimal d:
+                        onDecimal(d.Value);
                         break;
-                    case int i:
-                        onInteger(i);
+                    case Value.Integer i:
+                        onInteger(i.Value);
                         break;
-                    case bool b:
-                        onBoolean(b);
+                    case Value.Boolean b:
+                        onBoolean(b.Value);
                         break;
-                    case string s:
-                        onString(s);
+                    case Value.String s:
+                        onString(s.Value);
                         break;
-                    case DateTimeOffset dt:
-                        onDateTime(dt);
+                    case Value.DateTime dt:
+                        onDateTime(dt.Value);
                         break;
                     default:
                         throw new Exception("Invalid type");
@@ -246,28 +246,27 @@ public sealed record FormatDataType(string Type, string Description)
         return result;
     }
 
-    public ValidateResult Validate(string value, out object obj)
+    public ValidateResult Validate(string value, out Value outValue)
     {
-        obj = value;
+        outValue = new Value.String(value);
         switch (Type)
         {
             case "Decimal":
                 if (!decimal.TryParse(value, out var d))
                     return new ValidateResult.Invalid([$"Invalid decimal value - Value='{value}'"]);
-                obj = d;
+                outValue = new Value.Decimal(d);
                 return new ValidateResult.Ok();
             case "Integer":
                 if (!int.TryParse(value, out var i))
                     return new ValidateResult.Invalid([$"Invalid integer value - Value='{value}'"]);
-                obj = i;
+                outValue = new Value.Integer(i);
                 return new ValidateResult.Ok();
             case "Boolean":
                 if (!bool.TryParse(value, out var b))
                     return new ValidateResult.Invalid([$"Invalid boolean value - Value='{value}'"]);
-                obj = b;
+                outValue = new Value.Boolean(b);
                 return new ValidateResult.Ok();
             case "String":
-                obj = value;
                 return new ValidateResult.Ok();
             case "DateTime":
                 var pattern = "yyyy-MM-ddTHH:mm:ssZ";
@@ -281,7 +280,7 @@ public sealed record FormatDataType(string Type, string Description)
                     )
                 )
                     return new ValidateResult.Invalid([$"Invalid datetime value - Value='{value}'"]);
-                obj = dt;
+                outValue = new Value.DateTime(dt);
                 return new ValidateResult.Ok();
             default:
                 throw new Exception($"Invalid format type {Type}");
@@ -315,4 +314,20 @@ public sealed record FormatDataTypes : IEnumerable<FormatDataType>
 
         public sealed record Invalid : ParseResult;
     }
+}
+
+// Custom definitions
+public abstract record Value
+{
+    private Value() { }
+
+    public sealed record Decimal(decimal Value) : Value;
+
+    public sealed record Integer(int Value) : Value;
+
+    public sealed record Boolean(bool Value) : Value;
+
+    public sealed record String(string Value) : Value;
+
+    public sealed record DateTime(DateTimeOffset Value) : Value;
 }
