@@ -3,6 +3,10 @@ import sys
 from setuptools import setup, find_packages
 
 # Default version number
+def read_requirements():
+    with open('requirements.txt') as f:
+        return f.read().splitlines()
+
 version = "0.1.0-preview-"
 
 if len(sys.argv) > 1:
@@ -20,6 +24,7 @@ setup(
     url="https://github.com/dnv-opensource/vista-sdk",
     license="MIT",
     packages=find_packages(),
+    install_requires=read_requirements(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
