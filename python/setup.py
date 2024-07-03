@@ -24,7 +24,11 @@ setup(
     url="https://github.com/dnv-opensource/vista-sdk",
     license="MIT",
     packages=find_packages(),
-    install_requires=read_requirements(),
+    install_requires=[
+        'cachetools==5.3.3',
+        'parameterized==0.9.0',
+        'pydantic==2.7.4',
+        ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
