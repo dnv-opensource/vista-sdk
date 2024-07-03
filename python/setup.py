@@ -3,9 +3,7 @@ import sys
 from setuptools import setup, find_packages
 
 # Default version number
-def read_requirements():
-    with open('requirements.txt') as f:
-        return f.read().splitlines()
+
 
 version = "0.1.0-preview-"
 
