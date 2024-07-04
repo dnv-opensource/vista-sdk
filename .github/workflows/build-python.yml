@@ -48,6 +48,7 @@ jobs:
         run: |
           mv python/* ./
           mv python/.[!.]* ./
+          mv resources ./
           rm -rf python
 
       - name: Set up Python again
