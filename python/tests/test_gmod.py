@@ -16,7 +16,7 @@ class TestGmod(unittest.TestCase):
 
     def setUp(self):
         self.vis = TestVis.get_vis()
-        Client.get_gmod(VisVersionExtension.to_version_string(VisVersion.v3_4a))
+        Client.get_gmod_test(VisVersionExtension.to_version_string(VisVersion.v3_4a))
        
 
     def test_gmod_loads(self):
