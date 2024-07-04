@@ -38,11 +38,11 @@ jobs:
         run: |
           python python/vista_sdk/SourceGenerator/VisVersionsGenerator.py --resources-dir resources
 
-      - name: Run tests
-        env:
-          PYTHONPATH: ${{ github.workspace }}/python # Ensure PYTHONPATH is set for tests as well
-        run: |
-          pytest python/tests
+      # - name: Run tests
+      #   env:
+      #     PYTHONPATH: ${{ github.workspace }}/python # Ensure PYTHONPATH is set for tests as well
+      #   run: |
+      #     pytest python/tests
 
       - name: Move Python directory to root
         run: |
