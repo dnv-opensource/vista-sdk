@@ -30,9 +30,6 @@ class TestGmodPath(unittest.TestCase):
             with self.subTest(item=item):
                 vis_version = VisVersions.parse(item.vis_version)
                 input_path : str = item.path
-
-                vis : VIS = self.vis
-
                 path = GmodPath.try_parse(input_path, vis_version)
                 self.assertTrue(path[0])
                 self.assertIsNotNone(path[1])
