@@ -15,8 +15,8 @@ class Client:
     def get_locations(vis_version: str) -> Optional[LocationsDto]:
         resource_name = f"locations-vis-{vis_version}.json.gz"
         try:
-            with pkg_resources.open_binary('resources', resource_name) as file:
-                with gzip.open(file, 'rt') as gzip_file:
+            with pkg_resources.path('vista_sdk.resources', resource_name) as resource_path:
+                with gzip.open(resource_path, 'rt') as gzip_file:
                     data = json.load(gzip_file)
             locations_dto = LocationsDto(**data)
             return locations_dto
@@ -27,8 +27,8 @@ class Client:
     def get_gmod(vis_version: str) -> GmodDto:
         resource_name = f"gmod-vis-{vis_version}.json.gz"
         try:
-            with pkg_resources.open_binary('resources', resource_name) as file:
-                with gzip.open(file, 'rt') as gzip_file:
+            with pkg_resources.path('vista_sdk.resources', resource_name) as resource_path:
+                with gzip.open(resource_path, 'rt') as gzip_file:
                     data = json.load(gzip_file)
             gmod_dto = GmodDto(**data)
             return gmod_dto
