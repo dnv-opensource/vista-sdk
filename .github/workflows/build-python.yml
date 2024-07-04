@@ -40,7 +40,7 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/python # Set PYTHONPATH to the python directory
         run: |
-          python python/vista_sdk/SourceGenerator/VisVersionsGenerator.py --resources-dir resources
+          python python/vista_sdk/SourceGenerator/VisVersionsGenerator.py --resources-dir python/vista_sdk/resources
 
       # - name: Run tests
       #   env:
