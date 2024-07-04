@@ -13,7 +13,7 @@ if len(sys.argv) > 1:
             version += arg.split("=")[1]
             sys.argv.remove(arg)
 
-resource_directory = os.path.join(os.path.dirname(__file__), '..', '..', 'resources')
+resource_directory = os.path.join(os.path.dirname(__file__), '..', 'resources')
 
 def package_files(directory):
     paths = []
