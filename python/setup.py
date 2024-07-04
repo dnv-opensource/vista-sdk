@@ -13,14 +13,19 @@ if len(sys.argv) > 1:
             version += arg.split("=")[1]
             sys.argv.remove(arg)
 
+resource_directory = os.path.join(os.path.dirname(__file__), '..', 'resources')
+
+
 def package_files(directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            paths.append(os.path.join(path, filename))
+            # Add relative path to the files
+            paths.append(os.path.relpath(os.path.join(path, filename), directory))
     return paths
 
-resource_files = package_files('resources')
+
+resource_files = package_files(resource_directory)
 
 setup(
     name="vista-sdk",
@@ -32,7 +37,7 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
-    package_data={'': resource_files},
+    package_data={'resources': resource_files},
     install_requires=['cachetools>=5.3.3','parameterized>=0.9.0','pydantic>=2.7.1'],
     classifiers=[
         "Programming Language :: Python :: 3",
