@@ -24,7 +24,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        'vista_sdk': ['resources/*'],
+        'vista_sdk': ['../resources/*'],
     },
     install_requires=['cachetools>=5.3.3','parameterized>=0.9.0','pydantic>=2.7.1'],
     classifiers=[
