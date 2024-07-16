@@ -1,0 +1,78 @@
+name: Python Package
+
+on:
+  push:
+    branches: [main]
+    paths: ["python/**", ".github/workflows/build-python.yml"]
+  pull_request:
+    branches: [main]
+    paths: ["python/**", ".github/workflows/build-python.yml"]
+  workflow_dispatch:
+
+env:
+  CI_BUILD: true
+
+jobs:
+  build:
+    name: Build, test, and publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout entire repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install -r python/requirements.txt
+
+      - name: Copy resources folder into python/vista_sdk
+        run: |
+          cp -r ./resources ./python/vista_sdk/resources
+
+      - name: Generate VisVersion script
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python # Set PYTHONPATH to the python directory
+        run: |
+          python python/vista_sdk/SourceGenerator/VisVersionsGenerator.py --resources-dir resources
+
+      - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/python # Ensure PYTHONPATH is set for tests as well
+        run: |
+          pytest python/tests
+
+      - name: Move Python directory to root
+        run: |
+          mv python/* ./
+          mv python/.[!.]* ./
+          rm -rf python
+
+      - name: Set up Python again
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies for building
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
+
+      - name: Build package
+        if: success()
+        run: |
+          python setup.py sdist bdist_wheel --version=${{ github.run_number }}
+
+      - name: Publish package
+        if: success()
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+        run: |
+          twine upload dist/* --verbose
