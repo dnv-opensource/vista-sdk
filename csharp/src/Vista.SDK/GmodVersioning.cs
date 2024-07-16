@@ -215,12 +215,12 @@ internal sealed class GmodVersioning
                         if (next.TargetNode.Code != qualifyingNode.TargetNode.Code)
                             throw new Exception("Normal assignment end node was deleted");
                     }
-                    i++;
+                    continue;
                 }
                 else if (qualifyingNode.TargetNode.Code != targetEndNode.Code)
                 {
                     AddToPath(targetGmod, path, targetNormalAssignment!);
-                    i++; // Holy moly
+                    i++;
                 }
             }
             if (selectionChanged) // SC || SN || SD
