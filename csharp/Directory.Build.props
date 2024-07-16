@@ -29,11 +29,13 @@
     <DotNetVersion>7.0.0</DotNetVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' != 'net7.0' and '$(TargetFramework)' != 'net8.0'">
+    <!-- TODO: Solve the issue with SecurityVulnerabilities in previous targets  -->
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
     <DotNetVersion>6.0.0</DotNetVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpier.MsBuild" Version="0.26.3" >
+    <PackageReference Include="CSharpier.MsBuild" Version="0.26.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
