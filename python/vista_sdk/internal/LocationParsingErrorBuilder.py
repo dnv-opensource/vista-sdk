@@ -1,5 +1,8 @@
 from __future__ import annotations
+
 from enum import Enum
+from typing import List, Tuple
+
 
 class LocationValidationResult(Enum):
     INVALID = 1
@@ -8,12 +11,14 @@ class LocationValidationResult(Enum):
     NULL_OR_WHITE_SPACE = 4
     VALID = 5
 
+
 class LocationParsingErrorBuilder:
     def __init__(self):
         self._errors = []
 
-
-    def add_error(self, name : LocationValidationResult, message : str) -> LocationParsingErrorBuilder:
+    def add_error(
+        self, name: LocationValidationResult, message: str
+    ) -> LocationParsingErrorBuilder:
         self._errors.append((name, message))
         return self
 
@@ -28,13 +33,12 @@ class LocationParsingErrorBuilder:
     def build(self) -> ParsingErrors:
         return ParsingErrors(self._errors) if self._errors else ParsingErrors()
 
-class ParsingErrors:
-    empty = []
 
-    def __init__(self, errors : list = []):
+class ParsingErrors:
+    empty: List[Tuple[LocationValidationResult, str]] = []
+
+    def __init__(self, errors: list = []):  # noqa : B006;
         self.errors = [(error[0], error[1]) for error in errors]
 
     def __repr__(self):
         return f"ParsingErrors({self.errors})"
-    
-

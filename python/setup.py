@@ -1,6 +1,6 @@
-import os
 import sys
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup  # type: ignore
 
 # Default version number
 
@@ -18,19 +18,20 @@ setup(
     version=version,
     author="Anders Fredriksen",
     author_email="anders.fredriksen@dnv.com",
-    description="SDKs and tools relating to DNVs Vessel Information Structure (VIS), ISO 19847, ISO 19848 standards",
+    description="SDKs and tools relating to DNVs Vessel Information Structure (VIS),"
+    "ISO 19847, ISO 19848 standards",
     url="https://github.com/dnv-opensource/vista-sdk",
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        'vista_sdk': ['../resources/*'],
+        "vista_sdk": ["resources/*"],
     },
-    install_requires=['cachetools>=5.3.3','parameterized>=0.9.0','pydantic>=2.7.1'],
+    install_requires=["cachetools>=5.3.3", "parameterized>=0.9.0", "pydantic>=2.7.1"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8',
+    python_requires=">=3.8",
 )

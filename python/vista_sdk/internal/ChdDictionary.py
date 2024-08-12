@@ -1,6 +1,9 @@
 from __future__ import annotations
-from typing import Optional, Tuple, List, Generic, TypeVar, Dict
-TValue = TypeVar('TValue')
+
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar
+
+TValue = TypeVar("TValue")
+
 
 class ChdDictionary(Generic[TValue]):
     def __init__(self, items: List[Tuple[str, TValue]]):
@@ -19,7 +22,6 @@ class ChdDictionary(Generic[TValue]):
             return self._dict[key], True
         return None, False
 
-
     class ThrowHelper:
         @staticmethod
         def throw_key_not_found_exception(key: str):
@@ -28,5 +30,3 @@ class ChdDictionary(Generic[TValue]):
         @staticmethod
         def throw_invalid_operation_exception():
             raise Exception("Invalid operation")
-
-

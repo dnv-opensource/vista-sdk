@@ -1,17 +1,18 @@
-from vista_sdk.VisVersions import VisVersion
-from vista_sdk.VIS import VIS
 import unittest
 
-class TestVis:
+from vista_sdk.VIS import VIS
+from vista_sdk.VisVersions import VisVersion
 
+
+class TestVis:
     @staticmethod
     def get_vis() -> VIS:
-        from vista_sdk.VIS import VIS 
-        return VIS()
-    
-    
-class TestVISSingleton(unittest.TestCase):
+        from vista_sdk.VIS import VIS
 
+        return VIS()
+
+
+class TestVISSingleton(unittest.TestCase):
     def test_singleton_instance(self):
         vis_a = VIS().instance
         vis_b = VIS().instance
@@ -19,6 +20,5 @@ class TestVISSingleton(unittest.TestCase):
         vis_b.get_gmod(VisVersion.v3_7a)
         vis_c = VIS()
         vis_c.get_gmod(VisVersion.v3_7a)
-        
+
         self.assertIs(vis_a, vis_c, "VIS instances are not the same")
-        

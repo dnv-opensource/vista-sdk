@@ -1,11 +1,14 @@
-from typing import Optional, List
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
+
 class RelativeLocationsDto(BaseModel):
-    code: str = Field(..., alias='code')
-    name: str = Field(..., alias='name')
-    definition: Optional[str] = Field(None, alias='definition')
+    code: str = Field(..., alias="code")
+    name: str = Field(..., alias="name")
+    definition: Optional[str] = Field(None, alias="definition")
+
 
 class LocationsDto(BaseModel):
-    vis_version: str = Field(..., alias='visRelease')
-    items: List[RelativeLocationsDto] = Field(..., alias='items')
+    vis_version: str = Field(..., alias="visRelease")
+    items: List[RelativeLocationsDto] = Field(..., alias="items")

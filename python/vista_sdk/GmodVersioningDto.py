@@ -1,5 +1,7 @@
+from typing import Dict, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, Dict
+
 
 class GmodVersioningNodeChangesDto(BaseModel):
     next_vis_version: Optional[str] = Field(None, alias="nextVisVersion")
@@ -7,5 +9,8 @@ class GmodVersioningNodeChangesDto(BaseModel):
     previous_vis_version: Optional[str] = Field(None, alias="previousVisVersion")
     previous_code: Optional[str] = Field(None, alias="previousCode")
 
+
 class GmodVersioningDto(BaseModel):
-    items: Dict[str, Dict[str, GmodVersioningNodeChangesDto]] = Field(..., alias="items")
+    items: Dict[str, Dict[str, GmodVersioningNodeChangesDto]] = Field(
+        ..., alias="items"
+    )

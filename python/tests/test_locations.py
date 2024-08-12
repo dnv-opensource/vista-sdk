@@ -1,11 +1,12 @@
 import unittest
-from vista_sdk.Locations import  LocationGroup
-from vista_sdk.VisVersions import VisVersion
+
 from vista_sdk.LocationBuilder import LocationBuilder
+from vista_sdk.Locations import LocationGroup
 from vista_sdk.VIS import VIS
+from vista_sdk.VisVersions import VisVersion
+
 
 class TestLocations(unittest.TestCase):
-
     def setUp(self):
         self.vis = VIS()
         self.locations = self.vis.get_locations(VisVersion.v3_4a)
@@ -15,10 +16,10 @@ class TestLocations(unittest.TestCase):
         self.assertIsNotNone(self.locations.groups)
 
     def test_location_groups_properties(self):
-        values = list(LocationGroup) 
+        values = list(LocationGroup)
         values_int = [value.value for value in values]
         self.assertEqual(len(values_int), len(set(values_int)))
-        self.assertEqual(len(values_int), 5) 
+        self.assertEqual(len(values_int), 5)
         self.assertEqual(LocationGroup.NUMBER.value, 0)
         for i in range(len(values_int) - 1):
             self.assertEqual(values_int[i + 1], values_int[i] + 1)
@@ -42,11 +43,9 @@ class TestLocations(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.locations.parse(None)
         with self.assertRaises(ValueError):
-            self.locations.parse('') 
+            self.locations.parse("")
 
     def test_location_builder(self):
         location_str = "11FIPU"
-        location = self.locations.parse(location_str)
-        builder = LocationBuilder.create(self.locations)
-
-
+        self.locations.parse(location_str)
+        LocationBuilder.create(self.locations)

@@ -1,13 +1,16 @@
 from __future__ import annotations
+
+from copy import copy as copy
 from typing import Optional, TypeVar
 from xml.dom import ValidationErr
-from vista_sdk.Locations import Location, LocationGroup, Locations
-from copy import copy as copy
 
-T = TypeVar('T')
+from vista_sdk.Locations import Location, LocationGroup, Locations
+
+T = TypeVar("T")
+
 
 class LocationBuilder:
-    def __init__(self, locations : Locations):
+    def __init__(self, locations: Locations):
         self.vis_version = locations.vis_version
         self.reversed_groups = locations._reversed_groups
         self.number = None
@@ -17,7 +20,7 @@ class LocationBuilder:
         self.longitudinal = None
 
     @staticmethod
-    def create(locations : Locations) -> LocationBuilder:
+    def create(locations: Locations) -> LocationBuilder:
         return LocationBuilder(locations)
 
     def with_location(self, value: Location) -> LocationBuilder:
@@ -43,32 +46,32 @@ class LocationBuilder:
 
         return builder
 
-    def with_number(self, number :int) -> LocationBuilder:
+    def with_number(self, number: int) -> LocationBuilder:
         return self.with_value_internal(LocationGroup.NUMBER, number)
 
-    def with_side(self, side : str) -> LocationBuilder:
+    def with_side(self, side: str) -> LocationBuilder:
         return self.with_value_internal(LocationGroup.SIDE, side)
-    
-    def with_vertical(self, vertical : str) -> LocationBuilder:
+
+    def with_vertical(self, vertical: str) -> LocationBuilder:
         return self.with_value_internal(LocationGroup.VERTICAL, vertical)
 
-    def with_transverse(self, transverse : str) -> LocationBuilder:
+    def with_transverse(self, transverse: str) -> LocationBuilder:
         return self.with_value_internal(LocationGroup.TRANSVERSE, transverse)
 
-    def with_longitudinal(self, longitudinal : str) -> LocationBuilder: 
+    def with_longitudinal(self, longitudinal: str) -> LocationBuilder:
         return self.with_value_internal(LocationGroup.LONGITUDINAL, longitudinal)
 
-    def with_value(self, value : int) -> LocationBuilder:
+    def with_value(self, value: int) -> LocationBuilder:
         return self.with_value_internal(LocationGroup.NUMBER, value)
-    
-    def with_value_char(self, value : str) -> LocationBuilder:
+
+    def with_value_char(self, value: str) -> LocationBuilder:
         if value not in self.reversed_groups:
             raise ValueError(f"The value {value} is an invalid Locations value")
         group = self.reversed_groups[value]
         return self.with_value_internal(group, value)
 
-    def with_value_internal(self, group : LocationGroup, value : T) -> LocationBuilder:
-        if group == LocationGroup.NUMBER: 
+    def with_value_internal(self, group: LocationGroup, value: T) -> LocationBuilder:
+        if group == LocationGroup.NUMBER:
             if not isinstance(value, int):
                 raise ValueError("Value should be a number")
             if value < 1:
@@ -79,7 +82,7 @@ class LocationBuilder:
 
         if not isinstance(value, str) or len(value) != 1:
             raise ValueError("Value should be a single character")
-        
+
         if value not in self.reversed_groups or self.reversed_groups[value] != group:
             raise ValueError(f"The value {value} is an invalid {group.name} value")
 
@@ -87,7 +90,7 @@ class LocationBuilder:
         setattr(builder, group.name.lower(), value)
         return builder
 
-    def without_value(self, group : LocationGroup) -> LocationBuilder:
+    def without_value(self, group: LocationGroup) -> LocationBuilder:
         builder = copy(self)
         setattr(builder, group.name.lower(), None)
         return builder
@@ -100,8 +103,8 @@ class LocationBuilder:
         parts = [str(p) for p in parts if p is not None]
         if self.number:
             parts.insert(0, str(self.number))
-        return ''.join(sorted(parts))
-    
+        return "".join(sorted(parts))
+
     def without_number(self) -> LocationBuilder:
         return self.without_value(LocationGroup.NUMBER)
 

@@ -1,0 +1,42 @@
+
+# Consider packages in the src directory as first-party code
+src = ["src"]
+# Run ruff on Notebooks as well
+extend-include = ["*.ipynb"]
+
+[lint.per-file-ignores]
+# Allow the use of assert in tests
+"tests/*" = ["S101"]
+
+[lint]
+select = [
+    "F",   # Pyflakes
+    "E",   # pycodestyle
+    "W",   # pycodestyle
+    "I",   # isort
+    "ICN", # flake8-import-conventions
+    # "D",   # pydocstyle
+    # "N",   # pep8-naming
+    # "A",   # flake8-builtins
+    "B",   # flake8-bugbear
+    "S",   # flake8-bandit
+    "SIM", # flake8-simplify
+    # "C4",  # flake8-comprehensions
+    # "DTZ", # flake8-datetimez
+    # "FA",  # flake8-future-annotations
+    # "ISC", # flake8-implicit-str-concat
+    # "PT",  # flake8-pytest-style
+    # "Q",   # flake8-quotes
+    # "RET", # flake8-return
+    # "PTH", # flake8-use-pathlib
+    # "UP",  # pyupgrade
+    # "RUF", # Ruff-specific rules
+    # "PD",  # pandas-vet
+    # # "FAST", # FastAPI
+]
+ignore = [
+    "ISC001", # may cause conflicts when used with the formatter
+]
+
+[lint.pydocstyle]
+convention = "google"
