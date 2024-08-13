@@ -90,3 +90,8 @@ lerna-debug.log
 # System Files
 .DS_Store
 Thumbs.db
+
+.vs
+
+# Python test files
+*.pytest_cache/
