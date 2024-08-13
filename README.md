@@ -6,6 +6,8 @@
 [![SDK NuGet prerelease](https://img.shields.io/nuget/vpre/DNV.Vista.SDK?label=NuGet%20DNV.Vista.SDK)](https://www.nuget.org/packages/DNV.Vista.SDK)<br/>
 [![SDK NPM current](https://img.shields.io/npm/v/dnv-vista-sdk?label=NPM%20dnv-vista-sdk)](https://www.npmjs.com/package/dnv-vista-sdk)
 [![SDK NPM current](https://img.shields.io/npm/v/dnv-vista-sdk/preview?label=NPM%20dnv-vista-sdk)](https://www.npmjs.com/package/dnv-vista-sdk)<br/>
+![PyPI current](https://img.shields.io/pypi/v/vista-sdk?label=PyPI%20vista-sdk)
+
 
 ## Vista SDK
 The Vista team at DNV are working on tooling related to
