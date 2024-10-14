@@ -6,13 +6,13 @@ internal sealed class GmodVersioning
 {
     private readonly Dictionary<VisVersion, GmodVersioningNode> _versioningsMap = new();
 
-    internal GmodVersioning(GmodVersioningDto dto)
+    internal GmodVersioning(Dictionary<string, GmodVersioningDto> dto)
     {
-        foreach (var versioningDto in dto.Items)
+        foreach (var kvp in dto)
         {
-            var visVersion = versioningDto.Key;
-            var gmodVersioningNode = new GmodVersioningNode(versioningDto.Value);
-            _versioningsMap.Add(VisVersions.Parse(visVersion), gmodVersioningNode);
+            var parsedVersion = VisVersions.Parse(kvp.Key);
+            var gmodVersioningNode = new GmodVersioningNode(parsedVersion, kvp.Value.Items);
+            _versioningsMap.Add(parsedVersion, gmodVersioningNode);
         }
     }
 
@@ -267,10 +267,15 @@ internal sealed class GmodVersioning
 
     private readonly record struct GmodVersioningNode
     {
+        internal VisVersion VisVersion { get; }
         private readonly Dictionary<string, GmodVersioningNodeChanges> _versioningNodeChanges = new();
 
-        internal GmodVersioningNode(IReadOnlyDictionary<string, GmodVersioningNodeChangesDto> dto)
+        internal GmodVersioningNode(
+            VisVersion visVersion,
+            IReadOnlyDictionary<string, GmodVersioningNodeChangesDto> dto
+        )
         {
+            VisVersion = visVersion;
             foreach (var versioningNodeDto in dto)
             {
                 if (
@@ -285,10 +290,22 @@ internal sealed class GmodVersioning
                         ? nextVisVersion
                         : null,
                     versioningNodeDto.Value.NextCode,
+                    versioningNodeDto.Value.NextAssignment is not null
+                        ? new(
+                            versioningNodeDto.Value.NextAssignment.OldAssignment,
+                            versioningNodeDto.Value.NextAssignment.CurrentAssignment
+                        )
+                        : null,
                     VisVersions.TryParse(versioningNodeDto.Value.PreviousVisVersion, out var previoiusVisVersion)
                         ? previoiusVisVersion
                         : null,
-                    versioningNodeDto.Value.PreviousCode
+                    versioningNodeDto.Value.PreviousCode,
+                    versioningNodeDto.Value.PreviousAssignment is not null
+                        ? new(
+                            versioningNodeDto.Value.PreviousAssignment.OldAssignment,
+                            versioningNodeDto.Value.PreviousAssignment.CurrentAssignment
+                        )
+                        : null
                 );
                 _versioningNodeChanges.Add(code, versioningNodeChanges);
             }
@@ -298,10 +315,16 @@ internal sealed class GmodVersioning
             _versioningNodeChanges.TryGetValue(code, out nodeChanges);
     }
 
+    private sealed record NodeChange(VisVersion Version, string Code, GmodVersioningAssignmentChange? Assignment);
+
     private sealed record GmodVersioningNodeChanges(
         VisVersion? NextVisVersion,
         string? NextCode,
+        GmodVersioningAssignmentChange? NextAssignment,
         VisVersion? PreviousVisVersion,
-        string? PreviousCode
+        string? PreviousCode,
+        GmodVersioningAssignmentChange? PreviousAssignment
     );
+
+    private sealed record GmodVersioningAssignmentChange(string OldAssignment, string CurrentAssignment);
 }

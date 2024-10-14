@@ -42,7 +42,7 @@ internal static class EmbeddedResource
         var assembly = Assembly.GetExecutingAssembly();
 
         var gmodResourceName = GetResourceNames(assembly)
-            .Where(x => x.Contains("gmod") && x.EndsWith(".gz"))
+            .Where(x => x.Contains("gmod") && x.EndsWith(".gz") && !x.Contains("versioning"))
             .Where(x => x.Contains(visVersion))
             .SingleOrDefault();
 
@@ -88,20 +88,30 @@ internal static class EmbeddedResource
         return new GZipStream(stream, CompressionMode.Decompress, leaveOpen: false);
     }
 
-    internal static GmodVersioningDto? GetGmodVersioning()
+    internal static Dictionary<string, GmodVersioningDto>? GetGmodVersioning()
     {
         var assembly = Assembly.GetExecutingAssembly();
         var baseName = assembly.GetName().Name;
-        var gmodVersioningResourceName = assembly
+        var gmodVersioningResourceNames = assembly
             .GetManifestResourceNames()
-            .SingleOrDefault(x => x == $"{baseName}.resources.gmod-vis-versioning.json.gz");
+            .Where(x => x.Contains("gmod-vis-versioning") && x.EndsWith(".gz"))
+            .ToList();
 
-        if (gmodVersioningResourceName is null)
+        if (gmodVersioningResourceNames is null)
             return null;
 
-        using var stream = GetDecompressedStream(assembly, gmodVersioningResourceName);
+        var dtos = new Dictionary<string, GmodVersioningDto>();
 
-        return JsonSerializer.Deserialize<GmodVersioningDto>(stream);
+        foreach (var resourceName in gmodVersioningResourceNames)
+        {
+            using var stream = GetDecompressedStream(assembly, resourceName);
+            var gmodVersioning = JsonSerializer.Deserialize<GmodVersioningDto>(stream);
+            if (gmodVersioning is null)
+                continue;
+            dtos.Add(gmodVersioning.VisVersion, gmodVersioning);
+        }
+
+        return dtos;
     }
 
     internal static LocationsDto? GetLocations(string visVersion)

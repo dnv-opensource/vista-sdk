@@ -118,7 +118,16 @@ public sealed partial class Gmod : IEnumerable<GmodNode>
             node.Trim();
 
         _rootNode = nodeMap["VE"];
+        _nodeMap = new ChdDictionary<GmodNode>(nodeMap.Select(kvp => (kvp.Key, kvp.Value)).ToArray());
+    }
 
+    internal Gmod(VisVersion version, IReadOnlyDictionary<string, GmodNode> nodeMap)
+    {
+        VisVersion = version;
+        foreach (var node in nodeMap.Values)
+            node.Trim();
+
+        _rootNode = nodeMap["VE"];
         _nodeMap = new ChdDictionary<GmodNode>(nodeMap.Select(kvp => (kvp.Key, kvp.Value)).ToArray());
     }
 

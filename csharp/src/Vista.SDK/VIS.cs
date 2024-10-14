@@ -30,7 +30,7 @@ public static partial class VisVersionExtensions { }
 
 public sealed class VIS : IVIS
 {
-    public static readonly VisVersion LatestVisVersion = VisVersion.v3_7a;
+    public static readonly VisVersion LatestVisVersion = VisVersion.v3_8a;
 
     private readonly MemoryCache _gmodDtoCache;
     private readonly MemoryCache _gmodCache;
@@ -126,7 +126,7 @@ public sealed class VIS : IVIS
         return gmods.ToDictionary(t => t.Version, t => t.Gmod);
     }
 
-    private GmodVersioningDto GetGmodVersioningDto()
+    private Dictionary<string, GmodVersioningDto> GetGmodVersioningDto()
     {
         return _gmodVersioningDtoCache.GetOrCreate(
             _versioning,
@@ -135,12 +135,12 @@ public sealed class VIS : IVIS
                 entry.Size = 1;
                 entry.SlidingExpiration = TimeSpan.FromHours(1);
 
-                var dto = EmbeddedResource.GetGmodVersioning();
+                var dtos = EmbeddedResource.GetGmodVersioning();
 
-                if (dto is null)
+                if (dtos is null)
                     throw new ArgumentException("Invalid state");
 
-                return dto;
+                return dtos;
             }
         )!;
     }
@@ -261,8 +261,8 @@ public sealed class VIS : IVIS
         return (VisVersion[])Enum.GetValues(typeof(VisVersion));
     }
 
-    public GmodNode? ConvertNode(GmodNode sourceNode, VisVersion targetVersion) =>
-        GetGmodVersioning().ConvertNode(sourceNode.VisVersion, sourceNode, targetVersion);
+    public GmodNode? ConvertNode(GmodNode sourceNode, VisVersion targetVersion, GmodNode? sourceParent = null) =>
+        ConvertNode(sourceNode.VisVersion, sourceNode, targetVersion);
 
     public GmodNode? ConvertNode(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion) =>
         GetGmodVersioning().ConvertNode(sourceVersion, sourceNode, targetVersion);
