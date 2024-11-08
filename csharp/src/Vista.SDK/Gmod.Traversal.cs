@@ -50,6 +50,41 @@ public sealed partial class Gmod
         return TraverseNode(in context, rootNode) == TraversalHandlerResult.Continue;
     }
 
+    private TraversalHandlerResult TraverseNode<TState>(in TraversalContext<TState> context, GmodNode node)
+    {
+        if (node.Metadata.InstallSubstructure == false)
+            return TraversalHandlerResult.Continue;
+
+        var result = context.Handler(context.State, context.Parents.AsList, node);
+        if (result is TraversalHandlerResult.Stop or TraversalHandlerResult.SkipSubtree)
+            return result;
+
+        var skipOccurenceCheck = IsProductSelectionAssignment(context.Parents.LastOrDefault(), node);
+        // Skip the occurence check for "hidden" nodes such as selections, etc.
+        if (!skipOccurenceCheck)
+        {
+            var occ = context.Parents.Occurrences(node);
+            if (occ == context.MaxTraversalOccerance)
+                return TraversalHandlerResult.SkipSubtree;
+            if (occ > context.MaxTraversalOccerance)
+                throw new Exception("Invalid state - node occured more than expected");
+        }
+        context.Parents.Push(node);
+
+        for (int i = 0; i < node.Children.Count; i++)
+        {
+            var child = node.Children[i];
+            result = TraverseNode(in context, child);
+            if (result is TraversalHandlerResult.Stop)
+                return result;
+            else if (result is TraversalHandlerResult.SkipSubtree)
+                continue;
+        }
+
+        context.Parents.Pop();
+        return TraversalHandlerResult.Continue;
+    }
+
     internal bool PathExistsBetween(
         IEnumerable<GmodNode> fromPath,
         GmodNode to,
@@ -103,41 +138,6 @@ public sealed partial class Gmod
     record PathExistsContext(GmodNode To)
     {
         public IEnumerable<GmodNode> RemainingParents = Enumerable.Empty<GmodNode>();
-    }
-
-    private TraversalHandlerResult TraverseNode<TState>(in TraversalContext<TState> context, GmodNode node)
-    {
-        if (node.Metadata.InstallSubstructure == false)
-            return TraversalHandlerResult.Continue;
-
-        var result = context.Handler(context.State, context.Parents.AsList, node);
-        if (result is TraversalHandlerResult.Stop or TraversalHandlerResult.SkipSubtree)
-            return result;
-
-        var skipOccurenceCheck = IsProductSelectionAssignment(context.Parents.LastOrDefault(), node);
-        // Skip the occurence check for "hidden" nodes such as selections, etc.
-        if (!skipOccurenceCheck)
-        {
-            var occ = context.Parents.Occurrences(node);
-            if (occ == context.MaxTraversalOccerance)
-                return TraversalHandlerResult.SkipSubtree;
-            if (occ > context.MaxTraversalOccerance)
-                throw new Exception("Invalid state - node occured more than expected");
-        }
-        context.Parents.Push(node);
-
-        for (int i = 0; i < node.Children.Count; i++)
-        {
-            var child = node.Children[i];
-            result = TraverseNode(in context, child);
-            if (result is TraversalHandlerResult.Stop)
-                return result;
-            else if (result is TraversalHandlerResult.SkipSubtree)
-                continue;
-        }
-
-        context.Parents.Pop();
-        return TraversalHandlerResult.Continue;
     }
 
     private readonly record struct TraversalContext<TState>(
