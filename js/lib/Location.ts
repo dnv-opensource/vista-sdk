@@ -64,7 +64,8 @@ export class Locations {
                 location: new Location(relativeLocationDto.code),
             };
             this._relativeLocations.push(relativeLocation);
-
+            // TODO : Create new LocationGroup for H and V
+            if (["H", "V"].includes(relativeLocationDto.code)) continue;
             const key = {
                 N: LocationGroup.Number,
                 P: LocationGroup.Side,

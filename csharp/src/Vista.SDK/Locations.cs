@@ -62,6 +62,10 @@ public sealed class Locations
             );
             _relativeLocations.Add(relativeLocation);
 
+            // TODO : Create new LocationGroup for H and V
+            if (relativeLocationsDto.Code is 'H' or 'V')
+                continue;
+
             var key = relativeLocationsDto.Code switch
             {
                 'N' => LocationGroup.Number,

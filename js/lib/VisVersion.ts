@@ -4,6 +4,7 @@
 ,v3_5a = "3-5a"
 ,v3_6a = "3-6a"
 ,v3_7a = "3-7a"
+,v3_8a = "3-8a"
 
         }
 
@@ -19,6 +20,8 @@
                   v = "3-6a";
                   break;case VisVersion.v3_7a:
                   v = "3-7a";
+                  break;case VisVersion.v3_8a:
+                  v = "3-8a";
                   break;
                 default:
                   throw new Error('Invalid VisVersion enum value: ' + version);
@@ -41,6 +44,8 @@
                     v = "3-6a";
                     break;case VisVersion.v3_7a:
                     v = "3-7a";
+                    break;case VisVersion.v3_8a:
+                    v = "3-8a";
                     break;
                 default:
                   throw new Error('Invalid VisVersion enum value: ' + version);
@@ -61,6 +66,8 @@ case VisVersion.v3_5a:
 case VisVersion.v3_6a:
                     return true;
 case VisVersion.v3_7a:
+                    return true;
+case VisVersion.v3_8a:
                     return true;
 
                 default:
@@ -95,6 +102,8 @@ case "3-6a":
                     return VisVersion.v3_6a;
 case "3-7a":
                     return VisVersion.v3_7a;
+case "3-8a":
+                    return VisVersion.v3_8a;
 
                 default:
                   return;
