@@ -208,4 +208,33 @@ public class GmodVersioningTests
         Assert.Equal(targetLocalId, convertedLocalId);
         Assert.Equal(targetLocalIdStr, convertedLocalId!.ToString());
     }
+
+    [Fact(Skip = "3-8 S204 is not in 3-8a")]
+    public void ConvertEveryNodeToLatest()
+    {
+        var (_, vis) = VISTests.GetVis();
+        VisVersion[] visVersions = [VisVersion.v3_7a];
+        var gmodMap = vis.GetGmodsMap(visVersions);
+        var errored = new Dictionary<VisVersion, List<string>>();
+        foreach (var visVersion in visVersions)
+        {
+            var gmod = gmodMap[visVersion];
+            testOutputHelper.WriteLine($"Converting {visVersion} to {VIS.LatestVisVersion}");
+            if (!errored.TryGetValue(visVersion, out var errs))
+                errored.Add(visVersion, errs =  []);
+
+            gmod.Traverse(
+                (parents, node) =>
+                {
+                    var parent = parents.LastOrDefault();
+                    var targetNode = vis.ConvertNode(visVersion, node, VIS.LatestVisVersion);
+                    if (targetNode is null)
+                        errs.Add(node.Code);
+                    return TraversalHandlerResult.Continue;
+                }
+            );
+        }
+
+        Assert.All(errored, kvp => Assert.Empty(kvp.Value));
+    }
 }

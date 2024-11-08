@@ -37,19 +37,17 @@ internal sealed class GmodVersioning
         return node;
     }
 
-    public GmodNode? ConvertNodeInternal(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion)
+    private GmodNode? ConvertNodeInternal(VisVersion sourceVersion, GmodNode sourceNode, VisVersion targetVersion)
     {
+        ValidateSourceAndTargetVersionPair(sourceNode.VisVersion, targetVersion);
         var nextCode = sourceNode.Code;
 
-        if (TryGetVersioningNode(sourceVersion, out var versioningNode))
+        if (TryGetVersioningNode(targetVersion, out var versioningNode))
         {
-            if (versioningNode.TryGetCodeChanges(sourceNode.Code, out var change))
+            // Naive approach as we dont have any context of the path
+            if (versioningNode.TryGetCodeChanges(sourceNode.Code, out var change) && change.Target is not null)
             {
-                if (targetVersion == change.NextVisVersion)
-                    nextCode = change.NextCode ?? throw new InvalidOperationException("failed to set next code");
-                else if (targetVersion == change.PreviousVisVersion)
-                    nextCode =
-                        change.PreviousCode ?? throw new InvalidOperationException("failed to set previous code");
+                nextCode = change.Target;
             }
         }
 
@@ -244,13 +242,6 @@ internal sealed class GmodVersioning
         return new GmodPath(potentialParents, targetEndNode);
     }
 
-    private bool HasChangesInNextVisVersion(VisVersion source)
-    {
-        var target = source + 1;
-
-        return TryGetVersioningNode(target, out _);
-    }
-
     private bool TryGetVersioningNode(
         VisVersion visVersion,
         [MaybeNullWhen(false)] out GmodVersioningNode versioningNode
@@ -263,68 +254,73 @@ internal sealed class GmodVersioning
 
         if (string.IsNullOrWhiteSpace(targetVersion.ToVersionString()))
             throw new ArgumentException("Invalid target VISVersion: " + targetVersion.ToVersionString());
+        if (sourceVersion >= targetVersion)
+            throw new ArgumentException("Source version must be less than target version");
+    }
+
+    private void ValidateSourceAndTargetVersionPair(VisVersion sourceVersion, VisVersion targetVersion)
+    {
+        if (sourceVersion >= targetVersion)
+            throw new ArgumentException("Source version must be less than target version");
+        if (targetVersion - sourceVersion != 1)
+            throw new ArgumentException("Target version must be exactly one version higher than source version");
     }
 
     private readonly record struct GmodVersioningNode
     {
         internal VisVersion VisVersion { get; }
-        private readonly Dictionary<string, GmodVersioningNodeChanges> _versioningNodeChanges = new();
+        private readonly Dictionary<string, GmodNodeConversion> _versioningNodeChanges = new();
 
-        internal GmodVersioningNode(
-            VisVersion visVersion,
-            IReadOnlyDictionary<string, GmodVersioningNodeChangesDto> dto
-        )
+        internal GmodVersioningNode(VisVersion visVersion, IReadOnlyDictionary<string, GmodNodeConversionDto> dto)
         {
             VisVersion = visVersion;
             foreach (var versioningNodeDto in dto)
             {
-                if (
-                    versioningNodeDto.Value is null
-                    || (versioningNodeDto.Value.PreviousCode is null && versioningNodeDto.Value.NextCode is null)
-                )
-                    continue;
-
                 var code = versioningNodeDto.Key;
-                var versioningNodeChanges = new GmodVersioningNodeChanges(
-                    VisVersions.TryParse(versioningNodeDto.Value.NextVisVersion, out var nextVisVersion)
-                        ? nextVisVersion
-                        : null,
-                    versioningNodeDto.Value.NextCode,
-                    versioningNodeDto.Value.NextAssignment is not null
-                        ? new(
-                            versioningNodeDto.Value.NextAssignment.OldAssignment,
-                            versioningNodeDto.Value.NextAssignment.CurrentAssignment
-                        )
-                        : null,
-                    VisVersions.TryParse(versioningNodeDto.Value.PreviousVisVersion, out var previoiusVisVersion)
-                        ? previoiusVisVersion
-                        : null,
-                    versioningNodeDto.Value.PreviousCode,
-                    versioningNodeDto.Value.PreviousAssignment is not null
-                        ? new(
-                            versioningNodeDto.Value.PreviousAssignment.OldAssignment,
-                            versioningNodeDto.Value.PreviousAssignment.CurrentAssignment
-                        )
-                        : null
-                );
+                var versioningNodeChanges = new GmodNodeConversion
+                {
+                    Operations = new(versioningNodeDto.Value.Operations.Select(ParseConversionType)),
+                    Source = versioningNodeDto.Value.Source,
+                    Target = versioningNodeDto.Value.Target,
+                    OldAssignment = versioningNodeDto.Value.OldAssignment,
+                    NewAssignment = versioningNodeDto.Value.NewAssignment,
+                    DeleteAssignment = versioningNodeDto.Value.DeleteAssignment,
+                };
                 _versioningNodeChanges.Add(code, versioningNodeChanges);
             }
         }
 
-        public bool TryGetCodeChanges(string code, [MaybeNullWhen(false)] out GmodVersioningNodeChanges nodeChanges) =>
+        public bool TryGetCodeChanges(string code, [MaybeNullWhen(false)] out GmodNodeConversion nodeChanges) =>
             _versioningNodeChanges.TryGetValue(code, out nodeChanges);
     }
 
-    private sealed record NodeChange(VisVersion Version, string Code, GmodVersioningAssignmentChange? Assignment);
+    private sealed record GmodNodeConversion
+    {
+        public required HashSet<ConversionType> Operations { get; init; }
+        public required string Source { get; init; }
+        public string? Target { get; init; }
+        public string? OldAssignment { get; set; }
+        public string? NewAssignment { get; set; }
+        public bool? DeleteAssignment { get; set; }
+    }
 
-    private sealed record GmodVersioningNodeChanges(
-        VisVersion? NextVisVersion,
-        string? NextCode,
-        GmodVersioningAssignmentChange? NextAssignment,
-        VisVersion? PreviousVisVersion,
-        string? PreviousCode,
-        GmodVersioningAssignmentChange? PreviousAssignment
-    );
+    private enum ConversionType
+    {
+        ChangeCode,
+        Merge,
+        Move,
+        AssignmentChange = 20,
+        AssignmentDelete = 21
+    }
 
-    private sealed record GmodVersioningAssignmentChange(string OldAssignment, string CurrentAssignment);
+    private static ConversionType ParseConversionType(string type) =>
+        type switch
+        {
+            "changeCode" => ConversionType.ChangeCode,
+            "merge" => ConversionType.Merge,
+            "move" => ConversionType.Move,
+            "assignmentChange" => ConversionType.AssignmentChange,
+            "assignmentDelete" => ConversionType.AssignmentDelete,
+            _ => throw new ArgumentException("Invalid conversion type: " + type)
+        };
 }

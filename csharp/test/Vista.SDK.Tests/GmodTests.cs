@@ -7,7 +7,19 @@ namespace Vista.SDK.Tests;
 
 public class GmodTests
 {
+    public sealed record ExpectedValues(string Max, int Count);
+
     public static IEnumerable<object[]> Test_Vis_Versions => VisVersions.All.Select(x => new object[] { x }).ToArray();
+
+    public static readonly Dictionary<VisVersion, ExpectedValues> ExpectedMaxes =
+        new()
+        {
+            { VisVersion.v3_4a, new("C1053.3112", 6420) },
+            { VisVersion.v3_5a, new("C1053.3112", 6557) },
+            { VisVersion.v3_6a, new("C1053.3112", 6557) },
+            { VisVersion.v3_7a, new("H346.11113", 6672) },
+            { VisVersion.v3_8a, new("H346.11112", 6335) }
+        };
 
     [Theory]
     [MemberData(nameof(Test_Vis_Versions))]
@@ -41,12 +53,14 @@ public class GmodTests
         Assert.Equal(2, minLength.Code.Length);
         Assert.Equal("VE", minLength.Code);
         Assert.Equal(10, maxLength.Code.Length);
-        string[] expectedMax = ["C1053.3112", "H346.11113"];
-        Assert.Contains(maxLength.Code, expectedMax);
+
+        Assert.True(ExpectedMaxes.TryGetValue(visVersion, out var expectedValues));
+
+        Assert.Equal(maxLength.Code, expectedValues.Max);
 
         var count = gmod.Count();
-        int[] expectedCounts = [6420, 6557, 6672];
-        Assert.Contains(count, expectedCounts);
+        var expectedCount = expectedValues.Count;
+        Assert.Equal(count, expectedCount);
     }
 
     [Theory]
