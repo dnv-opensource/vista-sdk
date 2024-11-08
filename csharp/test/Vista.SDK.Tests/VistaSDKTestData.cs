@@ -5,6 +5,9 @@ namespace Vista.SDK.Tests;
 
 public class VistaSDKTestData
 {
+    private static JsonSerializerOptions options =
+        new() { ReadCommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true, };
+
     public static IEnumerable<object[]> AddValidPositionData() => AddCodebookData(CodebookTestData.ValidPosition);
 
     public static IEnumerable<object[]> AddStatesData() => AddCodebookData(CodebookTestData.States);
@@ -26,23 +29,22 @@ public class VistaSDKTestData
     public static IEnumerable<object?[]> AddIndividualizableSetsData() =>
         AddIndividualizableSetsData(IndividualizableSetsData);
 
+    public static IEnumerable<object?[]> AddVersioningData() => AddVersioningData(VersioningTestData);
+
     private static CodebookTestData CodebookTestData => GetData<CodebookTestData>("Codebook");
     private static LocalIdTestData LocalIdTestData => GetData<LocalIdTestData>("InvalidLocalIds");
     private static GmodPathTestData GmodPathTestData => GetData<GmodPathTestData>("GmodPaths");
     private static LocationsTestData LocationsTestData => GetData<LocationsTestData>("Locations");
     private static IndividualizableSetData[] IndividualizableSetsData =>
         GetData<IndividualizableSetData[]>("IndividualizableSets");
+    private static Dictionary<string, List<VersioningFullPathTestItem>> VersioningTestData =>
+        GetData<Dictionary<string, List<VersioningFullPathTestItem>>>("VersioningTestCases");
 
     private static T GetData<T>(string testName)
     {
         var path = $"testdata/{testName}.json";
         var testDataJson = File.ReadAllText(path);
 
-        var options = new JsonSerializerOptions
-        {
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
-        };
         return JsonSerializer.Deserialize<T>(testDataJson, options)
             ?? throw new Exception("Couldn't deserialize: " + typeof(T).Name);
     }
@@ -100,6 +102,26 @@ public class VistaSDKTestData
             yield return new object?[] { set.IsFullPath, set.VisVersion, set.Path, set.Expected, };
         }
     }
+
+    public static IEnumerable<object?[]> AddVersioningData(Dictionary<string, List<VersioningFullPathTestItem>> data)
+    {
+        foreach (var kvp in data)
+        {
+            foreach (var v in kvp.Value)
+            {
+                var sourceVersion = VisVersions.Parse(v.From);
+                var targetVersion = VisVersions.Parse(v.To);
+                var item = new VersioningTestItem(
+                    sourceVersion,
+                    targetVersion,
+                    GmodPath.ParseFullPath(v.SourceFullPath, sourceVersion),
+                    GmodPath.ParseFullPath(v.TargetFullPath, targetVersion),
+                    kvp.Key
+                );
+                yield return new object?[] { item };
+            }
+        }
+    }
 }
 
 public record InvalidLocalIds(
@@ -141,4 +163,19 @@ public sealed record IndividualizableSetData(
     [property: JsonPropertyName("visVersion")] string VisVersion,
     [property: JsonPropertyName("path")] string Path,
     [property: JsonPropertyName("expected")] string[][]? Expected
+);
+
+public record VersioningFullPathTestItem(
+    [property: JsonPropertyName("from")] string From,
+    [property: JsonPropertyName("to")] string To,
+    [property: JsonPropertyName("sourceFullPath")] string SourceFullPath,
+    [property: JsonPropertyName("targetFullPath")] string TargetFullPath
+);
+
+public sealed record VersioningTestItem(
+    VisVersion SourceVersion,
+    VisVersion TargetVersion,
+    GmodPath SourcePath,
+    GmodPath TargetPath,
+    string ConversionCode
 );
