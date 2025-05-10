@@ -14,11 +14,11 @@ public class GmodTests
     public static readonly Dictionary<VisVersion, ExpectedValues> ExpectedMaxes =
         new()
         {
-            { VisVersion.v3_4a, new("C1053.3112", 6420) },
-            { VisVersion.v3_5a, new("C1053.3112", 6557) },
-            { VisVersion.v3_6a, new("C1053.3112", 6557) },
+            { VisVersion.v3_4a, new("C1053.3114", 6420) },
+            { VisVersion.v3_5a, new("C1053.3114", 6557) },
+            { VisVersion.v3_6a, new("C1053.3114", 6557) },
             { VisVersion.v3_7a, new("H346.11113", 6672) },
-            { VisVersion.v3_8a, new("H346.11112", 6335) }
+            { VisVersion.v3_8a, new("H346.11113", 6335) }
         };
 
     [Theory]
@@ -46,21 +46,51 @@ public class GmodTests
         var gmod = vis.GetGmod(visVersion);
         Assert.NotNull(gmod);
 
-        var minLength = gmod.MinBy(n => n.Code.Length);
-        var maxLength = gmod.MaxBy(n => n.Code.Length);
-        Assert.NotNull(minLength);
-        Assert.NotNull(maxLength);
-        Assert.Equal(2, minLength.Code.Length);
-        Assert.Equal("VE", minLength.Code);
-        Assert.Equal(10, maxLength.Code.Length);
+        GmodNode? minLengthNode = null;
+        int currentMinLength = int.MaxValue;
 
+        GmodNode? maxLengthNode = null;
+        int currentMaxLength = 0;
+        int nodeCount = 0;
+
+        foreach (var node in gmod)
+        {
+            nodeCount++;
+            string code = node.Code;
+            int len = code.Length;
+
+            if (minLengthNode is null || len < currentMinLength)
+            {
+                currentMinLength = len;
+                minLengthNode = node;
+            }
+
+            if (maxLengthNode is null || len > currentMaxLength)
+            {
+                currentMaxLength = len;
+                maxLengthNode = node;
+            }
+            else if (len == currentMaxLength)
+            {
+                if (maxLengthNode is not null && string.CompareOrdinal(code, maxLengthNode.Code) > 0)
+                {
+                    maxLengthNode = node;
+                }
+            }
+        }
+
+        Assert.NotNull(minLengthNode);
+        Assert.NotNull(maxLengthNode);
+
+        Assert.Equal(2, minLengthNode.Code.Length);
+        Assert.Equal("VE", minLengthNode.Code);
+
+        Assert.Equal(10, maxLengthNode.Code.Length);
         Assert.True(ExpectedMaxes.TryGetValue(visVersion, out var expectedValues));
 
-        Assert.Equal(maxLength.Code, expectedValues.Max);
+        Assert.Equal(expectedValues.Max, maxLengthNode.Code);
 
-        var count = gmod.Count();
-        var expectedCount = expectedValues.Count;
-        Assert.Equal(count, expectedCount);
+        Assert.Equal(expectedValues.Count, nodeCount);
     }
 
     [Theory]
