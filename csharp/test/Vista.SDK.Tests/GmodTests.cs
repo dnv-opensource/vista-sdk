@@ -14,11 +14,11 @@ public class GmodTests
     public static readonly Dictionary<VisVersion, ExpectedValues> ExpectedMaxes =
         new()
         {
-            { VisVersion.v3_4a, new("C1053.3112", 6420) },
-            { VisVersion.v3_5a, new("C1053.3112", 6557) },
-            { VisVersion.v3_6a, new("C1053.3112", 6557) },
+            { VisVersion.v3_4a, new("C1053.3114", 6420) },
+            { VisVersion.v3_5a, new("C1053.3114", 6557) },
+            { VisVersion.v3_6a, new("C1053.3114", 6557) },
             { VisVersion.v3_7a, new("H346.11113", 6672) },
-            { VisVersion.v3_8a, new("H346.11112", 6335) }
+            { VisVersion.v3_8a, new("H346.11113", 6335) }
         };
 
     [Theory]
@@ -46,21 +46,64 @@ public class GmodTests
         var gmod = vis.GetGmod(visVersion);
         Assert.NotNull(gmod);
 
-        var minLength = gmod.MinBy(n => n.Code.Length);
-        var maxLength = gmod.MaxBy(n => n.Code.Length);
-        Assert.NotNull(minLength);
-        Assert.NotNull(maxLength);
-        Assert.Equal(2, minLength.Code.Length);
-        Assert.Equal("VE", minLength.Code);
-        Assert.Equal(10, maxLength.Code.Length);
+        GmodNode? minLengthLexiographicallyOrderedNode = null;
+        int currentMinLength = int.MaxValue;
 
+        GmodNode? maxLengthLexiographicallyOrderedNode = null;
+        int currentMaxLength = 0;
+        int nodeCount = 0;
+
+        foreach (var node in gmod)
+        {
+            nodeCount++;
+            string code = node.Code;
+            int len = code.Length;
+
+            if (minLengthLexiographicallyOrderedNode is null || len < currentMinLength)
+            {
+                currentMinLength = len;
+                minLengthLexiographicallyOrderedNode = node;
+            }
+            else if (len == currentMinLength)
+            {
+                if (
+                    minLengthLexiographicallyOrderedNode is not null
+                    && string.CompareOrdinal(code, minLengthLexiographicallyOrderedNode.Code) < 0
+                )
+                {
+                    minLengthLexiographicallyOrderedNode = node;
+                }
+            }
+
+            if (maxLengthLexiographicallyOrderedNode is null || len > currentMaxLength)
+            {
+                currentMaxLength = len;
+                maxLengthLexiographicallyOrderedNode = node;
+            }
+            else if (len == currentMaxLength)
+            {
+                if (
+                    maxLengthLexiographicallyOrderedNode is not null
+                    && string.CompareOrdinal(code, maxLengthLexiographicallyOrderedNode.Code) > 0
+                )
+                {
+                    maxLengthLexiographicallyOrderedNode = node;
+                }
+            }
+        }
+
+        Assert.NotNull(minLengthLexiographicallyOrderedNode);
+        Assert.NotNull(maxLengthLexiographicallyOrderedNode);
+
+        Assert.Equal(2, minLengthLexiographicallyOrderedNode.Code.Length);
+        Assert.Equal("VE", minLengthLexiographicallyOrderedNode.Code);
+
+        Assert.Equal(10, maxLengthLexiographicallyOrderedNode.Code.Length);
         Assert.True(ExpectedMaxes.TryGetValue(visVersion, out var expectedValues));
 
-        Assert.Equal(maxLength.Code, expectedValues.Max);
+        Assert.Equal(expectedValues.Max, maxLengthLexiographicallyOrderedNode.Code);
 
-        var count = gmod.Count();
-        var expectedCount = expectedValues.Count;
-        Assert.Equal(count, expectedCount);
+        Assert.Equal(expectedValues.Count, nodeCount);
     }
 
     [Theory]
