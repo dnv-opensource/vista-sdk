@@ -15,7 +15,7 @@ def generate_vis_version_script(directory: str, output_file: str):
         f.write("import enum\n\n")
         f.write("class VisVersion(enum.Enum):\n")
         for version in vis_versions:
-            f.write(f"    v{version.replace('-', '_')} = \"{version}\"\n")
+            f.write(f'    v{version.replace("-", "_")} = "{version}"\n')
         f.write("\n\nclass VisVersionExtension:\n")
         f.write("    @staticmethod\n")
         f.write(
@@ -24,7 +24,7 @@ def generate_vis_version_script(directory: str, output_file: str):
         f.write("        version_map = {\n")
         for version in vis_versions:
             f.write(
-                f"            VisVersion.v{version.replace('-', '_')}: \"{version}\",\n"
+                f'            VisVersion.v{version.replace("-", "_")}: "{version}",\n'
             )
         f.write("        }\n")
         f.write("        v = version_map.get(version, None)\n")
