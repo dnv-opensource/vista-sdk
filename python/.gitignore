@@ -7,6 +7,10 @@ __pycache__/
 # Ignore environment-specific settings
 .env
 
+# Ignore virtual environment directories
+venv/
+.venv/
+
 # Ignore editor-specific files
 .idea/
 *.sublime-*
