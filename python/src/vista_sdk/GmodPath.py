@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from abc import ABC
 from collections import deque
+from collections.abc import Generator
 from dataclasses import dataclass
-from typing import Deque, Dict, Generator, List, Optional, Tuple, overload
+from typing import Deque, Dict, List, Optional, Tuple, overload
 
 from vista_sdk.Gmod import Gmod
 from vista_sdk.GmodNode import GmodNode
@@ -268,8 +269,7 @@ class GmodPath:
                 else:
                     self._current_node = self._path.parents[self._current_index]
                 return self._current_index, self._current_node
-            else:
-                raise StopIteration
+            raise StopIteration
 
         def reset(self) -> None:
             self._current_index = (
@@ -381,14 +381,13 @@ class GmodPath:
             if not path:
                 raise ValueError("Couldn't parse path")
             return path
-        elif type(arg) is Gmod and type(arg2) is Locations:
+        if type(arg) is Gmod and type(arg2) is Locations:
             result = GmodPath.parse_internal(item, arg, arg2)
             if isinstance(result, GmodParsePathResult.Ok):
                 return result.path
-            elif isinstance(result, GmodParsePathResult.Err):
+            if isinstance(result, GmodParsePathResult.Err):
                 raise ValueError(result.error)
-            else:
-                raise Exception("Unexpected result")
+            raise Exception("Unexpected result")
 
     @staticmethod
     @overload
@@ -412,16 +411,14 @@ class GmodPath:
             gmod = VIS().get_gmod(arg)
             locations = VIS().get_locations(arg)
             return GmodPath.try_parse(item, arg=locations, gmod=gmod)
-        elif type(gmod) is Gmod and type(arg) is Locations:
+        if type(gmod) is Gmod and type(arg) is Locations:
             result = GmodPath.parse_internal(item, gmod, arg)
             if isinstance(result, GmodParsePathResult.Ok):
                 return True, result.path
-            elif isinstance(result, GmodParsePathResult.Err):
+            if isinstance(result, GmodParsePathResult.Err):
                 return False, None
-            else:
-                raise Exception("Unexpected result during path parsing")
-        else:
-            raise ValueError("Invalid arguments")
+            raise Exception("Unexpected result during path parsing")
+        raise ValueError("Invalid arguments")
 
     @staticmethod
     def parse_internal(
@@ -550,8 +547,7 @@ class GmodPath:
 
         if context.path:
             return GmodParsePathResult.Ok(context.path)
-        else:
-            return GmodParsePathResult.Err("Failed to find path after traversal")
+        return GmodParsePathResult.Err("Failed to find path after traversal")
 
     @staticmethod
     @overload
@@ -575,13 +571,12 @@ class GmodPath:
             locations_ = vis.get_locations(arg)
             success, path = GmodPath.try_parse_full_path(path_str, gmod, locations_)
             return success, path
-        elif type(gmod) is Gmod and type(arg) is Locations:
+        if type(gmod) is Gmod and type(arg) is Locations:
             result = GmodPath.parse_full_path_internal(path_str, gmod, arg)
             if isinstance(result, GmodParsePathResult.Ok):
                 return True, result.path
             return False, None
-        else:
-            raise ValueError("Invalid arguments")
+        raise ValueError("Invalid arguments")
 
     @staticmethod
     def parse_full_path(path_str: str, vis_version: VisVersion) -> GmodPath:
@@ -592,10 +587,9 @@ class GmodPath:
 
         if isinstance(result, GmodParsePathResult.Ok):
             return result.path
-        elif isinstance(result, GmodParsePathResult.Err):
+        if isinstance(result, GmodParsePathResult.Err):
             raise ValueError(result.error)
-        else:
-            raise Exception("Unexpected result")
+        raise Exception("Unexpected result")
 
     @staticmethod
     def parse_full_path_internal(
@@ -630,8 +624,7 @@ class GmodPath:
                     return GmodParsePathResult.Err(
                         f"Failed to parse location - {location_str}"
                     )
-                else:
-                    node = node.with_location(location_str=location_str)
+                node = node.with_location(location_str=location_str)
             if node is not None:
                 nodes.append(node)
 

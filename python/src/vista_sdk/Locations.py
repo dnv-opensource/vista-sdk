@@ -113,16 +113,15 @@ class Locations:
     def determine_group_by_code(self, code: str) -> LocationGroup:
         if code in "N":
             return LocationGroup.NUMBER
-        elif code in "PCS":
+        if code in "PCS":
             return LocationGroup.SIDE
-        elif code in "UML":
+        if code in "UML":
             return LocationGroup.VERTICAL
-        elif code in "IO":
+        if code in "IO":
             return LocationGroup.TRANSVERSE
-        elif code in "FA":
+        if code in "FA":
             return LocationGroup.LONGITUDINAL
-        else:
-            raise Exception(f"Unsupported code: {code}")
+        raise Exception(f"Unsupported code: {code}")
 
     @property
     def relative_locations(self) -> List[RelativeLocation]:
@@ -171,8 +170,7 @@ class Locations:
             else:
                 return False, None
             return location is not None, location
-        else:
-            raise ValueError("Invalid value for location")
+        raise ValueError("Invalid value for location")
 
     def try_parse_with_errors(
         self, value: Optional[str]
