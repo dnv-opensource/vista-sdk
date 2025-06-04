@@ -59,8 +59,8 @@ class IndividualizableSetDataList(BaseModel):
 class TestData:
     @staticmethod
     def get_data(test_name: str, cls: Type[T]) -> T:
-        path = os.path.join("testdata", f"{test_name}.json")
-        with open(path, "r") as file:
+        path = os.path.join("tests", "testdata", f"{test_name}.json")
+        with open(path) as file:
             test_data_json = file.read()
             test_data_json = test_data_json.replace("\n", "")
             if test_name == "IndividualizableSets":
