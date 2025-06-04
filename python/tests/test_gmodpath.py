@@ -5,12 +5,12 @@ from typing import List
 from dotenv import load_dotenv
 from pydantic import ValidationError
 
+from tests.testdata import TestData
 from vista_sdk.Client import Client
 from vista_sdk.GmodPath import GmodPath
 from vista_sdk.VisVersions import VisVersion, VisVersionExtension, VisVersions
 
 from .test_vis import TestVis
-from .testdata import TestData
 
 load_dotenv()
 environment = os.getenv("ENVIRONMENT")
