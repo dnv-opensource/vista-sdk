@@ -61,14 +61,15 @@ class Client:
 
     @staticmethod
     def get_gmod_test(vis_version: str) -> GmodDto:
-        pattern = f"./resources/gmod-vis-{vis_version}.json.gz"
-        files = glob(pattern)
-        if len(files) != 1:
-            raise Exception("Invalid state")
-
-        locations_resource_name = files[0]
-        with gzip.open(locations_resource_name, "rt") as file:
-            data = json.load(file)
+        with pkg_resources.path(
+            "vista_sdk.resources", f"gmod-vis-{vis_version}.json.gz"
+        ) as resource_path:
+            if not resource_path.exists():
+                raise FileNotFoundError(
+                    f"Resource gmod-vis-{vis_version}.json.gz not found"
+                )
+            with gzip.open(resource_path, "rt") as file:
+                data = json.load(file)
 
         gmod_dto = GmodDto(**data)
         return gmod_dto
