@@ -82,6 +82,6 @@ if __name__ == "__main__":
     )
     # go one level up on the path below
     resources_dir = os.path.abspath(os.path.join(args.resources_dir))
-    output_file = os.path.join(root_dir, "python", "vista_sdk", "VisVersions.py")
+    output_file = os.path.join(root_dir, "python", "src", "vista_sdk", "VisVersions.py")
 
     generate_vis_version_script(resources_dir, output_file)

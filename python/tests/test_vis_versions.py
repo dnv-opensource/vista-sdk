@@ -38,6 +38,8 @@ class TestVisVersions(unittest.TestCase):
     def test_Vis_generation(self):
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
         resources_dir = os.path.join(root_dir, "resources")
-        output_file = os.path.join(root_dir, "python", "vista_sdk", "VisVersions.py")
+        output_file = os.path.join(
+            root_dir, "python", "src", "vista_sdk", "VisVersions.py"
+        )
 
         generate_vis_version_script(resources_dir, output_file)
