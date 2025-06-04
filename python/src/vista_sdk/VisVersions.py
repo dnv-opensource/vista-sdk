@@ -1,5 +1,6 @@
 import enum
 
+
 class VisVersion(enum.Enum):
     v3_4a = "3-4a"
     v3_8a = "3-8a"
@@ -18,9 +19,9 @@ class VisVersionExtension:
             VisVersion.v3_5a: "3-5a",
             VisVersion.v3_7a: "3-7a",
         }
-        v = version_map.get(version, None)
+        v = version_map.get(version)
         if v is None:
-            raise ValueError(f'Invalid VisVersion enum value: {version}')
+            raise ValueError(f"Invalid VisVersion enum value: {version}")
         if builder is not None:
             builder.append(v)
         return v
@@ -33,10 +34,13 @@ class VisVersionExtension:
     def is_valid(version):
         return isinstance(version, VisVersion)
 
+
 class VisVersions:
     @staticmethod
     def all_versions():
-        return [version for version in VisVersion if VisVersions.try_parse(version.value)]
+        return [
+            version for version in VisVersion if VisVersions.try_parse(version.value)
+        ]
 
     @staticmethod
     def try_parse(version_str) -> VisVersion:
