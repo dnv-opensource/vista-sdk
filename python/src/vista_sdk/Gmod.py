@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import inspect
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from types import NoneType
 from typing import (
     Callable,
     Dict,
     Generic,
-    Iterable,
     List,
     Optional,
     TypeVar,
@@ -58,13 +58,12 @@ class Gmod:
 
         if "VE" not in node_map:
             raise Exception("Invalid state - root node not found")
-        else:
-            root_node = node_map.get("VE")
-            if root_node is None:
-                raise Exception(
-                    "Invalid state - root node is None despite 'VE' being in node_map"
-                )
-            self._root_node: GmodNode = root_node
+        root_node = node_map.get("VE")
+        if root_node is None:
+            raise Exception(
+                "Invalid state - root node is None despite 'VE' being in node_map"
+            )
+        self._root_node: GmodNode = root_node
         self._node_map = ChdDictionary(
             [(key, value) for key, value in node_map.items()]
         )
@@ -141,8 +140,7 @@ class Gmod:
         node = self._node_map[key]
         if node is not None:
             return node
-        else:
-            raise KeyError(f"Key not found: {key}")
+        raise KeyError(f"Key not found: {key}")
 
     def try_get_node(self, code: str) -> tuple[bool, Optional[GmodNode]]:
         node = self._node_map.try_get_value(code)
@@ -356,7 +354,7 @@ class Gmod:
             result = self.traverse_node(context, child)
             if result == TraversalHandlerResult.STOP:
                 return result
-            elif result == TraversalHandlerResult.SKIP_SUBTREE:
+            if result == TraversalHandlerResult.SKIP_SUBTREE:
                 continue
 
         context.parents.pop()
