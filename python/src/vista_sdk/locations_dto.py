@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 class RelativeLocationsDto(BaseModel):
     """Data transfer object for relative locations."""
+
     code: str = Field(..., alias="code")
     name: str = Field(..., alias="name")
     definition: str | None = Field(None, alias="definition")
@@ -14,5 +15,6 @@ class RelativeLocationsDto(BaseModel):
 
 class LocationsDto(BaseModel):
     """Data transfer object for locations data."""
+
     vis_version: str = Field(..., alias="visRelease")
     items: list[RelativeLocationsDto] = Field(..., alias="items")

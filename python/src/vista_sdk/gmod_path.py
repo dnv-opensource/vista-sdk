@@ -43,6 +43,7 @@ class GmodIndividualizableSet:
 
     @property
     def nodes(self) -> list[GmodNode]:
+        """Return the nodes in the individualizable set."""
         if self._path is None:
             raise ValueError(
                 "Attempting to access nodes on a non-initialized or cleared path"
@@ -51,10 +52,12 @@ class GmodIndividualizableSet:
 
     @property
     def node_indices(self) -> list[int]:
+        """Return the indices of the nodes in the individualizable set."""
         return self._nodes
 
     @property
     def location(self) -> Location | None:
+        """Return the location of the first node in the individualizable set."""
         if self._path is None:
             raise ValueError(
                 "Attempting to access nodes on a non-initialized or cleared path"
@@ -75,11 +78,13 @@ class GmodIndividualizableSet:
                 self._path[i] = node.with_location(value)
 
     def build(self) -> GmodPath:
+        """Return the GmodPath associated with this individualizable set."""
         if self._path is None:
             raise Exception("Tried to build individualizable set twice")
         return self._path
 
     def __str__(self) -> str:
+        """Return a string representation of the individualizable set."""
         if self._path is None:
             raise ValueError(
                 "Attempting to access nodes on a non-initialized or cleared path"
@@ -97,6 +102,7 @@ class GmodPath:
     def __init__(
         self, parents: list[GmodNode], node: GmodNode, skip_verify: bool = True
     ) -> None:
+        """Initialize the GmodPath with parents and a node."""
         self._parents: list[GmodNode] = []
         if not skip_verify:
             if not parents:
@@ -135,25 +141,31 @@ class GmodPath:
 
     @property
     def parents(self) -> list[GmodNode]:
+        """Return the list of parent nodes in the GmodPath."""
         return self._parents
 
     def set_parents(self, value: list[GmodNode]) -> None:
+        """Set the list of parent nodes in the GmodPath."""
         self._parents = value
 
     @property
     def length(self) -> int:
+        """Return the length of the GmodPath, including the node itself."""
         return len(self.parents) + 1
 
     @property
     def is_mappable(self) -> bool:
+        """Check if the GmodPath is mappable."""
         return self.node.is_mappable
 
     def __getitem__(self, depth: int) -> GmodNode:
+        """Get the GmodNode at a specific depth in the GmodPath."""
         if depth < 0 or depth > len(self.parents):
             raise IndexError("Index out of range for GmodPath indexer")
         return self.parents[depth] if depth < len(self.parents) else self.node
 
     def __setitem__(self, depth: int, value: GmodNode) -> None:
+        """Set the GmodNode at a specific depth in the GmodPath."""
         if depth < 0 or depth >= len(self.parents):
             raise IndexError("Index out of range for GmodPath indexer")
         if depth == len(self.parents):
@@ -163,6 +175,7 @@ class GmodPath:
 
     @property
     def individualizable_sets(self) -> list[GmodIndividualizableSet]:
+        """Return a list of individualizable sets in the GmodPath."""
         visitor = LocationSetsVisitor()
         result = []
         for i in range(self.length):
@@ -176,6 +189,7 @@ class GmodPath:
 
     @property
     def is_individualizable(self) -> bool:
+        """Check if the GmodPath is individualizable."""
         visitor = LocationSetsVisitor()
         for i in range(self.length):
             node = self[i]
@@ -185,6 +199,7 @@ class GmodPath:
 
     @staticmethod
     def is_valid(parents: list[GmodNode], node: GmodNode) -> tuple[bool, int]:
+        """Check if the GmodPath is valid."""
         missing_link_at = -1
 
         if len(parents) == 0:
@@ -204,20 +219,24 @@ class GmodPath:
         return True, missing_link_at
 
     def without_locations(self) -> GmodPath:
+        """Return a new GmodPath without locations in the parents and node."""
         new_parents = [parent.without_location() for parent in self.parents]
         new_node = self.node.without_location()
         return GmodPath(new_parents, new_node)
 
     def __str__(self) -> str:
+        """Return a string representation of the GmodPath."""
         return "/".join(
             [parent.__str__() for parent in self.parents if parent.is_leaf_node()]
             + [self.node.__str__()]
         )
 
     def to_full_path_string(self) -> str:
+        """Return the full path as a string representation."""
         return "/".join([node[1].__str__() for node in self.get_full_path()])
 
     def to_string_dump(self) -> str:
+        """Return a string representation of the GmodPath with additional metadata."""
         parts = []
         for depth, node in enumerate(self.get_full_path()):
             if depth == 0:
@@ -235,6 +254,7 @@ class GmodPath:
         return "".join(parts)
 
     def __eq__(self, other: object) -> bool:
+        """Check if two GmodPath instances are equal."""
         if not isinstance(other, GmodPath):
             return NotImplemented
 
@@ -243,13 +263,16 @@ class GmodPath:
         if len(self.parents) != len(other.parents):
             return False
 
-        for _, (parent, other_parent) in enumerate(zip(self.parents, other.parents)):
+        for _, (parent, other_parent) in enumerate(
+            zip(self.parents, other.parents, strict=False)
+        ):
             if parent != other_parent:
                 return False
 
         return not self.node != other.node
 
     def __hash__(self) -> int:
+        """Return a hash of the GmodPath."""
         return hash((*self.parents, self.node))
 
     class Enumerator:
@@ -284,6 +307,7 @@ class GmodPath:
             raise StopIteration
 
         def reset(self) -> None:
+            """Reset the enumerator to the initial state."""
             self._current_index = (
                 self._from_depth - 1 if self._from_depth is not None else -1
             )
@@ -397,6 +421,7 @@ class GmodPath:
 
     @staticmethod
     def parse(item: str, arg=None, arg2=None):
+        """Parse a string into a GmodPath based on the provided arguments."""
         if type(arg) is VisVersion and arg2 is None:
             path = GmodPath.try_parse(item, arg=arg)[1]
             if not path:
@@ -428,6 +453,7 @@ class GmodPath:
         arg: VisVersion | Locations | None = None,
         gmod: Gmod | None = None,
     ) -> tuple[bool, GmodPath | None]:
+        """Try to parse a string into a GmodPath based on the provided arguments."""
         if type(arg) is VisVersion and gmod is None:
             gmod = VIS().get_gmod(arg)
             locations = VIS().get_locations(arg)
@@ -445,6 +471,7 @@ class GmodPath:
     def parse_internal(  # noqa: C901
         item: str | None, gmod: Gmod, locations: Locations
     ) -> GmodParsePathResult.Ok | GmodParsePathResult.Err:
+        """Parse a string into a GmodPath using the provided Gmod and Locations."""
         if gmod.vis_version != locations.vis_version:
             return GmodParsePathResult.Err(
                 "Got different VIS versions for Gmod and Locations arguments"
@@ -586,6 +613,7 @@ class GmodPath:
     def try_parse_full_path(
         path_str: str, gmod=None, arg=None
     ) -> tuple[bool, GmodPath | None]:
+        """Try to parse a full path string into a GmodPath."""
         if type(arg) is VisVersion and gmod is None:
             vis = VIS()
             gmod = vis.get_gmod(arg)
@@ -601,6 +629,7 @@ class GmodPath:
 
     @staticmethod
     def parse_full_path(path_str: str, vis_version: VisVersion) -> GmodPath:
+        """Parse a full path string into a GmodPath using the provided VisVersion."""
         vis = VIS()
         gmod = vis.get_gmod(vis_version)
         locations = vis.get_locations(vis_version)
@@ -616,6 +645,7 @@ class GmodPath:
     def parse_full_path_internal(  # noqa: C901
         path_str: str, gmod: Gmod, locations: Locations
     ) -> GmodParsePathResult.Ok | GmodParsePathResult.Err:
+        """Parse a full path string into a GmodPath using the provided Gmod and Locations."""  # noqa: E501
         if not path_str.strip():
             return GmodParsePathResult.Err("Item is empty")
 
