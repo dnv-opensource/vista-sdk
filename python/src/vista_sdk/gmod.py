@@ -12,12 +12,12 @@ from dataclasses import dataclass, field
 from types import NoneType
 from typing import ClassVar, Generic, TypeVar, cast, overload
 
-from .gmod_dto import GmodDto
-from .gmod_node import GmodNode, GmodNodeMetadata
-from .gmod_path import GmodPath
-from .internal.chd_dictionary import ChdDictionary
-from .traversal_handler_result import TraversalHandlerResult
-from .vis_version import VisVersion
+from vista_sdk.gmod_dto import GmodDto
+from vista_sdk.gmod_node import GmodNode, GmodNodeMetadata
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.internal.chd_dictionary import ChdDictionary
+from vista_sdk.traversal_handler_result import TraversalHandlerResult
+from vista_sdk.vis_version import VisVersion
 
 TState = TypeVar("TState")
 

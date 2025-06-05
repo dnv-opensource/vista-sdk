@@ -8,7 +8,7 @@ import gzip
 import sys
 from pathlib import Path
 
-from python.src.vista_sdk.gmod_dto import GmodDto
+from vista_sdk.gmod_dto import GmodDto
 
 root_dir = (Path(__file__).parent.parent).resolve()
 sys.path.append(str(root_dir))
