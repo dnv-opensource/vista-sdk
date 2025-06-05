@@ -1,12 +1,14 @@
+"""Locations module for handling and parsing location codes in the VISTA SDK."""
+
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, overload
+from typing import overload
 
-from vista_sdk.LocationsDto import LocationsDto
-from vista_sdk.VisVersions import VisVersion
+from python.src.vista_sdk.locations_dto import LocationsDto
+from python.src.vista_sdk.vis_version import VisVersion
 
-from .internal.LocationParsingErrorBuilder import (
+from .internal.location_parsing_error_builder import (
     LocationParsingErrorBuilder,
     LocationValidationResult,
     ParsingErrors,
@@ -14,6 +16,8 @@ from .internal.LocationParsingErrorBuilder import (
 
 
 class LocationGroup(Enum):
+    """Enum representing different groups of location codes."""
+
     NUMBER = 0
     SIDE = 1
     VERTICAL = 2
@@ -22,7 +26,10 @@ class LocationGroup(Enum):
 
 
 class Location:
-    def __init__(self, value: str):
+    """Represents a location with a string value."""
+
+    def __init__(self, value: str) -> None:
+        """Initialize a Location instance with a string value."""
         self._value = value
 
     @property
@@ -49,13 +56,15 @@ class Location:
 
 
 class RelativeLocation:
+    """Represents a relative location with a code, name, and optional definition."""
+
     def __init__(
-        self, code: str, name: str, location: Location, definition: Optional[str] = None
-    ):
+        self, code: str, name: str, location: Location, definition: str | None
+    ) -> None:
         self._code: str = code
         self._name: str = name
         self._location: Location = location
-        self._definition: Optional[str] = definition
+        self._definition: str | None = definition
 
     @property
     def code(self) -> str:
@@ -70,7 +79,7 @@ class RelativeLocation:
         return self._location
 
     @property
-    def definition(self) -> Optional[str]:
+    def definition(self) -> str | None:
         return self._definition
 
     def __hash__(self) -> int:
@@ -85,12 +94,15 @@ class RelativeLocation:
 
 
 class Locations:
-    def __init__(self, version: VisVersion, dto: LocationsDto):
+    """Handles parsing and validation of location codes in the VISTA SDK."""
+
+    def __init__(self, version: VisVersion, dto: LocationsDto) -> None:
+        """Initialize Locations with a version and DTO."""
         self.vis_version = version
         self._location_codes = [d.code for d in dto.items]
         self._relative_locations = []
         self._reversed_groups = {}
-        groups: Dict[LocationGroup, List[RelativeLocation]] = {}
+        groups: dict[LocationGroup, list[RelativeLocation]] = {}
 
         for relative_locations_dto in dto.items:
             relative_location = RelativeLocation(
@@ -108,7 +120,7 @@ class Locations:
             if key != LocationGroup.NUMBER:
                 self._reversed_groups[relative_locations_dto.code] = key
 
-        self._groups: Dict = {k: tuple(v) for k, v in groups.items()}
+        self._groups: dict = {k: tuple(v) for k, v in groups.items()}
 
     def determine_group_by_code(self, code: str) -> LocationGroup:
         if code in "N":
@@ -124,14 +136,14 @@ class Locations:
         raise Exception(f"Unsupported code: {code}")
 
     @property
-    def relative_locations(self) -> List[RelativeLocation]:
+    def relative_locations(self) -> list[RelativeLocation]:
         return self._relative_locations.copy()
 
     @property
-    def groups(self) -> Dict[LocationGroup, List[RelativeLocation]]:
+    def groups(self) -> dict[LocationGroup, list[RelativeLocation]]:
         return self._groups
 
-    def parse(self, location_str: Optional[str]) -> Location:
+    def parse(self, location_str: str | None) -> Location:
         error_builder = LocationParsingErrorBuilder.create()
         location = None
 
@@ -147,15 +159,13 @@ class Locations:
         return location
 
     @overload
-    def try_parse(self, value: Optional[str]) -> Tuple[bool, Optional[Location]]: ...
+    def try_parse(self, value: str | None) -> tuple[bool, Location | None]: ...
     @overload
-    def try_parse(
-        self, value: Optional[Location]
-    ) -> Tuple[bool, Optional[Location]]: ...
+    def try_parse(self, value: Location | None) -> tuple[bool, Location | None]: ...
 
     def try_parse(
-        self, value: Optional[str] | Optional[Location]
-    ) -> Tuple[bool, Optional[Location]]:
+        self, value: str | None | Location | None
+    ) -> tuple[bool, Location | None]:
         if isinstance(value, Location):
             return True, value
         if isinstance(value, str):
@@ -173,8 +183,8 @@ class Locations:
         raise ValueError("Invalid value for location")
 
     def try_parse_with_errors(
-        self, value: Optional[str]
-    ) -> Tuple[bool, Optional[Location], ParsingErrors]:
+        self, value: str | None
+    ) -> tuple[bool, Location | None, ParsingErrors]:
         error_builder = LocationParsingErrorBuilder.create()
         location = None
         result = self.try_parse_internal(value if value else "", value, error_builder)
@@ -186,9 +196,9 @@ class Locations:
     def try_parse_internal(
         self,
         value: str,
-        original_str: Optional[str],
+        original_str: str | None,
         error_builder: LocationParsingErrorBuilder,
-    ) -> Tuple[bool, Optional[Location]]:
+    ) -> tuple[bool, Location | None]:
         location = None
 
         if not value:
@@ -210,7 +220,7 @@ class Locations:
         digit_start_index = None
         char_dict: dict[LocationGroup, str] = {}
 
-        assert len(LocationGroup) == 5  # noqa : S101;
+        assert len(LocationGroup) == 5  # noqa : S101
 
         for i, ch in enumerate(value):
             if ch.isdigit():
@@ -237,11 +247,11 @@ class Locations:
                 group = self._reversed_groups.get(ch)
                 if not group:
                     invalid_chars = ",".join(
-                        set(
+                        {
                             c
                             for c in original_str or original_span
                             if not c.isdigit() and c not in self._location_codes
-                        )
+                        }
                     )
                     error_builder.add_error(
                         LocationValidationResult.INVALID_CODE,
@@ -264,7 +274,7 @@ class Locations:
         return True, location
 
     @staticmethod
-    def try_parse_int(span: str, start: int, length: int) -> Tuple[bool, int]:
+    def try_parse_int(span: str, start: int, length: int) -> tuple[bool, int]:
         try:
             if start + length > len(span):
                 return False, 0
@@ -274,25 +284,52 @@ class Locations:
             return False, 0
 
 
+class LocationCodeError(Exception):
+    """Exception raised for errors in LocationCharDict operations."""
+
+
 class LocationCharDict:
-    def __init__(self, size: int):
-        self._table = [None] * size
+    """A dictionary-like structure to store location codes by their group.
 
-    def __getitem__(self, key: LocationGroup) -> Optional[str]:
+    This class maintains a fixed-size array of location codes, indexed by
+    LocationGroup values. It provides dictionary-like access while ensuring
+    type safety and bounds checking.
+    """
+
+    def __init__(self, size: int) -> None:
+        """Initialize the dictionary with a specified size."""
+        if size < 1:
+            raise ValueError("Size must be at least 1")
+        self._codes: list[str | None] = [None] * size
+
+    def __getitem__(self, key: LocationGroup) -> str | None:
+        """Get the location code for a given group."""
         index = key.value - 1
-        if index >= len(self._table):
-            raise Exception(f"Unsupported code: {key}")
-        return self._table[index]
+        if index >= len(self._codes):
+            raise LocationCodeError(
+                f"Location group {key.name} with value {key.value} "
+                f"exceeds storage size of {len(self._codes)}"
+            )
+        return self._codes[index]
 
-    def __setitem__(self, key: LocationGroup, value) -> None:
+    def __setitem__(self, key: LocationGroup, new_value: str) -> None:
+        """Set the location code for a given group."""
         index = key.value - 1
-        if index >= len(self._table):
-            raise Exception(f"Unsupported code: {key}")
-        self._table[index] = value
+        if index >= len(self._codes):
+            raise LocationCodeError(
+                f"Location group {key.name} with value {key.value} "
+                f"exceeds storage size of {len(self._codes)}"
+            )
+        self._codes[index] = new_value
 
-    def try_add(self, key: LocationGroup, value: str) -> Tuple[bool, Optional[str]]:
+    def try_add(self, key: LocationGroup, value: str) -> tuple[bool, str | None]:
+        """Try to add a location code for a group if not already present."""
         current_value = self[key]
         if current_value is not None:
             return False, current_value
         self[key] = value
         return True, None
+
+    def __len__(self) -> int:
+        """Get the total size of the internal storage."""
+        return len(self._codes)

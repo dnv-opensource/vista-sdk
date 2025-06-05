@@ -1,17 +1,20 @@
+"""This module generates a Python script defining the VisVersion enum and related classes."""  # noqa: E501
+
 import argparse
-import os
+from pathlib import Path
 
-from vista_sdk.SourceGenerator.EmbeddedResources import EmbeddedResource
+from .embedded_resources import EmbeddedResource
 
 
-def generate_vis_version_script(directory: str, output_file: str):
-    output_dir = os.path.dirname(output_file)
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+def generate_vis_version_script(directory: str, output_file: str) -> None:
+    """Generates a Python script defining the VisVersion enum and related classes."""
+    output_dir = Path(output_file).parent
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     vis_versions = EmbeddedResource.get_vis_versions(directory)
 
-    with open(output_file, "w") as f:
+    with open(output_file, "w") as f:  # noqa: PTH123
         f.write("import enum\n\n")
         f.write("class VisVersion(enum.Enum):\n")
         for version in vis_versions:
@@ -30,7 +33,7 @@ def generate_vis_version_script(directory: str, output_file: str):
         f.write("        v = version_map.get(version, None)\n")
         f.write("        if v is None:\n")
         f.write(
-            "            raise ValueError(f'Invalid VisVersion enum value: {version}')\n"  # noqa : E501;
+            "            raise ValueError(f'Invalid VisVersion enum value: {version}')\n"  # noqa : E501
         )
         f.write("        if builder is not None:\n")
         f.write("            builder.append(v)\n")
@@ -47,7 +50,7 @@ def generate_vis_version_script(directory: str, output_file: str):
         f.write("    @staticmethod\n")
         f.write("    def all_versions():\n")
         f.write(
-            "        return [version for version in VisVersion if VisVersions.try_parse(version.value)]\n"  # noqa : E501;
+            "        return [version for version in VisVersion if VisVersions.try_parse(version.value)]\n"  # noqa : E501
         )
         f.write("\n    @staticmethod\n")
         f.write("    def try_parse(version_str) -> VisVersion:\n")
@@ -62,7 +65,7 @@ def generate_vis_version_script(directory: str, output_file: str):
         f.write("        version = VisVersions.try_parse(version_str)\n")
         f.write("        if version is None:\n")
         f.write(
-            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'  # noqa : E501;
+            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'  # noqa : E501
         )
         f.write("        return version\n")
 
@@ -77,11 +80,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    root_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..")
-    )
+    root_dir = Path(__file__).parent.parent.parent.resolve()
     # go one level up on the path below
-    resources_dir = os.path.abspath(os.path.join(args.resources_dir))
-    output_file = os.path.join(root_dir, "python", "src", "vista_sdk", "VisVersions.py")
+    resources_dir = Path(args.resources_dir).resolve()
+    output_file = root_dir / "python" / "src" / "vista_sdk" / "VisVersions.py"
 
-    generate_vis_version_script(resources_dir, output_file)
+    generate_vis_version_script(str(resources_dir), str(output_file))
