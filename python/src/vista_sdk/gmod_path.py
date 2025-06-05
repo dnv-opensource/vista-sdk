@@ -8,13 +8,13 @@ from collections.abc import Generator
 from dataclasses import dataclass
 from typing import overload
 
-from python.src.vista_sdk.gmod import Gmod
-from python.src.vista_sdk.gmod_node import GmodNode
-from python.src.vista_sdk.locations import Location, Locations
-from python.src.vista_sdk.locations_sets_visitor import LocationSetsVisitor
-from python.src.vista_sdk.traversal_handler_result import TraversalHandlerResult
-from python.src.vista_sdk.vis import VIS
-from python.src.vista_sdk.vis_version import VisVersion
+from vista_sdk.gmod import Gmod
+from vista_sdk.gmod_node import GmodNode
+from vista_sdk.locations import Location, Locations
+from vista_sdk.locations_sets_visitor import LocationSetsVisitor
+from vista_sdk.traversal_handler_result import TraversalHandlerResult
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
 
 
 class GmodIndividualizableSet:

@@ -8,8 +8,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from .gmod_dto import GmodDto
-from .locations_dto import LocationsDto
+from vista_sdk.gmod_dto import GmodDto
+from vista_sdk.locations_dto import LocationsDto
 
 
 @dataclass(frozen=True)

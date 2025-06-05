@@ -13,12 +13,12 @@ from abc import ABC, abstractmethod
 from cachetools import TTLCache
 from dotenv import load_dotenv
 
-from .client import Client
-from .gmod import Gmod
-from .gmod_dto import GmodDto
-from .locations import Locations
-from .locations_dto import LocationsDto
-from .vis_version import VisVersion, VisVersionExtension
+from vista_sdk.client import Client
+from vista_sdk.gmod import Gmod
+from vista_sdk.gmod_dto import GmodDto
+from vista_sdk.locations import Locations
+from vista_sdk.locations_dto import LocationsDto
+from vista_sdk.vis_version import VisVersion, VisVersionExtension
 
 load_dotenv()
 environment = os.getenv("ENVIRONMENT")

@@ -13,6 +13,7 @@ dependencies = [
     "pydantic>=2.10.5",
     "pydantic-settings>=2.7.1",
     "pandera>=0.22.1",
+    "pandas>=2.3.0",
 ]
 
 [dependency-groups]
@@ -89,7 +90,7 @@ convention = "google"
 plugins = ["pydantic.mypy", "pandera.mypy"]
 namespace_packages = true
 explicit_package_bases = true
-mypy_path = "src"
+mypy_path = "src/vista_sdk"
 
 follow_imports = "silent"
 warn_redundant_casts = true
