@@ -1,28 +1,37 @@
+"""This module defines the GmodNode class and its metadata.
+
+It includes methods for creating nodes from DTOs,
+managing their relationships, and handling locations.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
-from typing import List, Optional, Tuple
 
-from .GmodDto import GmodNodeDto
-from .Locations import Location
-from .ParsingErrors import ParsingErrors
-from .VisVersions import VisVersion
+from .gmod_dto import GmodNodeDto
+from .locations import Location
+from .parsing_errors import ParsingErrors
+from .vis import VIS
+from .vis_version import VisVersion
 
 
 class GmodNodeMetadata:
+    """Metadata for a node in the General Maritime Object Data (GMOD) tree."""
+
     def __init__(
         self,
-        category,
-        type,
-        name,
-        common_name,
-        definition,
-        common_definition,
-        install_substructure,
-        normal_assignment_names,
-    ):
+        category: str,
+        type_val: str,
+        name: str,
+        common_name: str | None,
+        definition: str | None,
+        common_definition: str | None,
+        install_substructure: bool | None,
+        normal_assignment_names: dict[str, str] | None = None,
+    ) -> None:
+        """Initialize GmodNodeMetadata with the provided parameters."""
         self.category = category
-        self.type = type
+        self.type = type_val
         self.name = name
         self.common_name = common_name
         self.definition = definition
@@ -32,20 +41,24 @@ class GmodNodeMetadata:
 
     @property
     def full_type(self) -> str:
+        """Return the full type of the node."""
         return f"{self.category} {self.type}"
 
 
 @dataclass
 class GmodNode:
+    """Represents a node in the General Maritime Object Data (GMOD) tree."""
+
     vis_version: VisVersion
     code: str
     metadata: GmodNodeMetadata
-    location: Optional[Location] = None
-    children: List[GmodNode] = field(default_factory=list)
-    parents: List[GmodNode] = field(default_factory=list)
+    location: Location | None = None
+    children: list[GmodNode] = field(default_factory=list)
+    parents: list[GmodNode] = field(default_factory=list)
 
     @staticmethod
     def create_from_dto(vis_version: VisVersion, dto: GmodNodeDto) -> GmodNode:
+        """Create a GmodNode from a GmodNodeDto."""
         metadata = GmodNodeMetadata(
             dto.category,
             dto.type,
@@ -61,6 +74,7 @@ class GmodNode:
         return GmodNode(vis_version=vis_version, code=dto.code, metadata=metadata)
 
     def __eq__(self, other: object) -> bool:
+        """Check equality of two GmodNode instances."""
         if not isinstance(other, GmodNode):
             return NotImplemented
         if self.code != other.code:
@@ -76,6 +90,7 @@ class GmodNode:
         return not (self.location is not None and other.location is None)
 
     def without_location(self) -> GmodNode:
+        """Return a new node without the location."""
         return GmodNode(
             vis_version=self.vis_version,
             code=self.code,
@@ -84,15 +99,15 @@ class GmodNode:
             parents=self.parents,
         )
 
-    def with_location(self, location_str: Optional[str]) -> GmodNode:
+    def with_location(self, location_str: str | None) -> GmodNode:
+        """Set the location of the node, returning a new node if successful."""
         node = self.try_with_location(location_str)
         if node:
             return node
         raise ValueError(f"Invalid location: {location_str}")
 
-    def try_with_location(self, location_str: Optional[str]) -> GmodNode:
-        from .VIS import VIS
-
+    def try_with_location(self, location_str: str | None) -> GmodNode:
+        """Try to set the location of the node, returning a new node if successful."""
         if location_str is None:
             return self
         locations = VIS().get_locations(self.vis_version)
@@ -110,10 +125,9 @@ class GmodNode:
             return self
 
     def try_with_location_errors(
-        self, location_str: Optional[str], errors: List[ParsingErrors]
-    ) -> Tuple[GmodNode, List[ParsingErrors]]:
-        from .VIS import VIS
-
+        self, location_str: str | None, errors: list[ParsingErrors]
+    ) -> tuple[GmodNode, list[ParsingErrors]]:
+        """Try to set the location of the node, returning errors if parsing fails."""
         if location_str is None:
             return self, errors
         locations = VIS().get_locations(self.vis_version)
@@ -132,6 +146,7 @@ class GmodNode:
     def is_individualizable(
         self, is_target_node: bool = False, is_in_set: bool = False
     ) -> bool:
+        """Check if the node can be individualized."""
         if self.metadata.type in ["GROUP", "SELECTION"]:
             return False
         if self.is_product_type:
@@ -144,6 +159,7 @@ class GmodNode:
 
     @property
     def is_function_composition(self) -> bool:
+        """Check if the node is a function composition."""
         return (
             self.metadata.category in ["ASSET FUNCTION", "PRODUCT FUNCTION"]
             and self.metadata.type == "COMPOSITION"
@@ -151,6 +167,7 @@ class GmodNode:
 
     @property
     def is_mappable(self) -> bool:
+        """Check if the node is mappable."""
         if (
             self.product_type
             or self.product_selection
@@ -163,21 +180,25 @@ class GmodNode:
 
     @property
     def is_product_selection(self) -> bool:
+        """Check if the node is a product selection."""
         return self.metadata.category == "PRODUCT" and self.metadata.type == "SELECTION"
 
     @property
     def is_product_type(self) -> bool:
+        """Check if the node is a product type."""
         return self.metadata.category == "PRODUCT" and self.metadata.type == "TYPE"
 
     @property
     def is_asset(self) -> bool:
+        """Check if the node is an asset."""
         return self.metadata.category == "ASSET" and self.metadata.type in [
             "TYPE",
             "SELECTION",
         ]
 
     @property
-    def product_type(self) -> Optional[GmodNode]:
+    def product_type(self) -> GmodNode | None:
+        """Get the product type child node if it exists."""
         if len(self.children) == 1:
             child = self.children[0]
             if (
@@ -189,7 +210,8 @@ class GmodNode:
         return None
 
     @property
-    def product_selection(self) -> Optional[GmodNode]:
+    def product_selection(self) -> GmodNode | None:
+        """Get the product selection child node if it exists."""
         if len(self.children) == 1:
             child = self.children[0]
             if (
@@ -200,38 +222,47 @@ class GmodNode:
                 return child
         return None
 
-    def clone(self, **changes) -> GmodNode:
+    def clone(self, **changes: object) -> GmodNode:
+        """Create a clone of the GmodNode with specified changes."""
         return replace(self, **changes)
 
     def add_child(self, child: GmodNode) -> None:
+        """Add a child to this GmodNode."""
         if child not in self.children:
             self.children.append(child)
 
     def add_parent(self, parent: GmodNode) -> None:
+        """Add a parent to this GmodNode."""
         if parent not in self.parents:
             self.parents.append(parent)
 
-    def is_child(self, node_or_code) -> bool:
+    def is_child(self, node_or_code: str | GmodNode) -> bool:
+        """Check if the node is a child of this GmodNode."""
         code = node_or_code if isinstance(node_or_code, str) else node_or_code.code
         return any(child.code == code for child in self.children)
 
     def is_leaf_node(self) -> bool:
+        """Check if the node is a leaf node."""
         full_type: str = self.metadata.full_type
         return full_type in ["ASSET FUNCTION LEAF", "PRODUCT FUNCTION LEAF"]
 
     def is_function_node(self) -> bool:
+        """Check if the node is a function node."""
         return self.metadata.category != "PRODUCT" and self.metadata.type != "ASSET"
 
     def is_asset_function_node(self) -> bool:
+        """Check if the node is an asset function node."""
         return (
             self.metadata.category == "ASSET FUNCTION"
             and self.metadata.type == "FUNCTION"
         )
 
     def is_root(self) -> bool:
+        """Check if the node is a root node."""
         return self.code == "VE"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return a string representation of the GmodNode."""
         return (
             f"{self.code}-{self.location}" if self.location is not None else self.code
         )

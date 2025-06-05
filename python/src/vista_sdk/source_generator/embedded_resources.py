@@ -3,7 +3,7 @@ import os
 import sys
 from typing import List
 
-from vista_sdk.GmodDto import GmodDto
+from python.src.vista_sdk.gmod_dto import GmodDto
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.append(root_dir)
