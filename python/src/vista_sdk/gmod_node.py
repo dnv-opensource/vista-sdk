@@ -159,9 +159,6 @@ class GmodNode:
     def is_individualizable(
         self, is_target_node: bool = False, is_in_set: bool = False
     ) -> bool:
-        """if self.code in ["441", "411i"]:
-        breakpoint()"""
-
         """Check if the node can be individualized."""
         if self.metadata.type in ["GROUP", "SELECTION"]:
             return False
