@@ -5,6 +5,7 @@ and extract VISTA versions.
 """
 
 import gzip
+import json
 import sys
 from pathlib import Path
 
@@ -38,6 +39,7 @@ class EmbeddedResource:
     def get_vis_versions(directory: str) -> list[str]:
         """Retrieve all VISTA versions from the embedded resources in the specified directory."""  # noqa: E501
         resource_names = EmbeddedResource.get_resource_names(directory)
+        print(f"Found resources: {resource_names}")
         if not resource_names:
             raise Exception(
                 f"Did not find required resources in directory '{directory}'."
@@ -51,7 +53,15 @@ class EmbeddedResource:
                 stream_content = EmbeddedResource.get_decompressed_stream(
                     str(Path(directory) / resource_name)
                 )
-                gmod = GmodDto.model_validate(stream_content)
+
+                try:
+                    json_data = json.loads(stream_content)
+                except json.JSONDecodeError as e:
+                    raise ValueError(
+                        f"Failed to decode JSON from {resource_name}: {e}"
+                    ) from e
+
+                gmod = GmodDto.model_validate(json_data)
                 vis_versions.append(gmod.vis_version)
 
         return vis_versions

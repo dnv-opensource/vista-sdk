@@ -106,7 +106,7 @@ disallow_untyped_defs = true
 [tool.pytest.ini_options]
 # Tests are implemented, but code is not yet ready for production
 # These tests are also not pushed to Git
-addopts = "--ignore=tests/benchmark --ignore=tests/not_implemented --ignore=tests/test_vis_versions.py"
+addopts = "--ignore=tests/benchmark --ignore=tests/not_implemented"
 
 
 [tool.pydantic-mypy]

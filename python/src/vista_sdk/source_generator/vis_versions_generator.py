@@ -14,6 +14,16 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
 
     vis_versions = EmbeddedResource.get_vis_versions(directory)
 
+    if not vis_versions:
+        raise ValueError("No VIS versions found in resources")
+
+    # Validate version format
+    for version in vis_versions:
+        if not version or not isinstance(version, str):
+            raise ValueError(f"Invalid version format: {version}")
+        if not version.replace("-", "").replace(".", "").isalnum():
+            raise ValueError(f"Version contains invalid characters: {version}")
+
     with open(output_file, "w") as f:  # noqa: PTH123
         f.write("import enum\n\n")
         f.write("class VisVersion(enum.Enum):\n")
@@ -52,20 +62,23 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write(
             "        return [version for version in VisVersion if VisVersions.try_parse(version.value)]\n"  # noqa : E501
         )
-        f.write("\n    @staticmethod\n")
-        f.write("    def try_parse(version_str) -> VisVersion:\n")
+        # Change try_parse to match C# behavior
+        f.write("    @staticmethod\n")
+        f.write("    def try_parse(version_str) -> tuple[bool, VisVersion | None]:\n")
         for version in vis_versions:
             f.write(f'        if version_str == "{version}":\n')
-            f.write(f"            return VisVersion.v{version.replace('-', '_')}\n")
-        f.write(
-            '        raise ValueError(f"Invalid VisVersion string : {version_str}")\n'
-        )
+            f.write(
+                f"            return True, VisVersion.v{version.replace('-', '_')}\n"
+            )
+        f.write("        return False, None\n")  # Return tuple instead of raising
+
+        # Add parse method that throws
         f.write("\n    @staticmethod\n")
         f.write("    def parse(version_str: str) -> VisVersion:\n")
-        f.write("        version = VisVersions.try_parse(version_str)\n")
-        f.write("        if version is None:\n")
+        f.write("        success, version = VisVersions.try_parse(version_str)\n")
+        f.write("        if not success:\n")
         f.write(
-            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'  # noqa : E501
+            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'  # noqa: E501
         )
         f.write("        return version\n")
 
