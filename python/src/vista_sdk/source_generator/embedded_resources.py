@@ -39,7 +39,6 @@ class EmbeddedResource:
     def get_vis_versions(directory: str) -> list[str]:
         """Retrieve all VISTA versions from the embedded resources in the specified directory."""  # noqa: E501
         resource_names = EmbeddedResource.get_resource_names(directory)
-        print(f"Found resources: {resource_names}")
         if not resource_names:
             raise Exception(
                 f"Did not find required resources in directory '{directory}'."

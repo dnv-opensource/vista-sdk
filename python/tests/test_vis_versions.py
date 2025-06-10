@@ -54,8 +54,4 @@ class TestVisVersions:
         resources_dir = root_dir / "resources"
         output_file = root_dir / "python" / "src" / "vista_sdk" / "VisVersions.py"
 
-        print(f"Root directory: {root_dir}")
-        print(f"Resources directory: {resources_dir}")
-        print(f"Output file: {output_file}")
-
         generate_vis_version_script(str(resources_dir), str(output_file))
