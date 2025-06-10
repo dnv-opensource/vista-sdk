@@ -3,22 +3,26 @@
 from __future__ import annotations
 
 import pytest
-from src.vista_sdk.location_builder import LocationBuilder
-from src.vista_sdk.locations import Location, LocationGroup
-from src.vista_sdk.vis import VIS
-from src.vista_sdk.vis_version import VisVersion
+
+from vista_sdk.location_builder import LocationBuilder
+from vista_sdk.locations import Location, LocationGroup
+from vista_sdk.vis_version import VisVersion
 
 
 class TestLocations:
     """Test class for the Locations functionality in the VIS SDK."""
 
+    @pytest.fixture(autouse=True)
     def setUp(self) -> None:
         """Set up the test case with a VIS instance and locations."""
+        from vista_sdk.vis import VIS
+
         self.vis = VIS()
         self.locations = self.vis.get_locations(VisVersion.v3_4a)
 
     def test_locations_loads(self) -> None:
         """Test that locations are loaded correctly."""
+        print("Locations loaded:", self.locations)
         assert self.locations is not None
         assert self.locations.groups is not None
 
@@ -43,8 +47,11 @@ class TestLocations:
         value = "some_string"
         expected_error_messages = ["error_message1", "error_message2"]
         success, string_parsed_location = self.locations.try_parse(value)
-        success = self.locations.try_parse(value)
-        self.verify(success, string_parsed_location, expected_error_messages)
+        self.verify(
+            (success, string_parsed_location),
+            string_parsed_location,
+            expected_error_messages,
+        )
 
     def verify(
         self,

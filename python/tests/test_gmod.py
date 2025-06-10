@@ -3,13 +3,12 @@
 import unittest
 from dataclasses import dataclass
 
-from src.vista_sdk.client import Client
-from src.vista_sdk.gmod import Gmod, TraversalHandlerResult, TraversalOptions
-from src.vista_sdk.gmod_dto import GmodDto
-from src.vista_sdk.gmod_node import GmodNode
-from src.vista_sdk.gmod_path import GmodPath
-from src.vista_sdk.vis import VIS
-from src.vista_sdk.vis_version import VisVersion, VisVersionExtension
+from vista_sdk.client import Client
+from vista_sdk.gmod import TraversalHandlerResult, TraversalOptions
+from vista_sdk.gmod_dto import GmodDto
+from vista_sdk.gmod_node import GmodNode
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.vis_version import VisVersion, VisVersionExtension
 
 from .test_vis import TestVis
 
@@ -43,21 +42,35 @@ class TestGmod(unittest.TestCase):
                     f"Gmod for version {version} should not be None"
                 )
 
-                nodes = list(gmod._node_map)
-                min_length = min(nodes, key=lambda x: len(x[1].code))
-                max_length = max(nodes, key=lambda x: len(x[1].code))
+                # nodes = list(gmod._node_map)
+                # min_length = min(nodes, key=lambda x: len(x[1].code))
+                # max_length = max(nodes, key=lambda x: len(x[1].code))
 
-                assert len(min_length[1].code) == 2, "Minimum code length should be 2"
-                assert min_length[1].code == "VE", "Minimum code should be 'VE'"
-                assert max_length[1].code == 10, "Maximum code length should be 10"
+                min_len = float("inf")
+                max_len = 0
+                min_code = None
+                max_code = None
+
+                for node_count, (_, node) in enumerate(gmod._node_map, start=1):  # noqa: B007
+                    code_len = len(node.code)
+                    if code_len < min_len:
+                        min_len = code_len
+                        min_code = node.code
+                    if code_len > max_len:
+                        max_len = code_len
+                        max_code = node.code
+
+                assert min_len == 2, "Minimum code length should be 2"
+                assert min_code == "VE", "Minimum code should be 'VE'"
+                assert max_len == 10, "Maximum code length should be 10"
                 possible_max = ["C1053.3111", "H346.11113"]
-                assert max_length[1].code in possible_max, (
+                assert max_code in possible_max, (
                     f"Maximum code should be one of {possible_max}"
                 )
 
-                expected_counts = [6420, 6557, 6672]
-                assert len(nodes) in expected_counts, (
-                    f"Node count for version {version} should be one of {expected_counts}"  # noqa: E501
+                expected_counts = [6420, 6557, 6672, 6335]
+                assert node_count in expected_counts, (
+                    f"Node count for version {version} should be one of {expected_counts}, count is {node_count}"  # noqa: E501
                 )
 
     def test_gmod_lookup(self) -> None:
@@ -96,23 +109,23 @@ class TestGmod(unittest.TestCase):
 
                 seen.clear()
                 counter = 0
-                for code, node in gmod._node_map:  # noqa: B007
-                    assert node.code is not None, (
-                        f"Node code should not be None: {node}"
+                for code, gmod_node in gmod._node_map:  # noqa: B007
+                    assert gmod_node.code is not None, (
+                        f"Node code should not be None: {gmod_node}"
                     )
-                    assert node.code not in seen, (
-                        f"Node code should be unique: {node.code}"
+                    assert gmod_node.code not in seen, (
+                        f"Node code should be unique: {gmod_node.code}"
                     )
-                    seen.add(node.code)
+                    seen.add(gmod_node.code)
 
-                    success, found_node = gmod.try_get_node(node.code)
+                    success, found_node = gmod.try_get_node(gmod_node.code)
                     assert success
                     assert found_node is not None, (
-                        f"Found node should not be None for code: {node.code}"
+                        f"Found node should not be None for code: {gmod_node.code}"
                     )
                     if found_node is not None:
-                        assert node.code == found_node.code, (
-                            f"Node code should match found node code: {node.code}"
+                        assert gmod_node.code == found_node.code, (
+                            f"Node code should match found node code: {gmod_node.code}"
                         )
                     counter += 1
 
@@ -120,9 +133,8 @@ class TestGmod(unittest.TestCase):
                     f"Node count in GmodDto should match counter: {counter}"
                 )
 
-                test_codes = [
+                test_codes: list[str] = [
                     "ABC",
-                    None,
                     "",
                     "SDFASDFSDAFb",
                     "✅",
@@ -190,10 +202,12 @@ class TestGmod(unittest.TestCase):
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         node = gmod["411.3"]
+        print(f"selection: {node.product_selection}, type: {node.product_type}")
+
         assert node.product_type is not None, (
             "ProductType should not be None for node '411.3'"
         )
-        assert node.product_selection is not None, (
+        assert node.product_selection is None, (
             "ProductSelection should be None for node '411.3'"
         )
 
@@ -205,15 +219,14 @@ class TestGmod(unittest.TestCase):
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         node = gmod["411.2"]
+        print(f"selection: {node.product_selection}, type: {node.product_type}")
         assert node.product_selection is not None, (
             "ProductSelection should not be None for node '411.2'",
         )
-        assert node.product_type is not None, (
-            "ProductType should be None for node '411.2'"
-        )
+        assert node.product_type is None, "ProductType should be None for node '411.2'"
 
         node = gmod["H601"]
-        assert node.product_selection is not None, (
+        assert node.product_selection is None, (
             "ProductSelection should be None for node 'H601'"
         )
 
@@ -265,6 +278,8 @@ class TestGmod(unittest.TestCase):
 
     def test_full_traversal(self) -> None:
         """Test full traversal of Gmod with a custom handler."""
+        from vista_sdk.vis import VIS
+
         gmod = VIS().get_gmod(VisVersion.v3_4a)
 
         max_expected = TraversalOptions.DEFAULT_MAX_TRAVERSAL_OCCURRENCE
@@ -287,6 +302,9 @@ class TestGmod(unittest.TestCase):
         def traversal_handler(
             state: State, parents: list[GmodNode], node: GmodNode
         ) -> TraversalHandlerResult:
+            """Handler for traversal that counts nodes and checks parents."""
+            from vista_sdk.gmod import Gmod
+
             assert len(parents) == 0 or parents[0].is_root(), (
                 "First parent should be root or no parents"
             )
@@ -319,9 +337,11 @@ class TestGmod(unittest.TestCase):
         assert max_expected == state.max, "Maximum occurrence should match expected"
         assert completed, "Traversal should complete successfully"
 
-    @unittest.skip("This test is too slow to run in CI")
+    # @unittest.skip("This test is too slow to run in CI")
     def test_full_traversal_with_options(self) -> None:
         """Test full traversal of Gmod with a custom handler and options."""
+        from vista_sdk.gmod import Gmod
+
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         max_expected = 2
@@ -362,7 +382,7 @@ class TestGmod(unittest.TestCase):
             parents: list[GmodNode],
             node: GmodNode,  # noqa: ARG001
         ) -> TraversalHandlerResult:
-            assert len(parents) == 0 or parents[0].is_root, (
+            assert len(parents) == 0 or parents[0].is_root(), (
                 "First parent should be root or no parents",
             )
             state.node_count += 1

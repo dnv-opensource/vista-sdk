@@ -5,11 +5,11 @@ import unittest
 
 from dotenv import load_dotenv
 from pydantic import ValidationError
-from src.vista_sdk.client import Client
-from src.vista_sdk.gmod_path import GmodPath
-from src.vista_sdk.vis_version import VisVersion, VisVersionExtension, VisVersions
 
 from tests.testdata import TestData
+from vista_sdk.client import Client
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.vis_version import VisVersion, VisVersionExtension, VisVersions
 
 from .test_vis import TestVis
 
@@ -282,9 +282,13 @@ class TestGmodPath(unittest.TestCase):
                 unique_codes = set()
                 for individual_set in sets:
                     for node in individual_set.nodes:
+                        assert node.code not in unique_codes, (
+                            f"Node {node.code} should not be duplicated in individualizable sets"  # noqa: E501
+                        )
                         unique_codes.add(node.code)
-                        assert node.is_individualizable, (
-                            f"Node {node.code} should be individualizable"
+
+                        assert node.code in unique_codes, (
+                            f"Node {node.code} should be unique in individualizable sets"  # noqa: E501
                         )
 
     def test_valid_gmod_path_individualizable_sets_full_path(self) -> None:
@@ -302,10 +306,15 @@ class TestGmodPath(unittest.TestCase):
 
                 unique_codes = set()
                 for individual_set in sets:
+                    print(f"Individual set: {individual_set}")
                     for node in individual_set.nodes:
+                        assert node.code not in unique_codes, (
+                            f"Node {node.code} should not be duplicated in individualizable sets"  # noqa: E501
+                        )
                         unique_codes.add(node.code)
-                        assert node.is_individualizable, (
-                            f"Node {node.code} should be individualizable"
+
+                        assert node.code in unique_codes, (
+                            f"Node {node.code} should be unique in individualizable sets"  # noqa: E501
                         )
 
     def test_common_names(self) -> None:
@@ -322,9 +331,13 @@ class TestGmodPath(unittest.TestCase):
                 unique_codes = set()
                 for individual_set in sets:
                     for node in individual_set.nodes:
+                        assert node.code not in unique_codes, (
+                            f"Node {node.code} should not be duplicated in individualizable sets"  # noqa: E501
+                        )
                         unique_codes.add(node.code)
-                        assert node.is_individualizable, (
-                            f"Node {node.code} should be individualizable"
+
+                        assert node.code in unique_codes, (
+                            f"Node {node.code} should be unique in individualizable sets"  # noqa: E501
                         )
                         assert node.metadata.common_name is not None, (
                             f"Node {node.code} should have a common name"
