@@ -19,6 +19,7 @@ from vista_sdk.internal.chd_dictionary import ChdDictionary
 from vista_sdk.traversal_handler_result import TraversalHandlerResult
 from vista_sdk.vis_version import VisVersion
 
+
 TState = TypeVar("TState")
 
 TraversalHandler = Callable[[list[GmodNode], GmodNode], TraversalHandlerResult]

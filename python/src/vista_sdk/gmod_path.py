@@ -8,12 +8,10 @@ from collections.abc import Generator
 from dataclasses import dataclass
 from typing import overload
 
-from vista_sdk.gmod import Gmod
 from vista_sdk.gmod_node import GmodNode
 from vista_sdk.locations import Location, Locations
 from vista_sdk.locations_sets_visitor import LocationSetsVisitor
 from vista_sdk.traversal_handler_result import TraversalHandlerResult
-from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
 
 
@@ -366,6 +364,8 @@ class GmodPath:
         self, space_delimiter: str = " ", end_delimiter: str = "/"
     ) -> str:
         """Convert the GmodPath to a verbose string representation."""
+        from vista_sdk.vis import VIS
+
         builder = []
         for depth, common_name in self.get_common_names():
             location = str(self[depth].location)
@@ -417,11 +417,13 @@ class GmodPath:
 
     @staticmethod
     @overload
-    def parse(item: str, arg: Gmod, arg2: Locations) -> GmodPath: ...
+    def parse(item: str, arg, arg2: Locations) -> GmodPath: ...  # noqa: ANN001
 
     @staticmethod
     def parse(item: str, arg=None, arg2=None):
         """Parse a string into a GmodPath based on the provided arguments."""
+        from vista_sdk.gmod import Gmod
+
         if type(arg) is VisVersion and arg2 is None:
             path = GmodPath.try_parse(item, arg=arg)[1]
             if not path:
@@ -444,16 +446,21 @@ class GmodPath:
     @staticmethod
     @overload
     def try_parse(
-        item: str | None, arg: Locations, gmod: Gmod
+        item: str | None,
+        arg: Locations,
+        gmod,  # noqa: ANN001
     ) -> tuple[bool, GmodPath | None]: ...
 
     @staticmethod
     def try_parse(
         item: str | None,
         arg: VisVersion | Locations | None = None,
-        gmod: Gmod | None = None,
+        gmod=None,
     ) -> tuple[bool, GmodPath | None]:
         """Try to parse a string into a GmodPath based on the provided arguments."""
+        from vista_sdk.gmod import Gmod
+        from vista_sdk.vis import VIS
+
         if type(arg) is VisVersion and gmod is None:
             gmod = VIS().get_gmod(arg)
             locations = VIS().get_locations(arg)
@@ -469,7 +476,9 @@ class GmodPath:
 
     @staticmethod
     def parse_internal(  # noqa: C901
-        item: str | None, gmod: Gmod, locations: Locations
+        item: str | None,
+        gmod,  # noqa: ANN001
+        locations: Locations,
     ) -> GmodParsePathResult.Ok | GmodParsePathResult.Err:
         """Parse a string into a GmodPath using the provided Gmod and Locations."""
         if gmod.vis_version != locations.vis_version:
@@ -518,6 +527,9 @@ class GmodPath:
         def traverse_handler(  # noqa: C901
             context: GmodPath.ParseContext, parents: list[GmodNode], current: GmodNode
         ) -> TraversalHandlerResult:
+            """Handler for traversing the Gmod hierarchy."""
+            from vista_sdk.gmod import Gmod
+
             to_find = context.to_find
             found = current.code == to_find.code
 
@@ -606,7 +618,9 @@ class GmodPath:
     @staticmethod
     @overload
     def try_parse_full_path(
-        path_str: str, gmod: Gmod, arg: Locations
+        path_str: str,
+        gmod,  # noqa: ANN001
+        arg: Locations,
     ) -> tuple[bool, GmodPath]: ...
 
     @staticmethod
@@ -614,6 +628,9 @@ class GmodPath:
         path_str: str, gmod=None, arg=None
     ) -> tuple[bool, GmodPath | None]:
         """Try to parse a full path string into a GmodPath."""
+        from vista_sdk.gmod import Gmod
+        from vista_sdk.vis import VIS
+
         if type(arg) is VisVersion and gmod is None:
             vis = VIS()
             gmod = vis.get_gmod(arg)
@@ -630,6 +647,8 @@ class GmodPath:
     @staticmethod
     def parse_full_path(path_str: str, vis_version: VisVersion) -> GmodPath:
         """Parse a full path string into a GmodPath using the provided VisVersion."""
+        from vista_sdk.vis import VIS
+
         vis = VIS()
         gmod = vis.get_gmod(vis_version)
         locations = vis.get_locations(vis_version)
@@ -643,7 +662,9 @@ class GmodPath:
 
     @staticmethod
     def parse_full_path_internal(  # noqa: C901
-        path_str: str, gmod: Gmod, locations: Locations
+        path_str: str,
+        gmod,  # noqa: ANN001
+        locations: Locations,
     ) -> GmodParsePathResult.Ok | GmodParsePathResult.Err:
         """Parse a full path string into a GmodPath using the provided Gmod and Locations."""  # noqa: E501
         if not path_str.strip():

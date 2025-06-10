@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from .embedded_resources import EmbeddedResource
+from vista_sdk.source_generator.embedded_resources import EmbeddedResource
 
 
 def generate_vis_version_script(directory: str, output_file: str) -> None:
@@ -73,16 +73,20 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate VisVersion script.")
     parser.add_argument(
-        "--resources-dir",
+        "--resources_dir",
         type=str,
-        required=True,
+        required=False,
         help="The directory containing the .gz files",
     )
     args = parser.parse_args()
 
-    root_dir = Path(__file__).parent.parent.parent.resolve()
+    root_dir = Path(__file__).parent.parent.resolve()
     # go one level up on the path below
-    resources_dir = Path(args.resources_dir).resolve()
-    output_file = root_dir / "python" / "src" / "vista_sdk" / "VisVersions.py"
+    resources_dir = (
+        root_dir / "resources"
+        if not args.resources_dir
+        else Path(args.resources_dir).resolve()
+    )
+    output_file = root_dir / "VisVersions.py"
 
     generate_vis_version_script(str(resources_dir), str(output_file))

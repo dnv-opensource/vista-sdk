@@ -6,7 +6,7 @@ from copy import copy
 from typing import TypeVar
 from xml.dom import ValidationErr
 
-from python.src.vista_sdk.locations import Location, LocationGroup, Locations
+from vista_sdk.locations import Location, LocationGroup, Locations
 
 T = TypeVar("T")
 
@@ -18,11 +18,11 @@ class LocationBuilder:
         """Initialize the LocationBuilder with a Locations instance."""
         self.vis_version = locations.vis_version
         self.reversed_groups = locations._reversed_groups
-        self.number = None
-        self.side = None
-        self.vertical = None
-        self.transverse = None
-        self.longitudinal = None
+        self.number: int | None = None
+        self.side: str | None = None
+        self.vertical: str | None = None
+        self.transverse: str | None = None
+        self.longitudinal: str | None = None
 
     @staticmethod
     def create(locations: Locations) -> LocationBuilder:
@@ -85,7 +85,7 @@ class LocationBuilder:
         return self.with_value_internal(group, value)
 
     def with_value_internal(
-        self, group: LocationGroup, value: object
+        self, group: LocationGroup, value: int | str | None
     ) -> LocationBuilder:
         """Set the value for the location based on the group and value type."""
         if group == LocationGroup.NUMBER:
@@ -120,10 +120,10 @@ class LocationBuilder:
     def __str__(self) -> str:
         """Return a string representation of the location."""
         parts = [self.side, self.vertical, self.transverse, self.longitudinal]
-        parts = [str(p) for p in parts if p is not None]
+        parts = [p for p in parts if p is not None]
         if self.number:
             parts.insert(0, str(self.number))
-        return "".join(sorted(parts))
+        return "".join(sorted([p for p in parts if p is not None]))
 
     def without_number(self) -> LocationBuilder:
         """Remove the number from the location."""
