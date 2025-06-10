@@ -146,20 +146,12 @@ class VIS(IVIS):
         self._locations_dto_cache[vis_version] = dto
         return dto
 
-    def get_locations_map(
-        self, vis_versions: list[VisVersion]
-    ) -> dict[VisVersion, Locations]:
-        """Get a mapping of VIS versions to their locations."""
-        invalid_versions = [
-            v for v in vis_versions if v.name not in VisVersion.__members__
-        ]
-        if invalid_versions:
-            raise ValueError(
-                "Invalid VIS versions provided: "
-                f"{', '.join(map(str, invalid_versions))}"
-            )
+    def get_locations_map(self, vis_version: VisVersion) -> dict[VisVersion, Locations]:
+        """Get a mapping of a single VIS version to its locations."""
+        if vis_version.name not in VisVersion.__members__:
+            raise ValueError(f"Invalid VIS version provided: {vis_version}")
 
-        return {version: self.get_locations(version) for version in vis_versions}
+        return {vis_version: self.get_locations(vis_version)}
 
     def get_vis_versions(self) -> list[VisVersion]:
         """Get all available VIS versions."""

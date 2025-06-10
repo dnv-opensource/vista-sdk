@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from python.src.vista_sdk.gmod_node import GmodNode
-from python.src.vista_sdk.locations import Location
+from vista_sdk.gmod_node import GmodNode
+from vista_sdk.locations import Location
 
 
 class LocationSetsVisitor:
@@ -15,7 +15,7 @@ class LocationSetsVisitor:
         self, node: GmodNode, i: int, parents: list[GmodNode], target: GmodNode
     ) -> tuple[int, int, Location | None] | None:
         """Visit a node and determine if it is part of a location set."""
-        from python.src.vista_sdk.gmod import Gmod
+        from vista_sdk.gmod import Gmod
 
         is_parent = Gmod.is_potential_parent(node.metadata.type)
         is_target_node = i == len(parents)

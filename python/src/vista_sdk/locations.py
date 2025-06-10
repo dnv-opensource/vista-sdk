@@ -5,8 +5,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import overload
 
-from python.src.vista_sdk.locations_dto import LocationsDto
-from python.src.vista_sdk.vis_version import VisVersion
+from vista_sdk.locations_dto import LocationsDto
+from vista_sdk.vis_version import VisVersion
 
 from .internal.location_parsing_error_builder import (
     LocationParsingErrorBuilder,

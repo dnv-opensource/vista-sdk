@@ -8,11 +8,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 
-from .gmod_dto import GmodNodeDto
-from .locations import Location
-from .parsing_errors import ParsingErrors
-from .vis import VIS
-from .vis_version import VisVersion
+from vista_sdk.gmod_dto import GmodNodeDto
+from vista_sdk.locations import Location
+from vista_sdk.parsing_errors import ParsingErrors
+from vista_sdk.vis_version import VisVersion
 
 
 class GmodNodeMetadata:
@@ -108,9 +107,16 @@ class GmodNode:
 
     def try_with_location(self, location_str: str | None) -> GmodNode:
         """Try to set the location of the node, returning a new node if successful."""
+
+        def get_locations(vis_version):  # noqa: ANN001, ANN202
+            """Get the locations for the current VIS version."""
+            from vista_sdk.vis import VIS
+
+            return VIS().get_locations(vis_version)
+
         if location_str is None:
             return self
-        locations = VIS().get_locations(self.vis_version)
+        locations = get_locations(self.vis_version)
         try:
             new_location = locations.try_parse(location_str)[1]
             return GmodNode(
@@ -128,9 +134,16 @@ class GmodNode:
         self, location_str: str | None, errors: list[ParsingErrors]
     ) -> tuple[GmodNode, list[ParsingErrors]]:
         """Try to set the location of the node, returning errors if parsing fails."""
+
+        def get_locations(vis_version):  # noqa: ANN001, ANN202
+            """Get the locations for the current VIS version."""
+            from vista_sdk.vis import VIS
+
+            return VIS().get_locations(vis_version)
+
         if location_str is None:
             return self, errors
-        locations = VIS().get_locations(self.vis_version)
+        locations = get_locations(self.vis_version)
         if locations.try_parse(location_str):
             new_location = locations.parse(location_str)
             return GmodNode(
@@ -146,6 +159,9 @@ class GmodNode:
     def is_individualizable(
         self, is_target_node: bool = False, is_in_set: bool = False
     ) -> bool:
+        """if self.code in ["441", "411i"]:
+        breakpoint()"""
+
         """Check if the node can be individualized."""
         if self.metadata.type in ["GROUP", "SELECTION"]:
             return False
@@ -222,7 +238,7 @@ class GmodNode:
                 return child
         return None
 
-    def clone(self, **changes: object) -> GmodNode:
+    def clone(self, **changes) -> GmodNode:  # noqa: ANN003
         """Create a clone of the GmodNode with specified changes."""
         return replace(self, **changes)
 
