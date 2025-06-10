@@ -3,10 +3,11 @@
 from pathlib import Path
 
 import pytest
-from src.vista_sdk.source_generator.vis_versions_generator import (
+
+from vista_sdk.source_generator.vis_versions_generator import (
     generate_vis_version_script,
 )
-from src.vista_sdk.vis_version import VisVersion, VisVersionExtension, VisVersions
+from vista_sdk.vis_version import VisVersion, VisVersionExtension, VisVersions
 
 
 class TestVisVersions:
@@ -49,8 +50,12 @@ class TestVisVersions:
 
     def test_vis_generation(self) -> None:
         """Test the generation of the VisVersions script."""
-        root_dir = Path(__file__).parent.parent.resolve()
+        root_dir = Path(__file__).parent.parent.parent.resolve()
         resources_dir = root_dir / "resources"
         output_file = root_dir / "python" / "src" / "vista_sdk" / "VisVersions.py"
+
+        print(f"Root directory: {root_dir}")
+        print(f"Resources directory: {resources_dir}")
+        print(f"Output file: {output_file}")
 
         generate_vis_version_script(str(resources_dir), str(output_file))
