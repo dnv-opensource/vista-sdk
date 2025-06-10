@@ -1,5 +1,6 @@
 """Tests for the Gmod class in the Vista SDK."""
 
+import time
 import unittest
 from dataclasses import dataclass
 
@@ -41,10 +42,6 @@ class TestGmod(unittest.TestCase):
                 assert gmod is not None, (
                     f"Gmod for version {version} should not be None"
                 )
-
-                # nodes = list(gmod._node_map)
-                # min_length = min(nodes, key=lambda x: len(x[1].code))
-                # max_length = max(nodes, key=lambda x: len(x[1].code))
 
                 min_len = float("inf")
                 max_len = 0
@@ -280,6 +277,7 @@ class TestGmod(unittest.TestCase):
         """Test full traversal of Gmod with a custom handler."""
         from vista_sdk.vis import VIS
 
+        start_time = time.time()
         gmod = VIS().get_gmod(VisVersion.v3_4a)
 
         max_expected = TraversalOptions.DEFAULT_MAX_TRAVERSAL_OCCURRENCE
@@ -334,13 +332,19 @@ class TestGmod(unittest.TestCase):
         state: State = State()
 
         completed = gmod.traverse(args1=state, args2=traversal_handler)
+
+        elapsed_time = time.time() - start_time
+        print(f"Traversal completed in {elapsed_time:.2f} seconds")
+
         assert max_expected == state.max, "Maximum occurrence should match expected"
         assert completed, "Traversal should complete successfully"
 
-    # @unittest.skip("This test is too slow to run in CI")
+    @unittest.skip("This test is too slow to run in CI")
     def test_full_traversal_with_options(self) -> None:
         """Test full traversal of Gmod with a custom handler and options."""
         from vista_sdk.gmod import Gmod
+
+        start_time = time.time()
 
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
@@ -365,6 +369,9 @@ class TestGmod(unittest.TestCase):
 
         options = TraversalOptions(max_traversal_occurrence=max_expected)
         completed = gmod.traverse(args1=traversal_handler, args2=options)
+
+        elapsed_time = time.time() - start_time
+        print(f"Traversal completed in {elapsed_time:.2f} seconds")
 
         assert max_expected == max_occurrence, (
             "Maximum occurrence should match the expected limit"
