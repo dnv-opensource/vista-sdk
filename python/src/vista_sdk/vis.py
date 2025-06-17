@@ -16,6 +16,10 @@ from dotenv import load_dotenv
 from vista_sdk.client import Client
 from vista_sdk.gmod import Gmod
 from vista_sdk.gmod_dto import GmodDto
+from vista_sdk.gmod_node import GmodNode
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.gmod_versioning import GmodVersioning
+from vista_sdk.gmod_versioning_dto import GmodVersioningDto
 from vista_sdk.locations import Locations
 from vista_sdk.locations_dto import LocationsDto
 from vista_sdk.vis_version import VisVersion, VisVersionExtension
@@ -64,11 +68,13 @@ class VIS(IVIS):
     instance exists.
     """
 
-    LatestVisVersion = VisVersion.v3_7a
+    LatestVisVersion = VisVersion.v3_8a
     _locations_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)  # TTL is in seconds
     _locations_dto_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
     _gmod_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
     _gmod_dto_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
+    _gmod_versioning_dto_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
+    _gmod_versioning_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
 
     client = Client()
 
@@ -95,7 +101,7 @@ class VIS(IVIS):
     def load_gmod_dto(self, vis_version: VisVersion) -> GmodDto | None:
         """Load GMOD DTO from the client."""
         vis_version_str = VisVersionExtension.to_version_string(vis_version)
-        if environment == "local":
+        if environment == "local" or environment == "None":
             return self.client.get_gmod_test(vis_version_str)
         return self.client.get_gmod(vis_version_str)
 
@@ -107,6 +113,54 @@ class VIS(IVIS):
             self._gmod_cache[vis_version] = self.create_gmod(vis_version)
 
         return self._gmod_cache[vis_version]
+
+    def get_gmod_versioning_dto(self, vis_version: VisVersion) -> GmodVersioningDto:
+        """Get GMOD versioning DTO with caching."""
+        try:
+            if not VisVersionExtension.is_valid(vis_version):
+                raise ValueError(f"Invalid VIS version: {vis_version}")
+
+            if vis_version in self._gmod_versioning_dto_cache:
+                return self._gmod_versioning_dto_cache[vis_version]
+
+            version = VisVersionExtension.to_version_string(vis_version)
+
+            if environment == "local" or environment == "None":
+                dto = self.client.get_gmod_versioning_test(vis_version=version)
+            else:
+                dto = self.client.get_gmod_versioning(vis_version=version)
+
+            if dto is None:
+                raise Exception(f"Failed to load versioning DTO for version {version}")
+
+            print(f"Raw versioning DTO data: {dto}")  # Debug print
+
+            if not isinstance(dto, GmodVersioningDto):
+                dto = GmodVersioningDto(**dto)
+
+            self._gmod_versioning_dto_cache[vis_version] = dto
+            return dto
+        except Exception as e:
+            raise ValueError(f"Error getting GMOD versioning DTO: {e!s}") from e
+
+    def get_gmod_versioning(self, vis_version: VisVersion) -> GmodVersioning:
+        """Get GMOD versioning with caching."""
+        if not VisVersionExtension.is_valid(vis_version):
+            raise ValueError(f"Invalid VIS version: {vis_version}")
+
+        if vis_version in self._gmod_versioning_cache:
+            return self._gmod_versioning_cache[vis_version]
+
+        try:
+            dto = self.get_gmod_versioning_dto(vis_version)
+            versioning = GmodVersioning({vis_version.value: dto})
+            self._gmod_versioning_cache[vis_version] = versioning
+            print(f"versioning: {versioning}")
+            return versioning
+        except Exception as e:
+            raise ValueError(
+                f"Error getting GMOD versioning for {vis_version}: {e}"
+            ) from e
 
     def create_gmod(self, vis_version: VisVersion) -> Gmod:
         """Create a new GMOD instance."""
@@ -132,7 +186,7 @@ class VIS(IVIS):
         """Get locations DTO for a specific VIS version with caching."""
         if vis_version in self._locations_dto_cache:
             return self._locations_dto_cache[vis_version]
-        if environment == "local":
+        if environment == "local" or environment == "None":
             dto = self.client.get_locations_test(
                 VisVersionExtension.to_version_string(vis_version)
             )
@@ -156,6 +210,41 @@ class VIS(IVIS):
     def get_vis_versions(self) -> list[VisVersion]:
         """Get all available VIS versions."""
         return list(VisVersion)
+
+    def convert_node(
+        self,
+        source_version: VisVersion,
+        source_node: GmodNode,
+        target_version: VisVersion,
+    ) -> GmodNode | None:
+        """Convert a node from one version to another."""
+        versioning = self.get_gmod_versioning(source_version)
+        return versioning.convert_node(source_version, source_node, target_version)
+
+    def convert_path(
+        self,
+        source_version: VisVersion,
+        source_path: GmodPath,
+        target_version: VisVersion,
+    ) -> GmodPath | None:
+        """Convert a path form one version to another."""
+        try:
+            print("test")
+            versioning = self.get_gmod_versioning(source_version)
+            print("test2")
+            converted = versioning.convert_path(
+                source_version, source_path, target_version
+            )
+            print(f"converted: {converted}")
+            if converted:
+                # Verify the converted path is valid in target version
+                target_gmod = self.get_gmod(target_version)
+                if not target_gmod.parse_path(str(converted)):
+                    return None
+            return converted
+        except Exception as e:
+            print(f"Error converting path: {e}")
+            return None
 
     @staticmethod
     def is_iso_string(span: str) -> bool:

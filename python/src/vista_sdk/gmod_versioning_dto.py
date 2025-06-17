@@ -6,21 +6,31 @@ General Maritime Object Data (GMOD).
 
 from __future__ import annotations
 
+from collections.abc import Set
+
 from pydantic import BaseModel, Field
 
 
-class GmodVersioningNodeChangesDto(BaseModel):
-    """Data transfer object for changes in a GMOD node."""
+class GmodNodeConversionDto(BaseModel):
+    """DTO For GMOD Node Conversion."""
 
-    next_vis_version: str | None = Field(None, alias="nextVisVersion")
-    next_code: str | None = Field(None, alias="nextCode")
-    previous_vis_version: str | None = Field(None, alias="previousVisVersion")
-    previous_code: str | None = Field(None, alias="previousCode")
+    operations: Set[str] = Field(..., alias="operation")
+    source: str = Field(..., alias="source")
+    target: str = Field(..., alias="target")
+    old_assignment: str = Field(..., alias="old_assignment")
+    new_assignment: str = Field(..., alias="new_assignment")
+    delete_assignment: bool = Field(..., alias="delete_assignment")
+
+
+class GmodVersioningAssignmentChangeDto(BaseModel):
+    """DTO for change in GMOD Version."""
+
+    old_assignment: str = Field(..., alias="old_assignment")
+    current_assignment: str = Field(..., alias="current_assignment")
 
 
 class GmodVersioningDto(BaseModel):
-    """Data transfer object for GMOD versioning changes."""
+    """Data transfer object for GMOD Versioning."""
 
-    items: dict[str, dict[str, GmodVersioningNodeChangesDto]] = Field(
-        ..., alias="items"
-    )
+    vis_version: str = Field(..., alias="vis_version")
+    items: dict[str, GmodNodeConversionDto] = Field(..., alias="items")
