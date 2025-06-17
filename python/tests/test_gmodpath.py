@@ -30,7 +30,7 @@ class TestGmodPath(unittest.TestCase):
         except ValidationError as e:
             raise Exception("Couldn't load test data") from e
         self.vis = TestVis.get_vis()
-        if environment == "local":
+        if environment == "local" or environment == "None":
             Client.get_gmod_test(
                 VisVersionExtension.to_version_string(VisVersion.v3_4a)
             )

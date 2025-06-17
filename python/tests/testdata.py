@@ -91,11 +91,14 @@ class TestData:
     def get_data(test_name: str, cls: type[T]) -> T:
         """Load and validate test data from a JSON file."""
         path = Path("tests") / "testdata" / f"{test_name}.json"
-        with path.open() as file:
-            test_data_json = file.read()
-            test_data_json = test_data_json.replace("\n", "")
-            if test_name == "IndividualizableSets":
-                test_data_json = '{"data":' + test_data_json + "}"
+        if path:
+            with path.open() as file:
+                test_data_json = file.read()
+                test_data_json = test_data_json.replace("\n", "")
+                if test_name == "IndividualizableSets":
+                    test_data_json = '{"data":' + test_data_json + "}"
+        else:
+            FileExistsError(f"File not found: {path}")
         try:
             data_dict = json.loads(test_data_json)
             return cls.model_validate(data_dict)

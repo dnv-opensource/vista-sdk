@@ -10,7 +10,7 @@ def vis_instance():  # noqa: ANN201
     """Fixture to provide a singleton instance of VIS."""
     from vista_sdk.vis import VIS
 
-    return VIS.instance
+    return VIS().instance
 
 
 @pytest.fixture
