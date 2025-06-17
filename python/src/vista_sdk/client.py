@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from vista_sdk.gmod_dto import GmodDto
+from vista_sdk.gmod_versioning_dto import GmodVersioningDto
 from vista_sdk.locations_dto import LocationsDto
 
 
@@ -29,8 +30,10 @@ class Client:
             ):
                 data = json.load(gzip_file)
             return LocationsDto(**data)
-        except FileNotFoundError:
-            return None
+        except FileNotFoundError as err:
+            raise FileNotFoundError(
+                f"File: {resource_name} at given path was not found"
+            ) from err
 
     @staticmethod
     def get_gmod(vis_version: str) -> GmodDto:
@@ -45,8 +48,30 @@ class Client:
             ):
                 data = json.load(gzip_file)
             return GmodDto(**data)
-        except FileNotFoundError:
-            raise Exception("Invalid state") from None
+        except FileNotFoundError as err:
+            raise FileNotFoundError(
+                f"File: {resource_name} at given path was not found"
+            ) from err
+
+    @staticmethod
+    def get_gmod_versioning(vis_version: str) -> GmodVersioningDto:
+        """Retrieve GMOD Versioning data for the specified VISTA version."""
+        resource_name: str = f"gmod-vis-versioning-{vis_version}.json.gz"
+        try:
+            with (
+                pkg_resources.path(
+                    "vista_sdk.resources", resource_name
+                ) as resource_path,
+                gzip.open(resource_path, "rt") as gzip_file,
+            ):
+                data = json.load(gzip_file)
+                # Add vis_version to the data before creating DTO
+                data["vis_version"] = vis_version
+            return GmodVersioningDto(**data)
+        except FileNotFoundError as err:
+            raise FileNotFoundError(
+                f"File: {resource_name} at given path was not found"
+            ) from err
 
     @staticmethod
     def get_locations_test(vis_version: str) -> LocationsDto | None:
@@ -76,3 +101,20 @@ class Client:
                 data = json.load(file)
 
         return GmodDto(**data)
+
+    @staticmethod
+    def get_gmod_versioning_test(vis_version: str) -> GmodVersioningDto:
+        """Retrieve test GMOD Versioning data for the specified Vista version."""
+        with pkg_resources.path(
+            "vista_sdk.resources", f"gmod-vis-versioning-{vis_version}.json.gz"
+        ) as resource_path:
+            if not resource_path.exists():
+                raise FileNotFoundError(
+                    f"Resource gmod-vis-versioning-{vis_version}.json.gz not found"
+                )
+            with gzip.open(resource_path, "rt") as file:
+                data = json.load(file)
+                # Add vis_version to the data before creating DTO
+                data["vis_version"] = vis_version
+
+        return GmodVersioningDto(**data)
