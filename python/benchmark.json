@@ -1,0 +1,27 @@
+{
+    "name": "Vista SDK Python Benchmarks",
+    "version": "0.1.0",
+    "min_rounds": 20,
+    "max_time": 1.0,
+    "warmup": true,
+    "warmup_iterations": 3,
+    "disable_gc": true,
+    "timer": "perf_counter",
+    "benchmarks": [
+        {
+            "name": "Path Parsing",
+            "tool": "pytest",
+            "test_file": "tests/benchmark/test_benchmarks.py::test_path_parsing_benchmark"
+        },
+        {
+            "name": "Version Conversion",
+            "tool": "pytest",
+            "test_file": "tests/benchmark/test_benchmarks.py::test_version_conversion_benchmark"
+        },
+        {
+            "name": "Memory Usage",
+            "tool": "pytest",
+            "test_file": "tests/benchmark/test_benchmarks.py::test_memory_usage_large_dataset"
+        }
+    ]
+}
