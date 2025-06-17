@@ -13,7 +13,6 @@ venv/
 
 # AI generated tests that are not implemented
 tests/not_implemented/
-tests/benchmark/
 
 # Ignore editor-specific files
 .idea/
