@@ -340,6 +340,28 @@ class Gmod:
         reached_end = self.traverse(args1=state, args2=start_node, args3=handler)
         return not reached_end, state.remaining_parents
 
+    def find_common_parent(self, node1: GmodNode, node2: GmodNode) -> GmodNode | None:
+        """Find the first common parents for two child nodes."""
+        parents1 = self._get_all_parents(node1)
+        parents2 = self._get_all_parents(node2)
+
+        common_parents = set(parents1) & set(parents2)
+        if not common_parents:
+            return None
+
+        return min(common_parents, key=lambda x: len(self._get_all_parents(x)))
+
+    def _get_all_parents(self, node: GmodNode) -> list[GmodNode]:
+        """Returns a list of all parents for a given node."""
+        parents = [node]
+        current = node
+
+        while current.parents:
+            current = current.parents[0]
+            parents.append(current)
+
+        return parents
+
     @dataclass
     class PathExistsContext:
         """Context for checking if a path exists between nodes."""
