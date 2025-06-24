@@ -96,7 +96,7 @@ def process_paths(paths: list[GmodPath]) -> list[GmodPath]:
     results = []
     for path in paths:
         try:
-            converted = vis.convert_path(VisVersion.v3_4a, path, VisVersion.v3_5a)
+            converted = vis.convert_path(VisVersion.v3_5a, path, VisVersion.v3_6a)
             if converted:
                 results.append(converted)
         except Exception as e:
@@ -113,7 +113,7 @@ async def process_paths_async(paths: list[GmodPath]) -> list[GmodPath]:
         try:
             # Use asyncio.to_thread for CPU-bound operations
             converted = await asyncio.to_thread(
-                vis.convert_path, VisVersion.v3_4a, path, VisVersion.v3_5a
+                vis.convert_path, VisVersion.v3_5a, path, VisVersion.v3_6a
             )
             if converted:
                 results.append(converted)

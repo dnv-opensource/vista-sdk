@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+from vista_sdk.gmod import Gmod
 from vista_sdk.gmod_node import GmodNode
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.gmod_versioning_dto import GmodNodeConversionDto, GmodVersioningDto
@@ -154,7 +155,7 @@ class GmodVersioning:
             raise Exception("Failed to set location")
         return result
 
-    def convert_path(  # noqa : C901
+    def convert_path(
         self,
         source_version: VisVersion,
         source_path: GmodPath,
@@ -178,59 +179,190 @@ class GmodVersioning:
         if target_end_node.is_root():
             return GmodPath([target_end_node], target_end_node)
 
+        # Get GMOD instances
+        target_gmod = vis.get_gmod(target_version)
+        # source_gmod = vis.get_gmod(source_version)
+
         # Get full path of nodes
         source_nodes = source_path.get_full_path()
-        converted_nodes: list[tuple[GmodNode, GmodNode | None]] = []
-
-        # Convert each node in the path
-        for index, source_node in source_nodes:  # noqa : B007
-            converted = self.convert_node(
-                source_version=source_version,
-                source_node=source_node,
-                target_version=target_version,
+        qualifying_nodes = [
+            (
+                source_node,
+                self.convert_node(source_version, source_node[1], target_version),
             )
-            converted_nodes.append((source_node, converted))
+            for source_node in source_nodes
+        ]
 
-        print(f"converted_noded: {converted_nodes}")
-
-        # Check if any conversions
-        if any(conv[1] is None for conv in converted_nodes):
+        # Check if any conversions failed
+        if any(conv[1] is None for conv in qualifying_nodes):
             return None
 
-        # Build target path
-        target_path_nodes: list[GmodNode] = []
-        target_gmod = vis.get_gmod(target_version)
+        potential_parents: list[GmodNode] = [
+            n[1] for n in qualifying_nodes[:-1] if n[1] is not None
+        ]
+        if GmodPath.is_valid(potential_parents, target_end_node):
+            return GmodPath(potential_parents, target_end_node)
 
-        for source_node, target_node in converted_nodes:  # noqa : B007
-            if target_node is None:
+        # Filter out None values for _build_path
+        filtered_qualifying_nodes: list[tuple[GmodNode, GmodNode]] = [
+            (src[1], tgt) for (src, tgt) in qualifying_nodes if tgt is not None
+        ]
+
+        # Build path using complex logic
+        path = self._build_path(filtered_qualifying_nodes, target_gmod, target_end_node)
+        if not path:
+            return None
+
+        # Validate final path
+        return self._validate_final_path(path[:-1], path[-1], source_path)
+
+    def _build_path(  # noqa : C901
+        self,
+        qualifying_nodes: list[tuple[GmodNode, GmodNode]],
+        target_gmod: Gmod,
+        target_end_node: GmodNode,
+    ) -> list[GmodNode]:
+        """Build valid path from qualifying nodes."""
+        path: list[GmodNode] = []
+
+        for i, (source_node, target_node) in enumerate(qualifying_nodes):
+            if i > 0 and target_node.code == qualifying_nodes[i - 1][1].code:
                 continue
 
-            if not target_path_nodes:
-                target_path_nodes.append(target_node)
-                continue
+            code_changed = source_node.code != target_node.code
+            source_normal_assignment = getattr(source_node, "product_type", None)
+            target_normal_assignment = getattr(target_node, "product_type", None)
 
-            # Add helper nodes if needed
-            prev_node = target_path_nodes[-1]
-            if prev_node.is_child(target_node):
-                target_path_nodes.append(target_node)
-            else:
-                # Find common parent
-                common_parent = target_gmod.find_common_parent(prev_node, target_node)
-                if common_parent is None:
-                    return None
+            normal_assignment_changed = (
+                source_normal_assignment is not None
+                and target_normal_assignment is not None
+                and source_normal_assignment.code != target_normal_assignment.code
+            )
 
-                # Add nodes to complete the path
-                target_path_nodes.extend(
-                    self._get_path_to_node(common_parent, target_node)
+            if code_changed:
+                self._add_to_path(target_gmod, path, target_node)
+            elif normal_assignment_changed:
+                was_deleted = (
+                    source_normal_assignment is not None
+                    and target_normal_assignment is None
                 )
 
-        if not target_path_nodes:
-            return None
+                if not code_changed:
+                    self._add_to_path(target_gmod, path, target_node)
 
-        return GmodPath(
-            target_path_nodes[:-1],  # Parent nodes
-            target_path_nodes[-1],  # End node
-        )
+                if was_deleted:
+                    if target_node.code == target_end_node.code and i + 1 < len(
+                        qualifying_nodes
+                    ):
+                        next_node = qualifying_nodes[i + 1][1]
+                        if next_node.code != target_node.code:
+                            raise Exception("Normal assignment end node was deleted")
+                    continue
+
+                if (
+                    target_node.code != target_end_node.code
+                    and target_normal_assignment is not None
+                ):
+                    self._add_to_path(target_gmod, path, target_normal_assignment)
+                    i += 1
+            elif not code_changed and not normal_assignment_changed:
+                self._add_to_path(target_gmod, path, target_node)
+
+            if path and path[-1].code == target_end_node.code:
+                break
+
+        if not path or path[-1].code != target_end_node.code:
+            raise ValueError(f"Failed to build complete path to {target_end_node.code}")
+
+        return path
+
+    def _add_to_path(
+        self,
+        target_gmod: Gmod,
+        path: list[GmodNode],
+        node: GmodNode,
+    ) -> None:
+        """Add node to path with proper parent-child relationship verification."""
+        try:
+            if not path:
+                path.append(node)
+                return
+
+            prev = path[-1]
+            if prev.is_child(node):
+                path.append(node)
+                return
+
+            # Traverse backwards to find valid connection point
+            for j in range(len(path) - 1, -1, -1):
+                parent = path[j]
+                current_parents = path[: j + 1]
+                exists, remaining = self.path_exists_between(
+                    current_parents, node, target_gmod, include_remaining=True
+                )
+
+                if not exists:
+                    # Check asset function node constraint
+                    has_other_asset_nodes = any(
+                        n.is_asset_function_node is True and n.code != parent.code
+                        for n in current_parents
+                    )
+                    if not has_other_asset_nodes:
+                        raise ValueError("Cannot remove last asset function node")
+                    path.pop(j)
+                    continue
+
+                # Handle location propagation with individualizable check
+                nodes_to_add = []
+                if node.location is not None:
+                    for remaining_node in remaining:
+                        if not remaining_node.is_individualizable(False, True):
+                            nodes_to_add.append(remaining_node)
+                        else:
+                            nodes_to_add.append(
+                                remaining_node.try_with_location(str(node.location))
+                            )
+                else:
+                    nodes_to_add.extend(remaining)
+
+                path.extend(nodes_to_add)
+                break
+
+            path.append(node)
+
+        except Exception as e:
+            raise ValueError(f"Error adding node to path: {e}") from e
+
+    def path_exists_between(
+        self,
+        current_parents: list[GmodNode],
+        target_node: GmodNode,
+        target_gmod: Gmod,
+        include_remaining: bool = False,
+    ) -> tuple[bool, list[GmodNode]]:
+        """Check if path exists between current parents and target node."""
+        if not current_parents:
+            return False, []
+
+        # Find path through common parent
+        last_parent = current_parents[-1]
+        if last_parent.is_child(target_node):
+            return True, [target_node] if include_remaining else []
+
+        common_parent = target_gmod.find_common_parent(last_parent, target_node)
+        if not common_parent:
+            return False, []
+
+        remaining_nodes = self._get_path_to_node(common_parent, target_node)
+        return True, remaining_nodes
+
+    def _validate_final_path(
+        self, parents: list[GmodNode], end_node: GmodNode, source_path: GmodPath
+    ) -> GmodPath:
+        """Validate and create final path."""
+        if not GmodPath.is_valid(parents, end_node):
+            raise Exception(f"Did not end up with valid path for {source_path}")
+        return GmodPath(parents, end_node)
 
     def _get_path_to_node(
         self, start_node: GmodNode, end_node: GmodNode
@@ -252,14 +384,40 @@ class GmodVersioning:
         self, source_version: VisVersion, target_version: VisVersion
     ) -> None:
         """Validate version parameters."""
-        if not source_version.value:
-            raise ValueError(f"Invalid source VIS Version: {source_version.value}")
-        if not target_version.value:
-            raise ValueError(f"Invalid target VIS Version: {target_version.value}")
-        if source_version.value >= target_version.value:
+        if not source_version or not source_version.value:
+            raise ValueError(f"Invalid source VIS Version: {source_version}")
+        if not target_version or not target_version.value:
+            raise ValueError(f"Invalid target VIS Version: {target_version}")
+
+        source_num: float = 0.0
+        target_num: float = 0.0
+        if "_" in source_version.value or "_" in target_version.value:
+            print("'_' in version")
+            source_num = float(
+                source_version.value.replace("_", ".").replace("a", "").replace("v", "")
+            )
+            target_num = float(
+                target_version.value.replace("_", ".").replace("a", "").replace("v", "")
+            )
+
+        elif "-" in source_version.value or "-" in target_version.value:
+            source_num = float(
+                source_version.value.replace("-", ".").replace("a", "").replace("v", "")
+            )
+
+            target_num = float(
+                target_version.value.replace("-", ".").replace("a", "").replace("v", "")
+            )
+        else:
             raise ValueError(
-                f"Source version must be less than target version. Source version: "
-                f"{source_version.value}, target version: {target_version.value}"
+                f"Could not convert version to integer: {source_version.value},"
+                f" and {target_version.value}"
+            )
+
+        if source_num >= target_num:
+            raise ValueError(
+                f"Source version ({source_version.value}) must be less than "
+                f"target version ({target_version.value})"
             )
 
     def _validate_source_and_target_version_pair(

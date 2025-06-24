@@ -1,3 +1,8 @@
+"""AI Generatded.
+
+Track and analyze benchmark results over time,storing them in a SQLite
+database and generating reports.
+"""
 #!/usr/bin/env python3
 
 import json
@@ -5,15 +10,15 @@ import os
 import sqlite3
 import statistics
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 RESULTS_DIR = Path(__file__).parent / "benchmark_results"
 DB_PATH = RESULTS_DIR / "benchmark_history.db"
 
 
-def init_database():
-    """Initialize the benchmark history database"""
+def init_database() -> None:
+    """Initialize the benchmark history database."""
     RESULTS_DIR.mkdir(exist_ok=True)
 
     conn = sqlite3.connect(DB_PATH)
@@ -46,9 +51,9 @@ def init_database():
     conn.close()
 
 
-def store_results(results_file):
-    """Store benchmark results in the database"""
-    with open(results_file) as f:
+def store_results(results_file: Path) -> None:
+    """Store benchmark results in the database."""
+    with Path(results_file).open() as f:
         results = json.load(f)
 
     conn = sqlite3.connect(DB_PATH)
@@ -61,7 +66,7 @@ def store_results(results_file):
         VALUES (?, ?, ?)
     """,
         (
-            datetime.now().isoformat(),
+            datetime.now(timezone.utc).isoformat(),
             os.environ.get("GIT_COMMIT", "unknown"),
             sys.version.split()[0],
         ),
@@ -91,8 +96,8 @@ def store_results(results_file):
     conn.close()
 
 
-def analyze_trends():
-    """Analyze benchmark trends and detect regressions"""
+def analyze_trends() -> list[dict]:
+    """Analyze benchmark trends and detect regressions."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
@@ -141,14 +146,14 @@ def analyze_trends():
     return regressions
 
 
-def generate_report():
-    """Generate a benchmark report"""
+def generate_report() -> Path:
+    """Generate a benchmark report."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
     report = []
     report.append("# Benchmark Report")
-    report.append(f"\nGenerated: {datetime.now().isoformat()}")
+    report.append(f"\nGenerated: {datetime.now(timezone.utc).isoformat()}")
 
     # Get latest run info
     c.execute("""
@@ -159,7 +164,7 @@ def generate_report():
     """)
     latest_run = c.fetchone()
     if latest_run:
-        report.append(f"\n## Latest Run")
+        report.append("\n## Latest Run")
         report.append(f"- Timestamp: {latest_run[0]}")
         report.append(f"- Commit: {latest_run[1]}")
         report.append(f"- Python Version: {latest_run[2]}")
@@ -197,22 +202,23 @@ def generate_report():
 
     # Write report
     report_path = (
-        RESULTS_DIR / f"benchmark_report_{datetime.now().strftime('%Y%m%d')}.md"
+        RESULTS_DIR
+        / f"benchmark_report_{datetime.now(timezone.utc).strftime('%Y%m%d')}.md"
     )
-    with open(report_path, "w") as f:
+    with report_path.open("w") as f:
         f.write("\n".join(report))
 
     return report_path
 
 
-def main():
-    """Main entry point for benchmark history tracking"""
+def main() -> None:
+    """Main entry point for benchmark history tracking."""
     init_database()
 
     # Store results if a results file is provided
     if len(sys.argv) > 1:
-        results_file = sys.argv[1]
-        if os.path.exists(results_file):
+        results_file = Path(sys.argv[1])
+        if results_file.exists():
             store_results(results_file)
 
     # Generate and print report path

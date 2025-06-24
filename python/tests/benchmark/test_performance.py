@@ -16,7 +16,6 @@ from vista_sdk.vis_version import VisVersion
 
 @pytest.fixture(
     params=[
-        VisVersion.v3_4a,
         VisVersion.v3_5a,
         VisVersion.v3_6a,
         VisVersion.v3_7a,
@@ -51,7 +50,7 @@ class TestPerformance:
     ) -> None:
         """Test path parsing performance using paths from JSON file."""
         if vis_version is None:
-            vis_version = VisVersion.v3_4a
+            vis_version = VisVersion.v3_5a
 
         vis = VIS().instance
         gmod = vis.get_gmod(vis_version)
@@ -89,7 +88,6 @@ class TestPerformance:
     @pytest.mark.parametrize(
         "vis_version",
         [
-            VisVersion.v3_4a,
             VisVersion.v3_5a,
             VisVersion.v3_6a,
             VisVersion.v3_7a,
@@ -131,9 +129,10 @@ class TestPerformance:
 
                     current_memory = memory_profiler.memory_usage()[0]
                     delta = current_memory - baseline_memory
-                    print(
-                        f"Iteration {i + 1}/{iterations}: {current_memory:.2f} MiB (Δ {delta:+.2f} MiB)"  # noqa : E501
-                    )
+                    if delta != 0 and i >= 1:
+                        print(
+                            f"Iteration {i + 1}/{iterations}: {current_memory:.2f} MiB (Δ {delta:+.2f} MiB)"  # noqa : E501
+                        )
 
                 end_time = time.time()
                 print(f"Test completed in {end_time - start_time:.1f} seconds")

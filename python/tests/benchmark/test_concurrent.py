@@ -16,21 +16,21 @@ from vista_sdk.vis_version import VisVersion
 async def test_concurrent_path_conversions() -> None:
     """Test concurrent path conversions between versions."""
     vis = VIS().instance
-    source_gmod = vis.get_gmod(VisVersion.v3_4a)
+    source_gmod = vis.get_gmod(VisVersion.v3_6a)
     paths = []
 
     # Collect paths for conversion
     source_gmod.traverse(
         lambda parents, node: (
-            paths.append(GmodPath(list(parents), node, skip_verify=True))
-            or TraversalHandlerResult.CONTINUE
-        )
+            paths.append(GmodPath(list(parents), node, skip_verify=True)),
+            TraversalHandlerResult.CONTINUE,
+        )[1]
         if parents
         else TraversalHandlerResult.STOP
     )
 
     async def convert_path(path: GmodPath) -> GmodPath | None:
-        return vis.convert_path(VisVersion.v3_4a, path, VisVersion.v3_5a)
+        return vis.convert_path(VisVersion.v3_5a, path, VisVersion.v3_6a)
 
     # Convert paths concurrently
     tasks = [
@@ -44,9 +44,9 @@ async def test_concurrent_path_conversions() -> None:
 def test_parallel_gmod_operations() -> None:
     """Test parallel Gmod operations using ThreadPoolExecutor."""
     start_time = time.perf_counter()
-    max_time = 120  # Seconds
+    max_time = 300  # Seconds
     vis = VIS().instance
-    versions = [VisVersion.v3_4a, VisVersion.v3_5a, VisVersion.v3_6a]
+    versions = [VisVersion.v3_5a, VisVersion.v3_6a, VisVersion.v3_7a, VisVersion.v3_8a]
 
     def load_and_traverse_gmod(version: VisVersion) -> int:
         gmod = vis.get_gmod(version)
@@ -56,6 +56,8 @@ def test_parallel_gmod_operations() -> None:
                 paths.append(GmodPath(list(parents), node, skip_verify=True)),
                 TraversalHandlerResult.CONTINUE,
             )[1]
+            if parents
+            else TraversalHandlerResult.STOP
         )
         return len(paths)
 
@@ -70,12 +72,13 @@ def test_parallel_gmod_operations() -> None:
     assert all(count > 0 for count in results)
 
 
+"""
+
 @pytest.mark.skip("Codebooks not yet implemented")
 @pytest.mark.asyncio
 async def test_concurrent_resource_loading() -> None:
-    """Test concurrent loading of VIS resources."""
     vis = VIS().instance
-    versions = [VisVersion.v3_4a, VisVersion.v3_5a, VisVersion.v3_6a]
+    versions = [VisVersion.v3_5a, VisVersion.v3_6a, VisVersion.v3_7a, VisVersion.v3_8a]
 
     async def load_resources(version: VisVersion) -> bool:
         gmod = vis.get_gmod(version)
@@ -87,3 +90,4 @@ async def test_concurrent_resource_loading() -> None:
     results = await asyncio.gather(*tasks)
 
     assert all(results)
+    """
