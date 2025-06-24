@@ -16,10 +16,10 @@ def benchmark_versions():  # noqa: ANN201
     """Provide versions for benchmark tests."""
     from vista_sdk.vis_version import VisVersion
 
-    return [VisVersion.v3_4a, VisVersion.v3_5a, VisVersion.v3_6a]
+    return [VisVersion.v3_5a, VisVersion.v3_6a, VisVersion.v3_7a, VisVersion.v3_8a]
 
 
-def pytest_configure(config):  # noqa: ANN201
+def pytest_configure(config):  # noqa: ANN201, ANN001
     """Configure custom markers."""
     config.addinivalue_line("markers", "benchmark: mark test as a benchmark test")
     config.addinivalue_line("markers", "load_test: mark test as a load test")

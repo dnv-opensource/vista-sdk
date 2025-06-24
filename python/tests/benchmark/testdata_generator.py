@@ -1,23 +1,19 @@
 """Test data generator for load testing."""
 
 from dataclasses import dataclass
-from types import NoneType
-
-from vista_sdk.gmod import Gmod
-
 
 from tests.testdata import TestData
 
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.vis import VIS
-from vista_sdk.vis_version import VisVersion, VisVersionExtension
+from vista_sdk.vis_version import VisVersion
 
 
 @dataclass
 class TestDataConfig:
     """Configuration for testdata generation."""
 
-    base_version: VisVersion = VisVersion.v3_4a
+    base_version: VisVersion = VisVersion.v3_5a
     batch_size: int = 100
 
 
@@ -37,7 +33,7 @@ class TestDataGenerator:
     def setup(self, vis: VIS) -> None:
         """Initializing the test data generator."""
         self.vis = vis
-        self.gmod = vis.get_gmod(vis_version=VisVersion.v3_4a)
+        self.gmod = vis.get_gmod(vis_version=VisVersion.v3_5a)
         self._test_paths = self._load_test_paths()
 
     def _load_test_paths(self) -> list[str]:
