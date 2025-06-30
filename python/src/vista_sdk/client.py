@@ -8,6 +8,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from vista_sdk.codebook_dto import CodebooksDto
 from vista_sdk.gmod_dto import GmodDto
 from vista_sdk.gmod_versioning_dto import GmodVersioningDto
 from vista_sdk.locations_dto import LocationsDto
@@ -74,6 +75,24 @@ class Client:
             ) from err
 
     @staticmethod
+    def get_codebooks(vis_version: str) -> CodebooksDto:
+        """Retrieve codebooks data for the specified VISTA version."""
+        resource_name = f"codebooks-vis-{vis_version}.json.gz"
+        try:
+            with (
+                pkg_resources.path(
+                    "vista_sdk.resources", resource_name
+                ) as resource_path,
+                gzip.open(resource_path, "rt") as gzip_file,
+            ):
+                data = json.load(gzip_file)
+            return CodebooksDto(**data)
+        except FileNotFoundError as err:
+            raise FileNotFoundError(
+                f"File: {resource_name} at given path was not found"
+            ) from err
+
+    @staticmethod
     def get_locations_test(vis_version: str) -> LocationsDto | None:
         """Retrieve test locations data for the specified VISTA version."""
         pattern = f"locations-vis-{vis_version}.json.gz"
@@ -118,3 +137,18 @@ class Client:
                 data["vis_version"] = vis_version
 
         return GmodVersioningDto(**data)
+
+    @staticmethod
+    def get_codebooks_test(vis_version: str) -> CodebooksDto:
+        """Retrieve test codebooks data for the specified VISTA version."""
+        with pkg_resources.path(
+            "vista_sdk.resources", f"codebooks-vis-{vis_version}.json.gz"
+        ) as resource_path:
+            if not resource_path.exists():
+                raise FileNotFoundError(
+                    f"Resource codebooks-vis-{vis_version}.json.gz not found"
+                )
+            with gzip.open(resource_path, "rt") as file:
+                data = json.load(file)
+
+        return CodebooksDto(**data)

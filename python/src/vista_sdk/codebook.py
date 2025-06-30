@@ -5,10 +5,10 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any
 
+from vista_sdk.codebook_dto import CodebookDto
 from vista_sdk.codebook_names import CodebookName
-from vista_sdk.vis import VIS
+from vista_sdk.metadata_tag import MetadataTag
 
 
 class PositionValidationResult(IntEnum):
@@ -19,15 +19,6 @@ class PositionValidationResult(IntEnum):
     InvalidGrouping = 2
     Valid = 100
     Custom = 101
-
-
-@dataclass
-class MetadataTag:
-    """Data structure representing a metadata tag."""
-
-    name: CodebookName
-    value: str
-    is_custom: bool
 
 
 class CodebookStandardValues:
@@ -84,7 +75,7 @@ class Codebook:
     _groups: CodebookGroups
 
     @classmethod
-    def from_dto(cls, dto: dict[str, Any]) -> Codebook:
+    def from_dto(cls, dto: CodebookDto) -> Codebook:
         """Create a Codebook instance from a DTO (Data Transfer Object)."""
         name_map = {
             "positions": CodebookName.Position,
@@ -100,15 +91,15 @@ class Codebook:
             "detail": CodebookName.Detail,
         }
 
-        if dto["name"] not in name_map:
-            raise ValueError(f"Unknown metadata tag: {dto['name']}")
+        if dto.name not in name_map:
+            raise ValueError(f"Unknown metadata tag: {dto.name}")
 
-        name = name_map[dto["name"]]
+        name = name_map[dto.name]
         group_map = {}
 
         data = [
             (value.strip(), group.strip())
-            for group, values in dto["values"].items()
+            for group, values in dto.values.items()
             for value in values
             if value.strip() != "<number>"
         ]
@@ -121,7 +112,7 @@ class Codebook:
 
         return cls(
             name=name,
-            raw_data=dto["values"],
+            raw_data=dto.values,
             _group_map=group_map,
             _standard_values=CodebookStandardValues(name, value_set),
             _groups=CodebookGroups(group_set),
@@ -147,6 +138,8 @@ class Codebook:
 
     def try_create_tag(self, value: str | None) -> MetadataTag | None:
         """Try to create a metadata tag from a value, validating it against the codebook."""  # noqa: E501
+        from vista_sdk.vis import VIS  # noqa: PLC0415
+
         if not value or not value.strip():
             return None
 
@@ -177,6 +170,8 @@ class Codebook:
 
     def validate_position(self, position: str) -> PositionValidationResult:
         """Validate a position string against the codebook's position rules."""
+        from vista_sdk.vis import VIS  # noqa: I001, PLC0415
+
         if not position or not position.strip() or not VIS.is_iso_string(position):
             return PositionValidationResult.Invalid
 
