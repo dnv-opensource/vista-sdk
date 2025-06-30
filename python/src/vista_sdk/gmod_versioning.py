@@ -371,32 +371,6 @@ class GmodVersioning:
         if not target_version or not target_version.value:
             raise ValueError(f"Invalid target VIS Version: {target_version}")
 
-        """
-        source_num: float = 0.0
-        target_num: float = 0.0
-        if "_" in source_version.value or "_" in target_version.value:
-            print("'_' in version")
-            source_num = float(
-                source_version.value.replace("_", ".").replace("a", "").replace("v", "")
-            )
-            target_num = float(
-                target_version.value.replace("_", ".").replace("a", "").replace("v", "")
-            )
-
-        elif "-" in source_version.value or "-" in target_version.value:
-            source_num = float(
-                source_version.value.replace("-", ".").replace("a", "").replace("v", "")
-            )
-
-            target_num = float(
-                target_version.value.replace("-", ".").replace("a", "").replace("v", "")
-            )
-        else:
-            raise ValueError(
-                f"Could not convert version to integer: {source_version.value},"
-                f" and {target_version.value}"
-            )"""
-
         if source_version._value_ >= target_version._value_:
             raise ValueError(
                 f"Source version ({source_version.value}) must be less than "
