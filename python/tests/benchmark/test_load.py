@@ -16,7 +16,7 @@ from vista_sdk.vis_version import VisVersion
 
 @pytest.fixture(scope="module")
 def test_data_generator() -> TestDataGenerator:  # noqa : D103
-    vis = VIS().instance
+    vis = VIS()
     generator = TestDataGenerator()
     generator.setup(vis)
     return generator
@@ -92,7 +92,7 @@ async def test_async_large_dataset(
 
 def process_paths(paths: list[GmodPath]) -> list[GmodPath]:
     """Helper function to process a chunk of paths."""
-    vis = VIS().instance
+    vis = VIS()
     results = []
     for path in paths:
         try:
@@ -107,7 +107,7 @@ def process_paths(paths: list[GmodPath]) -> list[GmodPath]:
 
 async def process_paths_async(paths: list[GmodPath]) -> list[GmodPath]:
     """Helper function to process a chunk of paths asynchronously."""
-    vis = VIS().instance
+    vis = VIS()
     results = []
     for path in paths:
         try:

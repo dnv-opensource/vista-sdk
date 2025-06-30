@@ -17,7 +17,7 @@ from vista_sdk.vis_version import VisVersion
 @pytest.mark.benchmark(group="parsing")
 def test_path_parsing_benchmark(benchmark: BenchmarkFixture) -> None:
     """Benchmark path parsing performance."""
-    vis = VIS().instance
+    vis = VIS()
     gmod = vis.get_gmod(VisVersion.v3_6a)
     path_str = "411.1/C101.63/S206"
 
@@ -31,7 +31,7 @@ def test_path_parsing_benchmark(benchmark: BenchmarkFixture) -> None:
 
 def test_version_conversion_benchmark() -> None:
     """Version conversion performance."""
-    vis = VIS().instance
+    vis = VIS()
     source_gmod = vis.get_gmod(VisVersion.v3_6a)
     path = source_gmod.parse_path("411.1/C101.63/S206")
 
@@ -41,26 +41,23 @@ def test_version_conversion_benchmark() -> None:
         try:
             # Get versioning
             versioning = vis.get_gmod_versioning(VisVersion.v3_6a)
-            print(f"Got versioning: {versioning.__str__()}")
 
             # Try conversion
             converted = versioning.convert_path(
                 VisVersion.v3_6a, path, VisVersion.v3_7a
             )
-            print(f"Conversion result: {converted}")
 
             # Validate result
             if converted:
                 target_gmod = vis.get_gmod(VisVersion.v3_7a)
                 valid = target_gmod.parse_path(str(converted))
-                print(f"Validation result: {valid}")
                 path_list.append(valid)
                 if not valid:
                     path_list.append(converted)
                     return None
             return converted
         except Exception as e:
-            print(f"Conversion error: {e}")
+            print(f"Conversion error: {e!s}")
             return None
 
     result = convert_path()
@@ -77,7 +74,7 @@ def test_memory_usage_large_dataset() -> None:
     max_execution_time = 60
     target_path_count = 10000
 
-    vis = VIS().instance
+    vis = VIS()
     gmod = vis.get_gmod(VisVersion.v3_6a)
     path_count = 0
     max_memory_increase = 10  # MB

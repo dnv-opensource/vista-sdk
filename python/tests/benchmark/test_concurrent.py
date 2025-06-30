@@ -15,19 +15,18 @@ from vista_sdk.vis_version import VisVersion
 @pytest.mark.asyncio
 async def test_concurrent_path_conversions() -> None:
     """Test concurrent path conversions between versions."""
-    vis = VIS().instance
+    vis = VIS()
     source_gmod = vis.get_gmod(VisVersion.v3_6a)
     paths = []
 
     # Collect paths for conversion
-    source_gmod.traverse(
-        lambda parents, node: (
-            paths.append(GmodPath(list(parents), node, skip_verify=True)),
-            TraversalHandlerResult.CONTINUE,
-        )[1]
-        if parents
-        else TraversalHandlerResult.STOP
-    )
+    def _traverse_handler(parents, node) -> TraversalHandlerResult:  # noqa: ANN001
+        if not parents:
+            return TraversalHandlerResult.STOP
+        paths.append(GmodPath(list(parents), node, skip_verify=True))
+        return TraversalHandlerResult.CONTINUE
+
+    source_gmod.traverse(_traverse_handler)
 
     async def convert_path(path: GmodPath) -> GmodPath | None:
         return vis.convert_path(VisVersion.v3_5a, path, VisVersion.v3_6a)
@@ -45,20 +44,20 @@ def test_parallel_gmod_operations() -> None:
     """Test parallel Gmod operations using ThreadPoolExecutor."""
     start_time = time.perf_counter()
     max_time = 300  # Seconds
-    vis = VIS().instance
+    vis = VIS()
     versions = [VisVersion.v3_5a, VisVersion.v3_6a, VisVersion.v3_7a, VisVersion.v3_8a]
 
     def load_and_traverse_gmod(version: VisVersion) -> int:
         gmod = vis.get_gmod(version)
         paths = []
-        gmod.traverse(
-            lambda parents, node: (
-                paths.append(GmodPath(list(parents), node, skip_verify=True)),
-                TraversalHandlerResult.CONTINUE,
-            )[1]
-            if parents
-            else TraversalHandlerResult.STOP
-        )
+
+        def _traverse_handler(parents, node) -> TraversalHandlerResult:  # noqa : ANN001
+            if not parents:
+                return TraversalHandlerResult.STOP
+            paths.append(GmodPath(list(parents), node, skip_verify=True))
+            return TraversalHandlerResult.CONTINUE
+
+        gmod.traverse(_traverse_handler)
         return len(paths)
 
     with ThreadPoolExecutor(max_workers=3) as executor:
@@ -72,12 +71,11 @@ def test_parallel_gmod_operations() -> None:
     assert all(count > 0 for count in results)
 
 
-"""
-
 @pytest.mark.skip("Codebooks not yet implemented")
 @pytest.mark.asyncio
 async def test_concurrent_resource_loading() -> None:
-    vis = VIS().instance
+    """Test concurrent loading of resources like codebooks and locations."""
+    vis = VIS()
     versions = [VisVersion.v3_5a, VisVersion.v3_6a, VisVersion.v3_7a, VisVersion.v3_8a]
 
     async def load_resources(version: VisVersion) -> bool:

@@ -296,10 +296,13 @@ class Gmod:
     def _path_exists_between(
         self, from_path: Iterable[GmodNode], to_node: GmodNode
     ) -> tuple[bool, Iterable[GmodNode]]:
+        # Convert from_path to a list for multiple iterations
+        from_path_list = list(from_path)
+
         last_asset_function = next(
             (
                 node
-                for node in reversed(list(from_path))
+                for node in reversed(from_path_list)
                 if node.is_asset_function_node()
             ),
             None,
@@ -308,7 +311,11 @@ class Gmod:
             last_asset_function if last_asset_function is not None else self._root_node
         )
 
+        # Initialize state with both to and from_path (matching C# implementation)
+        remaining_parents: list[GmodNode] = []
         state = self.PathExistsContext(to=to_node)
+        state.from_path = from_path_list
+        state.remaining_parents = remaining_parents
 
         def handler(
             state: Gmod.PathExistsContext, parents: list[GmodNode], node: GmodNode
@@ -317,21 +324,39 @@ class Gmod:
             if node.code != state.to.code:
                 return TraversalHandlerResult.CONTINUE
 
-            actual_parents: list[GmodNode] = []
+            # Build actual_parents list including root ancestors
+            actual_parents = None
             current_parents = list(parents)
 
             while current_parents and not current_parents[0].is_root():
+                if actual_parents is None:
+                    actual_parents = list(current_parents)
+                    parents = actual_parents
+
                 parent = current_parents[0]
                 if len(parent.parents) != 1:
                     raise Exception("Invalid state - expected one parent")
+
                 actual_parents.insert(0, parent.parents[0])
                 current_parents = [parent.parents[0], *current_parents]
 
-            if all(qn.code in (p.code for p in current_parents) for qn in from_path):
+            # Validate parents (exact match of C# implementation)
+            if len(current_parents) < len(state.from_path):
+                return TraversalHandlerResult.CONTINUE
+
+            # Must have same start order (exact match of C# implementation)
+            match = True
+            for i in range(len(state.from_path)):
+                if current_parents[i].code != state.from_path[i].code:
+                    match = False
+                    break
+
+            if match:
+                # Calculate remaining parents using the same logic as C#
                 state.remaining_parents = [
                     p
                     for p in current_parents
-                    if all(pp.code != p.code for pp in from_path)
+                    if not any(pp.code == p.code for pp in state.from_path)
                 ]
                 return TraversalHandlerResult.STOP
 
@@ -340,34 +365,13 @@ class Gmod:
         reached_end = self.traverse(args1=state, args2=start_node, args3=handler)
         return not reached_end, state.remaining_parents
 
-    def find_common_parent(self, node1: GmodNode, node2: GmodNode) -> GmodNode | None:
-        """Find the first common parents for two child nodes."""
-        parents1 = self._get_all_parents(node1)
-        parents2 = self._get_all_parents(node2)
-
-        common_parents = set(parents1) & set(parents2)
-        if not common_parents:
-            return None
-
-        return min(common_parents, key=lambda x: len(self._get_all_parents(x)))
-
-    def _get_all_parents(self, node: GmodNode) -> list[GmodNode]:
-        """Returns a list of all parents for a given node."""
-        parents = [node]
-        current = node
-
-        while current.parents:
-            current = current.parents[0]
-            parents.append(current)
-
-        return parents
-
     @dataclass
     class PathExistsContext:
         """Context for checking if a path exists between nodes."""
 
         to: GmodNode
         remaining_parents: list[GmodNode] = field(default_factory=list)
+        from_path: list[GmodNode] = field(default_factory=list)
 
     def traverse_node(
         self, context: Gmod.TraversalContext[TState], node: GmodNode

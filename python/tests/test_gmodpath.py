@@ -306,7 +306,6 @@ class TestGmodPath(unittest.TestCase):
 
                 unique_codes = set()
                 for individual_set in sets:
-                    print(f"Individual set: {individual_set}")
                     for node in individual_set.nodes:
                         assert node.code not in unique_codes, (
                             f"Node {node.code} should not be duplicated in individualizable sets"  # noqa: E501

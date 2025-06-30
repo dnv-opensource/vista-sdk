@@ -52,7 +52,7 @@ class TestPerformance:
         if vis_version is None:
             vis_version = VisVersion.v3_5a
 
-        vis = VIS().instance
+        vis = VIS()
         gmod = vis.get_gmod(vis_version)
 
         # Load test paths
@@ -67,12 +67,10 @@ class TestPerformance:
                         path = gmod.parse_path(path_str)
                         results.append(path)
                     except Exception as e:
-                        print(f"Error parsing path {path_str}: {e}")
+                        print(f"Error parsing path {path_str}: {e!s}")
             return results
 
         results = benchmark(parse_paths)
-
-        print(len(results))
 
         # Verify results
         assert results is not None
@@ -103,7 +101,7 @@ class TestPerformance:
 
         print(f"\nTesting memory usage for {vis_version.value}")
         start_time = time.time()
-        vis: VIS = VIS().instance
+        vis: VIS = VIS()
         paths: list[GmodPath] = []
 
         def handler(p, n) -> TraversalHandlerResult:  # noqa : ANN001
