@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+from vista_sdk import gmod
 from vista_sdk.gmod import Gmod
 from vista_sdk.gmod_node import GmodNode
 from vista_sdk.gmod_path import GmodPath
@@ -130,7 +131,7 @@ class GmodVersioning:
         target_version: VisVersion,
     ) -> GmodNode | None:
         """Convert node between adjacent versions."""
-        from vista_sdk.vis import VIS
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         self._validate_source_and_target_version_pair(source_version, target_version)
         next_code = source_node.code
@@ -162,7 +163,7 @@ class GmodVersioning:
         target_version: VisVersion,
     ) -> GmodPath | None:
         """Convert a path from source to target version."""
-        from vista_sdk.vis import VIS
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         vis = VIS()
         # Convert the endnodes first
@@ -187,7 +188,7 @@ class GmodVersioning:
         source_nodes = source_path.get_full_path()
         qualifying_nodes = [
             (
-                source_node,
+                source_node[1],
                 self.convert_node(source_version, source_node[1], target_version),
             )
             for source_node in source_nodes
@@ -198,14 +199,14 @@ class GmodVersioning:
             return None
 
         potential_parents: list[GmodNode] = [
-            n[1] for n in qualifying_nodes[:-1] if n[1] is not None
+            n[1] for n in qualifying_nodes[:-1] if n[1]
         ]
         if GmodPath.is_valid(potential_parents, target_end_node):
             return GmodPath(potential_parents, target_end_node)
 
         # Filter out None values for _build_path
         filtered_qualifying_nodes: list[tuple[GmodNode, GmodNode]] = [
-            (src[1], tgt) for (src, tgt) in qualifying_nodes if tgt is not None
+            (src, tgt) for (src, tgt) in qualifying_nodes if tgt
         ]
 
         # Build path using complex logic
@@ -230,8 +231,12 @@ class GmodVersioning:
                 continue
 
             code_changed = source_node.code != target_node.code
-            source_normal_assignment = getattr(source_node, "product_type", None)
-            target_normal_assignment = getattr(target_node, "product_type", None)
+            source_normal_assignment = (
+                source_node.product_type if source_node.is_product_type else None
+            )
+            target_normal_assignment = (
+                target_node.product_type if target_node.is_product_type else None
+            )
 
             normal_assignment_changed = (
                 source_normal_assignment is not None
@@ -265,7 +270,7 @@ class GmodVersioning:
                 ):
                     self._add_to_path(target_gmod, path, target_normal_assignment)
                     i += 1
-            elif not code_changed and not normal_assignment_changed:
+            if not code_changed and not normal_assignment_changed:
                 self._add_to_path(target_gmod, path, target_node)
 
             if path and path[-1].code == target_end_node.code:
@@ -284,7 +289,7 @@ class GmodVersioning:
     ) -> None:
         """Add node to path with proper parent-child relationship verification."""
         try:
-            if not path:
+            if not path or len(path) == 0:
                 path.append(node)
                 return
 
@@ -297,18 +302,18 @@ class GmodVersioning:
             for j in range(len(path) - 1, -1, -1):
                 parent = path[j]
                 current_parents = path[: j + 1]
-                exists, remaining = self.path_exists_between(
-                    current_parents, node, target_gmod, include_remaining=True
+                # Call instance method on target_gmod to match C# implementation
+                exists, remaining = target_gmod._path_exists_between(
+                    from_path=current_parents, to_node=node
                 )
 
                 if not exists:
-                    # Check asset function node constraint
-                    has_other_asset_nodes = any(
-                        n.is_asset_function_node is True and n.code != parent.code
+                    # Check asset function node constraint - matching C# logic exactly
+                    if not any(
+                        n.is_asset_function_node() and n.code != parent.code
                         for n in current_parents
-                    )
-                    if not has_other_asset_nodes:
-                        raise ValueError("Cannot remove last asset function node")
+                    ):
+                        raise ValueError("Tried to remove last asset function node")
                     path.pop(j)
                     continue
 
@@ -332,29 +337,6 @@ class GmodVersioning:
 
         except Exception as e:
             raise ValueError(f"Error adding node to path: {e}") from e
-
-    def path_exists_between(
-        self,
-        current_parents: list[GmodNode],
-        target_node: GmodNode,
-        target_gmod: Gmod,
-        include_remaining: bool = False,
-    ) -> tuple[bool, list[GmodNode]]:
-        """Check if path exists between current parents and target node."""
-        if not current_parents:
-            return False, []
-
-        # Find path through common parent
-        last_parent = current_parents[-1]
-        if last_parent.is_child(target_node):
-            return True, [target_node] if include_remaining else []
-
-        common_parent = target_gmod.find_common_parent(last_parent, target_node)
-        if not common_parent:
-            return False, []
-
-        remaining_nodes = self._get_path_to_node(common_parent, target_node)
-        return True, remaining_nodes
 
     def _validate_final_path(
         self, parents: list[GmodNode], end_node: GmodNode, source_path: GmodPath
@@ -389,6 +371,7 @@ class GmodVersioning:
         if not target_version or not target_version.value:
             raise ValueError(f"Invalid target VIS Version: {target_version}")
 
+        """
         source_num: float = 0.0
         target_num: float = 0.0
         if "_" in source_version.value or "_" in target_version.value:
@@ -412,9 +395,9 @@ class GmodVersioning:
             raise ValueError(
                 f"Could not convert version to integer: {source_version.value},"
                 f" and {target_version.value}"
-            )
+            )"""
 
-        if source_num >= target_num:
+        if source_version._value_ >= target_version._value_:
             raise ValueError(
                 f"Source version ({source_version.value}) must be less than "
                 f"target version ({target_version.value})"

@@ -14,6 +14,8 @@ from cachetools import TTLCache
 from dotenv import load_dotenv
 
 from vista_sdk.client import Client
+from vista_sdk.codebook_dto import CodebooksDto
+from vista_sdk.codebooks import Codebooks
 from vista_sdk.gmod import Gmod
 from vista_sdk.gmod_dto import GmodDto
 from vista_sdk.gmod_node import GmodNode
@@ -75,6 +77,8 @@ class VIS(IVIS):
     _gmod_dto_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
     _gmod_versioning_dto_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
     _gmod_versioning_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
+    _codebooks_dto_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
+    _codebooks_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
 
     client = Client()
 
@@ -114,6 +118,17 @@ class VIS(IVIS):
 
         return self._gmod_cache[vis_version]
 
+    def get_gmods_map(self) -> dict[VisVersion, Gmod]:
+        """Get a mapping of all VIS versions to their GMODs."""
+        return {version: self.get_gmod(version) for version in VisVersion}
+
+    def create_gmod(self, vis_version: VisVersion) -> Gmod:
+        """Create a new GMOD instance."""
+        from .gmod import Gmod
+
+        dto = self.get_gmod_dto(vis_version)
+        return Gmod(vis_version, dto)
+
     def get_gmod_versioning_dto(self, vis_version: VisVersion) -> GmodVersioningDto:
         """Get GMOD versioning DTO with caching."""
         try:
@@ -132,8 +147,6 @@ class VIS(IVIS):
 
             if dto is None:
                 raise Exception(f"Failed to load versioning DTO for version {version}")
-
-            print(f"Raw versioning DTO data: {dto}")  # Debug print
 
             if not isinstance(dto, GmodVersioningDto):
                 dto = GmodVersioningDto(**dto)
@@ -155,32 +168,45 @@ class VIS(IVIS):
             dto = self.get_gmod_versioning_dto(vis_version)
             versioning = GmodVersioning({vis_version.value: dto})
             self._gmod_versioning_cache[vis_version] = versioning
-            print(f"versioning: {versioning}")
             return versioning
         except Exception as e:
             raise ValueError(
                 f"Error getting GMOD versioning for {vis_version}: {e}"
             ) from e
 
-    def create_gmod(self, vis_version: VisVersion) -> Gmod:
-        """Create a new GMOD instance."""
-        from .gmod import Gmod
+    def get_codebooks_dto(self, vis_version: VisVersion) -> CodebooksDto:
+        """Get codebooks DTO for a specific VIS version with caching."""
+        if vis_version in self._codebooks_dto_cache:
+            return self._codebooks_dto_cache[vis_version]
 
-        dto = self.get_gmod_dto(vis_version)
-        return Gmod(vis_version, dto)
+        if environment == "local" or environment == "None":
+            dto = self.client.get_codebooks_test(
+                VisVersionExtension.to_version_string(vis_version)
+            )
+        else:
+            dto = self.client.get_codebooks(
+                VisVersionExtension.to_version_string(vis_version)
+            )
 
-    def get_gmods_map(self) -> dict[VisVersion, Gmod]:
-        """Get a mapping of all VIS versions to their GMODs."""
-        return {version: self.get_gmod(version) for version in VisVersion}
+        if dto is None:
+            raise Exception("Invalid state")
 
-    def get_locations(self, vis_version: VisVersion) -> Locations:
-        """Get locations for a specific VIS version with caching."""
-        if vis_version in self._locations_cache:
-            return self._locations_cache[vis_version]
-        dto = self.get_locations_dto(vis_version)
-        location = Locations(vis_version, dto)
-        self._locations_cache[vis_version] = location
-        return location
+        self._codebooks_dto_cache[vis_version] = dto
+        return dto
+
+    def get_codebooks(self, vis_version: VisVersion) -> Codebooks:
+        """Get codebooks for a specific VIS version with caching."""
+        if vis_version in self._codebooks_cache:
+            return self._codebooks_cache[vis_version]
+
+        dto = self.get_codebooks_dto(vis_version)
+        codebooks = Codebooks(vis_version, dto)
+        self._codebooks_cache[vis_version] = codebooks
+        return codebooks
+
+    def get_codebooks_map(self) -> dict[VisVersion, Codebooks]:
+        """Get a mapping of VIS versions to their codebooks."""
+        return {version: self.get_codebooks(version) for version in VisVersion}
 
     def get_locations_dto(self, vis_version: VisVersion) -> LocationsDto:
         """Get locations DTO for a specific VIS version with caching."""
@@ -199,6 +225,15 @@ class VIS(IVIS):
 
         self._locations_dto_cache[vis_version] = dto
         return dto
+
+    def get_locations(self, vis_version: VisVersion) -> Locations:
+        """Get locations for a specific VIS version with caching."""
+        if vis_version in self._locations_cache:
+            return self._locations_cache[vis_version]
+        dto = self.get_locations_dto(vis_version)
+        location = Locations(vis_version, dto)
+        self._locations_cache[vis_version] = location
+        return location
 
     def get_locations_map(self, vis_version: VisVersion) -> dict[VisVersion, Locations]:
         """Get a mapping of a single VIS version to its locations."""
@@ -229,13 +264,10 @@ class VIS(IVIS):
     ) -> GmodPath | None:
         """Convert a path form one version to another."""
         try:
-            print("test")
             versioning = self.get_gmod_versioning(source_version)
-            print("test2")
             converted = versioning.convert_path(
                 source_version, source_path, target_version
             )
-            print(f"converted: {converted}")
             if converted:
                 # Verify the converted path is valid in target version
                 target_gmod = self.get_gmod(target_version)

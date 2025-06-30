@@ -8,7 +8,7 @@ def vis_instance():  # noqa: ANN201
     """Provide VIS instance for all tests."""
     from vista_sdk.vis import VIS
 
-    return VIS().instance
+    return VIS()
 
 
 @pytest.fixture(scope="session")

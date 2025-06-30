@@ -6,23 +6,13 @@ from abc import ABC
 from collections import deque
 from collections.abc import Generator
 from dataclasses import dataclass
-from typing import Any, overload
+from typing import overload
 
 from vista_sdk.gmod_node import GmodNode
 from vista_sdk.locations import Location, Locations
 from vista_sdk.locations_sets_visitor import LocationSetsVisitor
 from vista_sdk.traversal_handler_result import TraversalHandlerResult
 from vista_sdk.vis_version import VisVersion
-
-
-class _Context:
-    def __init__(self, parts: deque[GmodPath]) -> None:
-        # parts: deque of GmodPath.PathNode-like objects,
-        # each with .code and optional .location
-        self.parts: deque[GmodPath] = parts
-        self.to_find: Any = parts.popleft()  # current target
-        self.locations: dict[Any, Any] = {}  # code -> location
-        self.path: GmodPath | None = None  # final result
 
 
 class GmodIndividualizableSet:
@@ -374,7 +364,7 @@ class GmodPath:
         self, space_delimiter: str = " ", end_delimiter: str = "/"
     ) -> str:
         """Convert the GmodPath to a verbose string representation."""
-        from vista_sdk.vis import VIS
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         builder = []
         for depth, common_name in self.get_common_names():
@@ -432,7 +422,7 @@ class GmodPath:
     @staticmethod
     def parse(item: str, arg=None, arg2=None):
         """Parse a string into a GmodPath based on the provided arguments."""
-        from vista_sdk.gmod import Gmod
+        from vista_sdk.gmod import Gmod  # noqa: PLC0415
 
         if type(arg) is VisVersion and arg2 is None:
             path = GmodPath.try_parse(item, arg=arg)[1]
@@ -468,8 +458,8 @@ class GmodPath:
         gmod=None,
     ) -> tuple[bool, GmodPath | None]:
         """Try to parse a string into a GmodPath based on the provided arguments."""
-        from vista_sdk.gmod import Gmod
-        from vista_sdk.vis import VIS
+        from vista_sdk.gmod import Gmod  # noqa: PLC0415
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         if type(arg) is VisVersion and gmod is None:
             gmod = VIS().get_gmod(arg)
@@ -544,7 +534,7 @@ class GmodPath:
                 parents: list[GmodNode],
                 current: GmodNode,
             ) -> TraversalHandlerResult:
-                from vista_sdk.gmod import Gmod
+                from vista_sdk.gmod import Gmod  # noqa: PLC0415
 
                 to_find = context.to_find
                 found = current.code == to_find.code
@@ -649,8 +639,8 @@ class GmodPath:
         path_str: str, gmod=None, arg=None
     ) -> tuple[bool, GmodPath | None]:
         """Try to parse a full path string into a GmodPath."""
-        from vista_sdk.gmod import Gmod
-        from vista_sdk.vis import VIS
+        from vista_sdk.gmod import Gmod  # noqa: PLC0415
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         if type(arg) is VisVersion and gmod is None:
             vis = VIS()
@@ -668,7 +658,7 @@ class GmodPath:
     @staticmethod
     def parse_full_path(path_str: str, vis_version: VisVersion) -> GmodPath:
         """Parse a full path string into a GmodPath using the provided VisVersion."""
-        from vista_sdk.vis import VIS
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         vis = VIS()
         gmod = vis.get_gmod(vis_version)

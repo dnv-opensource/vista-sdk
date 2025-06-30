@@ -46,8 +46,6 @@ class TestDataGenerator:
         paths: list[GmodPath] = []
         base_paths = self._load_test_paths()
 
-        print(f"Loaded {len(base_paths)} base paths")
-
         while len(paths) < size:
             for path_str in base_paths:
                 if len(paths) >= size:
@@ -62,5 +60,4 @@ class TestDataGenerator:
                     print(f"Error parsing path {path_str}: {e!s}")
                     continue
 
-        print(f"Generated dataset with {len(paths)} paths")
         return paths

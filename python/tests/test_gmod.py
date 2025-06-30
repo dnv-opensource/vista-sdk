@@ -199,7 +199,6 @@ class TestGmod(unittest.TestCase):
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         node = gmod["411.3"]
-        print(f"selection: {node.product_selection}, type: {node.product_type}")
 
         assert node.product_type is not None, (
             "ProductType should not be None for node '411.3'"
@@ -216,7 +215,6 @@ class TestGmod(unittest.TestCase):
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         node = gmod["411.2"]
-        print(f"selection: {node.product_selection}, type: {node.product_type}")
         assert node.product_selection is not None, (
             "ProductSelection should not be None for node '411.2'",
         )
