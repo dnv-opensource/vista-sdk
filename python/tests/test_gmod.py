@@ -337,16 +337,16 @@ class TestGmod(unittest.TestCase):
         assert max_expected == state.max, "Maximum occurrence should match expected"
         assert completed, "Traversal should complete successfully"
 
-    @unittest.skip("This test is too slow to run in CI")
+    # @unittest.skip("This test is too slow to run in CI")
     def test_full_traversal_with_options(self) -> None:
         """Test full traversal of Gmod with a custom handler and options."""
-        from vista_sdk.gmod import Gmod
+        from vista_sdk.gmod import Gmod  # noqa: PLC0415
 
         start_time = time.time()
 
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
-        max_expected = 2
+        max_expected = 1
         max_occurrence = 0
 
         def traversal_handler(
