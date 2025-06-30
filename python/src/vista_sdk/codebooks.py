@@ -3,35 +3,18 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
 
 from vista_sdk.codebook import Codebook, MetadataTag
+from vista_sdk.codebook_dto import CodebookDto, CodebooksDto
 from vista_sdk.codebook_names import CodebookName
 from vista_sdk.vis_version import VisVersion
-
-
-class CodebooksDto:
-    """Data Transfer Object for Codebooks."""
-
-    def __init__(self, items: list[dict[str, Any]]) -> None:
-        """Initialize with a list of codebook data items.
-
-        Args:
-            items: List of dictionaries containing codebook data
-        """
-        self.items = items
 
 
 class Codebooks:
     """Collection of codebooks with indexed access and enumeration capabilities."""
 
     def __init__(self, vis_version: VisVersion, dto: CodebooksDto) -> None:
-        """Initialize with VIS version and codebooks data.
-
-        Args:
-            vis_version: The VIS version
-            dto: Data transfer object containing codebook data
-        """
+        """Initialize with VIS version and codebooks data."""
         self.vis_version = vis_version
 
         # Create an array to hold all codebooks, indexed by enum value - 1
@@ -43,7 +26,7 @@ class Codebooks:
             self._codebooks[type_obj.name.value - 1] = type_obj
 
         # Create and add the details codebook with empty values
-        details_dto = {"name": "detail", "values": {}}
+        details_dto = CodebookDto(name="detail", values=dict[str, list[str]]())
         details_codebook = Codebook.from_dto(details_dto)
         self._codebooks[details_codebook.name.value - 1] = details_codebook
 

@@ -90,4 +90,3 @@ async def test_concurrent_resource_loading() -> None:
     results = await asyncio.gather(*tasks)
 
     assert all(results)
-    """
