@@ -15,7 +15,7 @@ from typing import ClassVar, Generic, TypeVar, cast, overload
 from vista_sdk.gmod_dto import GmodDto
 from vista_sdk.gmod_node import GmodNode, GmodNodeMetadata
 from vista_sdk.gmod_path import GmodPath
-from vista_sdk.internal.chd_dictionary import ChdDictionary
+from vista_sdk.internal.dictionary import Dictionary
 from vista_sdk.traversal_handler_result import TraversalHandlerResult
 from vista_sdk.vis_version import VisVersion
 
@@ -66,7 +66,7 @@ class Gmod:
                 "Invalid state - root node is None despite 'VE' being in node_map"
             )
         self._root_node: GmodNode = root_node
-        self._node_map = ChdDictionary(list(node_map.items()))
+        self._node_map = Dictionary(list(node_map.items()))
 
     @property
     def root_node(self) -> GmodNode:

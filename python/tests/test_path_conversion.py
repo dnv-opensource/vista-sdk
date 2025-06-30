@@ -55,14 +55,12 @@ class TestPathConversion(unittest.TestCase):
                     VisVersion.v3_5a, source_path, VisVersion.v3_6a
                 )
 
-                print(f"result: {result}")
-
                 assert result is None
                 # assert str(result)
 
     def test_path_conversion_performance(self) -> None:
         """Test performance of path conversion."""
-        vis = VIS().instance
+        vis = VIS()
         source_gmod = vis.get_gmod(VisVersion.v3_6a)
         paths = []
 
@@ -88,7 +86,6 @@ class TestPathConversion(unittest.TestCase):
                     failed_count += 1
             except Exception as e:
                 failed_count += 1
-                print(f"Conversion failed for {path}: {e}")
 
         end_time = time.perf_counter()
 

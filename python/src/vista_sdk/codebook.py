@@ -170,7 +170,7 @@ class Codebook:
 
     def validate_position(self, position: str) -> PositionValidationResult:
         """Validate a position string against the codebook's position rules."""
-        from vista_sdk.vis import VIS  # noqa: I001, PLC0415
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         if not position or not position.strip() or not VIS.is_iso_string(position):
             return PositionValidationResult.Invalid

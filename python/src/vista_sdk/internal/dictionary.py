@@ -8,7 +8,7 @@ from typing import Generic, TypeVar
 TValue = TypeVar("TValue")
 
 
-class ChdDictionary(Generic[TValue]):
+class Dictionary(Generic[TValue]):
     """A generic dictionary class that provides type-safe access to key-value pairs."""
 
     def __init__(self, items: list[tuple[str, TValue]]) -> None:
