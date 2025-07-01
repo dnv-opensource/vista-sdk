@@ -6,7 +6,6 @@ import gzip
 import importlib.resources as pkg_resources
 import json
 from dataclasses import dataclass
-from pathlib import Path
 
 from vista_sdk.codebook_dto import CodebooksDto
 from vista_sdk.gmod_dto import GmodDto
@@ -30,6 +29,7 @@ class Client:
                 gzip.open(resource_path, "rt") as gzip_file,
             ):
                 data = json.load(gzip_file)
+
             return LocationsDto(**data)
         except FileNotFoundError as err:
             raise FileNotFoundError(
@@ -58,6 +58,7 @@ class Client:
     def get_gmod_versioning(vis_version: str) -> GmodVersioningDto:
         """Retrieve GMOD Versioning data for the specified VISTA version."""
         resource_name: str = f"gmod-vis-versioning-{vis_version}.json.gz"
+
         try:
             with (
                 pkg_resources.path(
@@ -66,9 +67,8 @@ class Client:
                 gzip.open(resource_path, "rt") as gzip_file,
             ):
                 data = json.load(gzip_file)
-                # Add vis_version to the data before creating DTO
-                data["vis_version"] = vis_version
-            return GmodVersioningDto(**data)
+
+            return GmodVersioningDto(visRelease=data["visRelease"], items=data["items"])
         except FileNotFoundError as err:
             raise FileNotFoundError(
                 f"File: {resource_name} at given path was not found"
@@ -95,14 +95,16 @@ class Client:
     @staticmethod
     def get_locations_test(vis_version: str) -> LocationsDto | None:
         """Retrieve test locations data for the specified VISTA version."""
-        pattern = f"locations-vis-{vis_version}.json.gz"
-        files = list(Path("./resources").glob(pattern))
-        if len(files) != 1:
-            return None
+        with pkg_resources.path(
+            "vista_sdk.resources", f"locations-vis-{vis_version}.json.gz"
+        ) as resource_path:
+            if not resource_path.exists():
+                raise FileNotFoundError(
+                    f"Resource gmod-vis-{vis_version}.json.gz not found"
+                )
 
-        locations_resource_name = files[0]
-        with gzip.open(locations_resource_name, "rt") as file:
-            data = json.load(file)
+            with gzip.open(resource_path, "rt") as file:
+                data = json.load(file)
 
         return LocationsDto(**data)
 
@@ -136,7 +138,14 @@ class Client:
                 # Add vis_version to the data before creating DTO
                 data["vis_version"] = vis_version
 
-        return GmodVersioningDto(**data)
+        try:
+            return GmodVersioningDto(
+                visRelease=data["vis_version"], items=data["items"]
+            )
+        except FileNotFoundError as err:
+            raise FileNotFoundError(
+                f"File: {resource_path} at given path was not found"
+            ) from err
 
     @staticmethod
     def get_codebooks_test(vis_version: str) -> CodebooksDto:

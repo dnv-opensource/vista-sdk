@@ -124,7 +124,7 @@ class VIS(IVIS):
 
     def create_gmod(self, vis_version: VisVersion) -> Gmod:
         """Create a new GMOD instance."""
-        from .gmod import Gmod
+        from .gmod import Gmod  # noqa: PLC0415
 
         dto = self.get_gmod_dto(vis_version)
         return Gmod(vis_version, dto)
@@ -154,7 +154,9 @@ class VIS(IVIS):
             self._gmod_versioning_dto_cache[vis_version] = dto
             return dto
         except Exception as e:
-            raise ValueError(f"Error getting GMOD versioning DTO: {e!s}") from e
+            raise ValueError(
+                f"Error getting GMOD versioning DTO for version {vis_version}"
+            ) from e
 
     def get_gmod_versioning(self, vis_version: VisVersion) -> GmodVersioning:
         """Get GMOD versioning with caching."""
@@ -170,9 +172,7 @@ class VIS(IVIS):
             self._gmod_versioning_cache[vis_version] = versioning
             return versioning
         except Exception as e:
-            raise ValueError(
-                f"Error getting GMOD versioning for {vis_version}: {e}"
-            ) from e
+            raise ValueError(f"Error getting GMOD versioning for {vis_version}") from e
 
     def get_codebooks_dto(self, vis_version: VisVersion) -> CodebooksDto:
         """Get codebooks DTO for a specific VIS version with caching."""
