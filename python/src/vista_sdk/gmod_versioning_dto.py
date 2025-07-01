@@ -14,23 +14,23 @@ from pydantic import BaseModel, Field
 class GmodNodeConversionDto(BaseModel):
     """DTO For GMOD Node Conversion."""
 
-    operations: Set[str] = Field(..., alias="operation")
+    operations: Set[str] = Field(..., alias="operations")
     source: str = Field(..., alias="source")
-    target: str = Field(..., alias="target")
-    old_assignment: str = Field(..., alias="old_assignment")
-    new_assignment: str = Field(..., alias="new_assignment")
-    delete_assignment: bool = Field(..., alias="delete_assignment")
+    target: str | None = Field(None, alias="target")
+    old_assignment: str | None = Field(None, alias="oldAssignment")
+    new_assignment: str | None = Field(None, alias="newAssignment")
+    delete_assignment: bool | None = Field(None, alias="deleteAssignment")
 
 
 class GmodVersioningAssignmentChangeDto(BaseModel):
     """DTO for change in GMOD Version."""
 
-    old_assignment: str = Field(..., alias="old_assignment")
-    current_assignment: str = Field(..., alias="current_assignment")
+    old_assignment: str = Field(..., alias="oldAssignment")
+    current_assignment: str = Field(..., alias="currentAssignment")
 
 
 class GmodVersioningDto(BaseModel):
     """Data transfer object for GMOD Versioning."""
 
-    vis_version: str = Field(..., alias="vis_version")
+    vis_version: str = Field(..., alias="visRelease")
     items: dict[str, GmodNodeConversionDto] = Field(..., alias="items")
