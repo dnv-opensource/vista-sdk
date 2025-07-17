@@ -52,7 +52,7 @@ class TestClient:
 
     def test_get_locations(self, monkeypatch) -> None:  # noqa: ANN001, ARG002
         """Test retrieving locations data."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         # Mock data for test
         mock_data = {
@@ -86,7 +86,7 @@ class TestClient:
 
     def test_get_locations_file_not_found(self, monkeypatch) -> None:  # noqa: ANN001, ARG002
         """Test handling of FileNotFoundError in get_locations."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         with mock.patch("vista_sdk.client.pkg_resources.path") as mock_path:
             mock_path.side_effect = FileNotFoundError("Test file not found")
@@ -101,7 +101,7 @@ class TestClient:
 
     def test_get_gmod(self, monkeypatch) -> None:  # noqa: ANN001, ARG002
         """Test retrieving GMOD data."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         # Mock data for test
         mock_data = {
@@ -131,13 +131,9 @@ class TestClient:
 
     def test_get_gmod_versioning(self, monkeypatch) -> None:  # noqa: ANN001, ARG002
         """Test retrieving GMOD Versioning data."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
-        # We need to fix the logger import first
         with mock.patch("vista_sdk.client.logger") as mock_logger:  # noqa: F841
-            # Mock data for test
-
-            # Create node conversion DTO instances
             mock_data = {
                 "visRelease": self.TEST_VIS_VERSION,
                 "items": {
@@ -173,7 +169,7 @@ class TestClient:
 
     def test_get_gmod_versioning_missing_items(self, monkeypatch) -> None:  # noqa: ANN001, ARG002
         """Test error handling when 'items' key is missing."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         # We need to fix the logger import first
         with mock.patch("vista_sdk.client.logger") as mock_logger:  # noqa: F841
@@ -200,7 +196,7 @@ class TestClient:
 
     def test_get_codebooks(self, monkeypatch) -> None:  # noqa: ANN001, ARG002
         """Test retrieving codebooks data."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         # Mock data for test
         mock_data = {
@@ -236,7 +232,7 @@ class TestClient:
 
     def test_get_locations_test(self, tmp_path, monkeypatch) -> None:  # noqa: ANN001
         """Test retrieving test locations data."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         # Create a mock resource file in temp directory
         resources_dir = tmp_path / "resources"
@@ -273,7 +269,7 @@ class TestClient:
 
     def test_get_gmod_versioning_test(self, monkeypatch) -> None:  # noqa: ANN001, ARG002
         """Test retrieving test GMOD Versioning data."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         # Mock data for test
         mock_data = {
@@ -311,7 +307,6 @@ class TestClient:
 
 
 # Integration tests that use real files (should be run in CI with resources available)
-@pytest.mark.integration
 class TestClientIntegration:
     """Integration tests for Client that use real resource files."""
 
@@ -319,7 +314,7 @@ class TestClientIntegration:
 
     def test_get_locations_integration(self) -> None:
         """Integration test for get_locations with real resource files."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         try:
             result = Client.get_locations(self.TEST_VIS_VERSION)
@@ -330,7 +325,7 @@ class TestClientIntegration:
 
     def test_get_gmod_integration(self) -> None:
         """Integration test for get_gmod with real resource files."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         try:
             result = Client.get_gmod(self.TEST_VIS_VERSION)
@@ -341,7 +336,7 @@ class TestClientIntegration:
 
     def test_get_gmod_versioning_integration(self) -> None:
         """Integration test for get_gmod_versioning with real resource files."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         try:
             result = Client.get_gmod_versioning(self.TEST_VIS_VERSION)
@@ -352,7 +347,7 @@ class TestClientIntegration:
 
     def test_get_codebooks_integration(self) -> None:
         """Integration test for get_codebooks with real resource files."""
-        from vista_sdk.client import Client  # noqa PLC0415
+        from vista_sdk.client import Client
 
         try:
             result = Client.get_codebooks(self.TEST_VIS_VERSION)

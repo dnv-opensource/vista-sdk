@@ -90,7 +90,7 @@ class TestData:
     @staticmethod
     def get_data(test_name: str, cls: type[T]) -> T:
         """Load and validate test data from a JSON file."""
-        path = Path("tests") / "testdata" / f"{test_name}.json"
+        path = Path(__file__).parent / "testdata" / f"{test_name}.json"
         if path:
             with path.open() as file:
                 test_data_json = file.read()
@@ -130,3 +130,12 @@ class TestData:
     def get_individualizable_sets_data(test_name: str) -> IndividualizableSetDatalist:
         """Load and validate individualizable sets test data."""
         return TestData.get_data(test_name, IndividualizableSetDatalist)
+
+    @staticmethod
+    def load_invalid_local_ids() -> list[tuple[str, list[str]]]:
+        """Load invalid local ID test data from the testdata directory."""
+        data = TestData.get_local_id_data("InvalidLocalIds")
+        return [
+            (item.local_id_str, item.expected_error_messages)
+            for item in data.invalid_local_ids
+        ]

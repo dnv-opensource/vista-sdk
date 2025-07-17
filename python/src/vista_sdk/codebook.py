@@ -138,12 +138,13 @@ class Codebook:
 
     def try_create_tag(self, value: str | None) -> MetadataTag | None:
         """Try to create a metadata tag from a value, validating it against the codebook."""  # noqa: E501
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         if not value or not value.strip():
             return None
 
         is_custom = False
+        value = value.strip()
 
         if self.name == CodebookName.Position:
             position_validity = self.validate_position(value)
@@ -154,10 +155,11 @@ class Codebook:
         else:
             if not VIS.is_iso_string(value):
                 return None
-            if self.name != CodebookName.Detail and value not in self._standard_values:
+
+            if self.name != CodebookName.Detail and value not in self.standard_values:
                 is_custom = True
 
-        return MetadataTag(name=self.name, value=value.strip(), is_custom=is_custom)
+        return MetadataTag(name=self.name, value=value, is_custom=is_custom)
 
     def create_tag(self, value: str) -> MetadataTag:
         """Create a metadata tag from a value, validating it against the codebook."""
@@ -170,7 +172,7 @@ class Codebook:
 
     def validate_position(self, position: str) -> PositionValidationResult:
         """Validate a position string against the codebook's position rules."""
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         if not position or not position.strip() or not VIS.is_iso_string(position):
             return PositionValidationResult.Invalid

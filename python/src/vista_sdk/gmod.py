@@ -311,7 +311,7 @@ class Gmod:
             last_asset_function if last_asset_function is not None else self._root_node
         )
 
-        # Initialize state with both to and from_path (matching C# implementation)
+        # Initialize state with both to and from_path
         remaining_parents: list[GmodNode] = []
         state = self.PathExistsContext(to=to_node)
         state.from_path = from_path_list
@@ -340,11 +340,11 @@ class Gmod:
                 actual_parents.insert(0, parent.parents[0])
                 current_parents = [parent.parents[0], *current_parents]
 
-            # Validate parents (exact match of C# implementation)
+            # Validate parents
             if len(current_parents) < len(state.from_path):
                 return TraversalHandlerResult.CONTINUE
 
-            # Must have same start order (exact match of C# implementation)
+            # Must have same start order
             match = True
             for i in range(len(state.from_path)):
                 if current_parents[i].code != state.from_path[i].code:
@@ -352,7 +352,7 @@ class Gmod:
                     break
 
             if match:
-                # Calculate remaining parents using the same logic as C#
+                # Calculate remaining parents
                 state.remaining_parents = [
                     p
                     for p in current_parents

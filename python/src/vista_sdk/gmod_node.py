@@ -265,10 +265,7 @@ class GmodNode:
 
     def is_asset_function_node(self) -> bool:
         """Check if the node is an asset function node."""
-        return (
-            self.metadata.category == "ASSET FUNCTION"
-            and self.metadata.type == "FUNCTION"
-        )
+        return self.metadata.category == "ASSET FUNCTION"
 
     def is_root(self) -> bool:
         """Check if the node is a root node."""

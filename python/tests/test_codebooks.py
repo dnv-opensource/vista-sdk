@@ -12,7 +12,7 @@ class TestCodebooks:
     @pytest.fixture(autouse=True)
     def setUp(self) -> None:
         """Set up the test environment."""
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         # Get VIS instance
         self.vis = VIS()
