@@ -310,11 +310,13 @@ class GmodPath:
                 self._from_depth - 1 if self._from_depth is not None else -1
             )
 
-    def get_full_path(self) -> Generator[tuple[int, GmodNode], None, None]:
-        """Yield the full path as a generator of tuples (depth, GmodNode)."""
+    def get_full_path(self) -> list[tuple[int, GmodNode]]:
+        """Get the full path as a list of tuples (depth, GmodNode)."""
+        result = []
         for i in range(len(self.parents)):
-            yield (i, self.parents[i])
-        yield (len(self.parents), self.node)
+            result.append((i, self.parents[i]))
+        result.append((len(self.parents), self.node))
+        return result
 
     def get_full_path_from(self, from_depth: int) -> GmodPath.Enumerator:
         """Get an enumerator for the full path starting from a specific depth."""
@@ -364,7 +366,7 @@ class GmodPath:
         self, space_delimiter: str = " ", end_delimiter: str = "/"
     ) -> str:
         """Convert the GmodPath to a verbose string representation."""
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         builder = []
         for depth, common_name in self.get_common_names():
@@ -420,22 +422,37 @@ class GmodPath:
     def parse(item: str, arg, arg2: Locations) -> GmodPath: ...  # noqa: ANN001
 
     @staticmethod
-    def parse(item: str, arg=None, arg2=None):
+    def parse(item: str, arg=None, arg2=None) -> GmodPath:
         """Parse a string into a GmodPath based on the provided arguments."""
-        from vista_sdk.gmod import Gmod  # noqa: PLC0415
+        from vista_sdk.gmod import Gmod
 
         if type(arg) is VisVersion and arg2 is None:
-            path = GmodPath.try_parse(item, arg=arg)[1]
-            if not path:
-                raise ValueError("Couldn't parse path")
-            return path
+            path_result = GmodPath.try_parse(item, arg=arg)
+            if not path_result:
+                raise ValueError(
+                    f"Couldn't parse path from '{item}' for VIS version {arg}"
+                )
+            if isinstance(path_result, GmodPath):
+                return path_result
+            if isinstance(path_result, tuple) and len(path_result) == 2:
+                success, path_or_error = path_result
+                if success and path_or_error is not None:
+                    return path_or_error
+                # If try_parse returns False, extract the error message if available
+                err_msg = f"Failed to parse '{item}' for VIS version {arg}"
+                if isinstance(path_or_error, str):
+                    err_msg += f": {path_or_error}"
+                raise ValueError(err_msg)
         if type(arg) is Gmod and type(arg2) is Locations:
             result = GmodPath.parse_internal(item, arg, arg2)
             if isinstance(result, GmodParsePathResult.Ok):
                 return result.path
             if isinstance(result, GmodParsePathResult.Err):
-                raise ValueError(result.error)
-        raise Exception("Unexpected result")
+                raise ValueError(
+                    f"Error parsing path '{item}' with GMOD"
+                    f" version {arg.vis_version}: {result.error}"
+                )
+        raise ValueError(f"Unexpected arguments for parsing path '{item}'")
 
     @staticmethod
     @overload
@@ -456,10 +473,13 @@ class GmodPath:
         item: str | None,
         arg: VisVersion | Locations | None = None,
         gmod=None,
-    ) -> tuple[bool, GmodPath | None]:
+    ) -> tuple[bool, GmodPath | None]:  # return None for failure
         """Try to parse a string into a GmodPath based on the provided arguments."""
-        from vista_sdk.gmod import Gmod  # noqa: PLC0415
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.gmod import Gmod
+        from vista_sdk.vis import VIS
+
+        if item is None or not item.strip():
+            return False, None
 
         if type(arg) is VisVersion and gmod is None:
             gmod = VIS().get_gmod(arg)
@@ -470,20 +490,23 @@ class GmodPath:
             if isinstance(result, GmodParsePathResult.Ok):
                 return True, result.path
             if isinstance(result, GmodParsePathResult.Err):
-                return False, None
-            raise Exception("Unexpected result during path parsing")
-        raise ValueError("Invalid arguments")
+                return False, None  # return None for failure
+            raise ValueError(f"Unexpected result during path parsing: {result}")
+        raise ValueError(f"Invalid arguments for path '{item}': arg={arg}, gmod={gmod}")
 
     @staticmethod
-    def parse_internal(  # noqa: C901
+    def parse_internal(  # noqa : C901
         item: str | None,
         gmod,  # noqa: ANN001
         locations: Locations,
     ) -> GmodParsePathResult.Ok | GmodParsePathResult.Err:
-        """Parse a string into a GmodPath using the provided Gmod and Locations."""
+        """Internal method to parse a string into a GmodPath."""
+        from vista_sdk.gmod import Gmod
+
         if gmod.vis_version != locations.vis_version:
             return GmodParsePathResult.Err(
-                "Got different VIS versions for Gmod and Locations arguments"
+                f"Got different VIS versions for Gmod ({gmod.vis_version}) "
+                f"and Locations ({locations.vis_version}) arguments"
             )
 
         if not item or item.isspace():
@@ -492,133 +515,146 @@ class GmodPath:
         item = item.strip().lstrip("/")
         parts: deque[GmodPath.PathNode] = deque()
 
-        try:
-            for part_str in item.split("/"):
-                if not part_str:
-                    return GmodParsePathResult.Err("Found empty code in path")
-                if "-" in part_str:
-                    code, loc_str = part_str.split("-")
+        for part_str in item.split("/"):
+            if not part_str:
+                continue  # Skip empty segments from double slashes
+
+            if "-" in part_str:
+                try:
+                    code, loc_str = part_str.split("-", 1)  # Split on first hyphen only
                     success, node = gmod.try_get_node(code)
-                    if not success or not node:
+                    if not success or node is None:
                         return GmodParsePathResult.Err(
-                            f"Failed to get GmodNode for {code}"
+                            f"Failed to get GmodNode for code '{code}'"
+                            f" from '{part_str}'"
+                            f" in VIS version {gmod.vis_version}"
                         )
 
                     location_success, location = locations.try_parse(loc_str)
-                    if not location_success:
+                    if not location_success or location is None:
                         return GmodParsePathResult.Err(
-                            f"Failed to parse location - {loc_str}"
+                            f"Failed to parse location '{loc_str}' from '{part_str}'"
+                            f" in VIS version {locations.vis_version}"
                         )
                     parts.append(GmodPath.PathNode(code, location))
-
-                else:
-                    success, node = gmod.try_get_node(part_str)
-                    if not success or not node:
-                        return GmodParsePathResult.Err(
-                            f"Failed to get GmodNode for {part_str}"
-                        )
-                    parts.append(GmodPath.PathNode(part_str))
-
-            if not parts:
-                return GmodParsePathResult.Err("Failed to find any parts")
-
-            to_find: GmodPath.PathNode = parts.popleft()
-            (result, base_node) = gmod.try_get_node(to_find.code)
-            if not result or not base_node:
-                return GmodParsePathResult.Err("Failed to find base node")
-
-            context = GmodPath.ParseContext(parts=parts, to_find=to_find)
-
-            def traverse_handler(  # noqa: C901
-                context: GmodPath.ParseContext,
-                parents: list[GmodNode],
-                current: GmodNode,
-            ) -> TraversalHandlerResult:
-                from vista_sdk.gmod import Gmod  # noqa: PLC0415
-
-                to_find = context.to_find
-                found = current.code == to_find.code
-
-                if not found and Gmod.is_leaf_node(current.metadata.full_type):
-                    return TraversalHandlerResult.SKIP_SUBTREE
-
-                if not found:
-                    return TraversalHandlerResult.CONTINUE
-
-                if to_find.location is not None:
-                    if context.locations is None:
-                        context.locations = {}
-                    context.locations[to_find.code] = to_find.location
-
-                if len(context.parts) > 0:
-                    context.to_find = context.parts.popleft()
-                    return TraversalHandlerResult.CONTINUE
-
-                path_parents: list[GmodNode] = []
-                for parent in parents:
-                    if context.locations and parent.code in context.locations:
-                        path_parents.append(
-                            parent.with_location(context.locations[parent.code].value)
-                        )
-                    else:
-                        path_parents.append(parent)
-                end_node = (
-                    current.with_location(to_find.location.value)
-                    if to_find.location
-                    else current
-                )
-
-                start_node: GmodNode | None = None
-
-                if len(path_parents) > 0 and len(path_parents[0].parents) == 1:
-                    start_node = path_parents[0].parents[0]
-                else:
-                    start_node = (
-                        end_node.parents[0] if len(end_node.parents) == 1 else None
+                except Exception as e:
+                    return GmodParsePathResult.Err(
+                        f"Error processing segment '{part_str}': {e!s}"
                     )
+            else:
+                success, node = gmod.try_get_node(part_str)
+                if not success or node is None:
+                    return GmodParsePathResult.Err(
+                        f"Failed to get GmodNode for '{part_str}'"
+                        f" in VIS version {gmod.vis_version}"
+                    )
+                parts.append(GmodPath.PathNode(part_str))
 
-                if not start_node or len(start_node.parents) > 1:
+        if not parts:
+            return GmodParsePathResult.Err("Failed to find any parts in path: '{item}'")
+
+        to_find: GmodPath.PathNode = parts.popleft()
+        (result, base_node) = gmod.try_get_node(to_find.code)
+        if not result or not base_node:
+            return GmodParsePathResult.Err(
+                f"Failed to find base node with code '{to_find.code}' "
+                f"in VIS version {gmod.vis_version}"
+            )
+
+        context = GmodPath.ParseContext(parts=parts, to_find=to_find)
+
+        def traverse_handler(  # noqa: ANN202, C901
+            context: GmodPath.ParseContext, parents: list[GmodNode], current: GmodNode
+        ):
+            to_find = context.to_find
+            found = current.code == to_find.code
+
+            if not found and Gmod.is_leaf_node(current.metadata.full_type):
+                return TraversalHandlerResult.SKIP_SUBTREE
+
+            if not found:
+                return TraversalHandlerResult.CONTINUE
+
+            if to_find.location is not None:
+                if context.locations is None:
+                    context.locations = {}
+                context.locations[to_find.code] = to_find.location
+
+            if len(context.parts) > 0:
+                context.to_find = context.parts.popleft()
+                return TraversalHandlerResult.CONTINUE
+
+            path_parents: list[GmodNode] = []
+            for parent in parents:
+                if context.locations and parent.code in context.locations:
+                    path_parents.append(
+                        parent.with_location(context.locations[parent.code].value)
+                    )
+                else:
+                    path_parents.append(parent)
+            end_node = (
+                current.with_location(to_find.location.value)
+                if to_find.location
+                else current
+            )
+
+            start_node: GmodNode | None = None
+
+            if len(path_parents) > 0 and len(path_parents[0].parents) == 1:
+                start_node = path_parents[0].parents[0]
+            else:
+                start_node = end_node.parents[0] if len(end_node.parents) == 1 else None
+
+            if not start_node:
+                # Try to continue without start_node if we have at least some parents
+                if len(path_parents) > 0:
+                    context.path = GmodPath(path_parents, end_node)
                     return TraversalHandlerResult.STOP
-
-                while len(start_node.parents) == 1:
-                    path_parents.insert(0, start_node)
-                    start_node = start_node.parents[0]
-                    if len(start_node.parents) > 1:
-                        return TraversalHandlerResult.STOP
-                if gmod.root_node:
-                    path_parents.insert(0, gmod.root_node)
-
-                visitor = LocationSetsVisitor()
-                for i in range(len(path_parents) + 1):
-                    n: GmodNode = path_parents[i] if i < len(path_parents) else end_node
-                    set_result = visitor.visit(n, i, path_parents, end_node)
-                    if set_result is None:
-                        if n.location is not None:
-                            return TraversalHandlerResult.STOP
-                        continue
-                    if set_result:
-                        start, end, location = set_result
-                    else:
-                        start, end, location = 0, 0, None
-                    if start == end:
-                        continue
-                    for j in range(start, end + 1):
-                        if j < len(path_parents):
-                            path_parents[j] = path_parents[j].clone(location=location)
-                        else:
-                            end_node = end_node.clone(location=location)
-
-                context.path = GmodPath(path_parents, end_node)
                 return TraversalHandlerResult.STOP
 
-            gmod.traverse(args1=context, args2=base_node, args3=traverse_handler)
+            if len(start_node.parents) > 1:
+                # Multiple parents situation - try to continue with what we have
+                if len(path_parents) > 0:
+                    context.path = GmodPath(path_parents, end_node)
+                return TraversalHandlerResult.STOP
 
-            if context.path:
-                return GmodParsePathResult.Ok(context.path)
-            return GmodParsePathResult.Err("Failed to find path after traversal")
+            while len(start_node.parents) == 1:
+                path_parents.insert(0, start_node)
+                start_node = start_node.parents[0]
+                if len(start_node.parents) > 1:
+                    return TraversalHandlerResult.STOP
+            if gmod.root_node:
+                path_parents.insert(0, gmod.root_node)
 
-        except Exception as e:
-            return GmodParsePathResult.Err(f"Error parsing path: {e!s}")
+            visitor = LocationSetsVisitor()
+            for i in range(len(path_parents) + 1):
+                n: GmodNode = path_parents[i] if i < len(path_parents) else end_node
+                set_result = visitor.visit(n, i, path_parents, end_node)
+                if set_result is None:
+                    if n.location is not None:
+                        return TraversalHandlerResult.STOP
+                    continue
+                if set_result:
+                    start, end, location = set_result
+                else:
+                    start, end, location = 0, 0, None
+                if start == end:
+                    continue
+                for j in range(start, end + 1):
+                    if j < len(path_parents):
+                        path_parents[j] = path_parents[j].clone(location=location)
+                    else:
+                        end_node = end_node.clone(location=location)
+
+            context.path = GmodPath(path_parents, end_node)
+            return TraversalHandlerResult.STOP
+
+        gmod.traverse(args1=context, args2=base_node, args3=traverse_handler)
+
+        if context.path:
+            return GmodParsePathResult.Ok(context.path)
+
+        return GmodParsePathResult.Err("Failed to find path after traversal")
 
     @staticmethod
     @overload
@@ -639,8 +675,8 @@ class GmodPath:
         path_str: str, gmod=None, arg=None
     ) -> tuple[bool, GmodPath | None]:
         """Try to parse a full path string into a GmodPath."""
-        from vista_sdk.gmod import Gmod  # noqa: PLC0415
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.gmod import Gmod
+        from vista_sdk.vis import VIS
 
         if type(arg) is VisVersion and gmod is None:
             vis = VIS()
@@ -658,7 +694,7 @@ class GmodPath:
     @staticmethod
     def parse_full_path(path_str: str, vis_version: VisVersion) -> GmodPath:
         """Parse a full path string into a GmodPath using the provided VisVersion."""
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         vis = VIS()
         gmod = vis.get_gmod(vis_version)

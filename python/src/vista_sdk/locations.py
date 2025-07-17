@@ -68,6 +68,9 @@ class RelativeLocation:
         self, code: str, name: str, location: Location, definition: str | None
     ) -> None:
         """Initialize RelativeLocation with code, name, location, and optional definition."""  # noqa: E501
+        if len(code) != 1:
+            raise ValueError(f"Expected a single character code, got: {code}.")
+
         self._code: str = code
         self._name: str = name
         self._location: Location = location
@@ -100,10 +103,8 @@ class RelativeLocation:
     def __eq__(self, other: object) -> bool:
         """Check equality of two RelativeLocation instances."""
         if not isinstance(other, RelativeLocation):
-            return NotImplemented
-        if isinstance(other, RelativeLocation):
-            return self._code == other._code
-        return NotImplemented
+            return False
+        return self._code == other._code
 
 
 class Locations:
@@ -126,6 +127,10 @@ class Locations:
             )
             self._relative_locations.append(relative_location)
 
+            # Not interested in horizontal or vertical codes
+            if relative_locations_dto.code in ("H", "V"):
+                continue
+
             key = self.determine_group_by_code(relative_locations_dto.code)
             if key not in groups:
                 groups[key] = []
@@ -140,13 +145,13 @@ class Locations:
         """Return the LocationGroup for a given code."""
         if code in "N":
             return LocationGroup.NUMBER
-        if code in "PCS":
+        if code in ("P", "C", "S"):
             return LocationGroup.SIDE
-        if code in "UML":
+        if code in ("U", "M", "L"):
             return LocationGroup.VERTICAL
-        if code in "IO":
+        if code in ("I", "O"):
             return LocationGroup.TRANSVERSE
-        if code in "FA":
+        if code in ("F", "A"):
             return LocationGroup.LONGITUDINAL
         raise Exception(f"Unsupported code: {code}")
 
@@ -181,9 +186,7 @@ class Locations:
     @overload
     def try_parse(self, value: Location | None) -> tuple[bool, Location | None]: ...
 
-    def try_parse(
-        self, value: str | None | Location | None
-    ) -> tuple[bool, Location | None]:
+    def try_parse(self, value: str | Location | None) -> tuple[bool, Location | None]:
         """Try to parse a location string or Location object and return the result."""
         if isinstance(value, Location):
             return True, value
@@ -213,7 +216,7 @@ class Locations:
             location = Location(value)
         return result[0], location, errors
 
-    def try_parse_internal(
+    def try_parse_internal(  # noqa: C901
         self,
         value: str,
         original_str: str | None,
@@ -222,14 +225,7 @@ class Locations:
         """Internal method to parse a location string and return a Location object."""
         location = None
 
-        if not value:
-            error_builder.add_error(
-                LocationValidationResult.NULL_OR_WHITE_SPACE,
-                "Invalid location: contains only whitespace",
-            )
-            return False, location
-
-        if value.isspace():
+        if not value or value.isspace():
             error_builder.add_error(
                 LocationValidationResult.NULL_OR_WHITE_SPACE,
                 "Invalid location: contains only whitespace",
@@ -239,59 +235,89 @@ class Locations:
         original_span = value
         prev_digit_index = None
         digit_start_index = None
-        char_dict: dict[LocationGroup, str] = {}
+        chars_start_index = None
 
-        assert len(LocationGroup) == 5  # noqa : S101
+        if len(LocationGroup) != 5:
+            raise RuntimeError("LocationGroup enum should have 5 members")
+        char_dict = LocationCharDict(4)  # 4 slots for non-NUMBER groups
 
         for i, ch in enumerate(value):
             if ch.isdigit():
+                # First digit should be at index 0
                 if digit_start_index is None and i != 0:
                     error_builder.add_error(
                         LocationValidationResult.INVALID,
-                        "Invalid location: numeric location should start before"
-                        "location code(s) in location:"
-                        f"'{original_str or original_span}'",
+                        "Invalid location: numeric location should start before "
+                        f"location code(s) in location: '{original_str or original_span}'",  # noqa: E501
                     )
                     return False, location
+
+                # Other digits should neighbor the first
                 if prev_digit_index is not None and prev_digit_index != (i - 1):
                     error_builder.add_error(
                         LocationValidationResult.INVALID,
-                        "Invalid location: cannot have multiple separated"
+                        "Invalid location: cannot have multiple separated "
                         f"digits in location: '{original_str or original_span}'",
                     )
                     return False, location
+
                 if digit_start_index is None:
                     digit_start_index = i
+                else:
+                    try:
+                        int(value[digit_start_index : i + 1])
+                    except ValueError:
+                        error_builder.add_error(
+                            LocationValidationResult.INVALID,
+                            f"Invalid location: failed to parse numeric location: "
+                            f"'{original_str or original_span}'",
+                        )
+                        return False, location
 
                 prev_digit_index = i
             else:
-                group = self._reversed_groups.get(ch)
-                if not group:
-                    invalid_chars = ",".join(
-                        {
-                            c
-                            for c in original_str or original_span
-                            if not c.isdigit() and c not in self._location_codes
-                        }
-                    )
+                # Handle non-digit characters
+                if ch not in self._reversed_groups:
+                    # Get all invalid characters
+                    invalid_chars = [
+                        f"'{c}'"
+                        for c in value
+                        if not c.isdigit()
+                        and c != "N"
+                        and c not in self._location_codes
+                    ]
                     error_builder.add_error(
                         LocationValidationResult.INVALID_CODE,
-                        f"Invalid location code: '{original_str or original_span}'"
-                        f"with invalid location code(s): {invalid_chars}",
+                        f"Invalid location code: '{original_str or original_span}' "
+                        f"with invalid location code(s): {','.join(invalid_chars)}",
                     )
                     return False, location
 
-                if group in char_dict and char_dict[group] != ch:
+                group = self._reversed_groups[ch]
+                success, existing_ch = char_dict.try_add(group, ch)
+                if not success:
                     error_builder.add_error(
                         LocationValidationResult.INVALID,
-                        f"Invalid location: Multiple '{group}' values."
-                        " Got both '{char_dict[group]}' and '{ch}' in "
+                        f"Invalid location: Multiple '{group.name}' values. "
+                        f"Got both '{existing_ch}' and '{ch}' in "
                         f"'{original_str or original_span}'",
                     )
                     return False, location
-                char_dict[group] = ch
 
-        location = Location(original_str or original_span)
+                if chars_start_index is None:
+                    chars_start_index = i
+                elif i > 0:
+                    prev_ch = value[i - 1]
+                    if ch < prev_ch:
+                        error_builder.add_error(
+                            LocationValidationResult.INVALID_ORDER,
+                            f"Invalid location: '{original_str or original_span}' "
+                            "not alphabetically sorted",
+                        )
+                        return False, location
+
+        # If we got here, location is valid
+        location = Location(original_str if original_str is not None else value)
         return True, location
 
     @staticmethod
@@ -346,10 +372,16 @@ class LocationCharDict:
 
     def try_add(self, key: LocationGroup, value: str) -> tuple[bool, str | None]:
         """Try to add a location code for a group if not already present."""
-        current_value = self[key]
-        if current_value is not None:
-            return False, current_value
-        self[key] = value
+        """Try to add a character for a location group."""
+        index = key.value - 1
+        if index >= len(self._codes):
+            raise ValueError(f"Unsupported code: {key}")
+
+        if self._codes[index] is not None:
+            existing_value = self._codes[index]
+            return False, existing_value
+
+        self._codes[index] = value
         return True, None
 
     def __len__(self) -> int:

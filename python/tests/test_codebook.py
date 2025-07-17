@@ -13,7 +13,7 @@ class TestCodebook:
     @pytest.fixture(autouse=True)
     def setUp(self) -> None:
         """Set up the test environment."""
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         # Get VIS instance
         self.vis = VIS()
@@ -183,7 +183,7 @@ class TestCodebook:
         assert "Vertical" in groups, "'Vertical' should be in groups"
         raw_data = codebooks[CodebookName.Position].raw_data
 
-        # -1 because we drop <number> as a group, like in C# implementation
+        # -1 because we drop <number> as a group
         assert len(groups) == len(raw_data) - 1, (
             f"Groups length ({len(groups)})"
             f" should be raw data length ({len(raw_data)}) - 1"
@@ -243,7 +243,7 @@ class TestCodebook:
 
     def _position_validation_from_string(self, value: str):  # noqa: ANN202
         """Convert string representation to PositionValidationResult enum."""
-        from vista_sdk.codebook import PositionValidationResult  # noqa: PLC0415
+        from vista_sdk.codebook import PositionValidationResult
 
         mapping = {
             "Invalid": PositionValidationResult.Invalid,

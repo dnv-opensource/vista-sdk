@@ -340,7 +340,7 @@ class TestGmod(unittest.TestCase):
     # @unittest.skip("This test is too slow to run in CI")
     def test_full_traversal_with_options(self) -> None:
         """Test full traversal of Gmod with a custom handler and options."""
-        from vista_sdk.gmod import Gmod  # noqa: PLC0415
+        from vista_sdk.gmod import Gmod
 
         start_time = time.time()
 

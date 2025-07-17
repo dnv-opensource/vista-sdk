@@ -7,6 +7,7 @@ managing vessel information structures, including General Maritime Object Data
 
 from __future__ import annotations
 
+import logging
 import os
 from abc import ABC, abstractmethod
 
@@ -22,6 +23,8 @@ from vista_sdk.gmod_node import GmodNode
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.gmod_versioning import GmodVersioning
 from vista_sdk.gmod_versioning_dto import GmodVersioningDto
+from vista_sdk.local_id import LocalId
+from vista_sdk.local_id_builder import LocalIdBuilder
 from vista_sdk.locations import Locations
 from vista_sdk.locations_dto import LocationsDto
 from vista_sdk.vis_version import VisVersion, VisVersionExtension
@@ -59,6 +62,20 @@ class IVIS(ABC):
     @abstractmethod
     def get_gmods_map(self) -> dict[VisVersion, Gmod]:
         """Get a mapping of VIS versions to their GMODs."""
+        ...
+
+    @abstractmethod
+    def convert_local_id(
+        self, source_local_id: LocalId, target_version: VisVersion
+    ) -> LocalId | None:
+        """Convert a LocalId from one version to another."""
+        ...
+
+    @abstractmethod
+    def convert_local_id_builder(
+        self, source_local_id_builder: LocalIdBuilder, target_version: VisVersion
+    ) -> LocalIdBuilder | None:
+        """Convert a LocalIdBuilder from one version to another."""
         ...
 
 
@@ -124,7 +141,7 @@ class VIS(IVIS):
 
     def create_gmod(self, vis_version: VisVersion) -> Gmod:
         """Create a new GMOD instance."""
-        from .gmod import Gmod  # noqa: PLC0415
+        from .gmod import Gmod
 
         dto = self.get_gmod_dto(vis_version)
         return Gmod(vis_version, dto)
@@ -167,12 +184,20 @@ class VIS(IVIS):
             return self._gmod_versioning_cache[vis_version]
 
         try:
+            # First try to get the versioning DTO
             dto = self.get_gmod_versioning_dto(vis_version)
             versioning = GmodVersioning({vis_version.value: dto})
             self._gmod_versioning_cache[vis_version] = versioning
             return versioning
+        except FileNotFoundError:
+            versioning = GmodVersioning({})
+            self._gmod_versioning_cache[vis_version] = versioning
+            return versioning
         except Exception as e:
-            raise ValueError(f"Error getting GMOD versioning for {vis_version}") from e
+            logging.warning(f"Error getting GMOD versioning for {vis_version}: {e}")
+            versioning = GmodVersioning({})
+            self._gmod_versioning_cache[vis_version] = versioning
+            return versioning
 
     def get_codebooks_dto(self, vis_version: VisVersion) -> CodebooksDto:
         """Get codebooks DTO for a specific VIS version with caching."""
@@ -253,8 +278,39 @@ class VIS(IVIS):
         target_version: VisVersion,
     ) -> GmodNode | None:
         """Convert a node from one version to another."""
-        versioning = self.get_gmod_versioning(source_version)
+        # The versioning data should be loaded based on target version transitions
+        # We need to build a versioning map that contains all the conversion rules
+        versioning_data = {}
+
+        # Collect versioning DTOs for all intermediate versions
+        current_version = source_version
+        while current_version._value_ < target_version._value_:
+            next_version = self._get_next_version(current_version)
+            if next_version is None:
+                break
+            try:
+                dto = self.get_gmod_versioning_dto(next_version)
+                versioning_data[next_version.value] = dto
+            except Exception:
+                # No versioning file for this version, skip
+                logging.debug(f"No versioning file for {next_version}")
+            current_version = next_version
+
+        from vista_sdk.gmod_versioning import GmodVersioning
+
+        versioning = GmodVersioning(versioning_data)
         return versioning.convert_node(source_version, source_node, target_version)
+
+    def _get_next_version(self, version: VisVersion) -> VisVersion | None:
+        """Get the next version in the sequence."""
+        version_sequence = {
+            VisVersion.v3_4a: VisVersion.v3_5a,
+            VisVersion.v3_5a: VisVersion.v3_6a,
+            VisVersion.v3_6a: VisVersion.v3_7a,
+            VisVersion.v3_7a: VisVersion.v3_8a,
+            VisVersion.v3_8a: None,
+        }
+        return version_sequence.get(version)
 
     def convert_path(
         self,
@@ -264,18 +320,141 @@ class VIS(IVIS):
     ) -> GmodPath | None:
         """Convert a path form one version to another."""
         try:
-            versioning = self.get_gmod_versioning(source_version)
+            # Build versioning data for all intermediate versions
+            versioning_data = {}
+            current_version = source_version
+            while current_version._value_ < target_version._value_:
+                next_version = self._get_next_version(current_version)
+                if next_version is None:
+                    break
+                try:
+                    dto = self.get_gmod_versioning_dto(next_version)
+                    versioning_data[next_version.value] = dto
+                except Exception:
+                    logging.debug(f"No versioning file for {next_version}")
+                current_version = next_version
+
+            from vista_sdk.gmod_versioning import GmodVersioning
+
+            versioning = GmodVersioning(versioning_data)
             converted = versioning.convert_path(
                 source_version, source_path, target_version
             )
             if converted:
                 # Verify the converted path is valid in target version
                 target_gmod = self.get_gmod(target_version)
-                if not target_gmod.parse_path(str(converted)):
+                if not target_gmod.parse_path(str(converted)):  # SE PÅ CONVERTED
                     return None
             return converted
         except Exception as e:
             print(f"Error converting path: {e}")
+            return None
+
+    def _direct_convert_local_id(
+        self, source_local_id: LocalId, target_version: VisVersion
+    ) -> LocalId:
+        """Directly convert a LocalId to a new version without versioning."""
+        # Convert the builder and build a new LocalId
+        converted_builder = self._direct_convert_local_id_builder(
+            source_local_id.builder, target_version
+        )
+        return converted_builder.build()
+
+    def convert_local_id(
+        self,
+        source_local_id: LocalId,
+        target_version: VisVersion,
+    ) -> LocalId | None:
+        """Convert a LocalId from one version to another."""
+        # If versions match, no conversion needed
+        if source_local_id.vis_version == target_version:
+            return source_local_id
+
+        # First try with versioning
+        try:
+            versioning = self.get_gmod_versioning(source_local_id.vis_version)
+            converted = versioning.convert_local_id_instance(
+                source_local_id, target_version
+            )
+            if converted:
+                return converted
+        except FileNotFoundError as e:
+            # File not found, will try direct conversion
+            logging.debug("Versioning file not found: %s. Trying direct conversion.", e)
+        except Exception as e:
+            # Other errors, will try direct conversion
+            logging.debug(
+                "Error in versioning conversion: %s. Trying direct conversion.", e
+            )
+
+        # If we get here, either versioning failed or an exception occurred
+        # Try direct conversion as a fallback
+        try:
+            return self._direct_convert_local_id(source_local_id, target_version)
+        except Exception as e:
+            logging.debug("Direct conversion failed: %s", e)
+            return None
+
+    def _direct_convert_local_id_builder(
+        self, source: LocalIdBuilder, target_version: VisVersion
+    ) -> LocalIdBuilder:
+        """Directly convert a LocalIdBuilder to a new version without versioning."""
+        # Create a new builder with the target version
+        builder = LocalIdBuilder.create(target_version)
+
+        # Copy all properties from the original
+        if source.primary_item:
+            builder = builder.with_primary_item(source.primary_item)
+        if source.secondary_item:
+            builder = builder.with_secondary_item(source.secondary_item)
+
+        # Copy verbose mode and then all metadata tags
+        return (
+            builder.with_verbose_mode(source.verbose_mode)
+            .try_with_metadata_tag(source.quantity)[0]
+            .try_with_metadata_tag(source.content)[0]
+            .try_with_metadata_tag(source.calculation)[0]
+            .try_with_metadata_tag(source.state)[0]
+            .try_with_metadata_tag(source.command)[0]
+            .try_with_metadata_tag(source.type)[0]
+            .try_with_metadata_tag(source.position)[0]
+            .try_with_metadata_tag(source.detail)[0]
+        )
+
+    def convert_local_id_builder(
+        self,
+        source_local_id_builder: LocalIdBuilder,
+        target_version: VisVersion,
+    ) -> LocalIdBuilder | None:
+        """Convert a LocalIdBuilder from one version to another."""
+        # Check if the builder has a version
+        if source_local_id_builder.vis_version is None:
+            return None
+
+        try:
+            # Try to get versioning data, which may return empty versioning if no file
+            versioning = self.get_gmod_versioning(source_local_id_builder.vis_version)
+            # Try conversion using versioning data
+            converted = versioning.convert_local_id(
+                source_local_id_builder, target_version
+            )
+
+            # If conversion succeeded, return it
+            if converted is not None:
+                return converted
+
+            # If conversion failed but versions differ, try direct conversion
+            if source_local_id_builder.vis_version != target_version:
+                return self._direct_convert_local_id_builder(
+                    source_local_id_builder, target_version
+                )
+
+            # If no conversion was possible, return None
+            return None
+
+        except Exception as e:
+            # Conversion failed, log and return None
+            logging.debug("Error converting local ID builder: %s", e)
             return None
 
     @staticmethod

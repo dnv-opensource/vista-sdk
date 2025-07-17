@@ -62,7 +62,6 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write(
             "        return [version for version in VisVersion if VisVersions.try_parse(version.value)]\n"  # noqa : E501
         )
-        # Change try_parse to match C# behavior
         f.write("    @staticmethod\n")
         f.write("    def try_parse(version_str) -> tuple[bool, VisVersion | None]:\n")
         for version in vis_versions:
