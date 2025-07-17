@@ -12,7 +12,7 @@ import { Locations } from "./Location";
 export class VIS {
     public static readonly instance = new VIS();
 
-    public static readonly latestVisVersion: VisVersion = VisVersion.v3_8a;
+    public static readonly latestVisVersion: VisVersion = VisVersion.v3_9a;
 
     private readonly _gmodDtoCache: LRUCache<VisVersion, Promise<GmodDto>>;
     private readonly _gmodCache: LRUCache<VisVersion, Gmod>;
@@ -41,7 +41,7 @@ export class VIS {
         ttl: 60 * 60 * 1000,
     };
 
-    private async getGmodDto(visVersion: VisVersion): Promise<GmodDto> {
+    public async getGmodDto(visVersion: VisVersion): Promise<GmodDto> {
         let gmodDto: Promise<GmodDto> | undefined =
             this._gmodDtoCache.get(visVersion);
 

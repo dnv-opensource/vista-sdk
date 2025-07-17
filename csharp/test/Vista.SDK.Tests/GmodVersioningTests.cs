@@ -217,6 +217,17 @@ public class GmodVersioningTests
         Assert.Equal(targetLocalIdStr, convertedLocalId!.ToString());
     }
 
+    [Theory]
+    [MemberData(nameof(VistaSDKTestData.AddValidGmodPathsData), MemberType = typeof(VistaSDKTestData))]
+    public void Test_Valid_GmodPath_To_Latest(GmodPathTestItem item)
+    {
+        var (_, vis) = VISTests.GetVis();
+        Assert.True(VisVersions.TryParse(item.VisVersion, out var sourceVersion));
+        Assert.True(GmodPath.TryParse(item.Path, sourceVersion, out var sourcePath));
+        var targetPath = vis.ConvertPath(sourceVersion, sourcePath, VIS.LatestVisVersion);
+        Assert.NotNull(targetPath);
+    }
+
     [Fact(Skip = "3-8 S204 is not in 3-8a")]
     public void ConvertEveryNodeToLatest()
     {

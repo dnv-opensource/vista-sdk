@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net7.0;net6.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0;netstandard2.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <PackageId>DNV.Vista.SDK.System.Text.Json</PackageId>
     <Description>
-      The Vista SDK packages codify the rules and principles of DNV Vessel Information Structure (VIS) and ISO19848/19847 standards to enable and support users and implementers.
+      The Vista SDK packages codify the rules and principles of DNV Vessel Information Structure
+      (VIS) and ISO19848/19847 standards to enable and support users and implementers.
       DNV.Vista.SDK.System.Text.Json implements JSON support for the ISO19848 packages.
     </Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="$(DotNetVersion)" />
     <!-- <PackageReference Include="NSwag.MSBuild" Version="14.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -22,13 +22,63 @@
     <ProjectReference Include="..\Vista.SDK\Vista.SDK.csproj" />
   </ItemGroup>
 
-  <!-- <Target Name="DataChannelListGeneration" AfterTargets="BeforeBuild" Condition="'$(CI_BUILD)' != 'True'">
-    <Exec Command="$(NSwagExe_Net70) jsonschema2csclient /input:../../../schemas/json/DataChannelList.schema.json /output:DataChannelList/DataChannelList.cs /Name:DataChannelListPackage /Namespace:Vista.SDK.Transport.Json.DataChannel /GenerateDataAnnotations:false /ArrayType:System.Collections.Generic.IReadOnlyList /ArrayInstanceType:System.Collections.Generic.List /DictionaryType:System.Collections.Generic.IReadOnlyDictionary /DictionaryInstanceType:System.Collections.Generic.Dictionary /ArrayBaseType:System.Collections.Generic.IReadOnlyList /DictionaryBaseType:System.Collections.Generic.IReadOnlyDictionary /GenerateImmutableArrayProperties:true /GenerateImmutableDictionaryProperties:true /GenerateNullableReferenceTypes:true /GenerateOptionalPropertiesAsNullable:true /ClassStyle:Record /JsonLibrary:SystemTextJson" />
-    <Exec Command="$(NSwagExe_Net70) jsonschema2csclient /input:../../../schemas/json/experimental/DataList.schema.json /output:Experimental/DataList/DataList.cs /Name:DataListPackage /Namespace:Vista.SDK.Experimental.Transport.Json.DataList /GenerateDataAnnotations:false /ArrayType:System.Collections.Generic.IReadOnlyList /ArrayInstanceType:System.Collections.Generic.List /DictionaryType:System.Collections.Generic.IReadOnlyDictionary /DictionaryInstanceType:System.Collections.Generic.Dictionary /ArrayBaseType:System.Collections.Generic.IReadOnlyList /DictionaryBaseType:System.Collections.Generic.IReadOnlyDictionary /GenerateImmutableArrayProperties:true /GenerateImmutableDictionaryProperties:true /GenerateNullableReferenceTypes:true /GenerateOptionalPropertiesAsNullable:true /ClassStyle:Record /JsonLibrary:SystemTextJson" />
+
+  <!-- <Target Name="DataChannelListGeneration" AfterTargets="BeforeBuild" Condition="'$(CI_BUILD)'
+  != 'True'">
+    <Exec Command="$(NSwagExe_Net70) jsonschema2csclient
+  /input:../../../schemas/json/DataChannelList.schema.json
+  /output:DataChannelList/DataChannelList.cs /Name:DataChannelListPackage
+  /Namespace:Vista.SDK.Transport.Json.DataChannel /GenerateDataAnnotations:false
+  /ArrayType:System.Collections.Generic.IReadOnlyList
+  /ArrayInstanceType:System.Collections.Generic.List
+  /DictionaryType:System.Collections.Generic.IReadOnlyDictionary
+  /DictionaryInstanceType:System.Collections.Generic.Dictionary
+  /ArrayBaseType:System.Collections.Generic.IReadOnlyList
+  /DictionaryBaseType:System.Collections.Generic.IReadOnlyDictionary
+  /GenerateImmutableArrayProperties:true /GenerateImmutableDictionaryProperties:true
+  /GenerateNullableReferenceTypes:true /GenerateOptionalPropertiesAsNullable:true /ClassStyle:Record
+  /JsonLibrary:SystemTextJson" />
+    <Exec Command="$(NSwagExe_Net70) jsonschema2csclient
+  /input:../../../schemas/json/experimental/DataList.schema.json
+  /output:Experimental/DataList/DataList.cs /Name:DataListPackage
+  /Namespace:Vista.SDK.Experimental.Transport.Json.DataList /GenerateDataAnnotations:false
+  /ArrayType:System.Collections.Generic.IReadOnlyList
+  /ArrayInstanceType:System.Collections.Generic.List
+  /DictionaryType:System.Collections.Generic.IReadOnlyDictionary
+  /DictionaryInstanceType:System.Collections.Generic.Dictionary
+  /ArrayBaseType:System.Collections.Generic.IReadOnlyList
+  /DictionaryBaseType:System.Collections.Generic.IReadOnlyDictionary
+  /GenerateImmutableArrayProperties:true /GenerateImmutableDictionaryProperties:true
+  /GenerateNullableReferenceTypes:true /GenerateOptionalPropertiesAsNullable:true /ClassStyle:Record
+  /JsonLibrary:SystemTextJson" />
   </Target>
 
-  <Target Name="TimeSeriesDataGeneration" AfterTargets="BeforeBuild" Condition="'$(CI_BUILD)' != 'True'">
-    <Exec Command="$(NSwagExe_Net70) jsonschema2csclient /input:../../../schemas/json/TimeSeriesData.schema.json /output:TimeSeriesData/TimeSeriesData.cs /Name:TimeSeriesDataPackage /Namespace:Vista.SDK.Transport.Json.TimeSeriesData /GenerateDataAnnotations:false /ArrayType:System.Collections.Generic.IReadOnlyList /ArrayInstanceType:System.Collections.Generic.List /DictionaryType:System.Collections.Generic.IReadOnlyDictionary /DictionaryInstanceType:System.Collections.Generic.Dictionary /ArrayBaseType:System.Collections.Generic.IReadOnlyList /DictionaryBaseType:System.Collections.Generic.IReadOnlyDictionary /GenerateImmutableArrayProperties:true /GenerateImmutableDictionaryProperties:true /GenerateNullableReferenceTypes:true /GenerateOptionalPropertiesAsNullable:true /ClassStyle:Record /JsonLibrary:SystemTextJson" />
-    <Exec Command="$(NSwagExe_Net70) jsonschema2csclient /input:../../../schemas/json/experimental/TimeSeriesData.schema.json /output:Experimental/TimeSeriesData/TimeSeriesData.cs /Name:TimeSeriesDataPackage /Namespace:Vista.SDK.Experimental.Transport.Json.TimeSeriesData /GenerateDataAnnotations:false /ArrayType:System.Collections.Generic.IReadOnlyList /ArrayInstanceType:System.Collections.Generic.List /DictionaryType:System.Collections.Generic.IReadOnlyDictionary /DictionaryInstanceType:System.Collections.Generic.Dictionary /ArrayBaseType:System.Collections.Generic.IReadOnlyList /DictionaryBaseType:System.Collections.Generic.IReadOnlyDictionary /GenerateImmutableArrayProperties:true /GenerateImmutableDictionaryProperties:true /GenerateNullableReferenceTypes:true /GenerateOptionalPropertiesAsNullable:true /ClassStyle:Record /JsonLibrary:SystemTextJson" />
+  <Target Name="TimeSeriesDataGeneration" AfterTargets="BeforeBuild" Condition="'$(CI_BUILD)' !=
+  'True'">
+    <Exec Command="$(NSwagExe_Net70) jsonschema2csclient
+  /input:../../../schemas/json/TimeSeriesData.schema.json /output:TimeSeriesData/TimeSeriesData.cs
+  /Name:TimeSeriesDataPackage /Namespace:Vista.SDK.Transport.Json.TimeSeriesData
+  /GenerateDataAnnotations:false /ArrayType:System.Collections.Generic.IReadOnlyList
+  /ArrayInstanceType:System.Collections.Generic.List
+  /DictionaryType:System.Collections.Generic.IReadOnlyDictionary
+  /DictionaryInstanceType:System.Collections.Generic.Dictionary
+  /ArrayBaseType:System.Collections.Generic.IReadOnlyList
+  /DictionaryBaseType:System.Collections.Generic.IReadOnlyDictionary
+  /GenerateImmutableArrayProperties:true /GenerateImmutableDictionaryProperties:true
+  /GenerateNullableReferenceTypes:true /GenerateOptionalPropertiesAsNullable:true /ClassStyle:Record
+  /JsonLibrary:SystemTextJson" />
+    <Exec Command="$(NSwagExe_Net70) jsonschema2csclient
+  /input:../../../schemas/json/experimental/TimeSeriesData.schema.json
+  /output:Experimental/TimeSeriesData/TimeSeriesData.cs /Name:TimeSeriesDataPackage
+  /Namespace:Vista.SDK.Experimental.Transport.Json.TimeSeriesData /GenerateDataAnnotations:false
+  /ArrayType:System.Collections.Generic.IReadOnlyList
+  /ArrayInstanceType:System.Collections.Generic.List
+  /DictionaryType:System.Collections.Generic.IReadOnlyDictionary
+  /DictionaryInstanceType:System.Collections.Generic.Dictionary
+  /ArrayBaseType:System.Collections.Generic.IReadOnlyList
+  /DictionaryBaseType:System.Collections.Generic.IReadOnlyDictionary
+  /GenerateImmutableArrayProperties:true /GenerateImmutableDictionaryProperties:true
+  /GenerateNullableReferenceTypes:true /GenerateOptionalPropertiesAsNullable:true /ClassStyle:Record
+  /JsonLibrary:SystemTextJson" />
   </Target> -->
 </Project>

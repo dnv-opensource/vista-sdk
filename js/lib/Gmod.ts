@@ -265,4 +265,8 @@ export class Gmod {
         context.parents.pop();
         return TraversalHandlerResult.Continue;
     }
+
+    public *[Symbol.iterator](): Generator<GmodNode> {
+        for (const [_, value] of this._nodeMap) yield value;
+    }
 }

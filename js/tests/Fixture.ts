@@ -16,16 +16,16 @@ export let visMap: Map<
     }
 > = new Map();
 
-let visPromise: Promise<typeof visMap>;
+let visPromise: Promise<typeof visMap> | null = null;
 
 export const getVISMap = async () => {
-    if (!visPromise) {
+    if (visPromise === null) {
         visPromise = VIS.instance.getVISMap(VisVersions.all).then((m) => {
             visMap = m;
             return visMap;
         });
     }
-    return visPromise;
+    return await visPromise;
 };
 
 export const getVIS = (version: VisVersion) => {

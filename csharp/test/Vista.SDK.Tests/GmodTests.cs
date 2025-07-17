@@ -1,8 +1,3 @@
-using System.Diagnostics;
-using FluentAssertions;
-using Vista.SDK;
-using Vista.SDK.Internal;
-
 namespace Vista.SDK.Tests;
 
 public class GmodTests
@@ -18,7 +13,8 @@ public class GmodTests
             { VisVersion.v3_5a, new("C1053.3114", 6557) },
             { VisVersion.v3_6a, new("C1053.3114", 6557) },
             { VisVersion.v3_7a, new("H346.11113", 6672) },
-            { VisVersion.v3_8a, new("H346.11113", 6335) }
+            { VisVersion.v3_8a, new("H346.11113", 6335) },
+            { VisVersion.v3_9a, new("H346.11113", 6553) },
         };
 
     [Theory]
@@ -287,7 +283,7 @@ public class GmodTests
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VIS.LatestVisVersion);
 
         var paths = new List<GmodPath>();
         var maxExpected = TraversalOptions.DEFAULT_MAX_TRAVERSAL_OCCURRENCE;
@@ -316,29 +312,38 @@ public class GmodTests
         Assert.True(completed);
     }
 
+    sealed record TraversalWithOptionsTestContext
+    {
+        public int Counter { get; set; } = 0;
+        public int MaxOccurrence { get; set; } = 0;
+        public int MaxExpected { get; set; } = 2;
+    };
+
     [Fact]
     public void Test_Full_Traversal_With_Options()
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VIS.LatestVisVersion);
+        var context = new TraversalWithOptionsTestContext();
 
-        var maxExpected = 2;
-        int maxOccurrence = 0;
         var completed = gmod.Traverse(
-            (parents, node) =>
+            context,
+            gmod["411.1"], // Only traverse from this node as the substrucures are really big
+            (context, parents, node) =>
             {
+                context.Counter++;
                 var skipOccurenceCheck = Gmod.IsProductSelectionAssignment(parents.LastOrDefault(), node);
                 if (skipOccurenceCheck)
                     return TraversalHandlerResult.Continue;
                 var occ = Occurrences(parents, node);
-                if (occ > maxOccurrence)
-                    maxOccurrence = occ;
+                if (occ > context.MaxOccurrence)
+                    context.MaxOccurrence = occ;
                 return TraversalHandlerResult.Continue;
             },
-            new TraversalOptions { MaxTraversalOccurrence = maxExpected }
+            new TraversalOptions { MaxTraversalOccurrence = context.MaxExpected }
         );
-        Assert.Equal(maxExpected, maxOccurrence);
+        Assert.Equal(context.MaxExpected, context.MaxOccurrence);
         Assert.True(completed);
     }
 
@@ -347,7 +352,7 @@ public class GmodTests
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VIS.LatestVisVersion);
 
         var state = new TraversalState(5) { NodeCount = 0 };
 
@@ -371,7 +376,7 @@ public class GmodTests
     {
         var (_, vis) = VISTests.GetVis();
 
-        var gmod = vis.GetGmod(VisVersion.v3_4a);
+        var gmod = vis.GetGmod(VIS.LatestVisVersion);
 
         var state = new TraversalState(0) { NodeCount = 0 };
 
@@ -393,5 +398,6 @@ public class GmodTests
         public int NodeCount { get; set; }
     }
 
-    private int Occurrences(IReadOnlyList<GmodNode> parents, GmodNode node) => parents.Count(p => p.Code == node.Code);
+    private static int Occurrences(IReadOnlyList<GmodNode> parents, GmodNode node) =>
+        parents.Count(p => p.Code == node.Code);
 }

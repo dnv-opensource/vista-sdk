@@ -15,23 +15,27 @@
     <Company>DNV AS</Company>
     <Copyright>DNV AS</Copyright>
     <RepositoryType>git</RepositoryType>
-    <Copyright>Copyright 2022 DNV AS</Copyright>
+    <Copyright>Copyright 2025 DNV AS</Copyright>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/dnv-opensource/vista-sdk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dnv-opensource/vista-sdk</RepositoryUrl>
     <PackageTags>dnv dnvgl vis maritime iso-19847 iso-19848</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <DotNetVersion>9.0.6</DotNetVersion>
+    <SystemTextDotNetVersion>9.0.6</SystemTextDotNetVersion>
+    <MemoryCacheDotNetVersion>9.0.6</MemoryCacheDotNetVersion>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <DotNetVersion>8.0.0</DotNetVersion>
+    <SystemTextDotNetVersion>8.0.5</SystemTextDotNetVersion>
+    <MemoryCacheDotNetVersion>8.0.1</MemoryCacheDotNetVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <DotNetVersion>7.0.0</DotNetVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net7.0' and '$(TargetFramework)' != 'net8.0'">
-    <!-- TODO: Solve the issue with SecurityVulnerabilities in previous targets  -->
-    <NoWarn>$(NoWarn);NU1903</NoWarn>
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net9.0' and '$(TargetFramework)' != 'net8.0'">
     <DotNetVersion>6.0.0</DotNetVersion>
+    <SystemTextDotNetVersion>6.0.10</SystemTextDotNetVersion>
+    <MemoryCacheDotNetVersion>6.0.2</MemoryCacheDotNetVersion>
   </PropertyGroup>
 
   <ItemGroup>
