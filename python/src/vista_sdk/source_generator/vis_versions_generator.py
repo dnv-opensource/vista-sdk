@@ -99,6 +99,6 @@ if __name__ == "__main__":
         if not args.resources_dir
         else Path(args.resources_dir).resolve()
     )
-    output_file = root_dir / "VisVersions.py"
+    output_file = root_dir / "vis_version.py"
 
     generate_vis_version_script(str(resources_dir), str(output_file))

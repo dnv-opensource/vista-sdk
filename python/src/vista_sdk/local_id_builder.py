@@ -380,7 +380,7 @@ class LocalIdBuilder:
             raise ValueError("Cannot build a LocalId from an invalid LocalIdBuilder")
 
         # Import here to avoid circular import
-        from vista_sdk.local_id import LocalId  # noqa: PLC0415
+        from vista_sdk.local_id import LocalId
 
         return LocalId(self)
 
@@ -402,7 +402,7 @@ class LocalIdBuilder:
             )
 
         # Import here to avoid circular import
-        from vista_sdk.mqtt.mqtt_local_id import MqttLocalId  # noqa: PLC0415
+        from vista_sdk.mqtt.mqtt_local_id import MqttLocalId
 
         return MqttLocalId(self)
 
@@ -519,7 +519,7 @@ class LocalIdBuilder:
 
     def to_string(self, builder: list[str]) -> None:
         """Convert this builder to a string."""
-        from vista_sdk.vis_version import VisVersionExtension  # noqa: PLC0415
+        from vista_sdk.vis_version import VisVersionExtension
 
         if self._vis_version is None:
             raise ValueError("No VIS version configured on LocalId")
@@ -553,7 +553,7 @@ class LocalIdBuilder:
     @staticmethod
     def _append_meta(builder: list[str], tag: MetadataTag | None) -> None:
         """Append a metadata tag to the string builder."""
-        from vista_sdk.codebook_names import CodebookNames  # noqa: PLC0415
+        from vista_sdk.codebook_names import CodebookNames
 
         if tag is not None and isinstance(tag, MetadataTag):
             prefix = CodebookNames.to_prefix(tag.name)

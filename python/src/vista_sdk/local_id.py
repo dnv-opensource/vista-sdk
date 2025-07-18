@@ -8,11 +8,8 @@ of LocalId objects.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from venv import logger
 
-import vista_sdk
 from vista_sdk.gmod_path import GmodPath
-
 from vista_sdk.local_id_builder_parsing import LocalIdBuilderParsing
 from vista_sdk.metadata_tag import MetadataTag
 from vista_sdk.parsing_errors import ParsingErrors
@@ -27,7 +24,7 @@ class LocalId:
 
     NAMING_RULE = "dnv-v2"
 
-    def __init__(self, builder: "LocalIdBuilder") -> None:
+    def __init__(self, builder: LocalIdBuilder) -> None:
         """Initialize a LocalId with a builder.
 
         Args:
@@ -45,7 +42,7 @@ class LocalId:
         self._builder = builder
 
     @property
-    def builder(self) -> "LocalIdBuilder":
+    def builder(self) -> LocalIdBuilder:
         """Get the builder for this LocalId."""
         return self._builder
 
