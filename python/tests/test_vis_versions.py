@@ -52,6 +52,6 @@ class TestVisVersions:
         """Test the generation of the VisVersions script."""
         root_dir = Path(__file__).parent.parent.parent.resolve()
         resources_dir = root_dir / "resources"
-        output_file = root_dir / "python" / "src" / "vista_sdk" / "VisVersions.py"
+        output_file = root_dir / "python" / "src" / "vista_sdk" / "vis_versions.py"
 
         generate_vis_version_script(str(resources_dir), str(output_file))

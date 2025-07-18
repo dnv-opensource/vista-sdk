@@ -73,7 +73,7 @@ class LocalIdItems:
             common_name: The common name to format and append
             location: Optional location to append
         """
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         result_chars = []
         prev = None

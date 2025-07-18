@@ -23,7 +23,7 @@ class LocalIdBuilderParsing:
 
     def __init__(self) -> None:
         """Initialize the LocalIdBuilderParsing class."""
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         self.vis = VIS()
 
@@ -752,7 +752,7 @@ class LocalIdBuilderParsing:
             - The new parsing state
             - The parsed tag, or None if parsing failed
         """
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         if codebooks is None:
             return False, i, state, None
