@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: Checkout entire repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
@@ -34,17 +34,20 @@ jobs:
 
       - name: Copy resources folder into python/vista_sdk
         run: |
+          # Remove existing resources directory if it exists
+          rm -rf ./python/src/vista_sdk/resources
+          # Copy resources directory
           cp -r ./resources ./python/src/vista_sdk/resources
 
       - name: Generate VisVersion script
         env:
-          PYTHONPATH: ${{ github.workspace }}/python # Set PYTHONPATH to the python directory
+          PYTHONPATH: ${{ github.workspace }}/python/src # Set PYTHONPATH to the python directory
         run: |
-          python python/srs/vista_sdk/source_generator/vis_versions_generator.py --resources-dir resources
+          python python/src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir resources
 
       - name: Run tests
         env:
-          PYTHONPATH: ${{ github.workspace }}/python # Ensure PYTHONPATH is set for tests as well
+          PYTHONPATH: ${{ github.workspace }}/python/src # Ensure PYTHONPATH is set for tests as well
         run: |
           pytest python/tests
 
