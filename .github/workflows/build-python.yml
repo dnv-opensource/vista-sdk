@@ -30,17 +30,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest
-          pip install -r python/requirements.txt
+          pip install -r python/dependencies.txt
 
       - name: Copy resources folder into python/vista_sdk
         run: |
-          cp -r ./resources ./python/vista_sdk/resources
+          cp -r ./resources ./python/src/vista_sdk/resources
 
       - name: Generate VisVersion script
         env:
           PYTHONPATH: ${{ github.workspace }}/python # Set PYTHONPATH to the python directory
         run: |
-          python python/vista_sdk/SourceGenerator/VisVersionsGenerator.py --resources-dir resources
+          python python/srs/vista_sdk/source_generator/vis_versions_generator.py --resources-dir resources
 
       - name: Run tests
         env:

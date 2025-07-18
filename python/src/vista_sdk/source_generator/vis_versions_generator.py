@@ -1,8 +1,9 @@
-"""This module generates a Python script defining the VisVersion enum and related classes."""  # noqa: E501
+"""This module generates a Python script defining the VisVersion enum and related classes."""
 
 import argparse
 from pathlib import Path
 
+# You'll need to implement or import this properly
 from vista_sdk.source_generator.embedded_resources import EmbeddedResource
 
 
@@ -24,60 +25,99 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         if not version.replace("-", "").replace(".", "").isalnum():
             raise ValueError(f"Version contains invalid characters: {version}")
 
-    with open(output_file, "w") as f:  # noqa: PTH123
-        f.write("import enum\n\n")
+    with Path(output_file).open("w", encoding="utf-8") as f:
+        # Write module docstring and imports
+        f.write('"""Module providing VIS version enumeration and utilities."""\n\n')
+        f.write("from __future__ import annotations\n\n")
+        f.write("import enum\n\n\n")
+
+        # Write VisVersion enum
         f.write("class VisVersion(enum.Enum):\n")
+        f.write('    """Enumeration of VIS versions.\n\n')
+        f.write(
+            "    Represents the various versions of the Vessel Information Structure (VIS).\n"
+        )
+        f.write('    """\n\n')
+
         for version in vis_versions:
-            f.write(f'    v{version.replace("-", "_")} = "{version}"\n')
+            enum_name = version.replace("-", "_").replace(".", "_")
+            f.write(f'    v{enum_name} = "{version}"\n')
+
+        # Write VisVersionExtension class
         f.write("\n\nclass VisVersionExtension:\n")
+        f.write('    """Utility class for VIS version string manipulation."""\n\n')
+
         f.write("    @staticmethod\n")
         f.write(
-            "    def to_version_string(version: VisVersion, builder=None) -> str:\n"
+            "    def to_version_string(version: VisVersion, builder: list[str] | None = None) -> str:\n"
+        )
+        f.write(
+            '        """Convert a VisVersion enum to its string representation."""\n'
         )
         f.write("        version_map = {\n")
         for version in vis_versions:
-            f.write(
-                f'            VisVersion.v{version.replace("-", "_")}: "{version}",\n'
-            )
+            enum_name = version.replace("-", "_").replace(".", "_")
+            f.write(f'            VisVersion.v{enum_name}: "{version}",\n')
         f.write("        }\n")
-        f.write("        v = version_map.get(version, None)\n")
+        f.write("        v = version_map.get(version)\n")
         f.write("        if v is None:\n")
         f.write(
-            "            raise ValueError(f'Invalid VisVersion enum value: {version}')\n"  # noqa : E501
+            '            raise ValueError(f"Invalid VisVersion enum value: {version}")\n'
         )
         f.write("        if builder is not None:\n")
         f.write("            builder.append(v)\n")
         f.write("        return v\n")
+
         f.write("\n    @staticmethod\n")
-        f.write("    def to_string(version, builder=None):\n")
+        f.write(
+            "    def to_string(version: VisVersion, builder: list[str] | None = None) -> str:\n"
+        )
+        f.write(
+            '        """Convert a VisVersion enum to its string representation."""\n'
+        )
         f.write(
             "        return VisVersionExtension.to_version_string(version, builder)\n"
         )
-        f.write("\n    @staticmethod\n")
-        f.write("    def is_valid(version):\n")
-        f.write("        return isinstance(version, VisVersion)\n")
-        f.write("\nclass VisVersions:\n")
-        f.write("    @staticmethod\n")
-        f.write("    def all_versions():\n")
-        f.write(
-            "        return [version for version in VisVersion if VisVersions.try_parse(version.value)]\n"  # noqa : E501
-        )
-        f.write("    @staticmethod\n")
-        f.write("    def try_parse(version_str) -> tuple[bool, VisVersion | None]:\n")
-        for version in vis_versions:
-            f.write(f'        if version_str == "{version}":\n')
-            f.write(
-                f"            return True, VisVersion.v{version.replace('-', '_')}\n"
-            )
-        f.write("        return False, None\n")  # Return tuple instead of raising
 
-        # Add parse method that throws
+        f.write("\n    @staticmethod\n")
+        f.write("    def is_valid(version: object) -> bool:\n")
+        f.write('        """Check if a version is valid."""\n')
+        f.write("        return isinstance(version, VisVersion)\n")
+
+        # Write VisVersions class
+        f.write("\n\nclass VisVersions:\n")
+        f.write('    """Utility class for VIS version management."""\n\n')
+
+        f.write("    @staticmethod\n")
+        f.write("    def all_versions() -> list[VisVersion]:\n")
+        f.write('        """Get all available VIS versions."""\n')
+        f.write("        return [\n")
+        f.write(
+            "            version for version in VisVersion if VisVersions.try_parse(version.value)\n"
+        )
+        f.write("        ]\n")
+
+        f.write("\n    @staticmethod\n")
+        f.write("    def try_parse(version_str: str) -> VisVersion | None:\n")
+        f.write('        """Try to parse a string into a VisVersion enum."""\n')
+        f.write("        version_map = {\n")
+        for version in vis_versions:
+            enum_name = version.replace("-", "_").replace(".", "_")
+            f.write(f'            "{version}": VisVersion.v{enum_name},\n')
+        f.write("        }\n")
+        f.write("        if version_str not in version_map:\n")
+        f.write(
+            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'
+        )
+        f.write("        return version_map[version_str]\n")
+
         f.write("\n    @staticmethod\n")
         f.write("    def parse(version_str: str) -> VisVersion:\n")
-        f.write("        success, version = VisVersions.try_parse(version_str)\n")
-        f.write("        if not success:\n")
+        f.write('        """Parse a string into a VisVersion enum."""\n')
+        f.write("        version = VisVersions.try_parse(version_str)\n")
+        f.write("        if version is None:\n")
         f.write(
-            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'  # noqa: E501
+            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'
         )
         f.write("        return version\n")
 
@@ -93,7 +133,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     root_dir = Path(__file__).parent.parent.resolve()
-    # go one level up on the path below
     resources_dir = (
         root_dir / "resources"
         if not args.resources_dir
