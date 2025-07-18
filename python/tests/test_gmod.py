@@ -53,21 +53,32 @@ class TestGmod(unittest.TestCase):
                     if code_len < min_len:
                         min_len = code_len
                         min_code = node.code
+                    elif code_len == min_len and min_code is not None:
+                        # Find lexicographically smallest code of minimum length
+                        if node.code < min_code:
+                            min_code = node.code
+
                     if code_len > max_len:
                         max_len = code_len
                         max_code = node.code
+                    elif code_len == max_len and max_code is not None:
+                        # Find lexicographically largest code of maximum length
+                        if node.code > max_code:
+                            max_code = node.code
 
                 assert min_len == 2, "Minimum code length should be 2"
                 assert min_code == "VE", "Minimum code should be 'VE'"
                 assert max_len == 10, "Maximum code length should be 10"
-                possible_max = ["C1053.3111", "H346.11113"]
+                possible_max = ["C1053.3114", "H346.11113"]
                 assert max_code in possible_max, (
-                    f"Maximum code should be one of {possible_max}"
+                    f"Maximum code should be one of {possible_max}, "
+                    f"but got: {max_code} for version: {version.value}"
                 )
 
-                expected_counts = [6420, 6557, 6672, 6335]
+                expected_counts = [6335, 6420, 6553, 6557, 6672]
                 assert node_count in expected_counts, (
-                    f"Node count for version {version} should be one of {expected_counts}, count is {node_count}"  # noqa: E501
+                    f"Node count for version {version.value} should be one of {expected_counts}, "  # noqa: E501
+                    f"but got: {node_count}"
                 )
 
     def test_gmod_lookup(self) -> None:
