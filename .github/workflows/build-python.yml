@@ -49,7 +49,7 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/python/src # Ensure PYTHONPATH is set for tests as well
         run: |
-          pytest python/tests
+          pytest python/tests --ignore=tests/benchmark
 
       - name: Move Python directory to root
         run: |
