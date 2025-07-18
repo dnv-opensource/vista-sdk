@@ -13,10 +13,10 @@ class VisVersion(enum.Enum):
 
     v3_4a = "3-4a"
     v3_8a = "3-8a"
+    v3_9a = "3-9a"
     v3_6a = "3-6a"
     v3_5a = "3-5a"
     v3_7a = "3-7a"
-    v3_9a = "3-9a"
 
 
 class VisVersionExtension:
@@ -27,11 +27,11 @@ class VisVersionExtension:
         """Convert a VisVersion enum to its string representation."""
         version_map = {
             VisVersion.v3_4a: "3-4a",
-            VisVersion.v3_5a: "3-5a",
-            VisVersion.v3_6a: "3-6a",
-            VisVersion.v3_7a: "3-7a",
             VisVersion.v3_8a: "3-8a",
             VisVersion.v3_9a: "3-9a",
+            VisVersion.v3_6a: "3-6a",
+            VisVersion.v3_5a: "3-5a",
+            VisVersion.v3_7a: "3-7a",
         }
         v = version_map.get(version)
         if v is None:
@@ -66,11 +66,11 @@ class VisVersions:
         """Try to parse a string into a VisVersion enum."""
         version_map = {
             "3-4a": VisVersion.v3_4a,
-            "3-5a": VisVersion.v3_5a,
-            "3-6a": VisVersion.v3_6a,
-            "3-7a": VisVersion.v3_7a,
             "3-8a": VisVersion.v3_8a,
             "3-9a": VisVersion.v3_9a,
+            "3-6a": VisVersion.v3_6a,
+            "3-5a": VisVersion.v3_5a,
+            "3-7a": VisVersion.v3_7a,
         }
         if version_str not in version_map:
             raise ValueError(f"Invalid VisVersion string: {version_str}")
