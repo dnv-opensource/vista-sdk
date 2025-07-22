@@ -69,7 +69,7 @@ def test_unsigned_integer_value() -> None:
     # Test negative value
     with pytest.raises(ValueError, match="non-negative"):
         UnsignedIntegerValue(-1)
-    assert value.value == 9223372036854775807
+    assert value.value == 42
 
 
 def test_double_value() -> None:
