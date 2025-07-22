@@ -85,7 +85,7 @@ class UniversalId(IUniversalId):
             ValueError: If the string cannot be parsed as a valid Universal ID
         """
         # Import at runtime to avoid circular imports
-        from .universal_id_builder import UniversalIdBuilder  # noqa: PLC0415
+        from .universal_id_builder import UniversalIdBuilder
 
         return UniversalIdBuilder.parse(universal_id_str).build()
 
@@ -102,7 +102,7 @@ class UniversalId(IUniversalId):
             If parsing fails, success will be False and universal_id will be None.
         """
         # Import at runtime to avoid circular imports
-        from .universal_id_builder import UniversalIdBuilder  # noqa: PLC0415
+        from .universal_id_builder import UniversalIdBuilder
 
         builder = UniversalIdBuilder.try_parse_simple(universal_id_str)
         if builder is None:
@@ -129,7 +129,7 @@ class UniversalId(IUniversalId):
             will contain the parsing errors, and universal_id will be None.
         """
         # Import at runtime to avoid circular imports
-        from .universal_id_builder import UniversalIdBuilder  # noqa: PLC0415
+        from .universal_id_builder import UniversalIdBuilder
 
         success, errors, builder = UniversalIdBuilder.try_parse_with_errors(
             universal_id_str
