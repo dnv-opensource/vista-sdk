@@ -1,4 +1,4 @@
-"""This module generates a Python script defining the VisVersion enum and related classes."""
+"""This module generates a Python script defining the VisVersion enum and related classes."""  # noqa : E501
 
 import argparse
 from pathlib import Path
@@ -35,7 +35,7 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write("class VisVersion(enum.Enum):\n")
         f.write('    """Enumeration of VIS versions.\n\n')
         f.write(
-            "    Represents the various versions of the Vessel Information Structure (VIS).\n"
+            "    Represents the various versions of the Vessel Information Structure (VIS).\n"  # noqa : E501
         )
         f.write('    """\n\n')
 
@@ -49,7 +49,7 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
 
         f.write("    @staticmethod\n")
         f.write(
-            "    def to_version_string(version: VisVersion, builder: list[str] | None = None) -> str:\n"
+            "    def to_version_string(version: VisVersion, builder: list[str] | None = None) -> str:\n"  # noqa : E501
         )
         f.write(
             '        """Convert a VisVersion enum to its string representation."""\n'
@@ -62,7 +62,7 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write("        v = version_map.get(version)\n")
         f.write("        if v is None:\n")
         f.write(
-            '            raise ValueError(f"Invalid VisVersion enum value: {version}")\n'
+            '            raise ValueError(f"Invalid VisVersion enum value: {version}")\n'  # noqa : E501
         )
         f.write("        if builder is not None:\n")
         f.write("            builder.append(v)\n")
@@ -70,7 +70,7 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
 
         f.write("\n    @staticmethod\n")
         f.write(
-            "    def to_string(version: VisVersion, builder: list[str] | None = None) -> str:\n"
+            "    def to_string(version: VisVersion, builder: list[str] | None = None) -> str:\n"  # noqa : E501
         )
         f.write(
             '        """Convert a VisVersion enum to its string representation."""\n'
@@ -93,7 +93,7 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write('        """Get all available VIS versions."""\n')
         f.write("        return [\n")
         f.write(
-            "            version for version in VisVersion if VisVersions.try_parse(version.value)\n"
+            "            version for version in VisVersion if VisVersions.try_parse(version.value)\n"  # noqa : E501
         )
         f.write("        ]\n")
 
@@ -107,7 +107,7 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write("        }\n")
         f.write("        if version_str not in version_map:\n")
         f.write(
-            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'
+            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'  # noqa : E501
         )
         f.write("        return version_map[version_str]\n")
 
@@ -117,7 +117,7 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write("        version = VisVersions.try_parse(version_str)\n")
         f.write("        if version is None:\n")
         f.write(
-            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'
+            '            raise ValueError(f"Invalid VisVersion string: {version_str}")\n'  # noqa : E501
         )
         f.write("        return version\n")
 

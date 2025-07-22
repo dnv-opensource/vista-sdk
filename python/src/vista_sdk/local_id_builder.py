@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, TypeVar
 
-from vista_sdk.codebook_names import CodebookName
+from vista_sdk.codebook_names import CodebookName, CodebookNames
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.local_id_items import LocalIdItems
 from vista_sdk.metadata_tag import MetadataTag
-from vista_sdk.vis_version import VisVersion, VisVersions
+from vista_sdk.parsing_errors import ParsingErrors
+from vista_sdk.vis_version import VisVersion, VisVersionExtension, VisVersions
 
 # Forward references to avoid circular imports
 T = TypeVar("T")
@@ -406,6 +407,23 @@ class LocalIdBuilder:
 
         return MqttLocalId(self)
 
+    @staticmethod
+    def try_parse(
+        local_id_str: str,
+    ) -> tuple[bool, ParsingErrors, LocalIdBuilder | None]:
+        """Attempt to parse a string into a LocalIdBuilder.
+
+        Args:
+            local_id_str: The string to parse
+
+        Returns:
+            A tuple containing a boolean indicating success,
+            any parsing errors, and the resulting LocalIdBuilder
+        """
+        from vista_sdk.local_id_builder_parsing import LocalIdBuilderParsing
+
+        return LocalIdBuilderParsing().try_parse(local_id_str)
+
     @property
     def has_custom_tag(self) -> bool:
         """Check if this builder has any custom tags."""
@@ -519,8 +537,6 @@ class LocalIdBuilder:
 
     def to_string(self, builder: list[str]) -> None:
         """Convert this builder to a string."""
-        from vista_sdk.vis_version import VisVersionExtension
-
         if self._vis_version is None:
             raise ValueError("No VIS version configured on LocalId")
 
@@ -553,8 +569,6 @@ class LocalIdBuilder:
     @staticmethod
     def _append_meta(builder: list[str], tag: MetadataTag | None) -> None:
         """Append a metadata tag to the string builder."""
-        from vista_sdk.codebook_names import CodebookNames
-
         if tag is not None and isinstance(tag, MetadataTag):
             prefix = CodebookNames.to_prefix(tag.name)
             builder.append(f"{prefix}{tag.prefix}{tag.value}/")

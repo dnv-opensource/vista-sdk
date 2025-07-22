@@ -88,6 +88,12 @@ class GmodNode:
             return False
         return not (self.location is not None and other.location is None)
 
+    def __hash__(self) -> int:
+        """Return a hash of the GmodNode based on immutable fields."""
+        # Use the code and location value (if available) for hashing
+        location_value = self.location.value if self.location else None
+        return hash((self.code, location_value))
+
     def without_location(self) -> GmodNode:
         """Return a new node without the location."""
         return GmodNode(

@@ -10,7 +10,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from vista_sdk.gmod_path import GmodPath
-from vista_sdk.local_id_builder_parsing import LocalIdBuilderParsing
 from vista_sdk.metadata_tag import MetadataTag
 from vista_sdk.parsing_errors import ParsingErrors
 from vista_sdk.vis_version import VisVersion
@@ -146,6 +145,8 @@ class LocalId:
         Raises:
             ValueError: If the parsing fails.
         """
+        from vista_sdk.local_id_builder_parsing import LocalIdBuilderParsing
+
         parser = LocalIdBuilderParsing()
         return parser.parse(local_id_str).build()
 
@@ -162,6 +163,8 @@ class LocalId:
             - The parsing errors encountered.
             - The resulting LocalId, or None if parsing failed.
         """
+        from vista_sdk.local_id_builder_parsing import LocalIdBuilderParsing
+
         parser = LocalIdBuilderParsing()
 
         success, errors, builder = parser.try_parse(local_id_str)
