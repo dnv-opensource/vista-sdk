@@ -37,7 +37,7 @@ def test_iso8601_datetime(value: str, expected_valid: bool):
 
 # Test DataChannelList Schema Validation
 @pytest.mark.parametrize("file_path", [
-    "tests/transport/json/_files/DataChannelList.json"
+    "tests/transport/json/DataChannelList.json"
 ])
 def test_data_channel_list_schema_validation(file_path):
     with open(file_path) as f:
@@ -54,7 +54,7 @@ def test_data_channel_list_schema_validation(file_path):
 
 # Test TimeSeriesData Schema Validation
 @pytest.mark.parametrize("file_path", [
-    "tests/transport/json/_files/TimeSeriesData.json"
+    "tests/transport/json/TimeSeriesData.json"
 ])
 def test_time_series_data_schema_validation(file_path):
     with open(file_path) as f:
