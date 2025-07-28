@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timezone, timedelta
 import pytest
 from vista_sdk.system_text_json import (
@@ -36,10 +37,11 @@ def test_iso8601_datetime(value: str, expected_valid: bool):
             DateTimeConverter.parse(value)
 
 # Test DataChannelList Schema Validation
-@pytest.mark.parametrize("file_path", [
-    "tests/transport/json/DataChannelList.json"
+@pytest.mark.parametrize("file_name", [
+    "DataChannelList.json"
 ])
-def test_data_channel_list_schema_validation(file_path):
+def test_data_channel_list_schema_validation(file_name):
+    file_path = os.path.join(os.path.dirname(__file__), "json", file_name)
     with open(file_path) as f:
         json_str = f.read()
 
@@ -53,10 +55,11 @@ def test_data_channel_list_schema_validation(file_path):
     assert data == data2
 
 # Test TimeSeriesData Schema Validation
-@pytest.mark.parametrize("file_path", [
-    "tests/transport/json/TimeSeriesData.json"
+@pytest.mark.parametrize("file_name", [
+    "TimeSeriesData.json"
 ])
-def test_time_series_data_schema_validation(file_path):
+def test_time_series_data_schema_validation(file_name):
+    file_path = os.path.join(os.path.dirname(__file__), "json", file_name)
     with open(file_path) as f:
         json_str = f.read()
 
