@@ -318,7 +318,6 @@ class TestClientIntegration:
 
         try:
             result = Client.get_locations(self.TEST_VIS_VERSION)
-            # print(f"Locations: {result.items[:1]}")  # Debug output
             assert isinstance(result, LocationsDto)
         except FileNotFoundError:
             pytest.skip("Resource files not available - skipping integration test")
@@ -329,7 +328,6 @@ class TestClientIntegration:
 
         try:
             result = Client.get_gmod(self.TEST_VIS_VERSION)
-            # print(f"GMOD: {result.items[:1]}")  # Debug output
             assert isinstance(result, GmodDto)
         except FileNotFoundError:
             pytest.skip("Resource files not available - skipping integration test")
@@ -340,7 +338,6 @@ class TestClientIntegration:
 
         try:
             result = Client.get_gmod_versioning(self.TEST_VIS_VERSION)
-            # print(f"GMOD Versioning: {result.items}")  # Debug output
             assert isinstance(result, GmodVersioningDto)
         except FileNotFoundError:
             pytest.skip("Resource files not available - skipping integration test")
@@ -351,7 +348,6 @@ class TestClientIntegration:
 
         try:
             result = Client.get_codebooks(self.TEST_VIS_VERSION)
-            # print(f"Codebooks: {result.items[:1]}")  # Debug output
             assert isinstance(result, CodebooksDto)
         except FileNotFoundError:
             pytest.skip("Resource files not available - skipping integration test")

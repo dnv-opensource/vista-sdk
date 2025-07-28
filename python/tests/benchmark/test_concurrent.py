@@ -71,7 +71,6 @@ def test_parallel_gmod_operations() -> None:
     assert all(count > 0 for count in results)
 
 
-@pytest.mark.skip("Codebooks not yet implemented")
 @pytest.mark.asyncio
 async def test_concurrent_resource_loading() -> None:
     """Test concurrent loading of resources like codebooks and locations."""

@@ -22,7 +22,6 @@ class TestLocations:
 
     def test_locations_loads(self) -> None:
         """Test that locations are loaded correctly."""
-        print("Locations loaded:", self.locations)
         assert self.locations is not None
         assert self.locations.groups is not None
 

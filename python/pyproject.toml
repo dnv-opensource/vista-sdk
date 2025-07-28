@@ -17,6 +17,10 @@ dependencies = [
     "types-cachetools>=6.0.0.20250525",
     "types-psutil>=7.0.0.20250601",
     "pytest-cov>=6.1.1",
+    "pytest>=8.4.0",
+    "pytest-benchmark>=5.1.0",
+    "psutil>=7.0.0",
+    "brotli>=1.1.0",
 ]
 
 [dependency-groups]
