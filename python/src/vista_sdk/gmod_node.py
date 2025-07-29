@@ -14,29 +14,23 @@ from vista_sdk.parsing_errors import ParsingErrors
 from vista_sdk.vis_version import VisVersion
 
 
+@dataclass(frozen=True)
 class GmodNodeMetadata:
     """Metadata for a node in the General Maritime Object Data (GMOD) tree."""
 
-    def __init__(
-        self,
-        category: str,
-        type_val: str,
-        name: str,
-        common_name: str | None,
-        definition: str | None,
-        common_definition: str | None,
-        install_substructure: bool | None,
-        normal_assignment_names: dict[str, str] | None = None,
-    ) -> None:
-        """Initialize GmodNodeMetadata with the provided parameters."""
-        self.category = category
-        self.type = type_val
-        self.name = name
-        self.common_name = common_name
-        self.definition = definition
-        self.common_definition = common_definition
-        self.install_substructure = install_substructure
-        self.normal_assignment_names = normal_assignment_names
+    category: str
+    type_val: str
+    name: str
+    common_name: str | None
+    definition: str | None
+    common_definition: str | None
+    install_substructure: bool | None
+    normal_assignment_names: dict[str, str] | None = None
+
+    @property
+    def type(self) -> str:
+        """Get the type value."""
+        return self.type_val
 
     @property
     def full_type(self) -> str:
@@ -76,23 +70,21 @@ class GmodNode:
         """Check equality of two GmodNode instances."""
         if not isinstance(other, GmodNode):
             return NotImplemented
-        if self.code != other.code:
-            return False
-        if (
-            self.location is not None
-            and other.location is not None
-            and self.location.value != other.location.value
-        ):
-            return False
-        if self.location is None and other.location is not None:
-            return False
-        return not (self.location is not None and other.location is None)
+        return (
+            self.code == other.code
+            and self.metadata.category == other.metadata.category
+            and self.metadata.type == other.metadata.type
+            and (
+                (self.location is None and other.location is None)
+                or (self.location is not None and other.location is not None
+                    and self.location.value == other.location.value)
+            )
+        )
 
     def __hash__(self) -> int:
         """Return a hash of the GmodNode based on immutable fields."""
-        # Use the code and location value (if available) for hashing
-        location_value = self.location.value if self.location else None
-        return hash((self.code, location_value))
+        # Use only the immutable parts for hashing
+        return hash((self.code, self.metadata.category, self.metadata.type))
 
     def without_location(self) -> GmodNode:
         """Return a new node without the location."""

@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timezone, timedelta
 import pytest
 from vista_sdk.system_text_json import (
-    TimeSeriesDataPackage, DataChannelList,
+    TimeSeriesDataPackage, DataChannelListPackage,
     JsonSerializer, time_series_to_json_dto,
     data_channel_list_to_json_dto
 )
@@ -36,27 +36,27 @@ def test_iso8601_datetime(value: str, expected_valid: bool):
 
 # Test DataChannelList Schema Validation
 @pytest.mark.parametrize("file_path", [
-    "schemas/json/DataChannelList.sample.json",
-    "schemas/json/DataChannelList.sample.compact.json"
+    "/home/oleeko/workspace/vista-sdk/schemas/json/DataChannelList.sample.json",
+    "/home/oleeko/workspace/vista-sdk/schemas/json/DataChannelList.sample.compact.json"
 ])
 def test_data_channel_list_schema_validation(file_path):
     with open(file_path) as f:
         json_str = f.read()
 
     # Test deserialization
-    data = JsonSerializer.deserialize(json_str, DataChannelList)
+    data = JsonSerializer.deserialize(json_str, DataChannelListPackage)
     assert data is not None
 
     # Test serialization round-trip
     json_str2 = JsonSerializer.serialize(data)
-    data2 = JsonSerializer.deserialize(json_str2, DataChannelList)
+    data2 = JsonSerializer.deserialize(json_str2, DataChannelListPackage)
 
     # Compare objects
     assert data == data2
 
 # Test TimeSeriesData Schema Validation
 @pytest.mark.parametrize("file_path", [
-    "schemas/json/TimeSeriesData.sample.json"
+    "/home/oleeko/workspace/vista-sdk/schemas/json/TimeSeriesData.sample.json"
 ])
 def test_time_series_data_schema_validation(file_path):
     with open(file_path) as f:
@@ -90,6 +90,7 @@ def test_time_series_data_conversion():
             self.ShipId = "123"
             self.TimeSpan = MockTimeSpan()
             self.DateCreated = datetime.now(timezone.utc)
+            self.DateModified = datetime.now(timezone.utc)
             self.Author = "Test"
             self.SystemConfiguration = None
             self.CustomHeaders = None
@@ -110,7 +111,7 @@ def test_time_series_data_conversion():
     assert isinstance(json_dto.Package.Header.TimeSpan.Start, datetime)
     assert isinstance(json_dto.Package.Header.TimeSpan.End, datetime)
 
-# Test conversion from domain objects for DataChannelList
+    # Test conversion from domain objects for DataChannelList
 def test_data_channel_list_conversion():
     # Create a mock domain object
     class MockDataChannelList:
@@ -121,7 +122,9 @@ def test_data_channel_list_conversion():
     class MockHeader:
         def __init__(self):
             self.ShipId = "123"
+            self.DataChannelListID = "config-123"
             self.DateCreated = datetime.now(timezone.utc)
+            self.DateModified = datetime.now(timezone.utc)
             self.Author = "Test"
             self.SystemConfiguration = None
             self.CustomHeaders = None
@@ -131,7 +134,7 @@ def test_data_channel_list_conversion():
     json_dto = data_channel_list_to_json_dto(domain_obj)
 
     # Verify conversion
-    assert isinstance(json_dto, DataChannelList)
-    assert json_dto.Header.ShipID == "123"
-    assert json_dto.Header.Author == "Test"
-    assert isinstance(json_dto.Header.DateCreated, datetime)
+    assert isinstance(json_dto, DataChannelListPackage)
+    assert json_dto.Package.Header.ShipID == "123"
+    assert json_dto.Package.Header.Author == "Test"
+    assert isinstance(json_dto.Package.Header.DateCreated, datetime)
