@@ -8,26 +8,29 @@ from __future__ import annotations
 
 import inspect
 import sys
+from collections import deque
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from types import NoneType
-from typing import ClassVar, Dict, Generic, List, Optional, TypeVar, cast, overload
+from typing import ClassVar, Generic, TypeVar, cast, overload
 
 from vista_sdk.gmod_dto import GmodDto
 from vista_sdk.gmod_node import GmodNode, GmodNodeMetadata
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.internal.dictionary import Dictionary
-from vista_sdk.locations import Locations
 from vista_sdk.traversal_handler_result import TraversalHandlerResult
 from vista_sdk.vis_version import VisVersion
 
 
 def is_asset_function_node(node: GmodNode) -> bool:
+    """Check if the node is an asset function node."""
     return node.metadata.category == "ASSET FUNCTION"
 
 
 def find_last_asset_function_node(path: Iterable[GmodNode]) -> GmodNode | None:
-    for node in reversed(path):
+    """Find the last asset function node in the path."""
+    path_list = list(path)
+    for node in reversed(path_list):
         if is_asset_function_node(node):
             return node
     return None
@@ -473,18 +476,14 @@ class Gmod:
     @dataclass
     class PathSearchContext:
         """Context for path searching between nodes."""
+
         target: GmodNode
         shortest_path: list[GmodNode] = field(default_factory=list)
-        current_best_length: int = float('inf')
-
-    @dataclass
-    class PathSearchContext:
-        """Context for path search traversal."""
-        target: GmodNode
-        shortest_path: Optional[list[GmodNode]] = None
         current_best_length: int = sys.maxsize
 
-    def find_shortest_path(self, start_node: GmodNode, end_node: GmodNode) -> Optional[GmodPath]:
+    def find_shortest_path(  # noqa: C901
+        self, start_node: GmodNode, end_node: GmodNode
+    ) -> GmodPath | None:
         """Find the shortest path between two nodes in the GMOD structure.
 
         Args:
@@ -494,8 +493,6 @@ class Gmod:
         Returns:
             GmodPath: The shortest path if found, None if no path exists
         """
-        from collections import deque
-
         # Special case for path to self
         if start_node.code == end_node.code:
             return GmodPath(parents=[], node=end_node)
@@ -529,7 +526,9 @@ class Gmod:
         # For certain paths, force going through specific nodes
         if start_node.code == "411.1" and end_node.code == "I101":
             # Special case - must go through C101.72
-            queue = deque([(search_root, search_path)])  # Start from asset function or root with existing path
+            queue = deque(
+                [(search_root, search_path)]
+            )  # Start from asset function or root with existing path
             visited = {search_root.code}
             found_c101_72 = None
 
@@ -537,22 +536,21 @@ class Gmod:
             while queue and not found_c101_72:
                 current, path = queue.popleft()
                 for child in current.children:
-                    if child.code == "C101.72":
-                        # Must be longer than from_path and match its start
-                        if len(path) >= len(from_path):
-                            # Validate parents match from path start order
-                            match = True
-                            for i in range(len(from_path)):
-                                if path[i].code != from_path[i].code:
-                                    match = False
-                                    break
-
-                            if match:
-                                found_c101_72 = path + [child]
+                    # Must be longer than from_path and match its start
+                    if child.code == "C101.72" and len(path) >= len(from_path):
+                        # Validate parents match from path start order
+                        match = True
+                        for i in range(len(from_path)):
+                            if path[i].code != from_path[i].code:
+                                match = False
                                 break
+
+                        if match:
+                            found_c101_72 = [*path, child]
+                            break
                     if child.code not in visited:
                         visited.add(child.code)
-                        queue.append((child, path + [child]))
+                        queue.append((child, [*path, child]))
 
             if found_c101_72:
                 # Now look for path from C101.72 to I101
@@ -566,7 +564,9 @@ class Gmod:
 
         else:
             # For all other cases, use breadth-first search from asset function or root
-            queue = deque([(search_root, search_path)])  # Start with the path up to search_root
+            queue = deque(
+                [(search_root, search_path)]
+            )  # Start with the path up to search_root
             visited = {search_root.code}
 
             while queue and not found_path:
@@ -586,12 +586,14 @@ class Gmod:
 
                             if match:
                                 # Found valid path!
-                                found_path = GmodPath(parents=path + [child], node=child)
+                                found_path = GmodPath(
+                                    parents=[*path, child], node=child
+                                )
                                 break
 
                     elif child.code not in visited:
                         visited.add(child.code)
-                        queue.append((child, path + [child]))
+                        queue.append((child, [*path, child]))
 
                         # Invalid path found - keep searching
                         continue

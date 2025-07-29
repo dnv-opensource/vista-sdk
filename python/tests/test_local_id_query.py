@@ -32,12 +32,14 @@ def create_tag_configurator(
 @dataclass
 class TestData:
     """Test data for local ID query tests."""
+
     local_id: str
     query: LocalIdQuery
     expected_match: bool
 
+
 @pytest.fixture(params=[])
-def test_data():
+def test_data() -> list[TestData]:
     """Test data fixture."""
     return []
 

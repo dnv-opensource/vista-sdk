@@ -144,7 +144,7 @@ class TestGmodPath(unittest.TestCase):
         test_paths = [
             ("411.1/C101.72/I101", VisVersion.v3_4a),
             ("612.21-1/C701.13/S93", VisVersion.v3_4a),
-            ("846/G203.32-2/S110.2-1/E31", VisVersion.v3_4a)
+            ("846/G203.32-2/S110.2-1/E31", VisVersion.v3_4a),
         ]
 
         for path_str, version in test_paths:

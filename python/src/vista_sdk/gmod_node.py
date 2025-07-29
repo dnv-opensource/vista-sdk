@@ -76,8 +76,11 @@ class GmodNode:
             and self.metadata.type == other.metadata.type
             and (
                 (self.location is None and other.location is None)
-                or (self.location is not None and other.location is not None
-                    and self.location.value == other.location.value)
+                or (
+                    self.location is not None
+                    and other.location is not None
+                    and self.location.value == other.location.value
+                )
             )
         )
 

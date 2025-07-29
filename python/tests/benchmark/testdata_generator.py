@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 
 from tests.testdata import TestData
-
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion

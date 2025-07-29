@@ -201,10 +201,17 @@ class GmodPath:
 
     def __str__(self) -> str:
         """Return a string representation of the path."""
+        # Build path from leaf nodes and the final node only
         path_parts = []
+
+        # Add all parent nodes that are leaf nodes
         for parent in self.parents:
-            path_parts.append(parent.code)
-        path_parts.append(self.node.code)
+            if parent.is_leaf_node():
+                path_parts.append(str(parent))  # Use str() to include location
+
+        # Always add the final node
+        path_parts.append(str(self.node))  # Use str() to include location
+
         return "/".join(path_parts)
 
     @property
@@ -238,13 +245,6 @@ class GmodPath:
         new_parents = [parent.without_location() for parent in self.parents]
         new_node = self.node.without_location()
         return GmodPath(new_parents, new_node)
-
-    def __str__(self) -> str:
-        """Return a string representation of the GmodPath."""
-        return "/".join(
-            [parent.__str__() for parent in self.parents if parent.is_leaf_node()]
-            + [self.node.__str__()]
-        )
 
     def to_full_path_string(self) -> str:
         """Return the full path as a string representation."""
@@ -331,22 +331,32 @@ class GmodPath:
         """Get the full path as a list of tuples (depth, GmodNode)."""
         result = []
         for i, parent in enumerate(self.parents):
-            result.append((i, GmodNode(
-                vis_version=parent.vis_version,
-                code=parent.code,
-                metadata=parent.metadata,
-                location=parent.location,
-                children=[],
-                parents=[]
-            )))
-        result.append((len(self.parents), GmodNode(
-            vis_version=self.node.vis_version,
-            code=self.node.code,
-            metadata=self.node.metadata,
-            location=self.node.location,
-            children=[],
-            parents=[]
-        )))
+            result.append(
+                (
+                    i,
+                    GmodNode(
+                        vis_version=parent.vis_version,
+                        code=parent.code,
+                        metadata=parent.metadata,
+                        location=parent.location,
+                        children=[],
+                        parents=[],
+                    ),
+                )
+            )
+        result.append(
+            (
+                len(self.parents),
+                GmodNode(
+                    vis_version=self.node.vis_version,
+                    code=self.node.code,
+                    metadata=self.node.metadata,
+                    location=self.node.location,
+                    children=[],
+                    parents=[],
+                ),
+            )
+        )
         return result
 
     def get_full_path_from(self, from_depth: int) -> GmodPath.Enumerator:
@@ -397,7 +407,7 @@ class GmodPath:
         self, space_delimiter: str = " ", end_delimiter: str = "/"
     ) -> str:
         """Convert the GmodPath to a verbose string representation."""
-        from vista_sdk.vis import VIS
+        from vista_sdk.vis import VIS  # noqa : PLC0415
 
         builder = []
         for depth, common_name in self.get_common_names():
@@ -455,7 +465,7 @@ class GmodPath:
     @staticmethod
     def parse(item: str, arg=None, arg2=None) -> GmodPath:
         """Parse a string into a GmodPath based on the provided arguments."""
-        from vista_sdk.gmod import Gmod
+        from vista_sdk.gmod import Gmod  # noqa: PLC0415
 
         if type(arg) is VisVersion and arg2 is None:
             path_result = GmodPath.try_parse(item, arg=arg)
@@ -506,8 +516,8 @@ class GmodPath:
         gmod=None,
     ) -> tuple[bool, GmodPath | None]:  # return None for failure
         """Try to parse a string into a GmodPath based on the provided arguments."""
-        from vista_sdk.gmod import Gmod
-        from vista_sdk.vis import VIS
+        from vista_sdk.gmod import Gmod  # noqa: PLC0415
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         if item is None or not item.strip():
             return False, None
@@ -532,7 +542,7 @@ class GmodPath:
         locations: Locations,
     ) -> GmodParsePathResult.Ok | GmodParsePathResult.Err:
         """Internal method to parse a string into a GmodPath."""
-        from vista_sdk.gmod import Gmod
+        from vista_sdk.gmod import Gmod  # noqa: PLC0415
 
         if gmod.vis_version != locations.vis_version:
             return GmodParsePathResult.Err(
@@ -706,8 +716,8 @@ class GmodPath:
         path_str: str, gmod=None, arg=None
     ) -> tuple[bool, GmodPath | None]:
         """Try to parse a full path string into a GmodPath."""
-        from vista_sdk.gmod import Gmod
-        from vista_sdk.vis import VIS
+        from vista_sdk.gmod import Gmod  # noqa: PLC0415
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         if type(arg) is VisVersion and gmod is None:
             vis = VIS()
@@ -725,7 +735,7 @@ class GmodPath:
     @staticmethod
     def parse_full_path(path_str: str, vis_version: VisVersion) -> GmodPath:
         """Parse a full path string into a GmodPath using the provided VisVersion."""
-        from vista_sdk.vis import VIS
+        from vista_sdk.vis import VIS  # noqa: PLC0415
 
         vis = VIS()
         gmod = vis.get_gmod(vis_version)

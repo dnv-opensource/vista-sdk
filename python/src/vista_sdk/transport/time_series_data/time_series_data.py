@@ -147,7 +147,7 @@ class TimeSeriesData:
                 if len(dataset.value) != table.number_of_data_channels:
                     return Invalid(
                         [
-                            f"Tabular data set {i} expects {len(table.data_channel_ids)} values, "
+                            f"Tabular data set {i} expects {len(table.data_channel_ids)} values, "  # noqa : E501
                             f"but {len(dataset.value)} values are provided"
                         ]
                     )
@@ -203,12 +203,17 @@ class TimeSeriesData:
                         if dataset.quality and j < len(dataset.quality)
                         else None
                     )
-                    result = on_tabular_data(
-                        dataset.time_stamp, data_channel, parsed_value, quality
-                    )
+                    # Only call on_tabular_data if parsed_value is not None
+                    # parsed_value is guaranteed not None here
+                    if parsed_value is not None:
+                        result = on_tabular_data(
+                            dataset.time_stamp, data_channel, parsed_value, quality
+                        )
 
-                    if not isinstance(result, Ok):
-                        erroneous_data_channels.append((data_channel_id, str(result)))
+                        if not isinstance(result, Ok):
+                            erroneous_data_channels.append(
+                                (data_channel_id, str(result))
+                            )
 
         # Validate event data
         if self.event_data and self.event_data.data_set:
@@ -257,16 +262,21 @@ class TimeSeriesData:
                     continue
 
                 parsed_value = type_validation[1]
-                result = on_event_data(
-                    event_data_item.time_stamp,
-                    data_channel,
-                    parsed_value,
-                    event_data_item.quality,
-                )
+                if parsed_value is not None:
+                    result = on_event_data(
+                        event_data_item.time_stamp,
+                        data_channel,
+                        parsed_value,
+                        event_data_item.quality,
+                    )
 
-                if not isinstance(result, Ok):
+                    if not isinstance(result, Ok):
+                        erroneous_data_channels.append(
+                            (event_data_item.data_channel_id, str(result))
+                        )
+                else:
                     erroneous_data_channels.append(
-                        (event_data_item.data_channel_id, str(result))
+                        (event_data_item.data_channel_id, "Parsed value is None")
                     )
 
         if erroneous_data_channels:

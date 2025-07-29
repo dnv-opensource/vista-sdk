@@ -3,17 +3,15 @@
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
-from vista_sdk.gmod_path import GmodPath
-from vista_sdk.locations import Locations
-from vista_sdk.vis import VIS
-from vista_sdk.vis_version import VisVersion
-
 from tests.benchmark.benchmark_base import (
     BenchmarkConfig,
-    run_benchmark,
     MethodOrderPolicy,
-    SummaryOrderPolicy
+    SummaryOrderPolicy,
+    run_benchmark,
 )
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
 
 
 @pytest.mark.benchmark(group="gmod")
@@ -21,7 +19,7 @@ class TestGmodPathParse:
     """Mirror of C#'s GmodPathParse benchmark class."""
 
     @pytest.fixture(scope="class")
-    def setup_components(self):
+    def setup_components(self) -> dict:
         """Mirror of C#'s Setup method."""
         print("\nInitializing VIS components...")
         try:
@@ -41,56 +39,64 @@ class TestGmodPathParse:
                 raise ValueError("Failed to load Locations")
             print("Locations loaded successfully")
 
-            return {
-                'gmod': gmod,
-                'locations': locations
-            }
+            return {"gmod": gmod, "locations": locations}
         except Exception as e:
-            print(f"Error during setup: {str(e)}")
+            print(f"Error during setup: {e!s}")
             raise
 
-    @pytest.mark.parametrize("category,path_str", [
-        ("Short", "400"),
-        ("Complex", "H346.11112"),
-        ("WithLocation", "411.1/C101.72/I101"),
-        ("FullPath", "411.1/C101.72/I101.12/S206.1"),
-        ("WithDetail", "411.1/C101.72/I101.12/S206.1/D2")
-    ])
-    def test_path_parsing(self, benchmark: BenchmarkFixture, setup_components, category: str, path_str: str) -> None:
+    @pytest.mark.parametrize(
+        ("category", "path_str"),
+        [
+            ("Short", "400"),
+            ("Complex", "H346.11112"),
+            ("WithLocation", "411.1/C101.72/I101"),
+            ("FullPath", "411.1/C101.72/I101.12/S206.1"),
+            ("WithDetail", "411.1/C101.72/I101.12/S206.1/D2"),
+        ],
+    )
+    def test_path_parsing(
+        self,
+        benchmark: BenchmarkFixture,
+        setup_components: dict,
+        category: str,
+        path_str: str,
+    ) -> None:
         """Mirror of C#'s benchmark methods."""
         print(f"\nTesting path parsing for category: {category}, path: {path_str}")
-        gmod = setup_components['gmod']
+        gmod = setup_components["gmod"]
 
         def parse_path() -> GmodPath:
             try:
-                # For complex paths with full path information, use parse_full_path with "VE" prefix
-                if category in ['Complex', 'FullPath', 'WithDetail']:
+                if category in ["Complex", "FullPath", "WithDetail"]:
                     ve_path = f"VE/{path_str}"
-                    # Use version 3.4a for these complex paths as they might have a different structure
-                    version = VisVersion.v3_4a if 'I101.12' in path_str else gmod.vis_version
+                    version = (
+                        VisVersion.v3_4a if "I101.12" in path_str else gmod.vis_version
+                    )
                     result = GmodPath.parse_full_path(ve_path, version)
                 else:
                     result = gmod.parse_path(path_str)
                 return result
             except Exception as e:
-                print(f"\nError parsing path {path_str}: {str(e)}")
+                print(f"\nError parsing path {path_str}: {e!s}")
                 raise
 
         config = BenchmarkConfig(
             group="GmodPathParse",
             method_order=MethodOrderPolicy.Declared,
             summary_order=SummaryOrderPolicy.FastestToSlowest,
-            description=category
+            description=category,
         )
         result = run_benchmark(benchmark, parse_path, config)
         assert isinstance(result, GmodPath)
         assert str(result) == path_str
 
     @pytest.mark.benchmark(group="gmod")
-    def test_location_parsing(self, benchmark: BenchmarkFixture, setup_components) -> None:
+    def test_location_parsing(
+        self, benchmark: BenchmarkFixture, setup_components: dict
+    ) -> None:
         """Mirror of C#'s ParseLocation benchmark method."""
-        print(f"\nTesting location parsing")
-        locations = setup_components['locations']
+        print("\nTesting location parsing")
+        locations = setup_components["locations"]
         location_str = "411.1/C101.72/I101"
 
         def parse_location() -> bool:
@@ -98,14 +104,14 @@ class TestGmodPathParse:
                 success, result = locations.try_parse(location_str)
                 return success and result is not None
             except Exception as e:
-                print(f"\nError parsing location {location_str}: {str(e)}")
+                print(f"\nError parsing location {location_str}: {e!s}")
                 raise
 
         config = BenchmarkConfig(
             group="GmodPathParse",
             method_order=MethodOrderPolicy.Declared,
             summary_order=SummaryOrderPolicy.FastestToSlowest,
-            description="Location"
+            description="Location",
         )
         result = run_benchmark(benchmark, parse_location, config)
         assert result is True

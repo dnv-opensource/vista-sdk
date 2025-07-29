@@ -6,11 +6,11 @@ from pathlib import Path
 
 import pytest
 
+from vista_sdk.imo_number import ImoNumber
+
 # Add src to path for imports
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
-
-from vista_sdk.imo_number import ImoNumber
 
 
 class ImoTestDataItem:
