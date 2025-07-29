@@ -1,14 +1,22 @@
-from typing import Dict, List, Optional, Any
-from datetime import datetime
+"""Extensions for converting DataChannelList domain objects to JSON DTOs."""
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .data_channel_list import DataChannelListContainer
+
 from .data_channel_list import (
-    DataChannelListPackage, DataChannelListContainer, ChannelList,
-    Header, DataChannel, ChannelID, Property, DataChannelType,
-    Format, Range, Unit, NameObject, Restriction,
-    DataChannelListID, VersionInformation
+    ChannelList,
+    ConfigurationReference,
+    DataChannel,
+    DataChannelListContainer,
+    DataChannelListPackage,
+    Header,
 )
 
-def to_json_dto(domain_list: Any) -> DataChannelListPackage:
-    """Convert domain DataChannelList to JSON DTO"""
+
+def to_json_dto(domain_list: "DataChannelListContainer") -> DataChannelListPackage:
+    """Convert domain DataChannelList to JSON DTO."""
     h = domain_list.Header
 
     header = None
@@ -16,39 +24,29 @@ def to_json_dto(domain_list: Any) -> DataChannelListPackage:
         system_config = None
         if h.SystemConfiguration is not None:
             system_config = [
-                ConfigurationReference(
-                    ID=r.Id,
-                    TimeStamp=r.TimeStamp
-                ) for r in h.SystemConfiguration
+                ConfigurationReference(ID=r.ID, TimeStamp=r.TimeStamp)
+                for r in h.SystemConfiguration
             ]
 
         header = Header(
-            ShipID=str(h.ShipId),
+            ShipID=str(h.ShipID),
             DateCreated=h.DateCreated,
             DateModified=h.DateModified,
             Author=h.Author,
             SystemConfiguration=system_config,
-            CustomHeaders=h.CustomHeaders
+            CustomHeaders=h.CustomHeaders,
         )
 
     channels = []
-    for dc in domain_list.DataChannelList:
+    for dc in domain_list.DataChannelList.DataChannel:
         channel = DataChannel(
             DataChannelID=dc.DataChannelID,
-            LocalID=dc.LocalID,
             Property=dc.Property,
-            Quantity=dc.Quantity,
-            Quality=dc.Quality,
-            TabularParameters=dc.TabularParameters,
-            Package=dc.Package,
-            EventDefinitions=dc.EventDefinitions,
-            CustomMetadata=dc.CustomMetadata
         )
         channels.append(channel)
 
     channel_list = ChannelList(DataChannel=channels)
-    container = DataChannelListContainer(
-        Header=header,
-        DataChannelList=channel_list
-    )
+    if header is None:
+        raise ValueError("Header must not be None for DataChannelListContainer")
+    container = DataChannelListContainer(Header=header, DataChannelList=channel_list)
     return DataChannelListPackage(Package=container)

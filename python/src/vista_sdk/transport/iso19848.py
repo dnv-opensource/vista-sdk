@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Protocol, Union
+from typing import Protocol
 
 from vista_sdk.transport.iso19848_dtos import (
     DataChannelTypeNameDto,
@@ -29,9 +29,7 @@ class DataChannelTypeNames:
 
     def parse(
         self, value: str
-    ) -> Union[
-        DataChannelTypeNames.ParseResult.Ok, DataChannelTypeNames.ParseResult.Invalid
-    ]:
+    ) -> DataChannelTypeNames.ParseResult.Ok | DataChannelTypeNames.ParseResult.Invalid:
         """Parse a data channel type name."""
         for type_name in self._dto.values:
             if type_name.type == value:
@@ -67,7 +65,7 @@ class FormatDataTypes:
 
     def parse(
         self, value: str
-    ) -> Union[FormatDataTypes.ParseResult.Ok, FormatDataTypes.ParseResult.Invalid]:
+    ) -> FormatDataTypes.ParseResult.Ok | FormatDataTypes.ParseResult.Invalid:
         """Parse a format data type."""
         for type_name in self._dto.values:
             if type_name.type == value:

@@ -95,10 +95,7 @@ class TestGmodVersioning:
     @staticmethod
     def valid_test_data_node() -> list[list[Any]]:
         """Get test data for nodes."""
-        return [
-            ["1014.211", None, "1014.211"],
-            ["323.5", None, "323.6"]
-        ]
+        return [["1014.211", None, "1014.211"], ["323.5", None, "323.6"]]
 
     def test_gmod_versioning_convert_path_multiple_versions(self) -> None:
         """Test that paths can be converted through multiple versions."""
@@ -110,7 +107,9 @@ class TestGmodVersioning:
         target_version = VisVersion.v3_8a
 
         source_path_obj = GmodPath.parse(source_path, source_version)
-        target_path = self.vis.convert_path(source_version, source_path_obj, target_version)
+        target_path = self.vis.convert_path(
+            source_version, source_path_obj, target_version
+        )
 
         assert target_path is not None
         assert target_path.to_string() == expected_path_3_8
@@ -132,7 +131,7 @@ class TestGmodVersioning:
         source_nodes = [n for _, n in source_path.get_full_path()]
         target_nodes = [n for _, n in target_path.get_full_path()]
 
-        for s_node, t_node in zip(source_nodes, target_nodes):
+        for s_node, t_node in zip(source_nodes, target_nodes, strict=False):
             assert s_node.location == t_node.location
 
     @pytest.mark.parametrize("input_path", ["511.11/C101.663i/C663.6/C261"])

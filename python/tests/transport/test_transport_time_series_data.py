@@ -7,9 +7,13 @@ import pytest
 from vista_sdk.local_id import LocalId  # type: ignore
 from vista_sdk.result import Invalid, Ok  # type: ignore
 from vista_sdk.transport.ship_id import ShipId  # type: ignore
-from vista_sdk.transport.time_series_data.data_channel_id import DataChannelId  # type: ignore
+from vista_sdk.transport.time_series_data.data_channel_id import (
+    DataChannelId,  # type: ignore
+)
 from vista_sdk.transport.time_series_data.time_series_data import (  # type: ignore
     ConfigurationReference as TimeSeriesConfigurationReference,
+)
+from vista_sdk.transport.time_series_data.time_series_data import (
     EventData,
     EventDataSet,
     Header,

@@ -21,6 +21,7 @@ from .data_channel import (
 )
 
 __all__ = [
+    "ConfigurationReference",
     "DataChannel",
     "DataChannelId",
     "DataChannelList",
@@ -37,5 +38,4 @@ __all__ = [
     "Unit",
     "VersionInformation",
     "WhiteSpace",
-    "ConfigurationReference",
 ]

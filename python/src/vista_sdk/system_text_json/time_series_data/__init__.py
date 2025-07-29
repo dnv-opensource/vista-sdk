@@ -1,20 +1,29 @@
-from .time_series_data import (
-    TimeSeriesDataPackage, Package, Header, TimeSpan,
-    ConfigurationReference, TimeSeriesData, TabularData,
-    TabularRow, EventData, Event
-)
+"""This file is part of the VISTA SDK."""
+
 from .extensions import to_json_dto
+from .time_series_data import (
+    ConfigurationReference,
+    Event,
+    EventData,
+    Header,
+    Package,
+    TabularData,
+    TabularRow,
+    TimeSeriesData,
+    TimeSeriesDataPackage,
+    TimeSpan,
+)
 
 __all__ = [
-    'TimeSeriesDataPackage',
-    'Package',
-    'Header',
-    'TimeSpan',
-    'ConfigurationReference',
-    'TimeSeriesData',
-    'TabularData',
-    'TabularRow',
-    'EventData',
-    'Event',
-    'to_json_dto',
+    "ConfigurationReference",
+    "Event",
+    "EventData",
+    "Header",
+    "Package",
+    "TabularData",
+    "TabularRow",
+    "TimeSeriesData",
+    "TimeSeriesDataPackage",
+    "TimeSpan",
+    "to_json_dto",
 ]

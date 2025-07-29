@@ -7,13 +7,6 @@ __pycache__/
 # Ignore environment-specific settings
 .env
 
-# Ignore virtual environment directories
-venv/
-.venv/
-
-# AI generated tests that are not implemented
-tests/not_implemented/
-
 # Ignore editor-specific files
 .idea/
 *.sublime-*

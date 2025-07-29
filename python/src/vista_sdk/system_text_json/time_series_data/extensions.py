@@ -1,13 +1,23 @@
-from typing import Dict, List, Optional, Any
-from datetime import datetime
+"""Extensions for converting domain TimeSeriesDataPackage to JSON DTO."""
+
+from typing import Any
+
 from .time_series_data import (
-    TimeSeriesDataPackage, Package, Header, TimeSpan,
-    ConfigurationReference, TimeSeriesData, TabularData,
-    TabularRow, EventData, Event
+    ConfigurationReference,
+    Event,
+    EventData,
+    Header,
+    Package,
+    TabularData,
+    TabularRow,
+    TimeSeriesData,
+    TimeSeriesDataPackage,
+    TimeSpan,
 )
 
-def to_json_dto(domain_package: Any) -> TimeSeriesDataPackage:
-    """Convert domain TimeSeriesDataPackage to JSON DTO"""
+
+def to_json_dto(domain_package: Any) -> TimeSeriesDataPackage:  # noqa: ANN401
+    """Convert domain TimeSeriesDataPackage to JSON DTO."""
     p = domain_package.Package
     h = domain_package.Package.Header
 
@@ -16,27 +26,22 @@ def to_json_dto(domain_package: Any) -> TimeSeriesDataPackage:
         system_config = None
         if h.SystemConfiguration is not None:
             system_config = [
-                ConfigurationReference(
-                    ID=r.Id,
-                    TimeStamp=r.TimeStamp
-                ) for r in h.SystemConfiguration
+                ConfigurationReference(ID=r.Id, TimeStamp=r.TimeStamp)
+                for r in h.SystemConfiguration
             ]
 
         time_span = None
         if h.TimeSpan is not None:
-            time_span = TimeSpan(
-                Start=h.TimeSpan.Start,
-                End=h.TimeSpan.End
-            )
+            time_span = TimeSpan(Start=h.TimeSpan.Start, End=h.TimeSpan.End)
 
         header = Header(
-            ShipID=str(h.ShipId),
+            ShipID=str(h.ShipID),
             TimeSpan=time_span,
             DateCreated=h.DateCreated,
             DateModified=h.DateModified,
             Author=h.Author,
             SystemConfiguration=system_config,
-            CustomHeaders=h.CustomHeaders
+            CustomHeaders=h.CustomHeaders,
         )
 
     time_series_data = []
@@ -44,8 +49,7 @@ def to_json_dto(domain_package: Any) -> TimeSeriesDataPackage:
         data_config = None
         if t.DataConfiguration is not None:
             data_config = ConfigurationReference(
-                ID=t.DataConfiguration.Id,
-                TimeStamp=t.DataConfiguration.TimeStamp
+                ID=t.DataConfiguration.Id, TimeStamp=t.DataConfiguration.TimeStamp
             )
 
         event_data = None
@@ -54,13 +58,14 @@ def to_json_dto(domain_package: Any) -> TimeSeriesDataPackage:
                 Event(
                     TimeStamp=e.TimeStamp,
                     Value=e.Value,
-                    CustomMetadata=e.CustomMetadata
-                ) for e in t.EventData.Events
+                    CustomMetadata=e.CustomMetadata,
+                )
+                for e in t.EventData.Events
             ]
             event_data = EventData(
                 DataChannelID=t.EventData.DataChannelID,
                 Events=events,
-                CustomMetadata=t.EventData.CustomMetadata
+                CustomMetadata=t.EventData.CustomMetadata,
             )
 
         tabular_data = None
@@ -72,14 +77,15 @@ def to_json_dto(domain_package: Any) -> TimeSeriesDataPackage:
                         TimeStamp=row.TimeStamp,
                         Value=row.Value,
                         Quality=row.Quality,
-                        Parameters=row.Parameters
-                    ) for row in td.Rows
+                        Parameters=row.Parameters,
+                    )
+                    for row in td.Rows
                 ]
                 tabular_data.append(
                     TabularData(
                         DataChannelID=td.DataChannelID,
                         Rows=rows,
-                        CustomMetadata=td.CustomMetadata
+                        CustomMetadata=td.CustomMetadata,
                     )
                 )
 
@@ -88,13 +94,10 @@ def to_json_dto(domain_package: Any) -> TimeSeriesDataPackage:
                 DataConfiguration=data_config,
                 TabularData=tabular_data,
                 EventData=event_data,
-                CustomData=t.CustomData
+                CustomData=t.CustomData,
             )
         )
 
-    package = Package(
-        Header=header,
-        TimeSeriesData=time_series_data
-    )
+    package = Package(Header=header, TimeSeriesData=time_series_data)
 
     return TimeSeriesDataPackage(Package=package)
