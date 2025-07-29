@@ -98,6 +98,82 @@ class TestGmodPath(unittest.TestCase):
 
     def test_get_full_path_from(self) -> None:
         """Test retrieval of the full path from a specific depth in a GMOD path."""
+
+    def test_find_shortest_path(self) -> None:
+        """Test finding shortest path between nodes."""
+        gmod = self.vis.get_gmod(VisVersion.v3_4a)
+
+        # Test simple direct path
+        start_node = gmod._node_map["411.1"]
+        end_node = gmod._node_map["C101.72"]
+        path = gmod.find_shortest_path(start_node=start_node, end_node=end_node)
+        assert path is not None
+        assert path.node.code == "C101.72"
+
+        # Test path with intermediate nodes
+        start_node = gmod._node_map["411.1"]
+        end_node = gmod._node_map["I101"]
+        path = gmod.find_shortest_path(start_node=start_node, end_node=end_node)
+        assert path is not None
+        assert path.node.code == "I101"
+        assert "C101.72" in [n.code for n in path.parents]
+
+        # Test when no path exists
+        start_node = gmod._node_map["514"]
+        end_node = gmod._node_map["C101.72"]
+        path = gmod.find_shortest_path(start_node=start_node, end_node=end_node)
+        assert path is None
+
+        # Test path to self
+        start_node = gmod._node_map["411.1"]
+        path = gmod.find_shortest_path(start_node=start_node, end_node=start_node)
+        assert path is not None
+        assert path.node.code == "411.1"
+        assert len(path.parents) == 0
+
+        # Test path from root
+        root_node = gmod.root_node
+        end_node = gmod._node_map["I101"]
+        path = gmod.find_shortest_path(start_node=root_node, end_node=end_node)
+        assert path is not None
+        assert path.node.code == "I101"
+        assert path.parents[0].code == "VE"
+
+    def test_gmod_path_fields(self) -> None:
+        """Test that GmodPath maintains all fields correctly during operations."""
+        test_paths = [
+            ("411.1/C101.72/I101", VisVersion.v3_4a),
+            ("612.21-1/C701.13/S93", VisVersion.v3_4a),
+            ("846/G203.32-2/S110.2-1/E31", VisVersion.v3_4a)
+        ]
+
+        for path_str, version in test_paths:
+            with self.subTest(path_str=path_str, version=version):
+                path = GmodPath.parse(path_str, version)
+
+                # Test all fields are maintained
+                assert path.vis_version == version
+                assert path.is_mappable is not None
+                assert path.length == len(path.parents) + 1
+
+                # Test path iteration
+                nodes_list = list(path.get_full_path())
+                assert len(nodes_list) > 0
+                assert nodes_list[-1][1].code == path.node.code
+
+                # Test string representations
+                assert path.to_string() == path_str
+                full_path = path.to_full_path_string()
+                assert full_path.startswith("VE/")
+                assert full_path.endswith(path.node.code)
+
+                # Test indexing
+                for i in range(path.length):
+                    assert path[i] is not None
+                    if i < len(path.parents):
+                        assert path[i] == path.parents[i]
+                    else:
+                        assert path[i] == path.node
         path_str = "411.1/C101.72/I101"
         expectation = {
             4: "411i",

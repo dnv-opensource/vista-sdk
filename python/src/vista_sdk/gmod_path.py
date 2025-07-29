@@ -195,6 +195,23 @@ class GmodPath:
                 return True
         return False
 
+    def to_string(self) -> str:
+        """Return a string representation of the path."""
+        return str(self)
+
+    def __str__(self) -> str:
+        """Return a string representation of the path."""
+        path_parts = []
+        for parent in self.parents:
+            path_parts.append(parent.code)
+        path_parts.append(self.node.code)
+        return "/".join(path_parts)
+
+    @property
+    def vis_version(self) -> VisVersion:
+        """Get the VIS version of the path."""
+        return self.node.vis_version
+
     @staticmethod
     def is_valid(parents: list[GmodNode], node: GmodNode) -> tuple[bool, int]:
         """Check if the GmodPath is valid."""
@@ -313,9 +330,23 @@ class GmodPath:
     def get_full_path(self) -> list[tuple[int, GmodNode]]:
         """Get the full path as a list of tuples (depth, GmodNode)."""
         result = []
-        for i in range(len(self.parents)):
-            result.append((i, self.parents[i]))
-        result.append((len(self.parents), self.node))
+        for i, parent in enumerate(self.parents):
+            result.append((i, GmodNode(
+                vis_version=parent.vis_version,
+                code=parent.code,
+                metadata=parent.metadata,
+                location=parent.location,
+                children=[],
+                parents=[]
+            )))
+        result.append((len(self.parents), GmodNode(
+            vis_version=self.node.vis_version,
+            code=self.node.code,
+            metadata=self.node.metadata,
+            location=self.node.location,
+            children=[],
+            parents=[]
+        )))
         return result
 
     def get_full_path_from(self, from_depth: int) -> GmodPath.Enumerator:
