@@ -945,6 +945,7 @@ source = { editable = "." }
 dependencies = [
     { name = "brotli" },
     { name = "cachetools" },
+    { name = "memory-profiler" },
     { name = "pandas" },
     { name = "pandera" },
     { name = "psutil" },
@@ -977,6 +978,7 @@ dev = [
 requires-dist = [
     { name = "brotli", specifier = ">=1.1.0" },
     { name = "cachetools", specifier = ">=5" },
+    { name = "memory-profiler", specifier = ">=0.61.0" },
     { name = "pandas", specifier = ">=2.3.0" },
     { name = "pandera", specifier = ">=0.22.1" },
     { name = "psutil", specifier = ">=7.0.0" },
