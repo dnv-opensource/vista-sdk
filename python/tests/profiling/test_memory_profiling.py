@@ -3,7 +3,7 @@
 import gc
 import time
 
-import memory_profiler  # type: ignore
+import memory_profiler
 import psutil
 import pytest
 
