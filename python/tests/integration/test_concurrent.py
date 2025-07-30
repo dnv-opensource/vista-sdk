@@ -49,7 +49,7 @@ def test_parallel_gmod_operations() -> None:
 
     def load_and_traverse_gmod(version: VisVersion) -> int:
         gmod = vis.get_gmod(version)
-        paths = []
+        paths: list = []
         max_paths = 1000  # Limit to 1000 paths for testing
 
         def _traverse_handler(parents, node) -> TraversalHandlerResult:  # noqa : ANN001

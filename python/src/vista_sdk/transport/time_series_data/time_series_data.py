@@ -153,23 +153,30 @@ class TimeSeriesData:
                     )
 
                 for j, data_channel_id in enumerate(table.data_channel_ids):
+
+                    def get_data_channel_by_local_id(
+                        local_id: LocalId, dc_id: DataChannelId = data_channel_id
+                    ) -> DataChannel | None:
+                        return self._get_data_channel_by_local_id(
+                            dc_package,
+                            dc_id,
+                            local_id,
+                            erroneous_data_channels,
+                        )
+
+                    def get_data_channel_by_short_id(
+                        short_id: str, dc_id: DataChannelId = data_channel_id
+                    ) -> DataChannel | None:
+                        return self._get_data_channel_by_short_id(
+                            dc_package,
+                            dc_id,
+                            short_id,
+                            erroneous_data_channels,
+                        )
+
                     data_channel = data_channel_id.match(
-                        on_local_id=lambda local_id, dc_id=data_channel_id: (
-                            self._get_data_channel_by_local_id(
-                                dc_package,
-                                dc_id,
-                                local_id,
-                                erroneous_data_channels,
-                            )
-                        ),
-                        on_short_id=lambda short_id, dc_id=data_channel_id: (
-                            self._get_data_channel_by_short_id(
-                                dc_package,
-                                dc_id,
-                                short_id,
-                                erroneous_data_channels,
-                            )
-                        ),
+                        on_local_id=get_data_channel_by_local_id,
+                        on_short_id=get_data_channel_by_short_id,
                     )
 
                     if not data_channel:
@@ -218,23 +225,30 @@ class TimeSeriesData:
         # Validate event data
         if self.event_data and self.event_data.data_set:
             for event_data_item in self.event_data.data_set:
+
+                def get_event_data_channel_by_local_id(
+                    local_id: LocalId, event_item: EventDataSet = event_data_item
+                ) -> DataChannel | None:
+                    return self._get_data_channel_by_local_id(
+                        dc_package,
+                        event_item.data_channel_id,
+                        local_id,
+                        erroneous_data_channels,
+                    )
+
+                def get_event_data_channel_by_short_id(
+                    short_id: str, event_item: EventDataSet = event_data_item
+                ) -> DataChannel | None:
+                    return self._get_data_channel_by_short_id(
+                        dc_package,
+                        event_item.data_channel_id,
+                        short_id,
+                        erroneous_data_channels,
+                    )
+
                 data_channel = event_data_item.data_channel_id.match(
-                    on_local_id=lambda local_id, event_item=event_data_item: (
-                        self._get_data_channel_by_local_id(
-                            dc_package,
-                            event_item.data_channel_id,
-                            local_id,
-                            erroneous_data_channels,
-                        )
-                    ),
-                    on_short_id=lambda short_id, event_item=event_data_item: (
-                        self._get_data_channel_by_short_id(
-                            dc_package,
-                            event_item.data_channel_id,
-                            short_id,
-                            erroneous_data_channels,
-                        )
-                    ),
+                    on_local_id=get_event_data_channel_by_local_id,
+                    on_short_id=get_event_data_channel_by_short_id,
                 )
 
                 if not data_channel:
