@@ -50,9 +50,14 @@ def test_parallel_gmod_operations() -> None:
     def load_and_traverse_gmod(version: VisVersion) -> int:
         gmod = vis.get_gmod(version)
         paths = []
+        max_paths = 1000  # Limit to 1000 paths for testing
 
         def _traverse_handler(parents, node) -> TraversalHandlerResult:  # noqa : ANN001
             if not parents:
+                # Root node - continue traversal but don't collect
+                return TraversalHandlerResult.CONTINUE
+            if len(paths) >= max_paths:
+                # Stop after collecting enough paths for testing
                 return TraversalHandlerResult.STOP
             paths.append(GmodPath(list(parents), node, skip_verify=True))
             return TraversalHandlerResult.CONTINUE

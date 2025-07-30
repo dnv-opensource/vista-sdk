@@ -27,14 +27,14 @@ class TestGmodPathParse:
             print("VIS instance created successfully")
 
             # Load cache as in C# implementation
-            print(f"Loading GMOD for version {VisVersion.v3_7a}")
-            gmod = vis.get_gmod(VisVersion.v3_7a)
+            print(f"Loading GMOD for version {VisVersion.v3_4a}")
+            gmod = vis.get_gmod(VisVersion.v3_4a)
             if gmod is None:
                 raise ValueError("Failed to load GMOD")
             print("GMOD loaded successfully")
 
-            print(f"Loading Locations for version {VisVersion.v3_7a}")
-            locations = vis.get_locations(VisVersion.v3_7a)
+            print(f"Loading Locations for version {VisVersion.v3_4a}")
+            locations = vis.get_locations(VisVersion.v3_4a)
             if locations is None:
                 raise ValueError("Failed to load Locations")
             print("Locations loaded successfully")
@@ -44,74 +44,90 @@ class TestGmodPathParse:
             print(f"Error during setup: {e!s}")
             raise
 
-    @pytest.mark.parametrize(
-        ("category", "path_str"),
-        [
-            ("Short", "400"),
-            ("Complex", "H346.11112"),
-            ("WithLocation", "411.1/C101.72/I101"),
-            ("FullPath", "411.1/C101.72/I101.12/S206.1"),
-            ("WithDetail", "411.1/C101.72/I101.12/S206.1/D2"),
-        ],
-    )
-    def test_path_parsing(
-        self,
-        benchmark: BenchmarkFixture,
-        setup_components: dict,
-        category: str,
-        path_str: str,
-    ) -> None:
-        """Mirror of C#'s benchmark methods."""
-        print(f"\nTesting path parsing for category: {category}, path: {path_str}")
-        gmod = setup_components["gmod"]
-
-        def parse_path() -> GmodPath:
-            try:
-                if category in ["Complex", "FullPath", "WithDetail"]:
-                    ve_path = f"VE/{path_str}"
-                    version = (
-                        VisVersion.v3_4a if "I101.12" in path_str else gmod.vis_version
-                    )
-                    result = GmodPath.parse_full_path(ve_path, version)
-                else:
-                    result = gmod.parse_path(path_str)
-                return result
-            except Exception as e:
-                print(f"\nError parsing path {path_str}: {e!s}")
-                raise
-
-        config = BenchmarkConfig(
-            group="GmodPathParse",
-            method_order=MethodOrderPolicy.Declared,
-            summary_order=SummaryOrderPolicy.FastestToSlowest,
-            description=category,
-        )
-        result = run_benchmark(benchmark, parse_path, config)
-        assert isinstance(result, GmodPath)
-        assert str(result) == path_str
-
-    @pytest.mark.benchmark(group="gmod")
-    def test_location_parsing(
+    def test_try_parse(
         self, benchmark: BenchmarkFixture, setup_components: dict
     ) -> None:
-        """Mirror of C#'s ParseLocation benchmark method."""
-        print("\nTesting location parsing")
+        """Mirror of C#'s TryParse benchmark method - No location category."""
+        gmod = setup_components["gmod"]
         locations = setup_components["locations"]
-        location_str = "411.1/C101.72/I101"
 
-        def parse_location() -> bool:
-            try:
-                success, result = locations.try_parse(location_str)
-                return success and result is not None
-            except Exception as e:
-                print(f"\nError parsing location {location_str}: {e!s}")
-                raise
+        def try_parse() -> bool:
+            success, _ = GmodPath.try_parse("411.1/C101.72/I101", locations, gmod)
+            return success
 
         config = BenchmarkConfig(
             group="GmodPathParse",
             method_order=MethodOrderPolicy.Declared,
             summary_order=SummaryOrderPolicy.FastestToSlowest,
-            description="Location",
+            description="No location",
         )
-        result = run_benchmark(benchmark, parse_location, config)
+        result = run_benchmark(benchmark, try_parse, config)
+        assert result is True
+
+    def test_try_parse_full_path(
+        self, benchmark: BenchmarkFixture, setup_components: dict
+    ) -> None:
+        """Mirror of C#'s TryParseFullPath benchmark method - No location category."""
+        gmod = setup_components["gmod"]
+        locations = setup_components["locations"]
+
+        def try_parse_full_path() -> bool:
+            success, _ = GmodPath.try_parse_full_path(
+                "VE/400a/410/411/411i/411.1/CS1/C101/C101.7/C101.72/I101",
+                gmod,
+                locations,
+            )
+            return success
+
+        config = BenchmarkConfig(
+            group="GmodPathParse",
+            method_order=MethodOrderPolicy.Declared,
+            summary_order=SummaryOrderPolicy.FastestToSlowest,
+            description="No location",
+        )
+        result = run_benchmark(benchmark, try_parse_full_path, config)
+        assert result is True
+
+    def test_try_parse_individualized(
+        self, benchmark: BenchmarkFixture, setup_components: dict
+    ) -> None:
+        """Mirror of C#'s TryParseIndividualized benchmark method - With location."""
+        gmod = setup_components["gmod"]
+        locations = setup_components["locations"]
+
+        def try_parse_individualized() -> bool:
+            success, _ = GmodPath.try_parse("612.21-1/C701.13/S93", locations, gmod)
+            return success
+
+        config = BenchmarkConfig(
+            group="GmodPathParse",
+            method_order=MethodOrderPolicy.Declared,
+            summary_order=SummaryOrderPolicy.FastestToSlowest,
+            description="With location",
+        )
+        result = run_benchmark(benchmark, try_parse_individualized, config)
+        assert result is True
+
+    def test_try_parse_full_path_individualized(
+        self, benchmark: BenchmarkFixture, setup_components: dict
+    ) -> None:
+        """Mirror of C#'s TryParseFullPathIndividualized benchmark method."""
+        gmod = setup_components["gmod"]
+        locations = setup_components["locations"]
+
+        def try_parse_full_path_individualized() -> bool:
+            success, _ = GmodPath.try_parse_full_path(
+                "VE/600a/610/612/612.2/612.2i/612.21-1/CS10/C701/C701.1/C701.13/S93",
+                gmod,
+                locations,
+            )
+            return success
+
+        config = BenchmarkConfig(
+            group="GmodPathParse",
+            method_order=MethodOrderPolicy.Declared,
+            summary_order=SummaryOrderPolicy.FastestToSlowest,
+            description="With location",
+        )
+        result = run_benchmark(benchmark, try_parse_full_path_individualized, config)
         assert result is True

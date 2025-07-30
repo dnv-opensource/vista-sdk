@@ -337,15 +337,7 @@ class VIS(IVIS):
             from vista_sdk.gmod_versioning import GmodVersioning
 
             versioning = GmodVersioning(versioning_data)
-            converted = versioning.convert_path(
-                source_version, source_path, target_version
-            )
-            if converted:
-                # Verify the converted path is valid in target version
-                target_gmod = self.get_gmod(target_version)
-                if not target_gmod.parse_path(str(converted)):  # SE PÅ CONVERTED
-                    return None
-            return converted
+            return versioning.convert_path(source_version, source_path, target_version)
         except Exception as e:
             print(f"Error converting path: {e}")
             return None
