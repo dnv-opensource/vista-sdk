@@ -12,7 +12,7 @@ from collections import deque
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from types import NoneType
-from typing import ClassVar, Generic, TypeVar, cast, overload
+from typing import Any, ClassVar, Generic, TypeVar, cast, overload
 
 from vista_sdk.gmod_dto import GmodDto
 from vista_sdk.gmod_node import GmodNode, GmodNodeMetadata
@@ -195,7 +195,9 @@ class Gmod:
         return GmodPath.try_parse_full_path(item, arg=self.vis_version)
 
     def check_signature(
-        self, handler: TraversalHandler | TraversalHandlerWithState, param_count: int
+        self,
+        handler: TraversalHandler | TraversalHandlerWithState[TState],
+        param_count: int,
     ) -> bool:
         """Check if the handler function has the expected number of parameters."""
         sig = inspect.signature(handler)
@@ -231,11 +233,16 @@ class Gmod:
         args4: TraversalOptions | None = None,
     ) -> bool: ...
 
-    def traverse(self, args1=None, args2=None, args3=None, args4=None) -> bool:
+    def traverse(
+        self,
+        args1: Any = None,
+        args2: Any = None,
+        args3: Any = None,
+        args4: Any = None,
+    ) -> bool:
         """Traverse the GMOD structure based on the provided arguments."""
-        state: TState | None  # type: ignore
+        state: Any = None
         root_node: GmodNode | None = None
-        handler: TraversalHandlerWithState | TraversalHandler | None = None
         options: TraversalOptions | None = None
 
         args1_type: type = type(args1)
@@ -260,7 +267,6 @@ class Gmod:
             and arg4_type is NoneType
         ):
             handler = lambda handler, parents, node: handler(parents, node)  # noqa: E731
-            root_node = self.root_node
             options = args3
         elif (
             args1_type is not None
@@ -488,7 +494,7 @@ class Gmod:
 
         # Get from path for node by looking at parents
         from_path = []
-        curr = start_node
+        curr: GmodNode | None = start_node
         while curr is not None:
             from_path.append(curr)
             # Look at parents

@@ -26,11 +26,13 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pytest
-          pip install -r python/dependencies.txt
+          cd python
+          uv sync --dev
 
       - name: Copy resources folder into python/vista_sdk
         run: |
@@ -49,7 +51,8 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/python/src # Ensure PYTHONPATH is set for tests as well
         run: |
-          pytest python/tests --ignore=python/tests/benchmark
+          cd python
+          uv run pytest tests --ignore=tests/benchmark
 
       - name: Move Python directory to root
         run: |

@@ -407,7 +407,7 @@ class GmodPath:
         self, space_delimiter: str = " ", end_delimiter: str = "/"
     ) -> str:
         """Convert the GmodPath to a verbose string representation."""
-        from vista_sdk.vis import VIS  # noqa : PLC0415
+        from vista_sdk.vis import VIS
 
         builder = []
         for depth, common_name in self.get_common_names():
@@ -465,7 +465,7 @@ class GmodPath:
     @staticmethod
     def parse(item: str, arg=None, arg2=None) -> GmodPath:
         """Parse a string into a GmodPath based on the provided arguments."""
-        from vista_sdk.gmod import Gmod  # noqa: PLC0415
+        from vista_sdk.gmod import Gmod
 
         if type(arg) is VisVersion and arg2 is None:
             path_result = GmodPath.try_parse(item, arg=arg)
@@ -516,8 +516,8 @@ class GmodPath:
         gmod=None,
     ) -> tuple[bool, GmodPath | None]:  # return None for failure
         """Try to parse a string into a GmodPath based on the provided arguments."""
-        from vista_sdk.gmod import Gmod  # noqa: PLC0415
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.gmod import Gmod
+        from vista_sdk.vis import VIS
 
         if item is None or not item.strip():
             return False, None
@@ -542,7 +542,7 @@ class GmodPath:
         locations: Locations,
     ) -> GmodParsePathResult.Ok | GmodParsePathResult.Err:
         """Internal method to parse a string into a GmodPath."""
-        from vista_sdk.gmod import Gmod  # noqa: PLC0415
+        from vista_sdk.gmod import Gmod
 
         if gmod.vis_version != locations.vis_version:
             return GmodParsePathResult.Err(
@@ -716,8 +716,8 @@ class GmodPath:
         path_str: str, gmod=None, arg=None
     ) -> tuple[bool, GmodPath | None]:
         """Try to parse a full path string into a GmodPath."""
-        from vista_sdk.gmod import Gmod  # noqa: PLC0415
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.gmod import Gmod
+        from vista_sdk.vis import VIS
 
         if type(arg) is VisVersion and gmod is None:
             vis = VIS()
@@ -735,7 +735,7 @@ class GmodPath:
     @staticmethod
     def parse_full_path(path_str: str, vis_version: VisVersion) -> GmodPath:
         """Parse a full path string into a GmodPath using the provided VisVersion."""
-        from vista_sdk.vis import VIS  # noqa: PLC0415
+        from vista_sdk.vis import VIS
 
         vis = VIS()
         gmod = vis.get_gmod(vis_version)
