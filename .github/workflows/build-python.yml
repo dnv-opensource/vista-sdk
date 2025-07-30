@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd python
-          uv sync
+          uv sync --dev
 
       - name: Copy resources folder into python/vista_sdk
         run: |
@@ -42,15 +42,20 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/python/src # Set PYTHONPATH to the python directory
         run: |
-          python python/src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir resources
+          cd python
+          uv run python src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir ../resources
 
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}/python/src # Ensure PYTHONPATH is set for tests as well
         run: |
           cd python
-          uv sync --dev
           uv run pytest tests --ignore=tests/benchmark
+
+      - name: Build package (test build)
+        run: |
+          cd python
+          uv build
 
       - name: Move Python directory to root
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
@@ -69,10 +74,10 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         uses: astral-sh/setup-uv@v4
 
-      - name: Build package
+      - name: Build package for publishing
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         run: |
-          uv build --version=${{ github.run_number }}
+          uv build
 
       - name: Publish package
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
