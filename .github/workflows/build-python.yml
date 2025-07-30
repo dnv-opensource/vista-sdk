@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd python
-          uv sync --dev
+          uv sync
 
       - name: Copy resources folder into python/vista_sdk
         run: |
@@ -52,6 +52,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/python/src # Ensure PYTHONPATH is set for tests as well
         run: |
           cd python
+          uv sync --dev
           uv run pytest tests --ignore=tests/benchmark
 
       - name: Move Python directory to root
