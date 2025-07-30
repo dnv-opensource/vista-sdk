@@ -1,15 +1,12 @@
 """This module is designed to test the performance on GMOD path parsing."""
 
 import json
-import time
 from pathlib import Path
 
-import memory_profiler  # type: ignore
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture  # type: ignore
 
 from vista_sdk.gmod_path import GmodPath
-from vista_sdk.traversal_handler_result import TraversalHandlerResult
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
 
@@ -45,6 +42,7 @@ class TestPerformance:
         #     test_cases.append((case["path"], case["visVersion"]))
         return test_cases
 
+    @pytest.mark.benchmark(group="parsing")
     def test_path_parsing_benchmark(
         self, benchmark: BenchmarkFixture, vis_version: VisVersion | None
     ) -> None:
@@ -82,63 +80,3 @@ class TestPerformance:
             assert any(result_str == p[0] for p in test_paths), (
                 f"Path {result_str} not found in test cases"
             )
-
-    @pytest.mark.parametrize(
-        "vis_version",
-        [
-            VisVersion.v3_5a,
-            VisVersion.v3_6a,
-            VisVersion.v3_7a,
-            VisVersion.v3_8a,
-        ],
-    )
-    # @pytest.mark.skip(reason="Long running memory test")
-    def test_memory_usage(self, vis_version: VisVersion) -> None:
-        """Test mamory usage while traversing through GMOD tree."""
-        max_paths: int = 1000
-        iterations: int = 100
-        timeout: int = 60
-
-        print(f"\nTesting memory usage for {vis_version.value}")
-        start_time = time.time()
-        vis: VIS = VIS()
-        paths: list[GmodPath] = []
-
-        def handler(p, n) -> TraversalHandlerResult:  # noqa : ANN001
-            if len(paths) > max_paths:
-                return TraversalHandlerResult.STOP
-            paths.append(GmodPath(p, n))
-            return TraversalHandlerResult.CONTINUE
-
-        @memory_profiler.profile
-        def memory_test() -> float | None:
-            try:
-                gmod = vis.get_gmod(vis_version)
-                baseline_memory = memory_profiler.memory_usage()[0]
-                print(f"Baseline memory: {baseline_memory:.2f} MiB")
-
-                for i in range(iterations):
-                    if time.time() - start_time > timeout:
-                        print(f"Timeout reached after {i} iterations")
-                        return None
-
-                    paths.clear()
-                    gmod.traverse(handler)
-
-                    current_memory = memory_profiler.memory_usage()[0]
-                    delta = current_memory - baseline_memory
-                    if delta != 0 and i >= 1:
-                        print(
-                            f"Iteration {i + 1}/{iterations}: {current_memory:.2f} MiB (Δ {delta:+.2f} MiB)"  # noqa : E501
-                        )
-
-                end_time = time.time()
-                print(f"Test completed in {end_time - start_time:.1f} seconds")
-                return current_memory
-
-            except Exception as e:
-                print(f"Error during memory test: {e}")
-                return None
-
-        final_memory = memory_test()
-        assert final_memory is not None, "Memory test failed to complete"

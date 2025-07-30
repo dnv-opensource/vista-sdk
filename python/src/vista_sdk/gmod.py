@@ -313,13 +313,10 @@ class Gmod:
     def _path_exists_between(
         self, from_path: Iterable[GmodNode], to_node: GmodNode
     ) -> tuple[bool, Iterable[GmodNode]]:
-        # Convert from_path to a list for multiple iterations
-        from_path_list = list(from_path)
-
         last_asset_function = next(
             (
                 node
-                for node in reversed(from_path_list)
+                for node in reversed(list(from_path))
                 if node.is_asset_function_node()
             ),
             None,
@@ -328,52 +325,44 @@ class Gmod:
             last_asset_function if last_asset_function is not None else self._root_node
         )
 
-        # Initialize state with both to and from_path
-        remaining_parents: list[GmodNode] = []
-        state = self.PathExistsContext(to=to_node)
-        state.from_path = from_path_list
-        state.remaining_parents = remaining_parents
+        state = self.PathExistsContext(to=to_node, from_path=list(from_path))
 
         def handler(
             state: Gmod.PathExistsContext, parents: list[GmodNode], node: GmodNode
         ) -> TraversalHandlerResult:
-            """Handler for path existence check."""
             if node.code != state.to.code:
                 return TraversalHandlerResult.CONTINUE
 
-            # Build actual_parents list including root ancestors
-            actual_parents = None
+            actual_parents: list[GmodNode] = []
             current_parents = list(parents)
 
+            # Build full path to root
             while current_parents and not current_parents[0].is_root():
-                if actual_parents is None:
-                    actual_parents = list(current_parents)
-                    parents = actual_parents
-
                 parent = current_parents[0]
                 if len(parent.parents) != 1:
                     raise Exception("Invalid state - expected one parent")
-
                 actual_parents.insert(0, parent.parents[0])
                 current_parents = [parent.parents[0], *current_parents]
 
-            # Validate parents
+            # Validate that from_path is contained in current parents
+            from_path_codes = [n.code for n in state.from_path]
+            current_parent_codes = [p.code for p in current_parents]
+
+            # Check if all nodes from from_path are in current_parents (order matters)
             if len(current_parents) < len(state.from_path):
                 return TraversalHandlerResult.CONTINUE
 
             # Must have same start order
             match = True
             for i in range(len(state.from_path)):
-                if current_parents[i].code != state.from_path[i].code:
+                if current_parent_codes[i] != from_path_codes[i]:
                     match = False
                     break
 
             if match:
-                # Calculate remaining parents
+                # Return remaining parents that are not in from_path
                 state.remaining_parents = [
-                    p
-                    for p in current_parents
-                    if not any(pp.code == p.code for pp in state.from_path)
+                    p for p in current_parents if p.code not in from_path_codes
                 ]
                 return TraversalHandlerResult.STOP
 
@@ -387,8 +376,8 @@ class Gmod:
         """Context for checking if a path exists between nodes."""
 
         to: GmodNode
-        remaining_parents: list[GmodNode] = field(default_factory=list)
         from_path: list[GmodNode] = field(default_factory=list)
+        remaining_parents: list[GmodNode] = field(default_factory=list)
 
     def traverse_node(
         self, context: Gmod.TraversalContext[TState], node: GmodNode

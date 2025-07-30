@@ -1,27 +1,62 @@
 {
     "name": "Vista SDK Python Benchmarks",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "min_rounds": 20,
     "max_time": 1.0,
     "warmup": true,
     "warmup_iterations": 3,
     "disable_gc": true,
     "timer": "perf_counter",
+    "memory_diagnostics": true,
     "benchmarks": [
         {
-            "name": "Path Parsing",
+            "name": "Codebooks Lookup",
+            "group": "codebooks",
             "tool": "pytest",
-            "test_file": "tests/benchmark/test_benchmarks.py::test_path_parsing_benchmark"
+            "test_file": "tests/benchmark/test_codebooks_lookup.py"
         },
         {
-            "name": "Version Conversion",
+            "name": "GMOD Path Parse",
+            "group": "gmod",
             "tool": "pytest",
-            "test_file": "tests/benchmark/test_benchmarks.py::test_version_conversion_benchmark"
+            "test_file": "tests/benchmark/test_gmod_path_parse.py"
         },
         {
-            "name": "Memory Usage",
+            "name": "GMOD Traversal",
+            "group": "gmod",
             "tool": "pytest",
-            "test_file": "tests/benchmark/test_benchmarks.py::test_memory_usage_large_dataset"
+            "test_file": "tests/benchmark/test_gmod_traversal.py"
+        },
+        {
+            "name": "GMOD Load",
+            "group": "gmod",
+            "tool": "pytest",
+            "test_file": "tests/benchmark/test_gmod_load.py"
+        },
+        {
+            "name": "GMOD Versioning Convert Path",
+            "group": "gmod",
+            "tool": "pytest",
+            "test_file": "tests/benchmark/test_gmod_versioning.py"
+        },
+        {
+            "name": "Data Channel List Serialization",
+            "group": "transport",
+            "tool": "pytest",
+            "test_file": "tests/benchmark/test_data_channel_list.py"
+        },
+        {
+            "name": "Short String Hash",
+            "group": "internal",
+            "tool": "pytest",
+            "test_file": "tests/benchmark/test_short_string_hash.py"
         }
-    ]
+    ],
+    "categories": {
+        "No location": "Benchmarks without location parsing",
+        "With location": "Benchmarks with location parsing",
+        "Uncompressed": "Uncompressed serialization benchmarks",
+        "Brotli": "Brotli compression benchmarks",
+        "Bzip2": "Bzip2 compression benchmarks"
+    }
 }
