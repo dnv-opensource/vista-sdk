@@ -16,7 +16,11 @@ The Vista SDK is built around these main components:
 
 ### Essential Imports
 ```python
-from vista_sdk import VIS, VisVersion, LocalIdBuilder, GmodPath
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.local_id import LocalId
 from vista_sdk.codebook_names import CodebookName
 ```
 
@@ -28,12 +32,15 @@ gmod = vis.get_gmod(VisVersion.v3_4a)
 codebooks = vis.get_codebooks(VisVersion.v3_4a)
 
 # Parse GMOD path
-path = GmodPath.parse("411.1/C101.31-2", VisVersion.v3_4a)
+path = GmodPath.parse(gmod, "411.1/C101.31-2")
+
+# Create quantity tag
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
 
 # Build Local ID
 local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
     .with_primary_item(path)
-    .with_quantity_tag("temperature")
+    .with_metadata_tag(quantity_tag)
     .build())
 ```
 
@@ -238,29 +245,27 @@ Set the secondary GMOD path (for relationships).
 
 **Returns:** Updated builder
 
-##### `with_quantity_tag(tag: MetadataTag | str) -> LocalIdBuilder`
-Add a quantity metadata tag.
+##### `with_metadata_tag(tag: MetadataTag) -> LocalIdBuilder`
+Add a metadata tag (quantity, position, content, etc.).
 
 **Parameters:**
-- `tag`: MetadataTag instance or string value
+- `tag`: MetadataTag instance created from codebooks
 
 **Returns:** Updated builder
 
 **Example:**
 ```python
+# Create tags from codebooks
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+content_tag = codebooks.create_tag(CodebookName.Content, "cooling.water")
+
 builder = (LocalIdBuilder.create(VisVersion.v3_4a)
     .with_primary_item(path)
-    .with_quantity_tag("temperature")
-    .with_content_tag("cooling.water"))
+    .with_metadata_tag(quantity_tag)
+    .with_metadata_tag(content_tag))
 ```
 
-##### Similar methods for other tag types:
-- `with_content_tag(tag)` - Content/substance tag
-- `with_position_tag(tag)` - Physical position tag
-- `with_state_tag(tag)` - State/condition tag
-- `with_command_tag(tag)` - Command/action tag
-- `with_type_tag(tag)` - Type classification tag
-- `with_detail_tag(tag)` - Additional detail tag
+**Note:** All metadata tags (quantity, position, content, state, command, type, detail) are added using the same `with_metadata_tag()` method. Tags must be created from codebooks first.
 
 ##### `with_verbose_mode(verbose: bool) -> LocalIdBuilder`
 Enable/disable verbose path representation.
@@ -470,7 +475,7 @@ Convert a path from one VIS version to another.
 ```python
 # Safe parsing
 try:
-    local_id = LocalIdBuilder.parse(id_string, gmod, codebooks, locations)
+    local_id = LocalId.parse(id_string)
     if local_id.is_valid:
         print(f"Valid Local ID: {local_id}")
     else:
@@ -479,8 +484,11 @@ except ValueError as e:
     print(f"Invalid Local ID format: {e}")
 
 # Safe building
+vis = VIS()
+gmod = vis.get_gmod(VisVersion.v3_4a)
+
 builder = LocalIdBuilder.create(VisVersion.v3_4a)
-if path := GmodPath.try_parse("411.1/C101.31", VisVersion.v3_4a):
+if path := GmodPath.try_parse(gmod, "411.1/C101.31"):
     builder = builder.with_primary_item(path)
 else:
     print("Invalid GMOD path")
@@ -537,9 +545,13 @@ var localId = LocalIdBuilder.Create(VisVersion.v3_4a)
 ```python
 vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)
-path = GmodPath.parse("411.1/C101.31", VisVersion.v3_4a)
+codebooks = vis.get_codebooks(VisVersion.v3_4a)
+
+path = GmodPath.parse(gmod, "411.1/C101.31")
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+
 local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
     .with_primary_item(path)
-    .with_quantity_tag("temperature")
+    .with_metadata_tag(quantity_tag)
     .build())
 ```

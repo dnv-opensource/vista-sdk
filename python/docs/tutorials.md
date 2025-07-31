@@ -24,7 +24,8 @@ Welcome to the comprehensive tutorial for the Vista SDK Python implementation! T
 ### Your First VIS Connection
 
 ```python
-from vista_sdk import VIS, VisVersion
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
 
 # Create VIS instance - this is your main entry point
 vis = VIS()
@@ -52,7 +53,8 @@ GMOD represents the hierarchical structure of vessel equipment and systems.
 ### Tutorial 1: Exploring the GMOD Tree
 
 ```python
-from vista_sdk import VIS, VisVersion
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
 
 vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)
@@ -82,11 +84,17 @@ print(f"Cooling system: {cooling_system.name}")
 GMOD paths represent navigation through the hierarchy:
 
 ```python
-from vista_sdk import GmodPath, VisVersion
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.gmod_path import GmodPath
+
+# Initialize VIS and get GMOD
+vis = VIS()
+gmod = vis.get_gmod(VisVersion.v3_4a)
 
 # Parse a complete path
 path_str = "411.1/C101.31-2"
-path = GmodPath.parse(path_str, VisVersion.v3_4a)
+path = GmodPath.parse(gmod, path_str)
 
 print(f"Path: {path_str}")
 print(f"Terminal node: {path.node.name}")
@@ -122,20 +130,27 @@ Local IDs are standardized identifiers for data channels following ISO 19847/198
 ### Tutorial 3: Building Your First Local ID
 
 ```python
-from vista_sdk import VIS, VisVersion, LocalIdBuilder, GmodPath
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.codebook_names import CodebookName
 
 vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)
 codebooks = vis.get_codebooks(VisVersion.v3_4a)
 
 # Step 1: Define what you're measuring
-path = GmodPath.parse("411.1/C101.31-2", VisVersion.v3_4a)
+path = GmodPath.parse(gmod, "411.1/C101.31-2")
 print(f"Measuring: {path.node.name}")
 
-# Step 2: Build the Local ID
+# Step 2: Create the quantity tag
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+
+# Step 3: Build the Local ID
 local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
     .with_primary_item(path)
-    .with_quantity_tag("temperature")
+    .with_metadata_tag(quantity_tag)
     .build())
 
 print(f"Local ID: {local_id}")
@@ -146,14 +161,20 @@ print(f"Is valid: {local_id.is_valid}")
 
 ```python
 # More complex example - cooled by seawater
-path = GmodPath.parse("411.1/C101.31", VisVersion.v3_4a)
+path = GmodPath.parse(gmod, "411.1/C101.31")
+
+# Create all metadata tags
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+content_tag = codebooks.create_tag(CodebookName.Content, "cooling.water")
+position_tag = codebooks.create_tag(CodebookName.Position, "inlet")
+state_tag = codebooks.create_tag(CodebookName.State, "normal")
 
 local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
     .with_primary_item(path)
-    .with_quantity_tag("temperature")
-    .with_content_tag("cooling.water")
-    .with_position_tag("inlet")
-    .with_state_tag("normal")
+    .with_metadata_tag(quantity_tag)
+    .with_metadata_tag(content_tag)
+    .with_metadata_tag(position_tag)
+    .with_metadata_tag(state_tag)
     .build())
 
 print(f"Complex Local ID: {local_id}")
@@ -168,18 +189,13 @@ for tag in local_id.metadata_tags:
 ### Tutorial 5: Parsing Existing Local IDs
 
 ```python
-from vista_sdk import LocalIdBuilder
+from vista_sdk.local_id import LocalId
 
 # Parse a Local ID string
 id_string = "/vis-3-4a/411.1/C101.31-2/meta:qty.temperature"
 
 try:
-    parsed_id = LocalIdBuilder.parse(
-        id_string,
-        gmod=gmod,
-        codebooks=codebooks,
-        locations=vis.get_locations(VisVersion.v3_4a)
-    )
+    parsed_id = LocalId.parse(id_string)
 
     print(f"Parsed Local ID: {parsed_id}")
     print(f"Equipment: {parsed_id.primary_item.node.name}")
@@ -322,18 +338,23 @@ def process_sensor_data(sensor_configs):
     for config in sensor_configs:
         try:
             # Parse path once
-            path = GmodPath.parse(config['path'], VisVersion.v3_4a)
+            path = GmodPath.parse(gmod, config['path'])
+
+            # Create quantity tag
+            quantity_tag = codebooks.create_tag(CodebookName.Quantity, config['quantity'])
 
             # Build Local ID
             builder = (LocalIdBuilder.create(VisVersion.v3_4a)
                 .with_primary_item(path)
-                .with_quantity_tag(config['quantity']))
+                .with_metadata_tag(quantity_tag))
 
             # Add optional tags
             if 'content' in config:
-                builder = builder.with_content_tag(config['content'])
+                content_tag = codebooks.create_tag(CodebookName.Content, config['content'])
+                builder = builder.with_metadata_tag(content_tag)
             if 'position' in config:
-                builder = builder.with_position_tag(config['position'])
+                position_tag = codebooks.create_tag(CodebookName.Position, config['position'])
+                builder = builder.with_metadata_tag(position_tag)
 
             local_id = builder.build()
 
@@ -546,17 +567,23 @@ def discover_equipment_by_type(gmod: Gmod, equipment_type: str) -> List[GmodNode
 
 def create_sensor_template(node: GmodNode, quantities: List[str]) -> List[str]:
     """Create Local ID templates for common measurements on equipment."""
+    vis = VIS()
+    gmod = vis.get_gmod(VisVersion.v3_4a)
+    codebooks = vis.get_codebooks(VisVersion.v3_4a)
 
     templates = []
 
     for quantity in quantities:
         try:
             # Create a basic GMOD path (assuming no instances for template)
-            path = GmodPath.parse(node.code, VisVersion.v3_4a)
+            path = GmodPath.parse(gmod, node.code)
+
+            # Create quantity tag
+            quantity_tag = codebooks.create_tag(CodebookName.Quantity, quantity)
 
             local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
                 .with_primary_item(path)
-                .with_quantity_tag(quantity)
+                .with_metadata_tag(quantity_tag)
                 .build())
 
             templates.append(str(local_id))
@@ -590,12 +617,14 @@ for pump in pumps[:5]:  # Show first 5
 ```python
 # Always use try/except for parsing operations
 try:
-    local_id = LocalIdBuilder.parse(user_input, gmod, codebooks, locations)
+    local_id = LocalId.parse(user_input)
 except ValueError as e:
     logger.warning(f"Invalid Local ID from user: {e}")
 
 # Use try_* methods when failure is acceptable
-path = GmodPath.try_parse(path_string, vis_version)
+vis = VIS()
+gmod = vis.get_gmod(VisVersion.v3_4a)
+path = GmodPath.try_parse(gmod, path_string)
 if path is None:
     # Handle gracefully
     pass
@@ -631,10 +660,16 @@ if local_id.has_custom_tag:
 ```python
 # Be explicit about versions
 def create_measurement_id(equipment_path: str, quantity: str, vis_version: VisVersion):
-    path = GmodPath.parse(equipment_path, vis_version)
+    vis = VIS()
+    gmod = vis.get_gmod(vis_version)
+    codebooks = vis.get_codebooks(vis_version)
+
+    path = GmodPath.parse(gmod, equipment_path)
+    quantity_tag = codebooks.create_tag(CodebookName.Quantity, quantity)
+
     return (LocalIdBuilder.create(vis_version)
         .with_primary_item(path)
-        .with_quantity_tag(quantity)
+        .with_metadata_tag(quantity_tag)
         .build())
 ```
 
