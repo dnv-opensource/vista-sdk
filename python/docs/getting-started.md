@@ -219,7 +219,7 @@ for pump in pumps[:5]:  # Show first 5
 ## 🔧 Development Setup
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Git (for development from source)
 
 ### Install for Development

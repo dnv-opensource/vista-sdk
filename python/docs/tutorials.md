@@ -18,7 +18,7 @@ Welcome to the comprehensive tutorial for the Vista SDK Python implementation! T
 ## Getting Started
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.10 or higher
 - Vista SDK installed (`pip install vista-sdk`)
 
 ### Your First VIS Connection

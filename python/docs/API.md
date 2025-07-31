@@ -424,12 +424,12 @@ Validate a location string.
 ### Enum: `VisVersion`
 
 Available VIS versions:
-- `v3_4a` - VIS 3.4a
-- `v3_5a` - VIS 3.5a
-- `v3_6a` - VIS 3.6a
-- `v3_7a` - VIS 3.7a
-- `v3_8a` - VIS 3.8a
-- `v3_9a` - VIS 3.9a
+- `v3_4a` - VIS 3-4a
+- `v3_5a` - VIS 3-5a
+- `v3_6a` - VIS 3-6a
+- `v3_7a` - VIS 3-7a
+- `v3_8a` - VIS 3-8a
+- `v3_9a` - VIS 3-9a
 
 ### Class: `GmodVersioning`
 
