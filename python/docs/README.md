@@ -66,18 +66,26 @@ The Vista SDK provides Python tools for working with:
 ## ⚡ Quick Example
 
 ```python
-from vista_sdk import VIS, VisVersion, LocalIdBuilder, GmodPath
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.codebook_names import CodebookName
 
 # Initialize and load VIS data
 vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)
+codebooks = vis.get_codebooks(VisVersion.v3_4a)
 
 # Create a standardized identifier for engine temperature
-engine_path = GmodPath.parse("411.1/C101.31-2", VisVersion.v3_4a)
+engine_path = GmodPath.parse(gmod, "411.1/C101.31-2")
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+position_tag = codebooks.create_tag(CodebookName.Position, "inlet")
+
 local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
     .with_primary_item(engine_path)
-    .with_quantity_tag("temperature")
-    .with_position_tag("inlet")
+    .with_metadata_tag(quantity_tag)
+    .with_metadata_tag(position_tag)
     .build())
 
 print(f"Local ID: {local_id}")

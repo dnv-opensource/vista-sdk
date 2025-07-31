@@ -28,7 +28,11 @@ pip install -e .
 Let's create your first Local ID - a standardized identifier for vessel data:
 
 ```python
-from vista_sdk import VIS, VisVersion, LocalIdBuilder, GmodPath
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.codebook_names import CodebookName
 
 # 1. Initialize VIS connection
 vis = VIS()
@@ -38,15 +42,18 @@ gmod = vis.get_gmod(VisVersion.v3_4a)
 codebooks = vis.get_codebooks(VisVersion.v3_4a)
 
 # 3. Find equipment in the hierarchy
-engine_path = GmodPath.parse("411.1/C101.31-2", VisVersion.v3_4a)
+engine_path = GmodPath.parse(gmod, "411.1/C101.31-2")
 print(f"Equipment: {engine_path.node.name}")
 # Output: Equipment: Fresh water cooler
 
 # 4. Build a Local ID for temperature measurement
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+position_tag = codebooks.create_tag(CodebookName.Position, "inlet")
+
 local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
     .with_primary_item(engine_path)
-    .with_quantity_tag("temperature")
-    .with_position_tag("inlet")
+    .with_metadata_tag(quantity_tag)
+    .with_metadata_tag(position_tag)
     .build())
 
 print(f"Local ID: {local_id}")
@@ -120,15 +127,21 @@ print("Sample positions:", list(positions.standard_values)[:5])
 ```python
 def create_sensor_local_id(equipment_path: str, measurement: str):
     """Create Local ID for a sensor reading."""
+    vis = VIS()
+    gmod = vis.get_gmod(VisVersion.v3_4a)
+    codebooks = vis.get_codebooks(VisVersion.v3_4a)
 
     try:
         # Parse the equipment path
-        path = GmodPath.parse(equipment_path, VisVersion.v3_4a)
+        path = GmodPath.parse(gmod, equipment_path)
+
+        # Create the quantity tag
+        quantity_tag = codebooks.create_tag(CodebookName.Quantity, measurement)
 
         # Build the Local ID
         local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
             .with_primary_item(path)
-            .with_quantity_tag(measurement)
+            .with_metadata_tag(quantity_tag)
             .build())
 
         return str(local_id) if local_id.is_valid else None
@@ -155,16 +168,13 @@ for equipment, measurement in sensors:
 ### Use Case 2: Parsing Existing Local IDs
 
 ```python
+from vista_sdk.local_id import LocalId
+
 def analyze_local_id(local_id_string: str):
     """Parse and analyze an existing Local ID."""
 
     try:
-        local_id = LocalIdBuilder.parse(
-            local_id_string,
-            gmod=gmod,
-            codebooks=codebooks,
-            locations=vis.get_locations(VisVersion.v3_4a)
-        )
+        local_id = LocalId.parse(local_id_string)
 
         print(f"Local ID: {local_id}")
         print(f"Equipment: {local_id.primary_item.node.name}")
@@ -206,10 +216,16 @@ for pump in pumps[:5]:  # Show first 5
 
     # Create a sample Local ID for flow measurement
     try:
-        path = GmodPath.parse(pump.code, VisVersion.v3_4a)
+        vis = VIS()
+        gmod = vis.get_gmod(VisVersion.v3_4a)
+        codebooks = vis.get_codebooks(VisVersion.v3_4a)
+
+        path = GmodPath.parse(gmod, pump.code)
+        quantity_tag = codebooks.create_tag(CodebookName.Quantity, "flow.rate")
+
         local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
             .with_primary_item(path)
-            .with_quantity_tag("flow.rate")
+            .with_metadata_tag(quantity_tag)
             .build())
         print(f"    Flow rate: {local_id}")
     except:

@@ -124,7 +124,8 @@ All samples follow these patterns:
 
 ### 1. VIS Initialization
 ```python
-from vista_sdk import VIS, VisVersion
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
 
 vis = VIS()
 version = VisVersion.v3_4a
@@ -144,9 +145,11 @@ except Exception as e:
 
 ### 3. Builder Pattern
 ```python
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+
 local_id = (LocalIdBuilder.create(version)
     .with_primary_item(path)
-    .with_quantity_tag(tag)
+    .with_metadata_tag(quantity_tag)
     .build())
 ```
 

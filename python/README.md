@@ -35,7 +35,11 @@ pip install -e .
 ### Basic Usage
 
 ```python
-from vista_sdk import VIS, VisVersion, LocalIdBuilder, GmodPath
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.codebook_names import CodebookName
 
 # Initialize VIS instance
 vis = VIS()
@@ -46,15 +50,20 @@ codebooks = vis.get_codebooks(VisVersion.v3_4a)
 locations = vis.get_locations(VisVersion.v3_4a)
 
 # Parse a GMOD path
-path = GmodPath.parse("411.1/C101.31-2", VisVersion.v3_4a)
+path = GmodPath.parse(gmod, "411.1/C101.31-2")
 print(f"Parsed path: {path}")
 
 # Build a Local ID
+# First create metadata tags from codebooks
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+content_tag = codebooks.create_tag(CodebookName.Content, "exhaust.gas")
+position_tag = codebooks.create_tag(CodebookName.Position, "inlet")
+
 local_id = (LocalIdBuilder.create(VisVersion.v3_4a)
     .with_primary_item(path)
-    .with_quantity_tag("temperature")
-    .with_content_tag("exhaust.gas")
-    .with_position_tag("inlet")
+    .with_metadata_tag(quantity_tag)
+    .with_metadata_tag(content_tag)
+    .with_metadata_tag(position_tag)
     .build())
 
 print(f"Local ID: {local_id}")
@@ -63,7 +72,8 @@ print(f"Local ID: {local_id}")
 ### Working with Codebooks
 
 ```python
-from vista_sdk import VIS, VisVersion
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
 from vista_sdk.codebook_names import CodebookName
 
 vis = VIS()
@@ -86,13 +96,15 @@ print(f"Is 'centre' valid position? {position_codebook.has_standard_value('centr
 ### GMOD Path Operations
 
 ```python
-from vista_sdk import VIS, VisVersion, GmodPath
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.gmod_path import GmodPath
 
 vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)
 
 # Parse a path
-path = GmodPath.parse("411.1/C101.31-2/meta", VisVersion.v3_4a)
+path = GmodPath.parse(gmod, "411.1/C101.31-2/meta")
 
 # Get path information
 print(f"Path depth: {len(path)}")
@@ -107,7 +119,9 @@ for depth, node in path.get_full_path():
 ### Version Conversion
 
 ```python
-from vista_sdk import VIS, VisVersion, GmodPath
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.gmod_path import GmodPath
 
 vis = VIS()
 
@@ -134,14 +148,28 @@ The main entry point for accessing VIS data:
 ### Local ID Builder
 Construct standardized local identifiers:
 ```python
-from vista_sdk import LocalIdBuilder, VisVersion
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.codebook_names import CodebookName
+
+vis = VIS()
+gmod = vis.get_gmod(VisVersion.v3_4a)
+codebooks = vis.get_codebooks(VisVersion.v3_4a)
+
+# Create metadata tags
+path = GmodPath.parse(gmod, "411.1/C101.31")
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+content_tag = codebooks.create_tag(CodebookName.Content, "cooling.water")
+state_tag = codebooks.create_tag(CodebookName.State, "high")
 
 builder = LocalIdBuilder.create(VisVersion.v3_4a)
 local_id = (builder
-    .with_primary_item_from_path("411.1/C101.31")
-    .with_quantity_tag("temperature")
-    .with_content_tag("cooling.water")
-    .with_state_tag("high")
+    .with_primary_item(path)
+    .with_metadata_tag(quantity_tag)
+    .with_metadata_tag(content_tag)
+    .with_metadata_tag(state_tag)
     .build())
 ```
 
@@ -156,7 +184,8 @@ The SDK follows a fluent builder pattern:
 ### Custom Error Handling
 
 ```python
-from vista_sdk import LocalIdBuilder, VisVersion
+from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.vis_version import VisVersion
 from vista_sdk.local_id_parsing_error_builder import LocalIdParsingErrorBuilder
 
 vis = VIS()
@@ -182,7 +211,8 @@ except Exception as e:
 ### Working with Different VIS Versions
 
 ```python
-from vista_sdk import VIS, VisVersion
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
 
 vis = VIS()
 
@@ -206,13 +236,24 @@ print(f"Loaded data for {len(version_data)} VIS versions")
 
 ```python
 from vista_sdk.mqtt import MqttLocalId
-from vista_sdk import LocalIdBuilder, VisVersion
+from vista_sdk.vis import VIS
+from vista_sdk.vis_version import VisVersion
+from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.codebook_names import CodebookName
 
 # Create a Local ID
+vis = VIS()
+gmod = vis.get_gmod(VisVersion.v3_4a)
+codebooks = vis.get_codebooks(VisVersion.v3_4a)
+
+path = GmodPath.parse(gmod, "411.1/C101.31")
+quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
+
 builder = LocalIdBuilder.create(VisVersion.v3_4a)
 local_id = (builder
-    .with_primary_item_from_path("411.1/C101.31")
-    .with_quantity_tag("temperature")
+    .with_primary_item(path)
+    .with_metadata_tag(quantity_tag)
     .build())
 
 # Convert to MQTT format
