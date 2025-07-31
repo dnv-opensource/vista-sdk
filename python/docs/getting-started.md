@@ -325,8 +325,6 @@ class DataProcessor:
 
 ## 🔗 Related Resources
 
-- [VIS Documentation](https://www.dnv.com/services/vessel-information-structure-vis-120226) - Official VIS specification
-- [ISO 19847](https://www.iso.org/standard/66356.html) - Ships and marine technology standard
 - [Vista SDK C#](../csharp/) - C# implementation of the same SDK
 - [Vista SDK JavaScript](../js/) - JavaScript/TypeScript implementation
 
