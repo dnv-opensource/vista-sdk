@@ -117,9 +117,9 @@ Found an error or want to improve the documentation? We welcome contributions!
 ## 🔗 Additional Resources
 
 ### Official Documentation
-- [DNV VIS Documentation](https://www.dnv.com/services/vessel-information-structure-vis-120226)
-- [ISO 19847 Standard](https://www.iso.org/standard/66356.html)
-- [ISO 19848 Standard](https://www.iso.org/standard/66357.html)
+- [DNV VISTA Documentation](https://docs.vista.dnv.com/docs/introduction/)
+- [ISO 19847 Standard](https://www.iso.org/standard/78260.html)
+- [ISO 19848 Standard](https://www.iso.org/standard/78262.html)
 
 ### Vista SDK Implementations
 - [C# Implementation](../../csharp/) - Full-featured C# SDK
