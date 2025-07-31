@@ -1,5 +1,10 @@
 name: Python Package
 
+# This workflow tests, builds, and publishes the Vista SDK Python package
+# - Tests: Run in parallel across Python 3.10, 3.11, 3.12, and 3.13
+# - Build: Creates distributable packages (only runs if all tests pass)
+# - Publish: Uploads to PyPI (only on manual dispatch from main branch)
+
 on:
   pull_request:
     branches: [main]
@@ -19,22 +24,27 @@ jobs:
       fail-fast: false  # Continue testing other versions even if one fails
 
     steps:
+      # Get the source code from the repository
       - name: Checkout entire repository
         uses: actions/checkout@v4
 
+      # Set up the specific Python version for this matrix job
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
+      # Install uv package manager for fast dependency management
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
+      # Install all Python dependencies including dev dependencies
       - name: Install dependencies
         run: |
           cd python
           uv sync --dev
 
+      # Copy shared resources into the Python package for runtime access
       - name: Copy resources folder into python/src/vista_sdk
         run: |
           # Remove existing resources directory if it exists
@@ -42,6 +52,7 @@ jobs:
           # Copy resources directory
           cp -r ./resources ./python/src/vista_sdk/resources
 
+      # Generate version-specific code based on available resources
       - name: Generate VisVersion script
         env:
           PYTHONPATH: ${{ github.workspace }}/python/src
@@ -49,6 +60,7 @@ jobs:
           cd python
           uv run python src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir ../resources
 
+      # Run the test suite for this Python version (excluding benchmarks)
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}/python/src
@@ -62,22 +74,27 @@ jobs:
     needs: test
 
     steps:
+      # Get the source code from the repository
       - name: Checkout entire repository
         uses: actions/checkout@v4
 
+      # Set up Python 3.13 for building (latest supported version)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.13"
 
+      # Install uv package manager for fast dependency management
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
+      # Install all Python dependencies including dev dependencies
       - name: Install dependencies
         run: |
           cd python
           uv sync --dev
 
+      # Copy shared resources into the Python package for runtime access
       - name: Copy resources folder into python/src/vista_sdk
         run: |
           # Remove existing resources directory if it exists
@@ -85,6 +102,7 @@ jobs:
           # Copy resources directory
           cp -r ./resources ./python/src/vista_sdk/resources
 
+      # Generate version-specific code based on available resources
       - name: Generate VisVersion script
         env:
           PYTHONPATH: ${{ github.workspace }}/python/src
@@ -92,11 +110,13 @@ jobs:
           cd python
           uv run python src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir ../resources
 
+      # Build the Python package (wheel and source distribution)
       - name: Build package
         run: |
           cd python
           uv build
 
+      # Store build artifacts for the publish job. The name and path are exlusive to GitHub Actions
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -104,26 +124,31 @@ jobs:
           path: python/dist/
 
   publish:
+    # This job only runs when the workflow is manually triggered from the 'main' branch.
     name: Publish
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
 
     steps:
+      # Retrieve the built package from the build job
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: python-package
           path: dist/
 
+      # Set up Python for publishing (same version as build for consistency)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.13"
 
+      # Install uv for package publishing
       - name: Install uv
         uses: astral-sh/setup-uv@v4
 
+      # Publish the package to PyPI using the UV_PUBLISH_TOKEN secret
       - name: Publish package
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
