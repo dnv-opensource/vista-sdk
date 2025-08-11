@@ -23,7 +23,7 @@ public class LocationsTests
     {
         var values = Enum.GetValues(typeof(LocationGroup)).Cast<int>().ToArray();
         Assert.Equal(values.Length, new HashSet<int>(values).Count);
-        Assert.Equal(5, values.Length); // If this changes, wee need to chaneg the way LocationCharDict is used
+        Assert.Equal(5, values.Length); // If this changes, we need to change the way LocationCharDict is used
         Assert.Equal(0, (int)LocationGroup.Number);
         for (int i = 0; i < values.Length - 1; i++) // Start at one
         {
@@ -119,6 +119,34 @@ public class LocationsTests
         Assert.Equal('U', builder.Vertical);
         Assert.Equal('I', builder.Transverse);
         Assert.Equal('F', builder.Longitudinal);
+    }
+
+    [Fact]
+    public void Test_LocationBuilder_WithLocation_SingleDigit()
+    {
+        var locations = VIS.Instance.GetLocations(VisVersion.v3_4a);
+
+        // Test single digit location parsing
+        var builder1 = LocationBuilder.Create(locations).WithLocation(new Location("1"));
+        Assert.Equal(1, builder1.Number);
+        Assert.Equal("1", builder1.ToString());
+
+        var builder5 = LocationBuilder.Create(locations).WithLocation(new Location("5"));
+        Assert.Equal(5, builder5.Number);
+        Assert.Equal("5", builder5.ToString());
+
+        var builder9 = LocationBuilder.Create(locations).WithLocation(new Location("9"));
+        Assert.Equal(9, builder9.Number);
+        Assert.Equal("9", builder9.ToString());
+
+        // Test single digit with characters
+        var builderMixed = LocationBuilder.Create(locations).WithLocation(new Location("1FIPU"));
+        Assert.Equal(1, builderMixed.Number);
+        Assert.Equal('P', builderMixed.Side);
+        Assert.Equal('U', builderMixed.Vertical);
+        Assert.Equal('I', builderMixed.Transverse);
+        Assert.Equal('F', builderMixed.Longitudinal);
+        Assert.Equal("1FIPU", builderMixed.ToString());
     }
 
     [Fact]

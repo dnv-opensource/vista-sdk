@@ -38,7 +38,7 @@ public sealed record LocationBuilder
             if (char.IsDigit(ch))
             {
                 if (n is null)
-                    n = ch;
+                    n = ch - '0';
                 else
                 {
                     if (!Locations.TryParseInt(span, 0, i + 1, out var num))

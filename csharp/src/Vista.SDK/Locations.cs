@@ -207,7 +207,7 @@ public sealed class Locations
 
                 if (digitStartIndex is null)
                 {
-                    number = ch;
+                    number = ch - '0';
                     digitStartIndex = i;
                 }
                 else
