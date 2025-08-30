@@ -176,7 +176,7 @@ public class LocalIdTests
             .WithoutPosition()
             .WithoutState()
             .WithoutContent()
-            .WithoutCalculcation();
+            .WithoutCalculation();
 
         Assert.True(allWithout.IsEmpty);
     }

@@ -191,7 +191,7 @@ public sealed partial record class LocalIdBuilder : ILocalIdBuilder<LocalIdBuild
         {
             CodebookName.Quantity => WithoutQuantity(),
             CodebookName.Content => WithoutContent(),
-            CodebookName.Calculation => WithoutCalculcation(),
+            CodebookName.Calculation => WithoutCalculation(),
             CodebookName.State => WithoutState(),
             CodebookName.Command => WithoutCommand(),
             CodebookName.Type => WithoutType(),
@@ -204,7 +204,7 @@ public sealed partial record class LocalIdBuilder : ILocalIdBuilder<LocalIdBuild
 
     public LocalIdBuilder WithoutContent() => this with { Content = null };
 
-    public LocalIdBuilder WithoutCalculcation() => this with { Calculation = null };
+    public LocalIdBuilder WithoutCalculation() => this with { Calculation = null };
 
     public LocalIdBuilder WithoutState() => this with { State = null };
 
