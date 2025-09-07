@@ -64,9 +64,9 @@ public sealed partial class Gmod
         if (!skipOccurenceCheck)
         {
             var occ = context.Parents.Occurrences(node);
-            if (occ == context.MaxTraversalOccerance)
+            if (occ == context.MaxTraversalOccurrence)
                 return TraversalHandlerResult.SkipSubtree;
-            if (occ > context.MaxTraversalOccerance)
+            if (occ > context.MaxTraversalOccurrence)
                 throw new Exception("Invalid state - node occured more than expected");
         }
         context.Parents.Push(node);
@@ -158,7 +158,7 @@ public sealed partial class Gmod
         Parents Parents,
         TraverseHandlerWithState<TState> Handler,
         TState State,
-        int MaxTraversalOccerance
+        int MaxTraversalOccurrence
     );
 
     private readonly struct Parents
