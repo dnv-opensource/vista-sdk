@@ -149,16 +149,14 @@ public sealed record LocationBuilder
         if (Number is not null)
             str.Append(Number.ToString());
 
-        foreach (var item in items)
-        {
-            if (item is null)
-                continue;
+        // Sort only the location characters, not the number digits
+        var sortedChars = items.Where(item => item is not null).OrderBy(c => c).Select(c => c!.Value);
 
+        foreach (var item in sortedChars)
+        {
             str.Append(item);
         }
 
-        var parts = str.ToString().OrderBy(c => c).Select(s => s.ToString());
-
-        return string.Concat(parts);
+        return str.ToString();
     }
 }

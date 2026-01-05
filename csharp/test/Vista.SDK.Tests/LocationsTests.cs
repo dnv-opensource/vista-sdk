@@ -150,6 +150,25 @@ public class LocationsTests
     }
 
     [Fact]
+    public void Test_LocationBuilder_MultiDigit_Number_Not_Sorted()
+    {
+        var locations = VIS.Instance.GetLocations(VisVersion.v3_4a);
+
+        // Test that multi-digit numbers are NOT sorted
+        var builder = LocationBuilder
+            .Create(locations)
+            .WithNumber(10)
+            .WithSide('S')
+            .WithVertical('U')
+            .WithLongitudinal('F');
+
+        // Should be "10FSU" NOT "01FSU"
+        // The number "10" should stay together, not be sorted as individual characters
+        Assert.Equal("10FSU", builder.ToString());
+        Assert.Equal(10, builder.Number);
+    }
+
+    [Fact]
     public void Test_Locations_Equality()
     {
         var (_, vis) = VISTests.GetVis();
