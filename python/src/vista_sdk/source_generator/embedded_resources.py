@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from vista_sdk.gmod_dto import GmodDto
+from vista_sdk.internal.natural_sort import natural_sort_key
 
 root_dir = (Path(__file__).parent.parent).resolve()
 sys.path.append(str(root_dir))
@@ -62,5 +63,5 @@ class EmbeddedResource:
 
                 gmod = GmodDto.model_validate(json_data)
                 vis_versions.append(gmod.vis_version)
-
+        vis_versions.sort(key=natural_sort_key)
         return vis_versions

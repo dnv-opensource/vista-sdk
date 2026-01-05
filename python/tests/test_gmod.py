@@ -20,7 +20,7 @@ class TestGmod(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the test environment."""
         self.vis = TestVis.get_vis()
-        Client.get_gmod_test(VisVersionExtension.to_version_string(VisVersion.v3_4a))
+        Client.get_gmod(VisVersionExtension.to_version_string(VisVersion.v3_4a))
 
     def test_gmod_loads(self) -> None:
         """Test that Gmod can be loaded for all versions."""
@@ -36,6 +36,16 @@ class TestGmod(unittest.TestCase):
 
     def test_gmod_properties(self) -> None:
         """Test properties of Gmod for all versions."""
+        expected_matches = {
+            VisVersion.v3_4a: 6420,
+            VisVersion.v3_5a: 6557,
+            VisVersion.v3_6a: 6557,
+            VisVersion.v3_7a: 6672,
+            VisVersion.v3_8a: 6335,
+            VisVersion.v3_9a: 6553,
+            VisVersion.v3_10a: 6555,
+        }
+
         for version in VisVersion:
             with self.subTest(version=version):
                 gmod = self.vis.get_gmod(version)
@@ -75,10 +85,13 @@ class TestGmod(unittest.TestCase):
                     f"but got: {max_code} for version: {version.value}"
                 )
 
-                expected_counts = [6335, 6420, 6553, 6557, 6672]
-                assert node_count in expected_counts, (
-                    f"Node count for version {version.value} should be one of {expected_counts}, "  # noqa: E501
-                    f"but got: {node_count}"
+                expected_count = expected_matches.get(version)
+                assert expected_count is not None, (
+                    f"Expected count for version {version.value} should be defined"
+                )
+                assert node_count == expected_count, (
+                    f"Node count for version {version.value} should be "
+                    f"{expected_count}, but got: {node_count}"
                 )
 
     def test_gmod_lookup(self) -> None:

@@ -87,7 +87,7 @@ class VIS(IVIS):
     instance exists.
     """
 
-    LatestVisVersion = VisVersion.v3_8a
+    LatestVisVersion = VisVersion.v3_10a
     _locations_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)  # TTL is in seconds
     _locations_dto_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
     _gmod_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
@@ -122,8 +122,6 @@ class VIS(IVIS):
     def load_gmod_dto(self, vis_version: VisVersion) -> GmodDto | None:
         """Load GMOD DTO from the client."""
         vis_version_str = VisVersionExtension.to_version_string(vis_version)
-        if environment == "local" or environment == "None":
-            return self.client.get_gmod_test(vis_version_str)
         return self.client.get_gmod(vis_version_str)
 
     def get_gmod(self, vis_version: VisVersion) -> Gmod:
@@ -157,10 +155,7 @@ class VIS(IVIS):
 
             version = VisVersionExtension.to_version_string(vis_version)
 
-            if environment == "local" or environment == "None":
-                dto = self.client.get_gmod_versioning_test(vis_version=version)
-            else:
-                dto = self.client.get_gmod_versioning(vis_version=version)
+            dto = self.client.get_gmod_versioning(vis_version=version)
 
             if dto is None:
                 raise Exception(f"Failed to load versioning DTO for version {version}")
@@ -204,14 +199,9 @@ class VIS(IVIS):
         if vis_version in self._codebooks_dto_cache:
             return self._codebooks_dto_cache[vis_version]
 
-        if environment == "local" or environment == "None":
-            dto = self.client.get_codebooks_test(
-                VisVersionExtension.to_version_string(vis_version)
-            )
-        else:
-            dto = self.client.get_codebooks(
-                VisVersionExtension.to_version_string(vis_version)
-            )
+        dto = self.client.get_codebooks(
+            VisVersionExtension.to_version_string(vis_version)
+        )
 
         if dto is None:
             raise Exception("Invalid state")
@@ -237,14 +227,10 @@ class VIS(IVIS):
         """Get locations DTO for a specific VIS version with caching."""
         if vis_version in self._locations_dto_cache:
             return self._locations_dto_cache[vis_version]
-        if environment == "local" or environment == "None":
-            dto = self.client.get_locations_test(
-                VisVersionExtension.to_version_string(vis_version)
-            )
-        else:
-            dto = self.client.get_locations(
-                VisVersionExtension.to_version_string(vis_version)
-            )
+
+        dto = self.client.get_locations(
+            VisVersionExtension.to_version_string(vis_version)
+        )
         if dto is None:
             raise Exception("Invalid state")
 

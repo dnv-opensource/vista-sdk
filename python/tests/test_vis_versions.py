@@ -37,7 +37,7 @@ class TestVisVersions:
         assert VisVersion.v3_7a in versions
         assert VisVersion.v3_8a in versions
         assert VisVersion.v3_9a in versions
-        assert len(VisVersions.all_versions()) == 6, "There should be 6 versions"
+        assert len(VisVersions.all_versions()) == 7, "There should be 7 versions"
 
     def test_try_parse(self) -> None:
         """Test the try_parse method of VisVersions."""

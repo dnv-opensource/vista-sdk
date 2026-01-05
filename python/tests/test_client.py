@@ -259,7 +259,7 @@ class TestClient:
 
         with mock.patch("vista_sdk.client.json.load", return_value=mock_data):
             # Test the method
-            result = Client.get_locations_test(self.TEST_VIS_VERSION)
+            result = Client.get_locations(self.TEST_VIS_VERSION)
 
             if result is not None:
                 # Assertions
@@ -297,7 +297,7 @@ class TestClient:
 
                 with mock.patch("vista_sdk.client.json.load", return_value=mock_data):
                     # Test the method
-                    result = Client.get_gmod_versioning_test(self.TEST_VIS_VERSION)
+                    result = Client.get_gmod_versioning(self.TEST_VIS_VERSION)
 
                     # Assertions
                     assert isinstance(result, GmodVersioningDto)
