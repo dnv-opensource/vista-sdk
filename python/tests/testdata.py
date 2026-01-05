@@ -139,3 +139,39 @@ class TestData:
             (item.local_id_str, item.expected_error_messages)
             for item in data.invalid_local_ids
         ]
+
+    # Codebook test data helpers
+    @staticmethod
+    def _add_codebook_data(data: list[list[str]]) -> list[tuple[str, ...]]:
+        """Convert codebook data into test parameters."""
+        return [tuple(item) for item in data]
+
+    @classmethod
+    def add_valid_position_data(cls) -> list[tuple[str, ...]]:
+        """Get valid position test data."""
+        codebook_data = cls.get_codebook_data("Codebook")
+        return cls._add_codebook_data(codebook_data.valid_position)
+
+    @classmethod
+    def add_states_data(cls) -> list[tuple[str, ...]]:
+        """Get states test data."""
+        codebook_data = cls.get_codebook_data("Codebook")
+        return cls._add_codebook_data(codebook_data.states)
+
+    @classmethod
+    def add_positions_data(cls) -> list[tuple[str, ...]]:
+        """Get positions test data."""
+        codebook_data = cls.get_codebook_data("Codebook")
+        return cls._add_codebook_data(codebook_data.positions)
+
+    @classmethod
+    def add_tag_data(cls) -> list[tuple[str, ...]]:
+        """Get tag test data."""
+        codebook_data = cls.get_codebook_data("Codebook")
+        return cls._add_codebook_data(codebook_data.tag)
+
+    @classmethod
+    def add_detail_tag_data(cls) -> list[tuple[str, ...]]:
+        """Get detail tag test data."""
+        codebook_data = cls.get_codebook_data("Codebook")
+        return cls._add_codebook_data(codebook_data.detail_tag)

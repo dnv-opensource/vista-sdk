@@ -2,7 +2,7 @@
 
 import pytest
 
-from tests.vista_sdk_testdata import VistaSDKTestData
+from tests.testdata import TestData
 from vista_sdk.codebook_names import CodebookName
 from vista_sdk.vis_version import VisVersion
 
@@ -19,7 +19,7 @@ class TestCodebook:
         self.vis = VIS()
 
     @pytest.mark.parametrize(
-        ("input_value", "expected_output"), VistaSDKTestData.add_valid_position_data()
+        ("input_value", "expected_output"), TestData.add_valid_position_data()
     )
     def test_position_validation(self, input_value: str, expected_output: str) -> None:
         """Test position validation."""
@@ -36,7 +36,7 @@ class TestCodebook:
 
     @pytest.mark.parametrize(
         ("invalid_standard_value", "valid_standard_value"),
-        VistaSDKTestData.add_positions_data(),
+        TestData.add_positions_data(),
     )
     def test_positions(
         self, invalid_standard_value: str, valid_standard_value: str
@@ -70,7 +70,7 @@ class TestCodebook:
 
     @pytest.mark.parametrize(
         ("invalid_group", "valid_value", "valid_group", "second_valid_value"),
-        VistaSDKTestData.add_states_data(),
+        TestData.add_states_data(),
     )
     def test_states(
         self,
@@ -110,7 +110,7 @@ class TestCodebook:
             "first_invalid_tag",
             "second_invalid_tag",
         ),
-        VistaSDKTestData.add_tag_data(),
+        TestData.add_tag_data(),
     )
     def test_create_tag(
         self,
@@ -212,7 +212,7 @@ class TestCodebook:
 
     @pytest.mark.parametrize(
         ("valid_custom_tag", "first_invalid_custom_tag", "second_invalid_custom_tag"),
-        VistaSDKTestData.add_detail_tag_data(),
+        TestData.add_detail_tag_data(),
     )
     def test_detail_tag(
         self,
