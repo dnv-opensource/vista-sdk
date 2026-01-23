@@ -5,7 +5,9 @@ This directory contains practical examples demonstrating how to use the Vista SD
 ## 📁 Sample Files
 
 ### 🚀 [`basic_usage.py`](basic_usage.py)
+
 **Perfect starting point** - Demonstrates fundamental operations:
+
 - Initializing VIS and loading data
 - Parsing GMOD paths
 - Working with codebooks and metadata tags
@@ -16,7 +18,9 @@ python samples/basic_usage.py
 ```
 
 ### 🔧 [`codebooks_example.py`](codebooks_example.py)
+
 **Deep dive into codebooks** - Shows how to:
+
 - Explore available codebooks and their content
 - Create standard and custom metadata tags
 - Validate tag values
@@ -27,7 +31,9 @@ python samples/codebooks_example.py
 ```
 
 ### 🏗️ [`gmod_operations.py`](gmod_operations.py)
-**GMOD (General Model of Data) operations** - Covers:
+
+**GMOD (Generic Product Model) operations** - Covers:
+
 - Parsing and analyzing GMOD paths
 - Exploring node hierarchies and metadata
 - Working with different VIS versions
@@ -38,7 +44,9 @@ python samples/gmod_operations.py
 ```
 
 ### 🎯 [`advanced_local_ids.py`](advanced_local_ids.py)
+
 **Advanced Local ID operations** - Demonstrates:
+
 - Building complex Local IDs with multiple components
 - Error handling and validation
 - Working with custom tags
@@ -51,6 +59,7 @@ python samples/advanced_local_ids.py
 ## 🚀 Running the Samples
 
 ### Prerequisites
+
 Make sure you have the Vista SDK installed:
 
 ```bash
@@ -86,24 +95,28 @@ done
 ## 📚 What You'll Learn
 
 ### From `basic_usage.py`:
+
 - How to initialize the VIS system
 - Basic GMOD path parsing
 - Creating simple Local IDs
 - Working with metadata tags
 
 ### From `codebooks_example.py`:
+
 - Understanding different codebook types
 - Creating and validating tags
 - Working with custom values
 - Position validation rules
 
 ### From `gmod_operations.py`:
+
 - GMOD structure and navigation
 - Node properties and relationships
 - Version-specific operations
 - Path validation techniques
 
 ### From `advanced_local_ids.py`:
+
 - Complex Local ID construction
 - Error handling strategies
 - Builder pattern best practices
@@ -123,6 +136,7 @@ Feel free to modify these samples to experiment with:
 All samples follow these patterns:
 
 ### 1. VIS Initialization
+
 ```python
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
@@ -135,6 +149,7 @@ locations = vis.get_locations(version)
 ```
 
 ### 2. Error Handling
+
 ```python
 try:
     result = some_operation()
@@ -144,6 +159,7 @@ except Exception as e:
 ```
 
 ### 3. Builder Pattern
+
 ```python
 quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
 
