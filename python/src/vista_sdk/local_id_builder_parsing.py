@@ -6,8 +6,6 @@ implementing the state machine logic for parsing LocalId strings.
 
 from __future__ import annotations
 
-import contextlib
-
 from vista_sdk.codebook_names import CodebookName
 from vista_sdk.codebooks import Codebooks
 from vista_sdk.internal.local_id_parsing_error_builder import LocalIdParsingErrorBuilder
@@ -21,13 +19,19 @@ from vista_sdk.vis_version import VisVersions
 class LocalIdBuilderParsing:
     """Class for parsing LocalId strings into LocalIdBuilder objects."""
 
+    def __new__(cls) -> LocalIdBuilderParsing:
+        """Create or return the singleton instance of VIS."""
+        if not hasattr(cls, "instance"):
+            cls.instance = super().__new__(cls)
+        return cls.instance
+
     def __init__(self) -> None:
         """Initialize the LocalIdBuilderParsing class."""
         from vista_sdk.vis import VIS
 
         self.vis = VIS()
 
-    def parse(self, local_id_str: str) -> LocalIdBuilder:  # noqa: C901
+    def parse(self, local_id_str: str) -> LocalIdBuilder:
         """Parse a string into a LocalIdBuilder.
 
         Args:
@@ -44,54 +48,6 @@ class LocalIdBuilderParsing:
             # First, check for explicit errors
             if errors.has_errors:
                 error_message = str(errors)
-            else:
-                # Custom error analysis for the specific path
-                segments = local_id_str.split("/")
-                # Try to find metadata tags to analyze
-                meta_idx = -1
-                with contextlib.suppress(ValueError):
-                    meta_idx = segments.index("meta")
-
-                # Specific analysis
-                if len(segments) < 2:
-                    error_message = "Invalid path format, missing required segments"
-                elif segments[0] != LocalIdBuilder.NAMING_RULE:
-                    error_message = (
-                        f"Invalid naming rule, expected '{LocalIdBuilder.NAMING_RULE}'"
-                    )
-                elif not segments[1].startswith("vis-"):
-                    error_message = "Invalid VIS version format, must start with 'vis-'"
-                elif meta_idx == -1:
-                    error_message = "Missing 'meta' segment in path"
-                elif meta_idx < len(segments) - 1:
-                    # Extract the tag prefix and value
-                    meta_tag = segments[meta_idx + 1]
-                    if "-" in meta_tag:
-                        prefix, value = meta_tag.split("-", 1)
-                        error_message = (
-                            f"Invalid metadata tag value '{value}'"
-                            f"for prefix '{prefix}'."
-                            " Tag may not exist in codebook or"
-                            " is incompatible with the path"
-                        )
-                    else:
-                        error_message = f"Invalid metadata tag format '{meta_tag}'"
-                else:
-                    # Check if any path elements might be invalid
-                    for i, segment in enumerate(segments):
-                        if i < meta_idx and segment.count(".") > 0:
-                            # This could be an invalid path element
-                            error_message = (
-                                f"Path element '{segment}' may be invalid or not "
-                                "defined in the GMOD hierarchy"
-                            )
-                            break
-                    else:
-                        # If we didn't find a specific issue
-                        error_message = (
-                            "Unknown parsing failure, possibly an invalid path "
-                            "structure or incompatible metadata combination"
-                        )
 
             raise ValueError(
                 f"Couldn't parse local ID from: '{local_id_str}'. {error_message}"
@@ -113,11 +69,11 @@ class LocalIdBuilderParsing:
             - The resulting LocalIdBuilder, or None if parsing failed
         """
         error_builder = LocalIdParsingErrorBuilder.empty()
-        success, local_id = self.try_parse_internal(local_id_str, error_builder)
+        success, local_id = self._try_parse_internal(local_id_str, error_builder)
         errors = error_builder.build()
         return success, errors, local_id
 
-    def try_parse_internal(  # noqa : C901
+    def _try_parse_internal(  # noqa : C901
         self, local_id_str: str, error_builder: LocalIdParsingErrorBuilder
     ) -> tuple[bool, LocalIdBuilder | None]:
         """Internal implementation of try_parse.
@@ -161,9 +117,9 @@ class LocalIdBuilderParsing:
         type_tag = None
         pos = None
         detail = None
+        verbose = False
         predefined_message = None
         invalid_secondary_item = False
-        verbose = False  # For builder.with_verbose_mode
 
         primary_item_start = -1
         secondary_item_start = -1
@@ -242,15 +198,13 @@ class LocalIdBuilderParsing:
                             return False, None
 
                         path = span[primary_item_start : i - 1]
-                        res = gmod.try_parse_path(path)
-                        if res is not None:
-                            success, primary_item = res
-                            if not success or primary_item is None:
-                                self.add_error(
-                                    error_builder,
-                                    LocalIdParsingState.PRIMARY_ITEM,
-                                    f"Invalid GmodPath in Primary item: {path}",
-                                )
+                        success, primary_item = gmod.try_parse_path(path)
+                        if not success or primary_item is None:
+                            self.add_error(
+                                error_builder,
+                                LocalIdParsingState.PRIMARY_ITEM,
+                                f"Invalid GmodPath in Primary item: {path}",
+                            )
                     else:
                         self.add_error(
                             error_builder,
@@ -302,17 +256,15 @@ class LocalIdBuilderParsing:
                     if next_state != state:
                         # Try to parse the accumulated path
                         path = span[primary_item_start : i - 1]
-                        res = gmod.try_parse_path(path)
-                        if res is not None:
-                            success, primary_item = res
-                            if not success or primary_item is None:
-                                # Displays the full GmodPath when first part of
-                                # PrimaryItem is invalid
-                                self.add_error(
-                                    error_builder,
-                                    LocalIdParsingState.PRIMARY_ITEM,
-                                    f"Invalid GmodPath in Primary item: {path}",
-                                )
+                        success, primary_item = gmod.try_parse_path(path)
+                        if not success or primary_item is None:
+                            # Displays the full GmodPath when first part of
+                            # PrimaryItem is invalid
+                            self.add_error(
+                                error_builder,
+                                LocalIdParsingState.PRIMARY_ITEM,
+                                f"Invalid GmodPath in Primary item: {path}",
+                            )
 
                         if is_tilde:
                             state = next_state
@@ -331,8 +283,9 @@ class LocalIdBuilderParsing:
                             f"Invalid GmodNode in Primary item: {code}",
                         )
 
-                        next_state_indexes = self.get_next_state_indexes(span, state)
-                        next_state_index, end_of_next_state_index = next_state_indexes
+                        next_state_index, end_of_next_state_index = (
+                            self.get_next_state_indexes(span, state)
+                        )
 
                         if next_state_index == -1:
                             self.add_error(
@@ -359,8 +312,7 @@ class LocalIdBuilderParsing:
                         self.add_error(
                             error_builder,
                             LocalIdParsingState.PRIMARY_ITEM,
-                            f"Invalid GmodPath: Last part in Primary item: "
-                            f"{invalid_primary_item_path}",
+                            f"Invalid GmodPath: Last part in Primary item: {invalid_primary_item_path}",  # noqa : E501
                         )
 
                         i = end_of_next_state_index
@@ -415,26 +367,23 @@ class LocalIdBuilderParsing:
                 if next_state != state:
                     # Transitioning to next state - validate the secondary item path
                     path = span[secondary_item_start : i - 1]
-                    res = gmod.try_parse_path(path)
-                    if res is not None:
-                        success, secondary_item = res
-                        if not success or secondary_item is None:
-                            # display the full GmodPath when first part of
-                            # SecondaryItem is invalid
-                            invalid_secondary_item = True
-                            self.add_error(
-                                error_builder,
-                                LocalIdParsingState.SECONDARY_ITEM,
-                                f"Invalid GmodPath in Secondary item: {path}",
-                            )
+                    success, secondary_item = gmod.try_parse_path(path)
+                    if not success or secondary_item is None:
+                        # display the full GmodPath when first part of
+                        # SecondaryItem is invalid
+                        invalid_secondary_item = True
+                        self.add_error(
+                            error_builder,
+                            LocalIdParsingState.SECONDARY_ITEM,
+                            f"Invalid GmodPath in Secondary item: {path}",
+                        )
 
-                            next_start_indexes = self.get_next_state_indexes(
-                                span, state
-                            )
-                            if next_start_indexes[1] != -1:
-                                i = next_start_indexes[1]
-                                state = next_state
-                                continue
+                        _, end_of_next_state_index = self.get_next_state_indexes(
+                            span, state
+                        )
+                        i = end_of_next_state_index
+                        state = next_state
+                        continue
 
                     if is_tilde:
                         state = next_state
@@ -454,8 +403,10 @@ class LocalIdBuilderParsing:
 
                     # Check if we need to report "Last part" error and skip to
                     # next state
-                    next_start_indexes = self.get_next_state_indexes(span, state)
-                    if next_start_indexes[0] == -1:
+                    next_state_index, end_of_next_state_index = (
+                        self.get_next_state_indexes(span, state)
+                    )
+                    if next_state_index == -1:
                         # Missing /meta prefix case
                         self.add_error(
                             error_builder,
@@ -465,7 +416,7 @@ class LocalIdBuilderParsing:
                         return False, None
 
                     # Report "Last part" error for invalid segments
-                    invalid_path = span[i : next_start_indexes[0]]
+                    invalid_path = span[i:next_state_index]
                     self.add_error(
                         error_builder,
                         LocalIdParsingState.SECONDARY_ITEM,
@@ -474,10 +425,6 @@ class LocalIdBuilderParsing:
                     )
 
                     # Determine next state based on what comes next
-                    if next_start_indexes[0] + 1 < len(span):
-                        next_segment = span[next_start_indexes[0] + 1 :]
-                    else:
-                        next_segment = ""
                     if next_segment.startswith("meta"):
                         next_state = LocalIdParsingState.META_QUANTITY
                     elif next_segment.startswith("~"):
@@ -485,7 +432,7 @@ class LocalIdBuilderParsing:
                     else:
                         raise ValueError("Inconsistent parsing state")
 
-                    i = next_start_indexes[1]
+                    i = end_of_next_state_index
                     state = next_state
                     continue
 
@@ -679,35 +626,20 @@ class LocalIdBuilderParsing:
             return False, None
 
         # Create a builder with the parsed components
-        builder = LocalIdBuilder.create(vis_version)
-
-        # Apply primary and secondary items
-        if primary_item is not None:
-            builder, success = builder.try_with_primary_item(primary_item)
-
-        if secondary_item is not None:
-            builder, success = builder.try_with_secondary_item(secondary_item)
-
-        # Apply verbose mode
-        builder = builder.with_verbose_mode(verbose)
-
-        # Add metadata tags
-        if qty is not None:
-            builder, success = builder.try_with_metadata_tag(qty)
-        if cnt is not None:
-            builder, success = builder.try_with_metadata_tag(cnt)
-        if calc is not None:
-            builder, success = builder.try_with_metadata_tag(calc)
-        if state_tag is not None:
-            builder, success = builder.try_with_metadata_tag(state_tag)
-        if cmd is not None:
-            builder, success = builder.try_with_metadata_tag(cmd)
-        if type_tag is not None:
-            builder, success = builder.try_with_metadata_tag(type_tag)
-        if pos is not None:
-            builder, success = builder.try_with_metadata_tag(pos)
-        if detail is not None:
-            builder, success = builder.try_with_metadata_tag(detail)
+        builder = (
+            LocalIdBuilder.create(vis_version)
+            .try_with_primary_item(primary_item)
+            .try_with_secondary_item(secondary_item)
+            .with_verbose_mode(verbose)
+            .try_with_metadata_tag(qty)
+            .try_with_metadata_tag(cnt)
+            .try_with_metadata_tag(calc)
+            .try_with_metadata_tag(state_tag)
+            .try_with_metadata_tag(cmd)
+            .try_with_metadata_tag(type_tag)
+            .try_with_metadata_tag(pos)
+            .try_with_metadata_tag(detail)
+        )
 
         # Check for final validation errors
         if builder.is_empty_metadata:
@@ -940,6 +872,7 @@ class LocalIdBuilderParsing:
 
         meta_index = span.find("/meta")
         end_of_meta_index = meta_index + len("/meta") + 1 if meta_index != -1 else -1
+        is_verbose = custom_index < meta_index
 
         if state == LocalIdParsingState.PRIMARY_ITEM:
             sec_index = span.find("/sec")
@@ -948,13 +881,13 @@ class LocalIdBuilderParsing:
             if sec_index != -1:
                 return sec_index, end_of_sec_index
 
-            if custom_index != -1:
+            if is_verbose and custom_index != -1:
                 return custom_index, end_of_custom_index
 
             return meta_index, end_of_meta_index
 
         if state == LocalIdParsingState.SECONDARY_ITEM:
-            if custom_index != -1:
+            if is_verbose and custom_index != -1:
                 return custom_index, end_of_custom_index
 
             return meta_index, end_of_meta_index

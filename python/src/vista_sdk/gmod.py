@@ -1,4 +1,4 @@
-"""GMOD (Generalized Model of Data) module for the VISTA SDK.
+"""GMOD (Generic Product Model) module for the VISTA SDK.
 
 This module provides the core GMOD functionality,
 including traversal and path operations.
@@ -9,7 +9,7 @@ from __future__ import annotations
 import inspect
 import sys
 from collections import deque
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
 from types import NoneType
 from typing import Any, ClassVar, Generic, TypeVar, cast, overload
@@ -53,10 +53,10 @@ class TraversalOptions:
 
 
 class Gmod:
-    """Class representing the GMOD (Generalized Model of Data) structure."""
+    """Class representing the GMOD (Generic Product Model) structure."""
 
-    PotentialParentScopeTypes: ClassVar[set[str]] = {"SELECTION", "GROUP", "LEAF"}
-    LeafTypes: ClassVar[set[str]] = {"ASSET FUNCTION LEAF", "PRODUCT FUNCTION LEAF"}
+    PotentialParentScopeTypes: ClassVar[set[str]] = GmodNode.PotentialParentScopeTypes
+    LeafTypes: ClassVar[set[str]] = GmodNode.LeafTypes
 
     def __init__(self, vis_version: VisVersion, dto: GmodDto) -> None:
         """Initialize the Gmod instance with a version and a DTO."""
@@ -90,81 +90,72 @@ class Gmod:
         """Return the root node of the GMOD."""
         return self._root_node
 
-    def __iter__(self) -> Iterable[tuple[str, GmodNode]]:
+    def __iter__(self) -> Iterator[GmodNode]:
         """Return an iterator over the nodes in the GMOD."""
-        return iter(self._node_map)
+        return self._node_map.values()
+
+    def __len__(self) -> int:
+        """Return the number of nodes in the GMOD."""
+        return len(self._node_map)
 
     @staticmethod
     def is_potential_parent(type_str: str) -> bool:
         """Check if the given type string is a potential parent scope type."""
-        return type_str in Gmod.PotentialParentScopeTypes
+        return GmodNode.is_potential_parent_scope_type(type_str)
 
     @staticmethod
     def is_leaf_node(full_type: str) -> bool:
         """Check if the given full type is a leaf node type."""
-        return full_type in Gmod.LeafTypes
+        return GmodNode.is_leaf_node_type(full_type)
 
     @staticmethod
     def is_leaf_node_metadata(metadata: GmodNodeMetadata) -> bool:
         """Check if the given metadata represents a leaf node."""
-        return Gmod.is_leaf_node(metadata.full_type)
+        return GmodNode.is_leaf_node_from_metadata(metadata)
 
     @staticmethod
     def is_function_node(category: str) -> bool:
         """Check if the given category represents a function node."""
-        return category != "PRODUCT" and category != "ASSET"
+        return GmodNode.is_function_node_category(category)
 
     @staticmethod
     def is_function_node_metadata(metadata: GmodNodeMetadata) -> bool:
         """Check if the given metadata represents a function node."""
-        return Gmod.is_function_node(metadata.category)
+        return GmodNode.is_function_node_from_metadata(metadata)
 
     @staticmethod
     def is_product_selection(metadata: GmodNodeMetadata) -> bool:
         """Check if the given metadata represents a product selection."""
-        return metadata.category == "PRODUCT" and metadata.type == "SELECTION"
+        return GmodNode.is_product_selection_metadata(metadata)
 
     @staticmethod
     def is_product_type(metadata: GmodNodeMetadata) -> bool:
         """Check if the given metadata represents a product type."""
-        return metadata.category == "PRODUCT" and metadata.type == "TYPE"
+        return GmodNode.is_product_type_metadata(metadata)
 
     @staticmethod
     def is_asset(metadata: GmodNodeMetadata) -> bool:
         """Check if the given metadata represents an asset."""
-        return metadata.category == "ASSET"
+        return GmodNode.is_asset_metadata(metadata)
 
     @staticmethod
     def is_asset_function_node(metadata: GmodNodeMetadata) -> bool:
         """Check if the given metadata represents an asset function node."""
-        return metadata.category == "ASSET FUNCTION"
+        return GmodNode.is_asset_function_node_metadata(metadata)
 
     @staticmethod
     def is_product_type_assignment(
         parent: GmodNode | None, child: GmodNode | None
     ) -> bool:
         """Check if the parent-child relationship is a product type assignment."""
-        if parent is None or child is None:
-            return False
-        if "FUNCTION" not in parent.metadata.category:
-            return False
-        return not (
-            child.metadata.category != "PRODUCT" or child.metadata.type != "TYPE"
-        )
+        return GmodNode.is_product_type_assignment(parent, child)
 
     @staticmethod
     def is_product_selection_assignment(
         parent: GmodNode | None, child: GmodNode | None
     ) -> bool:
         """Check if the parent-child relationship is a product selection assignment."""
-        if parent is None or child is None:
-            return False
-        if "FUNCTION" not in parent.metadata.category:
-            return False
-        return not (
-            "PRODUCT" not in child.metadata.category
-            or child.metadata.type != "SELECTION"
-        )
+        return GmodNode.is_product_selection_assignment(parent, child)
 
     def __getitem__(self, key: str) -> GmodNode:
         """Get a node by its key (code)."""
@@ -182,7 +173,7 @@ class Gmod:
         """Parse a string into a GmodPath object."""
         return GmodPath.parse(item, arg=self.vis_version)
 
-    def try_parse_path(self, item: str) -> tuple[bool, GmodPath | None] | None:
+    def try_parse_path(self, item: str) -> tuple[bool, GmodPath | None]:
         """Try to parse a string into a GmodPath object."""
         return GmodPath.try_parse(item, arg=self.vis_version)
 
@@ -194,7 +185,7 @@ class Gmod:
         """Try to parse a full path string into a GmodPath object."""
         return GmodPath.try_parse_full_path(item, arg=self.vis_version)
 
-    def check_signature(
+    def _check_signature(
         self,
         handler: TraversalHandler | TraversalHandlerWithState[TState],
         param_count: int,
@@ -252,7 +243,7 @@ class Gmod:
 
         if (
             callable(args1)
-            and self.check_signature(args1, 2)  # type: ignore
+            and self._check_signature(args1, 2)  # type: ignore
             and arg3_type is NoneType
             and arg4_type is NoneType
         ):
@@ -262,7 +253,7 @@ class Gmod:
             root_node = self.root_node
         elif (
             callable(args1)
-            and self.check_signature(args1, 2)  # type: ignore
+            and self._check_signature(args1, 2)  # type: ignore
             and arg2_type is GmodNode
             and arg4_type is NoneType
         ):
@@ -271,7 +262,7 @@ class Gmod:
         elif (
             args1_type is not None
             and callable(args2)
-            and self.check_signature(args2, 3)  # type: ignore
+            and self._check_signature(args2, 3)  # type: ignore
             and arg3_type is NoneType
             and arg4_type is NoneType
         ):
@@ -283,7 +274,7 @@ class Gmod:
             args1_type is not None
             and arg2_type is GmodNode
             and callable(args3)
-            and self.check_signature(args3, 3)  # type: ignore
+            and self._check_signature(args3, 3)  # type: ignore
         ):
             state = args1
             root_node = args2  # type: ignore
@@ -331,7 +322,7 @@ class Gmod:
             last_asset_function if last_asset_function is not None else self._root_node
         )
 
-        state = self.PathExistsContext(to=to_node, from_path=list(from_path))
+        state = Gmod.PathExistsContext(to=to_node, from_path=list(from_path))
 
         def handler(
             state: Gmod.PathExistsContext, parents: list[GmodNode], node: GmodNode
@@ -340,35 +331,34 @@ class Gmod:
                 return TraversalHandlerResult.CONTINUE
 
             actual_parents: list[GmodNode] = []
-            current_parents = list(parents)
 
             # Build full path to root
-            while current_parents and not current_parents[0].is_root():
-                parent = current_parents[0]
+            while not parents[0].is_root():
+                if not actual_parents:
+                    actual_parents = [*parents]
+                    parents = actual_parents
+
+                parent = parents[0]
                 if len(parent.parents) != 1:
                     raise Exception("Invalid state - expected one parent")
                 actual_parents.insert(0, parent.parents[0])
-                current_parents = [parent.parents[0], *current_parents]
-
-            # Validate that from_path is contained in current parents
-            from_path_codes = [n.code for n in state.from_path]
-            current_parent_codes = [p.code for p in current_parents]
-
             # Check if all nodes from from_path are in current_parents (order matters)
-            if len(current_parents) < len(state.from_path):
+            if len(parents) < len(state.from_path):
                 return TraversalHandlerResult.CONTINUE
 
             # Must have same start order
             match = True
             for i in range(len(state.from_path)):
-                if current_parent_codes[i] != from_path_codes[i]:
+                if parents[i].code != state.from_path[i].code:
                     match = False
                     break
 
             if match:
                 # Return remaining parents that are not in from_path
                 state.remaining_parents = [
-                    p for p in current_parents if p.code not in from_path_codes
+                    p
+                    for p in parents
+                    if not any(pp.code == p.code for pp in state.from_path)
                 ]
                 return TraversalHandlerResult.STOP
 
@@ -389,8 +379,8 @@ class Gmod:
         self, context: Gmod.TraversalContext[TState], node: GmodNode
     ) -> TraversalHandlerResult:
         """Traverse a single node in the GMOD structure."""
-        if node.metadata.install_substructure is False:
-            return TraversalHandlerResult.CONTINUE
+        # if node.metadata.install_substructure is False:
+        #     return TraversalHandlerResult.CONTINUE
 
         result = context.handler(context.state, context.parents.nodes, node)
         if result in (TraversalHandlerResult.STOP, TraversalHandlerResult.SKIP_SUBTREE):
@@ -476,122 +466,63 @@ class Gmod:
         shortest_path: list[GmodNode] = field(default_factory=list)
         current_best_length: int = sys.maxsize
 
-    def find_shortest_path(  # noqa: C901
+    def find_shortest_path(
         self, start_node: GmodNode, end_node: GmodNode
     ) -> GmodPath | None:
-        """Find the shortest path between two nodes in the GMOD structure.
+        """Find the shortest path from start_node down to end_node.
+
+        Uses BFS to find the shortest path through the GMOD hierarchy,
+        starting from start_node and traversing down through children.
+        Returns the FULL path from root through start_node to end_node.
 
         Args:
-            start_node: The starting node
+            start_node: The starting node (must be an ancestor of end_node)
             end_node: The target node to reach
 
         Returns:
-            GmodPath: The shortest path if found, None if no path exists
+            GmodPath (full path from root) if end_node is reachable from start_node,
+            None otherwise
         """
+
+        def bfs_find_path(
+            from_node: GmodNode, to_node: GmodNode
+        ) -> list[GmodNode] | None:
+            """BFS to find shortest path from from_node to to_node (children)."""
+            if from_node.code == to_node.code:
+                return [from_node]
+
+            queue: deque[tuple[GmodNode, list[GmodNode]]] = deque()
+            queue.append((from_node, [from_node]))
+            visited: set[str] = {from_node.code}
+
+            while queue:
+                current, path = queue.popleft()
+                for child in current.children:
+                    if child.code in visited:
+                        continue
+                    new_path = [*path, child]
+                    if child.code == to_node.code:
+                        return new_path
+                    visited.add(child.code)
+                    queue.append((child, new_path))
+            return None
+
+        # First, find path from root to start_node
+        path_to_start = bfs_find_path(self.root_node, start_node)
+        if path_to_start is None:
+            return None
+
         # Special case for path to self
         if start_node.code == end_node.code:
-            return GmodPath(parents=[], node=end_node)
+            return GmodPath(parents=path_to_start[:-1], node=start_node)
 
-        # Get from path for node by looking at parents
-        from_path = []
-        curr: GmodNode | None = start_node
-        while curr is not None:
-            from_path.append(curr)
-            # Look at parents
-            curr = curr.parents[0] if curr.parents else None
+        # Find path from start_node to end_node
+        path_from_start = bfs_find_path(start_node, end_node)
+        if path_from_start is None:
+            return None
 
-        from_path.reverse()  # Put the path in order from root to start_node
-
-        # Get last asset function node
-        last_asset = find_last_asset_function_node(from_path)
-
-        # If no asset function found, start from root node
-        search_root = last_asset if last_asset else self.root_node
-        search_path = []
-
-        # Build search_path up to search_root
-        for node in from_path:
-            search_path.append(node)
-            if node == search_root:
-                break
-
-        # Track whether we find a path
-        found_path = None
-
-        # For certain paths, force going through specific nodes
-        if start_node.code == "411.1" and end_node.code == "I101":
-            # Special case - must go through C101.72
-            queue = deque(
-                [(search_root, search_path)]
-            )  # Start from asset function or root with existing path
-            visited = {search_root.code}
-            found_c101_72 = None
-
-            # First find path to C101.72 that matches original path
-            while queue and not found_c101_72:
-                current, path = queue.popleft()
-                for child in current.children:
-                    # Must be longer than from_path and match its start
-                    if child.code == "C101.72" and len(path) >= len(from_path):
-                        # Validate parents match from path start order
-                        match = True
-                        for i in range(len(from_path)):
-                            if path[i].code != from_path[i].code:
-                                match = False
-                                break
-
-                        if match:
-                            found_c101_72 = [*path, child]
-                            break
-                    if child.code not in visited:
-                        visited.add(child.code)
-                        queue.append((child, [*path, child]))
-
-            if found_c101_72:
-                # Now look for path from C101.72 to I101
-                c101_72_node = found_c101_72[-1]
-                for child in c101_72_node.children:
-                    if child.code == "I101":
-                        # Found valid path through C101.72 to I101
-                        # Parents need to be all nodes in the path including C101.72
-                        found_path = GmodPath(parents=found_c101_72, node=child)
-                        break
-
-        else:
-            # For all other cases, use breadth-first search from asset function or root
-            queue = deque(
-                [(search_root, search_path)]
-            )  # Start with the path up to search_root
-            visited = {search_root.code}
-
-            while queue and not found_path:
-                current, path = queue.popleft()
-
-                for child in current.children:
-                    if child == end_node:
-                        # Like C#, validate path matches before returning
-                        # Must be longer than from_path and match its start
-                        if len(path) >= len(from_path):
-                            # Validate parents match from path start order
-                            match = True
-                            for i in range(len(from_path)):
-                                if path[i].code != from_path[i].code:
-                                    match = False
-                                    break
-
-                            if match:
-                                # Found valid path!
-                                found_path = GmodPath(
-                                    parents=[*path, child], node=child
-                                )
-                                break
-
-                    elif child.code not in visited:
-                        visited.add(child.code)
-                        queue.append((child, [*path, child]))
-
-                        # Invalid path found - keep searching
-                        continue
-
-        # Return the found path if any, otherwise None
-        return found_path
+        # Combine: path_to_start (includes start) + path_from_start[1:] (skip start, it's already included) # noqa: E501
+        full_parents = (
+            path_to_start + path_from_start[1:-1]
+        )  # exclude end_node from parents
+        return GmodPath(parents=full_parents, node=end_node)

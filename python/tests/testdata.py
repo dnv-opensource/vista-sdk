@@ -57,7 +57,7 @@ class CodebookTestData(BaseModel):
 class LocationsTestDataItem(BaseModel):
     """Data model for individual location test items."""
 
-    value: str = Field(..., alias="value")
+    value: str | None = Field(..., alias="value")
     success: bool = Field(..., alias="success")
     output: str | None = Field(..., alias="output")
     expected_error_messages: list[str] = Field(..., alias="expectedErrorMessages")
@@ -107,14 +107,28 @@ class TestData:
             raise Exception(f"Couldn't deserialize: {cls.__name__}") from e
 
     @staticmethod
-    def get_gmodpath_data(test_name: str) -> GmodPathTestData:
+    def get_gmodpath_data() -> GmodPathTestData:
         """Load and validate GMOD path test data."""
-        return TestData.get_data(test_name, GmodPathTestData)
+        return TestData.get_data("GmodPaths", GmodPathTestData)
+
+    @staticmethod
+    def get_valid_gmod_path_data() -> list[GmodPathTestItem]:
+        """Load valid GMOD path test data."""
+        data = TestData.get_gmodpath_data()
+        return data.valid
 
     @staticmethod
     def get_local_id_data(test_name: str) -> LocalIdTestData:
         """Load and validate local ID test data."""
         return TestData.get_data(test_name, LocalIdTestData)
+
+    @staticmethod
+    def get_universal_id_test_data() -> list[str]:
+        """Load universal ID test data as a list of strings."""
+        return [
+            "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet",
+            "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/meta/calc~accumulate",
+        ]
 
     @staticmethod
     def get_codebook_data(test_name: str) -> CodebookTestData:

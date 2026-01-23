@@ -2,29 +2,16 @@
 
 import pytest
 
+from tests.testdata import TestData  # type: ignore
 from vista_sdk.imo_number import ImoNumber  # type: ignore
 from vista_sdk.universal_id import UniversalId  # type: ignore
-from vista_sdk.universal_id_builder import UniversalIdBuilder  # type: ignore
+from vista_sdk.universal_id_builder import UniversalIdBuilder
 
 
 class TestUniversalId:
     """Test class for Universal ID functionality."""
 
-    @pytest.fixture
-    def test_data(self) -> list[str]:
-        """Test data matching the C# test cases."""
-        return [
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet",
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/meta/calc~accumulate",
-        ]
-
-    @pytest.mark.parametrize(
-        "test_case",
-        [
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet",
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/meta/calc~accumulate",
-        ],
-    )
+    @pytest.mark.parametrize("test_case", TestData.get_universal_id_test_data())
     def test_try_parsing(self, test_case: str) -> None:
         """Test UniversalIdBuilder.try_parse_with_errors method.
 
@@ -34,13 +21,7 @@ class TestUniversalId:
         assert success, f"Parsing failed for: {test_case}. Errors: {errors}"
         assert builder is not None, f"Builder should not be None for: {test_case}"
 
-    @pytest.mark.parametrize(
-        "test_case",
-        [
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet",
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/meta/calc~accumulate",
-        ],
-    )
+    @pytest.mark.parametrize("test_case", TestData.get_universal_id_test_data())
     def test_parsing(self, test_case: str) -> None:
         """Test UniversalId.parse method.
 
@@ -60,10 +41,7 @@ class TestUniversalId:
 
     @pytest.mark.parametrize(
         "test_case",
-        [
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet",
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/meta/calc~accumulate",
-        ],
+        TestData.get_universal_id_test_data(),
     )
     def test_to_string(self, test_case: str) -> None:
         """Test string representation of UniversalId.
@@ -83,10 +61,7 @@ class TestUniversalId:
 
     @pytest.mark.parametrize(
         "test_case",
-        [
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet",
-            "data.dnv.com/IMO1234567/dnv-v2/vis-3-7a/612.21/C701.23/C633/meta/calc~accumulate",
-        ],
+        TestData.get_universal_id_test_data(),
     )
     def test_universal_builder_add_and_remove_all(self, test_case: str) -> None:
         """Test adding and removing components from UniversalIdBuilder.

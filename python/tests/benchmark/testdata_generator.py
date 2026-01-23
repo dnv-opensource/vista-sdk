@@ -37,7 +37,7 @@ class TestDataGenerator:
 
     def _load_test_paths(self) -> list[str]:
         """Load base test paths from existing test data."""
-        test_data = TestData.get_gmodpath_data("GmodPaths")
+        test_data = TestData.get_gmodpath_data()
         return [item.path for item in test_data.valid]
 
     def generate_large_dataset(self, size: int = 1000) -> list[GmodPath]:

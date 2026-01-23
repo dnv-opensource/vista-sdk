@@ -1,14 +1,14 @@
 """This file is part of the VISTA SDK."""
 
-from .extensions import to_json_dto
+from .extensions import to_domain_model, to_json_dto
 from .time_series_data import (
     ConfigurationReference,
-    Event,
+    DataSetEvent,
+    DataSetTabular,
     EventData,
     Header,
     Package,
     TabularData,
-    TabularRow,
     TimeSeriesData,
     TimeSeriesDataPackage,
     TimeSpan,
@@ -16,14 +16,15 @@ from .time_series_data import (
 
 __all__ = [
     "ConfigurationReference",
-    "Event",
+    "DataSetEvent",
+    "DataSetTabular",
     "EventData",
     "Header",
     "Package",
     "TabularData",
-    "TabularRow",
     "TimeSeriesData",
     "TimeSeriesDataPackage",
     "TimeSpan",
+    "to_domain_model",
     "to_json_dto",
 ]

@@ -9,13 +9,12 @@ from vista_sdk.gmod_path import GmodPath
 from vista_sdk.local_id_items import LocalIdItems
 from vista_sdk.metadata_tag import MetadataTag
 from vista_sdk.parsing_errors import ParsingErrors
-from vista_sdk.vis_version import VisVersion, VisVersionExtension, VisVersions
+from vista_sdk.vis_version import VisVersion, VisVersions
 
 # Forward references to avoid circular imports
 T = TypeVar("T")
 if TYPE_CHECKING:
     from vista_sdk.local_id import LocalId
-    from vista_sdk.mqtt.mqtt_local_id import MqttLocalId
 
 
 class LocalIdBuilder:
@@ -126,35 +125,26 @@ class LocalIdBuilder:
 
     def with_vis_version(self, vis_version: str | VisVersion) -> LocalIdBuilder:
         """Set the VIS version."""
-        builder, succeeded = self.try_with_vis_version(vis_version)
-        if not succeeded:
+        builder = self.try_with_vis_version(vis_version)
+        if builder is None:
             raise ValueError(f"Failed to parse VIS version: {vis_version}")
         return builder
 
     def try_with_vis_version(
         self, vis_version: str | VisVersion | None
-    ) -> tuple[LocalIdBuilder, bool]:
+    ) -> LocalIdBuilder:
         """Try to set the VIS version."""
         if isinstance(vis_version, str):
             try:
                 version_obj = VisVersions.parse(vis_version)
                 return self.try_with_vis_version(version_obj)
             except ValueError:
-                return self, False
+                return self
 
         if vis_version is None:
-            return self, False
+            return self
 
-        return self._copy_with(vis_version=vis_version), True
-
-    def try_with_vis_version_out(
-        self, vis_version: VisVersion | None, out_succeeded: list[bool]
-    ) -> LocalIdBuilder:
-        """Try to set the VIS version with an out parameter."""
-        builder, succeeded = self.try_with_vis_version(vis_version)
-        if len(out_succeeded) > 0:
-            out_succeeded[0] = succeeded
-        return builder
+        return self._copy_with(vis_version=vis_version)
 
     def without_vis_version(self) -> LocalIdBuilder:
         """Remove the VIS version."""
@@ -166,31 +156,20 @@ class LocalIdBuilder:
 
     def with_primary_item(self, item: GmodPath) -> LocalIdBuilder:
         """Set the primary item."""
-        builder, succeeded = self.try_with_primary_item(item)
-        if not succeeded:
+        builder = self.try_with_primary_item(item)
+        if builder is None:
             raise ValueError(f"Invalid primary item: {item}")
         return builder
 
-    def try_with_primary_item(
-        self, item: GmodPath | None
-    ) -> tuple[LocalIdBuilder, bool]:
+    def try_with_primary_item(self, item: GmodPath | None) -> LocalIdBuilder:
         """Try to set the primary item."""
         if item is None:
-            return self, False
+            return self
 
         new_items = LocalIdItems(
             primary_item=item, secondary_item=self._items.secondary_item
         )
-        return self._copy_with(items=new_items), True
-
-    def try_with_primary_item_out(
-        self, item: GmodPath | None, out_succeeded: list[bool]
-    ) -> LocalIdBuilder:
-        """Try to set the primary item with an out parameter."""
-        builder, succeeded = self.try_with_primary_item(item)
-        if len(out_succeeded) > 0:
-            out_succeeded[0] = succeeded
-        return builder
+        return self._copy_with(items=new_items)
 
     def without_primary_item(self) -> LocalIdBuilder:
         """Remove the primary item."""
@@ -201,31 +180,20 @@ class LocalIdBuilder:
 
     def with_secondary_item(self, item: GmodPath) -> LocalIdBuilder:
         """Set the secondary item."""
-        builder, succeeded = self.try_with_secondary_item(item)
-        if not succeeded:
+        builder = self.try_with_secondary_item(item)
+        if builder is None:
             raise ValueError(f"Invalid secondary item: {item}")
         return builder
 
-    def try_with_secondary_item(
-        self, item: GmodPath | None
-    ) -> tuple[LocalIdBuilder, bool]:
+    def try_with_secondary_item(self, item: GmodPath | None) -> LocalIdBuilder:
         """Try to set the secondary item."""
         if item is None:
-            return self, False
+            return self
 
         new_items = LocalIdItems(
             primary_item=self._items.primary_item, secondary_item=item
         )
-        return self._copy_with(items=new_items), True
-
-    def try_with_secondary_item_out(
-        self, item: GmodPath | None, out_succeeded: list[bool]
-    ) -> LocalIdBuilder:
-        """Try to set the secondary item with an out parameter."""
-        builder, succeeded = self.try_with_secondary_item(item)
-        if len(out_succeeded) > 0:
-            out_succeeded[0] = succeeded
-        return builder
+        return self._copy_with(items=new_items)
 
     def without_secondary_item(self) -> LocalIdBuilder:
         """Remove the secondary item."""
@@ -236,45 +204,34 @@ class LocalIdBuilder:
 
     def with_metadata_tag(self, metadata_tag: MetadataTag) -> LocalIdBuilder:
         """Set a metadata tag."""
-        builder, succeeded = self.try_with_metadata_tag(metadata_tag)
-        if not succeeded:
+        builder = self.try_with_metadata_tag(metadata_tag)
+        if builder is None:
             raise ValueError(f"Invalid metadata tag: {metadata_tag}")
         return builder
 
-    def try_with_metadata_tag(
-        self, metadata_tag: MetadataTag | None
-    ) -> tuple[LocalIdBuilder, bool]:
+    def try_with_metadata_tag(self, metadata_tag: MetadataTag | None) -> LocalIdBuilder:
         """Try to set a metadata tag."""
         if metadata_tag is None:
-            return self, False
+            return self
 
         if metadata_tag.name == CodebookName.Quantity:
-            return self._with_quantity(metadata_tag), True
+            return self._with_quantity(metadata_tag)
         if metadata_tag.name == CodebookName.Content:
-            return self._with_content(metadata_tag), True
+            return self._with_content(metadata_tag)
         if metadata_tag.name == CodebookName.Calculation:
-            return self._with_calculation(metadata_tag), True
+            return self._with_calculation(metadata_tag)
         if metadata_tag.name == CodebookName.State:
-            return self._with_state(metadata_tag), True
+            return self._with_state(metadata_tag)
         if metadata_tag.name == CodebookName.Command:
-            return self._with_command(metadata_tag), True
+            return self._with_command(metadata_tag)
         if metadata_tag.name == CodebookName.Type:
-            return self._with_type(metadata_tag), True
+            return self._with_type(metadata_tag)
         if metadata_tag.name == CodebookName.Position:
-            return self._with_position(metadata_tag), True
+            return self._with_position(metadata_tag)
         if metadata_tag.name == CodebookName.Detail:
-            return self._with_detail(metadata_tag), True
+            return self._with_detail(metadata_tag)
 
-        return self, False
-
-    def try_with_metadata_tag_out(
-        self, metadata_tag: MetadataTag | None, out_succeeded: list[bool]
-    ) -> LocalIdBuilder:
-        """Try to set a metadata tag with an out parameter."""
-        builder, succeeded = self.try_with_metadata_tag(metadata_tag)
-        if len(out_succeeded) > 0:
-            out_succeeded[0] = succeeded
-        return builder
+        return self
 
     def without_metadata_tag(self, name: CodebookName) -> LocalIdBuilder:
         """Remove a metadata tag."""
@@ -283,7 +240,7 @@ class LocalIdBuilder:
         if name == CodebookName.Content:
             return self.without_content()
         if name == CodebookName.Calculation:
-            return self.without_calculcation()  # Note: This typo matches the C# code
+            return self.without_calculation()  # Note: This typo matches the C# code
         if name == CodebookName.State:
             return self.without_state()
         if name == CodebookName.Command:
@@ -304,13 +261,6 @@ class LocalIdBuilder:
     def without_content(self) -> LocalIdBuilder:
         """Remove the content metadata tag."""
         return self._copy_with(content=None)
-
-    def without_calculcation(self) -> LocalIdBuilder:
-        """Remove the calculation metadata tag.
-
-        Note: This method name has a typo matching the C# implementation.
-        """
-        return self.without_calculation()
 
     def without_calculation(self) -> LocalIdBuilder:
         """Remove the calculation metadata tag."""
@@ -385,27 +335,19 @@ class LocalIdBuilder:
 
         return LocalId(self)
 
-    def build_mqtt(self) -> MqttLocalId:
-        """Build a MqttLocalId from this builder.
+    @staticmethod
+    def parse(local_id_str: str) -> LocalIdBuilder:
+        """Parse a string into a LocalIdBuilder.
+
+        Args:
+            local_id_str: The string to parse
 
         Returns:
-            MqttLocalId: An instance that formats the LocalId according to
-            MQTT conventions.
-
-        Raises:
-            ValueError: If the builder is empty or invalid.
+            The resulting LocalIdBuilder
         """
-        if self.is_empty:
-            raise ValueError("Cannot build a MqttLocalId from an empty LocalIdBuilder")
-        if not self.is_valid:
-            raise ValueError(
-                "Cannot build a MqttLocalId from an invalid LocalIdBuilder"
-            )
+        from vista_sdk.local_id_builder_parsing import LocalIdBuilderParsing
 
-        # Import here to avoid circular import
-        from vista_sdk.mqtt.mqtt_local_id import MqttLocalId
-
-        return MqttLocalId(self)
+        return LocalIdBuilderParsing().parse(local_id_str)
 
     @staticmethod
     def try_parse(
@@ -545,7 +487,7 @@ class LocalIdBuilder:
         builder.append(naming_rule)
 
         builder.append("vis-")
-        builder.append(VisVersionExtension.to_version_string(self._vis_version))
+        builder.append(str(self._vis_version))
         builder.append("/")
 
         self._items.append(builder, self._verbose_mode)
@@ -578,3 +520,7 @@ class LocalIdBuilder:
         builder: list[str] = []
         self.to_string(builder)
         return "".join(builder)
+
+    def __repr__(self) -> str:
+        """Get the official string representation of this builder."""
+        return f"LocalIdBuilder({self!s})"

@@ -59,11 +59,3 @@ class MetadataTag:
             raise ValueError("Unknown metadata tag:" + str({self.name}))
 
         builder.append(f"{prefix}{self.prefix}{self.value}{separator}")
-
-    @staticmethod
-    def to_string_builder(*args) -> str:  # noqa : ANN002
-        """Utility method to create a string from multiple metadata tags."""
-        builder: list = []
-        for tag in args:
-            tag.to_string(builder)
-        return "".join(builder)

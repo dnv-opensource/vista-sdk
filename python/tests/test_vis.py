@@ -6,6 +6,7 @@ multiple calls to get_gmod return the same instance.
 
 import unittest
 
+from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
 
 
@@ -27,10 +28,10 @@ class TestVISSingleton(unittest.TestCase):
         """Test that multiple calls to VIS return the same instance."""
         vis = TestVis.get_vis()
         vis_a = vis.instance
-        vis_b = vis.instance
+        vis_b = VIS().instance
         vis_a.get_gmod(VisVersion.v3_7a)
         vis_b.get_gmod(VisVersion.v3_7a)
         vis_c = vis
         vis_c.get_gmod(VisVersion.v3_7a)
 
-        assert vis_a is vis_c, "VIS instances are not the same"
+        assert vis_a is vis_b is vis_c, "VIS instances are not the same"

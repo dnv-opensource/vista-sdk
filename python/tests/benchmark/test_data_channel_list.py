@@ -2,7 +2,6 @@
 
 import bz2
 import io
-import json
 from pathlib import Path
 
 import brotli
@@ -15,8 +14,8 @@ from tests.benchmark.benchmark_base import (
     SummaryOrderPolicy,
     run_benchmark,
 )
-from vista_sdk.local_id import LocalId
-from vista_sdk.transport.time_series_data import DataChannelId as TSDataChannelId
+from vista_sdk.system_text_json import Serializer as JsonSerializer
+from vista_sdk.system_text_json.data_channel_list import DataChannelListPackage
 
 
 @pytest.mark.benchmark(group="transport")
@@ -26,123 +25,97 @@ class TestDataChannelListSerialization:
     @pytest.fixture(scope="class")
     def setup_data(self) -> dict:
         """Set up test data for benchmarks."""
-        # Load DataChannelList data - simplified approach
-        # Path relative to workspace root, not python subdirectory
+        # Load DataChannelList JSON file
         test_file_path = Path(__file__).resolve()
-        workspace_root = test_file_path.parent.parent.parent.parent
-        schema_path = (
-            workspace_root / "schemas" / "json" / "DataChannelList.sample.compact.json"
+        json_path = (
+            test_file_path.parent.parent / "transport" / "json" / "DataChannelList.json"
         )
-        with schema_path.open() as f:
-            self._json_data = json.load(f)
 
-        # Create time series data channel IDs from the JSON data
-        # Following C# pattern: use short_id if available, otherwise use local_id
-        self.ts_data_channel_ids = []
-        data_channels = self._json_data["Package"]["DataChannelList"]["DataChannel"]
-        for data_channel in data_channels:
-            channel_id = data_channel["DataChannelID"]
-            if channel_id.get("ShortID"):
-                # Use short ID if available
-                ts_dc_id = TSDataChannelId.from_short_id(channel_id["ShortID"])
-            else:
-                # Fall back to local ID
-                local_id = LocalId.parse(channel_id["LocalID"])
-                ts_dc_id = TSDataChannelId.from_local_id(local_id)
-            self.ts_data_channel_ids.append(ts_dc_id)
+        with json_path.open() as f:
+            json_str = f.read()
 
-        # Pre-serialize the JSON data for benchmarks
-        self._json_string = json.dumps(self._json_data)
+        # Deserialize using JsonSerializer
+        data_channel_list = JsonSerializer.deserialize_data_channel_list(json_str)
 
-        # Return data for test methods
         return {
-            "json_data": self._json_data,
-            "json_string": self._json_string,
-            # Python equivalent of memory stream using BytesIO
+            "json_string": json_str,
+            "data_channel_list": data_channel_list,
             "memory_stream": io.BytesIO(),
-            "compression_stream": io.BytesIO(),  # For compression tests
-            "ts_data_channel_ids": self.ts_data_channel_ids,
+            "compression_stream": io.BytesIO(),
         }
 
-    def test_json(self, benchmark: BenchmarkFixture, setup_data: dict) -> None:
-        """Benchmark JSON serialization."""
-        """Mirror of C#'s Json benchmark method."""
-        memory_stream = setup_data["memory_stream"]
-        json_data = setup_data["json_data"]
+    def test_json_deserialize(
+        self, benchmark: BenchmarkFixture, setup_data: dict
+    ) -> None:
+        """Benchmark JSON deserialization."""
+        json_string = setup_data["json_string"]
 
-        def serialize_json() -> None:
-            memory_stream.seek(0)
-            memory_stream.truncate()
-            json_str = json.dumps(json_data)
-            memory_stream.write(json_str.encode("utf-8"))
+        def deserialize() -> DataChannelListPackage:
+            return JsonSerializer.deserialize_data_channel_list(json_string)
 
         config = BenchmarkConfig(
             group="DataChannelListSerialization",
             method_order=MethodOrderPolicy.Declared,
             summary_order=SummaryOrderPolicy.FastestToSlowest,
-            description="Json",
+            description="Json Deserialize",
         )
-        run_benchmark(benchmark, serialize_json, config)
-        assert memory_stream.tell() > 0
+        result = run_benchmark(benchmark, deserialize, config)
+        assert result is not None
+
+    def test_json_serialize(
+        self, benchmark: BenchmarkFixture, setup_data: dict
+    ) -> None:
+        """Benchmark JSON serialization."""
+        data_channel_list = setup_data["data_channel_list"]
+
+        def serialize() -> str:
+            return JsonSerializer.serialize(data_channel_list)
+
+        config = BenchmarkConfig(
+            group="DataChannelListSerialization",
+            method_order=MethodOrderPolicy.Declared,
+            summary_order=SummaryOrderPolicy.FastestToSlowest,
+            description="Json Serialize",
+        )
+        result = run_benchmark(benchmark, serialize, config)
+        assert result is not None
+        assert len(result) > 0
 
     @pytest.mark.parametrize("compression_level", [5, 9])
     def test_json_bzip2(
         self, benchmark: BenchmarkFixture, setup_data: dict, compression_level: int
     ) -> None:
         """Mirror of C#'s Json_Bzip2 benchmark method."""
-        memory_stream = setup_data["memory_stream"]
-        compression_stream = setup_data["compression_stream"]
-        json_data = setup_data["json_data"]
+        data_channel_list = setup_data["data_channel_list"]
 
-        def serialize_json_bzip2() -> None:
-            memory_stream.seek(0)
-            memory_stream.truncate()
-            compression_stream.seek(0)
-            compression_stream.truncate()
-
-            # Convert JSON data to string and write to memory stream
-            json_str = json.dumps(json_data)
-            memory_stream.write(json_str.encode("utf-8"))
-            memory_stream.seek(0)
-
-            compressed = bz2.compress(memory_stream.getvalue(), compression_level)
-            compression_stream.write(compressed)
+        def serialize_and_compress() -> bytes:
+            json_str = JsonSerializer.serialize(data_channel_list)
+            return bz2.compress(json_str.encode("utf-8"), compression_level)
 
         config = BenchmarkConfig(
             group="DataChannelListSerialization",
             method_order=MethodOrderPolicy.Declared,
             summary_order=SummaryOrderPolicy.FastestToSlowest,
-            description="Json-Bzip2",
+            description=f"Json+Bzip2 (level={compression_level})",
         )
-        run_benchmark(benchmark, serialize_json_bzip2, config)
-        assert compression_stream.tell() > 0
+        result = run_benchmark(benchmark, serialize_and_compress, config)
+        assert result is not None
+        assert len(result) > 0
 
     def test_json_brotli(self, benchmark: BenchmarkFixture, setup_data: dict) -> None:
         """Mirror of C#'s Json_Brotli benchmark method."""
-        memory_stream = setup_data["memory_stream"]
-        compression_stream = setup_data["compression_stream"]
-        json_data = setup_data["json_data"]
+        data_channel_list = setup_data["data_channel_list"]
 
-        def serialize_json_brotli() -> None:
-            memory_stream.seek(0)
-            memory_stream.truncate()
-            compression_stream.seek(0)
-            compression_stream.truncate()
-
-            # Convert JSON data to string and write to memory stream
-            json_str = json.dumps(json_data)
-            memory_stream.write(json_str.encode("utf-8"))
-            memory_stream.seek(0)
-
-            compressed = brotli.compress(memory_stream.getvalue(), quality=11)
-            compression_stream.write(compressed)
+        def serialize_and_compress() -> bytes:
+            json_str = JsonSerializer.serialize(data_channel_list)
+            return brotli.compress(json_str.encode("utf-8"), quality=11)
 
         config = BenchmarkConfig(
             group="DataChannelListSerialization",
             method_order=MethodOrderPolicy.Declared,
             summary_order=SummaryOrderPolicy.FastestToSlowest,
-            description="Json-Brotli",
+            description="Json+Brotli (quality=11)",
         )
-        run_benchmark(benchmark, serialize_json_brotli, config)
-        assert compression_stream.tell() > 0
-        assert compression_stream.tell() > 0
+        result = run_benchmark(benchmark, serialize_and_compress, config)
+        assert result is not None
+        assert len(result) > 0

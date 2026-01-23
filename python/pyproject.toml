@@ -37,6 +37,7 @@ dev = [
     "types-cachetools>=6.0.0.20250525",
     "pre-commit>=4.2.0",
     "ruff>=0.12.3",
+    "datamodel-code-generator>=0.25.0",
 ]
 
 [build-system]
@@ -55,6 +56,9 @@ extend-include = ["*.ipynb"]
 # Auto-generated files - allow long lines
 "src/vista_sdk/vis_version.py" = ["E501"]
 "src/vista_sdk/source_generator/vis_versions_generator.py" = ["E501"]
+# Auto-generated DTO files - no docstrings needed
+"src/vista_sdk/system_text_json/*/data_channel_list.py" = ["D"]
+"src/vista_sdk/system_text_json/*/time_series_data.py" = ["D"]
 
 [tool.ruff.lint]
 select = [
@@ -91,7 +95,7 @@ select = [
     "FAST", # FastAPI
     "RUF",  # Ruff-specific rules
 ]
-ignore = []
+ignore = ["PLC0415"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

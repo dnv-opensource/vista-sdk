@@ -25,6 +25,14 @@ class Dictionary(Generic[TValue]):
         """Return an iterator over the key-value pairs in the dictionary."""
         return iter(self._dict.items())
 
+    def __len__(self) -> int:
+        """Return the number of key-value pairs in the dictionary."""
+        return len(self._dict)
+
+    def values(self) -> Iterator[TValue]:
+        """Return an iterator over the values in the dictionary."""
+        return iter(self._dict.values())
+
     def try_get_value(self, key: str) -> tuple[TValue | None, bool]:
         """Try to get the value associated with the given key."""
         if key in self._dict:

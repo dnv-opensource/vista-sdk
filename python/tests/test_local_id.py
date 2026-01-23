@@ -10,6 +10,7 @@ from vista_sdk.codebook_names import CodebookName
 from vista_sdk.internal.location_parsing_error_builder import LocationValidationResult
 from vista_sdk.local_id import LocalId
 from vista_sdk.local_id_builder import LocalIdBuilder
+from vista_sdk.mqtt.mqtt_local_id import MqttLocalId
 from vista_sdk.parsing_errors import ParsingErrors
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
@@ -20,10 +21,10 @@ class TestParsingErrors:
 
     def test_comparisons(self) -> None:
         """Test comparison operators for ParsingErrors."""
-        errors1 = [(LocationValidationResult.INVALID, "M1")]
+        errors1 = [(LocationValidationResult.INVALID.name, "M1")]
         errors2 = [
-            (LocationValidationResult.INVALID, "M1"),
-            (LocationValidationResult.INVALID_CODE, "M1"),
+            (LocationValidationResult.INVALID.name, "M1"),
+            (LocationValidationResult.INVALID_CODE.name, "M1"),
         ]
 
         e1 = ParsingErrors(errors1)
@@ -43,10 +44,10 @@ class TestParsingErrors:
 
     def test_enumerator(self) -> None:
         """Test enumeration of ParsingErrors."""
-        errors1 = [(LocationValidationResult.INVALID, "M1")]
+        errors1 = [(LocationValidationResult.INVALID.name, "M1")]
         errors2 = [
-            (LocationValidationResult.INVALID, "M1"),
-            (LocationValidationResult.INVALID_CODE, "M1"),
+            (LocationValidationResult.INVALID.name, "M1"),
+            (LocationValidationResult.INVALID_CODE.name, "M1"),
         ]
 
         e1 = ParsingErrors(errors1)
@@ -135,27 +136,21 @@ class TestLocalId:
             else None
         )
 
-        builder = LocalIdBuilder.create(vis_version).with_primary_item(primary_item)
-
-        if secondary_item is not None:
-            builder = builder.with_secondary_item(secondary_item)
-
-        builder = builder.with_verbose_mode(input_data.verbose)
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Quantity, input_data.quantity)
+        local_id = (
+            LocalIdBuilder.create(vis_version)
+            .with_primary_item(primary_item)
+            .try_with_secondary_item(secondary_item)
+            .with_verbose_mode(input_data.verbose)
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Quantity, input_data.quantity)
+            )
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Content, input_data.content)
+            )
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Position, input_data.position)
+            )
         )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Content, input_data.content)
-        )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Position, input_data.position)
-        )
-        local_id = builder_tuple[0]
 
         local_id_str = str(local_id)
 
@@ -174,47 +169,28 @@ class TestLocalId:
         secondary_item = gmod.parse_path("411.1/C101.31-5")
 
         # Create the builder step by step to handle Python's tuple returns
-        builder = LocalIdBuilder.create(vis_version)
-        builder = builder.with_primary_item(primary_item)
-
-        # For methods that return (builder, success), unpack just the builder
-        builder_tuple = builder.try_with_secondary_item(secondary_item)
-        builder = builder_tuple[0]  # Extract just the builder from the tuple
-
-        builder = builder.with_verbose_mode(True)
-
-        # Handle each metadata tag similarly
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.create_tag(CodebookName.Quantity, "quantity")
+        local_id = (
+            LocalIdBuilder.create(vis_version)
+            .with_primary_item(primary_item)
+            .try_with_secondary_item(secondary_item)
+            .with_verbose_mode(True)
+            .try_with_metadata_tag(
+                codebooks.create_tag(CodebookName.Quantity, "quantity")
+            )
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Content, "content")
+            )
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Position, "position")
+            )
+            .try_with_metadata_tag(codebooks.create_tag(CodebookName.State, "state"))
+            .try_with_metadata_tag(
+                codebooks.create_tag(CodebookName.Content, "content")
+            )
+            .try_with_metadata_tag(
+                codebooks.create_tag(CodebookName.Calculation, "calculate")
+            )
         )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Content, "content")
-        )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Position, "position")
-        )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.create_tag(CodebookName.State, "state")
-        )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.create_tag(CodebookName.Content, "content")
-        )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.create_tag(CodebookName.Calculation, "calculate")
-        )
-        builder = builder_tuple[0]
-
-        local_id = builder
 
         assert local_id.is_valid
 
@@ -225,7 +201,7 @@ class TestLocalId:
             .without_position()
             .without_state()
             .without_content()
-            .without_calculcation()
+            .without_calculation()
         )
 
         assert all_without.is_empty
@@ -274,35 +250,24 @@ class TestLocalId:
         )
 
         # Create the builder step by step to handle Python's tuple returns
-        builder = LocalIdBuilder.create(vis_version)
-
-        # For methods that return (builder, success), unpack just the builder
-        builder_tuple = builder.try_with_primary_item(primary_item)
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_secondary_item(secondary_item)
-        builder = builder_tuple[0]
-
-        builder = builder.with_verbose_mode(input_data.verbose)
-
-        # Handle each metadata tag
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Quantity, input_data.quantity)
+        builder = (
+            LocalIdBuilder.create(vis_version)
+            .try_with_primary_item(primary_item)
+            .try_with_secondary_item(secondary_item)
+            .with_verbose_mode(input_data.verbose)
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Quantity, input_data.quantity)
+            )
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Content, input_data.content)
+            )
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Position, input_data.position)
+            )
         )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Content, input_data.content)
-        )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Position, input_data.position)
-        )
-        builder = builder_tuple[0]
 
         # Build an MQTT local ID
-        mqtt_local_id = builder.build_mqtt()
+        mqtt_local_id = MqttLocalId(builder)
         local_id_str = str(mqtt_local_id)
         assert expected_output == local_id_str
 
@@ -338,39 +303,27 @@ class TestLocalId:
         )
 
         # Create the builder step by step to handle Python's tuple returns
-        builder = LocalIdBuilder.create(vis_version)
-        builder = builder.with_primary_item(primary_item)
-
-        # For methods that return (builder, success), unpack just the builder
-        builder_tuple = builder.try_with_secondary_item(secondary_item)
-        builder = builder_tuple[0]
-
-        # Handle each metadata tag
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Quantity, input_data.quantity)
+        local_id = (
+            LocalIdBuilder.create(vis_version)
+            .with_primary_item(primary_item)
+            .try_with_secondary_item(secondary_item)
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Quantity, input_data.quantity)
+            )
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Content, input_data.content)
+            )
+            .try_with_metadata_tag(
+                codebooks.try_create_tag(CodebookName.Position, input_data.position)
+            )
         )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Content, input_data.content)
-        )
-        builder = builder_tuple[0]
-
-        builder_tuple = builder.try_with_metadata_tag(
-            codebooks.try_create_tag(CodebookName.Position, input_data.position)
-        )
-        builder = builder_tuple[0]
-
-        local_id = builder
 
         other_local_id = local_id
         assert local_id == other_local_id
         assert local_id is other_local_id
 
         # Create a copy
-        other_local_id = LocalIdBuilder.create(vis_version)
-        for key, value in local_id.__dict__.items():
-            setattr(other_local_id, key, value)
+        other_local_id = local_id.with_vis_version(vis_version)
 
         assert local_id == other_local_id
         assert local_id is not other_local_id
@@ -383,16 +336,14 @@ class TestLocalId:
         assert local_id is not other_local_id
 
         # Create a structurally equivalent builder
-        builder_tuple = local_id.try_with_primary_item(local_id.primary_item)
-        builder = builder_tuple[0]  # Extract just the builder from the tuple
-
-        builder_tuple = builder.try_with_metadata_tag(
+        other_local_id = local_id.try_with_primary_item(
+            local_id.primary_item
+        ).try_with_metadata_tag(  # Extract just the builder from the tuple
             codebooks.try_create_tag(
                 CodebookName.Position,
                 local_id.position.value if local_id.position else None,
             )
         )
-        other_local_id = builder_tuple[0]
 
         assert local_id == other_local_id
         assert local_id is not other_local_id
@@ -426,7 +377,9 @@ class TestLocalId:
         """Test parsing a large number of LocalIds from a file."""
         path = Path(__file__).parent / "testdata" / "LocalIds.txt"
         with path.open() as file:
-            errored = []
+            errored: list[
+                tuple[str, LocalId | None, Exception | None, ParsingErrors]
+            ] = []
 
             for line in file:
                 local_id_str = line.strip()
@@ -447,7 +400,7 @@ class TestLocalId:
                     # Skip invalid location e.g. primaryItem 511.11-1SO
                     if "location" in str(ex):
                         continue
-                    errored.append((local_id_str, None, None, ParsingErrors.empty()))
+                    errored.append((local_id_str, None, ex, ParsingErrors.empty()))
 
             if any(e[3].has_errors for e in errored):
                 # For debugging: print errors
@@ -457,31 +410,21 @@ class TestLocalId:
             assert not any(error for item in errored for error in item[3])
             assert not errored
 
-    @pytest.mark.skip("Experimental")
-    def test_new_parser(self) -> None:
-        """Test an experimental new parser."""
-        # This is a placeholder for the experimental parser
-        # In the Python implementation, we would likely use a different approach
-        pass
-
-    def test_parsing_validation(self) -> None:
+    @pytest.mark.parametrize(
+        ("local_id_str", "expected_error_messages"),
+        [
+            (item.local_id_str, item.expected_error_messages)
+            for item in TestData.get_local_id_data("InvalidLocalIds").invalid_local_ids
+        ],
+    )
+    def test_parsing_validation(
+        self, local_id_str: str, expected_error_messages: list[str]
+    ) -> None:
         """Test validation during parsing using test data from JSON file."""
-        # Load test data using the TestData class
-        local_id_data = TestData.get_local_id_data("InvalidLocalIds")
+        parsed, error_builder, _ = LocalId.try_parse(local_id_str)
 
-        # Convert to a list of tuples for parametrizing
-        test_cases = []
-        for invalid_id in local_id_data.invalid_local_ids:
-            test_cases.append(
-                (invalid_id.local_id_str, invalid_id.expected_error_messages)
-            )
+        actual_error_messages = [message for _, message in error_builder]
+        assert sorted(actual_error_messages) == sorted(expected_error_messages)
 
-        # Test each case
-        for local_id_str, expected_error_messages in test_cases:
-            parsed, error_builder, _ = LocalId.try_parse(local_id_str)
-
-            actual_error_messages = [message for _, message in error_builder]
-            assert sorted(actual_error_messages) == sorted(expected_error_messages)
-
-            assert not parsed
-            assert error_builder is not None
+        assert not parsed
+        assert error_builder is not None

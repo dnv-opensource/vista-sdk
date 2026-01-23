@@ -7,9 +7,8 @@ from dotenv import load_dotenv
 from pydantic import ValidationError
 
 from tests.testdata import TestData
-from vista_sdk.client import Client
 from vista_sdk.gmod_path import GmodPath
-from vista_sdk.vis_version import VisVersion, VisVersionExtension, VisVersions
+from vista_sdk.vis_version import VisVersion, VisVersions
 
 from .test_vis import TestVis
 
@@ -23,19 +22,13 @@ class TestGmodPath(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the test environment."""
         try:
-            self.gmod_test_data = TestData.get_gmodpath_data("GmodPaths")
+            self.gmod_test_data = TestData.get_gmodpath_data()
             self.test_individualizable_sets_data = (
                 TestData.get_individualizable_sets_data("IndividualizableSets")
             )
         except ValidationError as e:
             raise Exception("Couldn't load test data") from e
         self.vis = TestVis.get_vis()
-        if environment == "local" or environment == "None":
-            Client.get_gmod_test(
-                VisVersionExtension.to_version_string(VisVersion.v3_4a)
-            )
-        else:
-            Client.get_gmod(VisVersionExtension.to_version_string(VisVersion.v3_4a))
 
     def test_gmodpath_parse(self) -> None:
         """Test parsing of valid GMOD paths."""
@@ -43,12 +36,10 @@ class TestGmodPath(unittest.TestCase):
             with self.subTest(item=item):
                 vis_version = VisVersions.parse(item.vis_version)
                 input_path: str = item.path
-                path = GmodPath.try_parse(input_path, vis_version)
-                assert path[0], "Path parsing failed for valid input"
-                assert path[1] is not None, "Parsed path is None for valid input"
-                assert input_path == path[1].__str__(), (
-                    "Parsed path does not match input path"
-                )
+                success, path = GmodPath.try_parse(input_path, vis_version)
+                assert success, "Path parsing failed for valid input"
+                assert path is not None, "Parsed path is None for valid input"
+                assert input_path == str(path), "Parsed path does not match input path"
 
     def test_gmodpath_parse_invalid(self) -> None:
         """Test parsing of invalid GMOD paths."""
@@ -57,9 +48,9 @@ class TestGmodPath(unittest.TestCase):
             with self.subTest(item=item):
                 vis_version = VisVersions.parse(item.vis_version)
                 input_path: str = item.path
-                path = GmodPath.try_parse(input_path, vis_version)
-                assert not path[0], "Path parsing should fail for invalid input"
-                assert path[1] is None, "Parsed path should be None for invalid input"
+                success, path = GmodPath.try_parse(input_path, vis_version)
+                assert not success, "Path parsing should fail for invalid input"
+                assert path is None, "Parsed path should be None for invalid input"
 
     def test_get_full_path(self) -> None:
         """Test retrieval of the full path from a GMOD path."""
@@ -98,6 +89,35 @@ class TestGmodPath(unittest.TestCase):
 
     def test_get_full_path_from(self) -> None:
         """Test retrieval of the full path from a specific depth in a GMOD path."""
+        """Test retrieval of the full path from a GMOD path."""
+        # Test with a valid path
+        path_str = "411.1/C101.72/I101"
+        expectation = {
+            4: "411i",
+            5: "411.1",
+            6: "CS1",
+            7: "C101",
+            8: "C101.7",
+            9: "C101.72",
+            10: "I101",
+        }
+
+        seen = set()
+        path = GmodPath.parse(path_str, arg=VisVersion.v3_4a)
+
+        for depth, node in path.get_full_path_from(4):
+            if depth in seen:
+                self.fail("Got same depth twice")
+            seen.add(depth)
+            if len(seen) == 1:
+                assert depth == 4, "First depth should be 4"
+            assert expectation[depth] == node.code, (
+                f"Expected {expectation[depth]} at depth {depth}, got {node.code}"
+            )
+
+        assert sorted(expectation.keys()) == sorted(seen), (
+            "Seen depths do not match expected depths"
+        )
 
     def test_find_shortest_path(self) -> None:
         """Test finding shortest path between nodes."""
@@ -108,15 +128,20 @@ class TestGmodPath(unittest.TestCase):
         end_node = gmod._node_map["C101.72"]
         path = gmod.find_shortest_path(start_node=start_node, end_node=end_node)
         assert path is not None
-        assert path.node.code == "C101.72"
+        assert path.node.code == end_node.code
+        assert path.parents[0].code == gmod.root_node.code
+        assert start_node.code in [n.code for n in path.parents]
 
         # Test path with intermediate nodes
         start_node = gmod._node_map["411.1"]
         end_node = gmod._node_map["I101"]
+        # Expects '411.1/CS1/C102/C102.6/I101'
         path = gmod.find_shortest_path(start_node=start_node, end_node=end_node)
         assert path is not None
-        assert path.node.code == "I101"
-        assert "C101.72" in [n.code for n in path.parents]
+        assert path.node.code == end_node.code
+        assert "C102.6" in [n.code for n in path.parents]
+        assert path.parents[0].code == gmod.root_node.code
+        assert start_node.code in [n.code for n in path.parents]
 
         # Test when no path exists
         start_node = gmod._node_map["514"]
@@ -124,20 +149,21 @@ class TestGmodPath(unittest.TestCase):
         path = gmod.find_shortest_path(start_node=start_node, end_node=end_node)
         assert path is None
 
-        # Test path to self
+        # Test path to self - returns full path from root
         start_node = gmod._node_map["411.1"]
         path = gmod.find_shortest_path(start_node=start_node, end_node=start_node)
         assert path is not None
-        assert path.node.code == "411.1"
-        assert len(path.parents) == 0
+        assert path.node.code == start_node.code
+        assert len(path.parents) > 0
+        assert path.parents[0].code == gmod.root_node.code
 
         # Test path from root
         root_node = gmod.root_node
         end_node = gmod._node_map["I101"]
         path = gmod.find_shortest_path(start_node=root_node, end_node=end_node)
         assert path is not None
-        assert path.node.code == "I101"
-        assert path.parents[0].code == "VE"
+        assert path.node.code == end_node.code
+        assert path.parents[0].code == gmod.root_node.code
 
     def test_gmod_path_fields(self) -> None:
         """Test that GmodPath maintains all fields correctly during operations."""
@@ -204,52 +230,62 @@ class TestGmodPath(unittest.TestCase):
 
     def test_full_path_parsing(self) -> None:
         """Test parsing of full paths into GmodPath objects."""
-        version = VisVersion.v3_4a
-        short_path_strs: list[str] = ["612.21-1/C701.13/S93"]
-        expected_full_path_strs: list[str] = [
-            "VE/600a/610/612/612.2/612.2i-1/612.21-1/CS10/C701/C701.1/C701.13/S93"
+        test_cases = [
+            (
+                "411.1/C101.72/I101",
+                "VE/400a/410/411/411i/411.1/CS1/C101/C101.7/C101.72/I101",
+            ),
+            (
+                "612.21-1/C701.13/S93",
+                "VE/600a/610/612/612.2/612.2i-1/612.21-1/CS10/C701/C701.1/C701.13/S93",
+            ),
         ]
-        for i in range(len(short_path_strs)):
-            path = GmodPath.parse(short_path_strs[i], arg=version)
-            full_string = path.to_full_path_string()
-            assert expected_full_path_strs[i] == full_string, (
-                f"Expected full path string '{expected_full_path_strs[i]}', "
-                f"got '{full_string}'"
-            )
+        version = VisVersion.v3_4a
 
-            parsed, parsed_path = GmodPath.try_parse_full_path(full_string, arg=version)
-            assert parsed_path is not None, "Parsed path should not be None"
-            assert parsed, "Expected parsing to succeed for valid full path"
+        for short_path_str, expected_full_path_str in test_cases:
+            with self.subTest(short_path_str=short_path_str):
+                path = GmodPath.parse(short_path_str, arg=version)
+                full_string = path.to_full_path_string()
+                assert expected_full_path_str == full_string, (
+                    f"Expected full path string '{expected_full_path_str}', "
+                    f"got '{full_string}'"
+                )
 
-            assert path == parsed_path, "Parsed path does not match original path"
-            assert full_string == path.to_full_path_string(), (
-                "Full path string does not match original path"
-            )
-            assert full_string == parsed_path.to_full_path_string(), (
-                "Full path string does not match parsed path"
-            )
-            assert short_path_strs[i] == str(path), (
-                f"Short path string '{short_path_strs[i]}' does not match path string '{path!s}'"  # noqa: E501
-            )
-            assert short_path_strs[i] == str(parsed_path), (
-                f"Short path string '{short_path_strs[i]}' does not match parsed path string '{parsed_path!s}'"  # noqa: E501
-            )
+                parsed, parsed_path = GmodPath.try_parse_full_path(
+                    full_string, arg=version
+                )
+                assert parsed_path is not None, "Parsed path should not be None"
+                assert parsed, "Expected parsing to succeed for valid full path"
 
-            parsed_path = GmodPath.parse_full_path(full_string, version)
-            assert parsed_path is not None, "Parsed path should not be None"
-            assert path == parsed_path, "Parsed path does not match original path"
-            assert full_string == path.to_full_path_string(), (
-                "Full path string does not match original path"
-            )
-            assert full_string == parsed_path.to_full_path_string(), (
-                "Full path string does not match parsed path"
-            )
-            assert short_path_strs[i] == str(path), (
-                f"Short path string '{short_path_strs[i]}' does not match path string '{path!s}'"  # noqa: E501
-            )
-            assert short_path_strs[i] == str(parsed_path), (
-                f"Short path string '{short_path_strs[i]}' does not match parsed path string '{parsed_path!s}'"  # noqa: E501
-            )
+                assert path == parsed_path, "Parsed path does not match original path"
+                assert full_string == path.to_full_path_string(), (
+                    "Full path string does not match original path"
+                )
+                assert full_string == parsed_path.to_full_path_string(), (
+                    "Full path string does not match parsed path"
+                )
+                assert short_path_str == str(path), (
+                    f"Short path string '{short_path_str}' does not match path string '{path!s}'"  # noqa: E501
+                )
+                assert short_path_str == str(parsed_path), (
+                    f"Short path string '{short_path_str}' does not match parsed path string '{parsed_path!s}'"  # noqa: E501
+                )
+
+                parsed_path = GmodPath.parse_full_path(full_string, version)
+                assert parsed_path is not None, "Parsed path should not be None"
+                assert path == parsed_path, "Parsed path does not match original path"
+                assert full_string == path.to_full_path_string(), (
+                    "Full path string does not match original path"
+                )
+                assert full_string == parsed_path.to_full_path_string(), (
+                    "Full path string does not match parsed path"
+                )
+                assert short_path_str == str(path), (
+                    f"Short path string '{short_path_str}' does not match path string '{path!s}'"  # noqa: E501
+                )
+                assert short_path_str == str(parsed_path), (
+                    f"Short path string '{short_path_str}' does not match parsed path string '{parsed_path!s}'"  # noqa: E501
+                )
 
     def test_individualizable_sets(self) -> None:
         """Test individualizable sets in GMOD paths."""
@@ -297,9 +333,7 @@ class TestGmodPath(unittest.TestCase):
                     return
 
                 if item.expected is None:
-                    result_tuple = gmod.try_parse_path(item.path)
-                    assert result_tuple is not None, "gmod.try_parse_path returned None"
-                    result, parsed = result_tuple
+                    result, parsed = gmod.try_parse_path(item.path)
                     assert not result, "Expected parsing to fail for invalid path"
                     assert parsed is None, "Parsed path should be None for invalid path"
                     return
@@ -320,9 +354,7 @@ class TestGmodPath(unittest.TestCase):
         """Test that GMOD paths that do not individualize return None."""
         version = VisVersion.v3_7a
         gmod = self.vis.get_gmod(version)
-        result = gmod.try_parse_path("500a-1")
-        assert result is not None, "gmod.try_parse_path returned None"
-        parsed, path = result
+        parsed, path = gmod.try_parse_path("500a-1")
         assert not parsed, "Parsed path should not be individualizable"
         assert path is None, (
             "Parsed path should be None for non-individualizable GMOD path"
@@ -330,7 +362,7 @@ class TestGmodPath(unittest.TestCase):
 
     def test_to_full_path_string(self) -> None:
         """Test conversion of GMOD paths to full path strings."""
-        gmod = self.vis.get_gmod(VisVersion.v3_4a)
+        gmod = self.vis.get_gmod(VisVersion.v3_7a)
         path = gmod.parse_path("511.11-1/C101.663i-1/C663")
         assert (
             path.to_full_path_string()

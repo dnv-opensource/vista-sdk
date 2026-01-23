@@ -5,6 +5,7 @@
 [![GitHub](https://img.shields.io/github/license/dnv-opensource/vista-sdk?style=flat-square)](https://github.com/dnv-opensource/vista-sdk/blob/main/LICENSE)
 
 The Vista SDK Python implementation provides comprehensive tools for working with:
+
 - **DNV Vessel Information Structure (VIS)**
 - **ISO 19847** - Ships and marine technology — Shipboard data servers to share field data at sea
 - **ISO 19848** - Ships and marine technology — Standard data for shipboard machinery and equipment
@@ -12,11 +13,13 @@ The Vista SDK Python implementation provides comprehensive tools for working wit
 ## 📦 Installation
 
 ### PyPI Installation
+
 ```bash
 pip install vista-sdk
 ```
 
 ### Development Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/dnv-opensource/vista-sdk.git
@@ -50,7 +53,7 @@ codebooks = vis.get_codebooks(VisVersion.v3_4a)
 locations = vis.get_locations(VisVersion.v3_4a)
 
 # Parse a GMOD path
-path = GmodPath.parse(gmod, "411.1/C101.31-2")
+path = gmod.parse_path("411.1/C101.31-2")
 print(f"Parsed path: {path}")
 
 # Build a Local ID
@@ -101,19 +104,24 @@ from vista_sdk.vis_version import VisVersion
 from vista_sdk.gmod_path import GmodPath
 
 vis = VIS()
+
 gmod = vis.get_gmod(VisVersion.v3_4a)
 
 # Parse a path
-path = GmodPath.parse(gmod, "411.1/C101.31-2/meta")
+path = gmod.parse_path("411.1/C101.31-2")
 
 # Get path information
 print(f"Path depth: {len(path)}")
 print(f"Node at depth 1: {path.node}")
-print(f"Full path string: {path}")
+print(f"Full path string: {path.to_full_path_string()}")
 
 # Traverse the path
 for depth, node in path.get_full_path():
     print(f"Depth {depth}: {node.code} - {node.common_name}")
+
+# Get common names context of the path
+for depth, common_name in path.get_common_names():
+    print(f"Depth {depth}: {common_name}")
 ```
 
 ### Version Conversion
@@ -139,14 +147,18 @@ except Exception as e:
 ## 📚 Core Components
 
 ### VIS (Vessel Information Structure)
+
 The main entry point for accessing VIS data:
-- **GMOD** (General Model of Data) - Equipment and system hierarchy
+
+- **GMOD** (Generic Product Model) - Function and component hierarchy
 - **Codebooks** - Standardized metadata tags
 - **Locations** - Physical positioning information
 - **Versioning** - Path conversion between VIS versions
 
 ### Local ID Builder
+
 Construct standardized local identifiers:
+
 ```python
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
@@ -159,7 +171,7 @@ gmod = vis.get_gmod(VisVersion.v3_4a)
 codebooks = vis.get_codebooks(VisVersion.v3_4a)
 
 # Create metadata tags
-path = GmodPath.parse(gmod, "411.1/C101.31")
+path = gmod.parse_path("411.1/C101.31")
 quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
 content_tag = codebooks.create_tag(CodebookName.Content, "cooling.water")
 state_tag = codebooks.create_tag(CodebookName.State, "high")
@@ -174,7 +186,9 @@ local_id = (builder
 ```
 
 ### Builder Pattern Support
+
 The SDK follows a fluent builder pattern:
+
 - **`with_*()`** - Add or set values (throws on invalid input)
 - **`try_with_*()`** - Add values safely (returns success status)
 - **`without_*()`** - Remove specific components
@@ -212,13 +226,12 @@ except Exception as e:
 
 ```python
 from vista_sdk.vis import VIS
-from vista_sdk.vis_version import VisVersion
+from vista_sdk.vis_version import VisVersions
 
 vis = VIS()
 
 # Get all available versions
-available_versions = [VisVersion.v3_4a, VisVersion.v3_5a, VisVersion.v3_6a,
-                     VisVersion.v3_7a, VisVersion.v3_8a, VisVersion.v3_9a]
+available_versions = VisVersions.all_versions()
 
 # Load data for multiple versions
 version_data = {}
@@ -247,7 +260,7 @@ vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)
 codebooks = vis.get_codebooks(VisVersion.v3_4a)
 
-path = GmodPath.parse(gmod, "411.1/C101.31")
+path = gmod.parse_path("411.1/C101.31")
 quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
 
 builder = LocalIdBuilder.create(VisVersion.v3_4a)
@@ -264,6 +277,7 @@ print(f"MQTT Topic: {mqtt_id}")  # Uses underscores instead of slashes
 ## 🧪 Testing
 
 ### Running Tests
+
 ```bash
 # Run all tests
 uv run pytest
@@ -277,6 +291,7 @@ uv run pytest tests/test_local_id.py -v
 ```
 
 ### Running Benchmarks
+
 ```bash
 # Run all benchmarks
 python run_benchmarks.py
@@ -299,6 +314,31 @@ The Python implementation includes comprehensive benchmarks that mirror the C# i
 - **Codebook Lookups**: Tag creation and validation
 - **Local ID Processing**: Parsing and building
 - **Transport**: JSON serialization performance
+
+### Benchmark Results
+
+#### Codebooks Lookup (time in nanoseconds)
+
+| Test                     | Mean            | Min      | Max        | Ops/sec |
+| ------------------------ | --------------- | -------- | ---------- | ------- |
+| `dict_lookup` (baseline) | 184 ns          | 172 ns   | 18,846 ns  | 5.43M   |
+| `frozen_dict_lookup`     | 780 ns (4.2x)   | 711 ns   | 512,398 ns | 1.28M   |
+| `codebooks_lookup`       | 1,278 ns (6.9x) | 1,172 ns | 283,627 ns | 783K    |
+
+#### GMOD Load (time in microseconds)
+
+| Test   | Mean    | Min     | Max     | Ops/sec |
+| ------ | ------- | ------- | ------- | ------- |
+| `load` | 2.18 µs | 1.34 µs | 9.14 µs | 458K    |
+
+#### GMOD Path Parse (time in microseconds)
+
+| Test                                 | Mean            | Min      | Max      | Ops/sec |
+| ------------------------------------ | --------------- | -------- | -------- | ------- |
+| `try_parse_full_path` (baseline)     | 30.3 µs         | 28.4 µs  | 428 µs   | 33.0K   |
+| `try_parse_full_path_individualized` | 53.0 µs (1.7x)  | 49.3 µs  | 4,070 µs | 18.9K   |
+| `try_parse_individualized`           | 98.1 µs (3.2x)  | 92.1 µs  | 2,714 µs | 10.2K   |
+| `try_parse`                          | 146.8 µs (4.8x) | 137.3 µs | 1,769 µs | 6.8K    |
 
 See [BENCHMARK_IMPLEMENTATION_SUMMARY.md](BENCHMARK_IMPLEMENTATION_SUMMARY.md) for detailed performance analysis.
 
@@ -369,6 +409,7 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 ## 📞 Support
 
 For questions and support:
+
 - Create an issue on [GitHub Issues](https://github.com/dnv-opensource/vista-sdk/issues)
 - Check the [documentation](https://docs.vista.dnv.com)
 - Review the [samples](samples/) directory for examples

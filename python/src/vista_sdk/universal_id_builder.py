@@ -53,8 +53,8 @@ class UniversalIdBuilder:
             and self._local_id.is_valid
         )
 
-    @classmethod
-    def create(cls, version: VisVersion) -> UniversalIdBuilder:
+    @staticmethod
+    def create(version: VisVersion) -> UniversalIdBuilder:
         """Create a new UniversalIdBuilder with the specified VIS version.
 
         Args:
@@ -67,7 +67,7 @@ class UniversalIdBuilder:
         from .local_id_builder import LocalIdBuilder
 
         local_id = LocalIdBuilder.create(version)
-        return cls().with_local_id(local_id)
+        return UniversalIdBuilder().with_local_id(local_id)
 
     def __eq__(self, other: object) -> bool:
         """Check equality with another UniversalIdBuilder."""
@@ -234,8 +234,8 @@ class UniversalIdBuilder:
             f" local_id={self._local_id!r})"
         )
 
-    @classmethod
-    def parse(cls, universal_id_str: str) -> UniversalIdBuilder:
+    @staticmethod
+    def parse(universal_id_str: str) -> UniversalIdBuilder:
         """Parse a string into a UniversalIdBuilder.
 
         Args:
@@ -252,8 +252,8 @@ class UniversalIdBuilder:
 
         return UniversalIdBuilderParser.parse(universal_id_str)
 
-    @classmethod
-    def try_parse_simple(cls, universal_id: str) -> UniversalIdBuilder | None:
+    @staticmethod
+    def try_parse_simple(universal_id: str) -> UniversalIdBuilder | None:
         """Try to parse a string into a UniversalIdBuilder.
 
         Args:
@@ -268,9 +268,9 @@ class UniversalIdBuilder:
         success, builder = UniversalIdBuilderParser.try_parse(universal_id)
         return builder if success else None
 
-    @classmethod
+    @staticmethod
     def try_parse_with_errors(
-        cls, universal_id: str
+        universal_id: str,
     ) -> tuple[bool, ParsingErrors, UniversalIdBuilder | None]:
         """Try to parse a string into a UniversalIdBuilder with detailed errors.
 
@@ -285,8 +285,8 @@ class UniversalIdBuilder:
 
         return UniversalIdBuilderParser.try_parse_with_errors(universal_id)
 
-    @classmethod
-    def try_parse(cls, universal_id: str) -> tuple[bool, UniversalIdBuilder | None]:
+    @staticmethod
+    def try_parse(universal_id: str) -> tuple[bool, UniversalIdBuilder | None]:
         """Try to parse a string into a UniversalIdBuilder.
 
         Args:
@@ -300,9 +300,9 @@ class UniversalIdBuilder:
 
         return UniversalIdBuilderParser.try_parse(universal_id)
 
-    @classmethod
+    @staticmethod
     def try_parse_with_errors_v2(
-        cls, universal_id: str
+        universal_id: str,
     ) -> tuple[bool, ParsingErrors, UniversalIdBuilder | None]:
         """Try to parse a string into a UniversalIdBuilder with detailed errors (v2).
 

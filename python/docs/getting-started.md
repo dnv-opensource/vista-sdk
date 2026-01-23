@@ -5,10 +5,11 @@ Welcome to the Vista SDK Python implementation! This guide will help you get up 
 ## 🎯 What is Vista SDK?
 
 The Vista SDK provides a Python interface for working with:
+
 - **VIS (Vessel Information Structure)** - Standardized data model for vessel equipment and systems
 - **ISO 19847/19848** - International standards for vessel data exchange
 - **Local IDs** - Unique identifiers for data channels and measurements
-- **GMOD** - General Model of Data representing equipment hierarchy
+- **GMOD** - Generic Product Model representing equipment hierarchy
 - **Codebooks** - Standardized vocabularies for metadata
 
 ## 🚀 Quick Installation
@@ -69,6 +70,7 @@ print(f"Valid: {local_id.is_valid}")
 ## 🏗️ Core Concepts
 
 ### 1. VIS Versions
+
 Different versions of the VIS standard contain different equipment definitions:
 
 ```python
@@ -82,6 +84,7 @@ print(f"VIS 3.4a has {len(list(gmod_34.all_nodes()))} equipment nodes")
 ```
 
 ### 2. GMOD Hierarchy
+
 Equipment is organized in a tree structure:
 
 ```python
@@ -95,6 +98,7 @@ print(f"Path: {main_engine.name} -> {engine_1.name} -> {cooling.name} -> {cooler
 ```
 
 ### 3. Local ID Structure
+
 Local IDs follow the pattern: `/vis-version/equipment-path/metadata`
 
 ```
@@ -105,6 +109,7 @@ Local IDs follow the pattern: `/vis-version/equipment-path/metadata`
 ```
 
 ### 4. Metadata Tags
+
 Tags describe what you're measuring:
 
 ```python
@@ -235,6 +240,7 @@ for pump in pumps[:5]:  # Show first 5
 ## 🔧 Development Setup
 
 ### Prerequisites
+
 - Python 3.10 or higher
 - Git (for development from source)
 
@@ -287,6 +293,7 @@ mypy src/vista_sdk
 ### Common Issues
 
 **Q: "ModuleNotFoundError: No module named 'vista_sdk'"**
+
 ```bash
 # Make sure you've installed the package
 pip install -e .
@@ -296,6 +303,7 @@ python -c "import sys; print(sys.path)"
 ```
 
 **Q: "KeyError when accessing GMOD node"**
+
 ```python
 # Use try_get_node for safe access
 node = gmod.try_get_node("invalid.code")
@@ -304,6 +312,7 @@ if node is None:
 ```
 
 **Q: "ValueError when building Local ID"**
+
 ```python
 # Validate components first
 path = GmodPath.try_parse("411.1/C101.31", VisVersion.v3_4a)
@@ -315,6 +324,7 @@ else:
 ```
 
 **Q: "Performance issues with large datasets"**
+
 ```python
 # Cache VIS instances and reuse them
 class DataProcessor:

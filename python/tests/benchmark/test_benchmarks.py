@@ -33,7 +33,7 @@ def test_version_conversion_benchmark(benchmark: BenchmarkFixture) -> None:
     def convert_path() -> GmodPath | None:
         try:
             # Get versioning
-            versioning = vis.get_gmod_versioning(VisVersion.v3_6a)
+            versioning = vis.get_gmod_versioning()
 
             # Try conversion
             return versioning.convert_path(VisVersion.v3_6a, path, VisVersion.v3_7a)

@@ -9,7 +9,7 @@ from vista_sdk.gmod import TraversalHandlerResult, TraversalOptions
 from vista_sdk.gmod_dto import GmodDto
 from vista_sdk.gmod_node import GmodNode
 from vista_sdk.gmod_path import GmodPath
-from vista_sdk.vis_version import VisVersion, VisVersionExtension
+from vista_sdk.vis_version import VisVersion
 
 from .test_vis import TestVis
 
@@ -20,7 +20,7 @@ class TestGmod(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the test environment."""
         self.vis = TestVis.get_vis()
-        Client.get_gmod(VisVersionExtension.to_version_string(VisVersion.v3_4a))
+        Client.get_gmod(str(VisVersion.v3_4a))
 
     def test_gmod_loads(self) -> None:
         """Test that Gmod can be loaded for all versions."""
@@ -36,14 +36,15 @@ class TestGmod(unittest.TestCase):
 
     def test_gmod_properties(self) -> None:
         """Test properties of Gmod for all versions."""
-        expected_matches = {
-            VisVersion.v3_4a: 6420,
-            VisVersion.v3_5a: 6557,
-            VisVersion.v3_6a: 6557,
-            VisVersion.v3_7a: 6672,
-            VisVersion.v3_8a: 6335,
-            VisVersion.v3_9a: 6553,
-            VisVersion.v3_10a: 6555,
+        # Expected values: (max_code, count) - matches C# ExpectedMaxes
+        expected_values: dict[VisVersion, tuple[str, int]] = {
+            VisVersion.v3_4a: ("C1053.3114", 6420),
+            VisVersion.v3_5a: ("C1053.3114", 6557),
+            VisVersion.v3_6a: ("C1053.3114", 6557),
+            VisVersion.v3_7a: ("H346.11113", 6672),
+            VisVersion.v3_8a: ("H346.11113", 6335),
+            VisVersion.v3_9a: ("H346.11113", 6553),
+            VisVersion.v3_10a: ("H346.11113", 6555),
         }
 
         for version in VisVersion:
@@ -53,41 +54,42 @@ class TestGmod(unittest.TestCase):
                     f"Gmod for version {version} should not be None"
                 )
 
-                min_len = float("inf")
-                max_len = 0
+                current_min_len = float("inf")
+                current_max_len = 0
                 min_code = None
                 max_code = None
 
                 for node_count, (_, node) in enumerate(gmod._node_map, start=1):  # noqa: B007
                     code_len = len(node.code)
-                    if code_len < min_len:
-                        min_len = code_len
+                    if code_len < current_min_len:
+                        current_min_len = code_len
                         min_code = node.code
-                    elif code_len == min_len and min_code is not None:
+                    elif code_len == current_min_len and min_code is not None:
                         # Find lexicographically smallest code of minimum length
                         if node.code < min_code:
                             min_code = node.code
 
-                    if code_len > max_len:
-                        max_len = code_len
+                    if code_len > current_max_len:
+                        current_max_len = code_len
                         max_code = node.code
-                    elif code_len == max_len and max_code is not None:
+                    elif code_len == current_max_len and max_code is not None:
                         # Find lexicographically largest code of maximum length
                         if node.code > max_code:
                             max_code = node.code
 
-                assert min_len == 2, "Minimum code length should be 2"
+                assert current_min_len == 2, "Minimum code length should be 2"
                 assert min_code == "VE", "Minimum code should be 'VE'"
-                assert max_len == 10, "Maximum code length should be 10"
-                possible_max = ["C1053.3114", "H346.11113"]
-                assert max_code in possible_max, (
-                    f"Maximum code should be one of {possible_max}, "
-                    f"but got: {max_code} for version: {version.value}"
-                )
+                assert current_max_len == 10, "Maximum code length should be 10"
 
-                expected_count = expected_matches.get(version)
-                assert expected_count is not None, (
-                    f"Expected count for version {version.value} should be defined"
+                expected = expected_values.get(version)
+                assert expected is not None, (
+                    f"Expected values for version {version.value} should be defined"
+                )
+                expected_max, expected_count = expected
+
+                assert max_code == expected_max, (
+                    f"Maximum code for version {version.value} should be "
+                    f"'{expected_max}', but got: '{max_code}'"
                 )
                 assert node_count == expected_count, (
                     f"Node count for version {version.value} should be "
@@ -199,8 +201,8 @@ class TestGmod(unittest.TestCase):
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         unique_types = set()
-        for node in gmod.__iter__():
-            category_type = f"{node[1].metadata.category} | {node[1].metadata.type}"
+        for node in gmod:
+            category_type = f"{node.metadata.category} | {node.metadata.type}"
             unique_types.add(category_type)
 
         assert unique_types is not None, "The set of node types should not be empty"

@@ -78,29 +78,28 @@ class DataChannelId:
             return self._short_id
         raise RuntimeError("Invalid state exception")
 
-    @classmethod
-    def parse(cls, value: str) -> DataChannelId:
+    @staticmethod
+    def parse(value: str) -> DataChannelId:
         """Parse a string into a DataChannelId."""
         if value is None:
             raise ValueError("value cannot be None")
 
         # Try to parse as LocalId first
-        try:
-            local_id = LocalId.parse(value)
-            return cls(local_id=local_id)
-        except (ValueError, AttributeError):
-            # If LocalId parsing fails, treat as short ID
-            return cls(short_id=value)
+        result, _, local_id = LocalId.try_parse(value)
+        if result:
+            return DataChannelId(local_id=local_id)
+        # If LocalId parsing fails, treat as short ID
+        return DataChannelId(short_id=value)
 
-    @classmethod
-    def from_local_id(cls, local_id: LocalId) -> DataChannelId:
+    @staticmethod
+    def from_local_id(local_id: LocalId) -> DataChannelId:
         """Create DataChannelId from LocalId."""
-        return cls(local_id=local_id)
+        return DataChannelId(local_id=local_id)
 
-    @classmethod
-    def from_short_id(cls, short_id: str) -> DataChannelId:
+    @staticmethod
+    def from_short_id(short_id: str) -> DataChannelId:
         """Create DataChannelId from short ID."""
-        return cls(short_id=short_id)
+        return DataChannelId(short_id=short_id)
 
     def __eq__(self, other: object) -> bool:
         """Check equality with another DataChannelId."""

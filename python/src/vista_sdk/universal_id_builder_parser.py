@@ -51,7 +51,6 @@ class UniversalIdBuilderParser:
         return success, builder
 
     @staticmethod
-    @staticmethod
     def try_parse_with_errors(
         universal_id: str,
     ) -> tuple[bool, ParsingErrors, UniversalIdBuilder | None]:
@@ -90,7 +89,7 @@ class UniversalIdBuilderParser:
         # Parse local ID
         parser = LocalIdBuilderParsing()
         try:
-            success, local_id_builder = parser.try_parse_internal(
+            success, local_id_builder = parser._try_parse_internal(
                 local_id_segment, error_builder
             )
         except Exception:
@@ -132,7 +131,6 @@ class UniversalIdBuilderParser:
             )
             return False, error_builder.build(), None
 
-    @staticmethod
     @staticmethod
     def _parse_universal_id_segments(
         universal_id_segment: str, error_builder: LocalIdParsingErrorBuilder

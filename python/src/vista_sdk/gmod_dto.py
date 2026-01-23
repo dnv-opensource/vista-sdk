@@ -1,4 +1,4 @@
-"""Data transfer objects for General Maritime Object Data (GMOD)."""
+"""Data transfer objects for Generic Product Model (GMOD)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 class GmodNodeDto(BaseModel):
     """Data transfer object for a GMOD node.
 
-    Represents a node in the General Maritime Object Data (GMOD) tree.
+    Represents a node in the Generic Product Model (GMOD) tree.
     """
 
     category: str = Field(..., alias="category")
@@ -27,7 +27,7 @@ class GmodNodeDto(BaseModel):
 class GmodDto(BaseModel):
     """Data transfer object for GMOD data.
 
-    Represents the complete General Maritime Object Data structure.
+    Represents the complete Generic Product Model structure.
     """
 
     vis_version: str = Field(..., alias="visRelease")

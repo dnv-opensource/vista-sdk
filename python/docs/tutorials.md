@@ -18,6 +18,7 @@ Welcome to the comprehensive tutorial for the Vista SDK Python implementation! T
 ## Getting Started
 
 ### Prerequisites
+
 - Python 3.10 or higher
 - Vista SDK installed (`pip install vista-sdk`)
 
@@ -40,13 +41,14 @@ print(f"Available codebooks: {[book.name for book in codebooks]}")
 ```
 
 **What's happening:**
+
 - `VIS()` creates your connection to all VIS data
 - Data is cached automatically - multiple calls are efficient
 - Each VIS version has its own data set
 
 ---
 
-## Understanding GMOD (General Model of Data)
+## Understanding GMOD (Generic Product Model)
 
 GMOD represents the hierarchical structure of vessel equipment and systems.
 
@@ -116,6 +118,7 @@ else:
 ```
 
 **Key Concepts:**
+
 - Paths use forward slashes (`/`) to separate levels
 - Dashes indicate instances (e.g., `-2` for instance 2)
 - Only "mappable" nodes can be used in Local IDs
@@ -614,6 +617,7 @@ for pump in pumps[:5]:  # Show first 5
 ## Best Practices Summary
 
 ### 1. Error Handling
+
 ```python
 # Always use try/except for parsing operations
 try:
@@ -631,6 +635,7 @@ if path is None:
 ```
 
 ### 2. Performance Optimization
+
 ```python
 # Cache VIS instances and commonly used objects
 class SensorProcessor:
@@ -645,6 +650,7 @@ class SensorProcessor:
 ```
 
 ### 3. Validation
+
 ```python
 # Always validate Local IDs after building
 local_id = builder.build()
@@ -657,6 +663,7 @@ if local_id.has_custom_tag:
 ```
 
 ### 4. Version Management
+
 ```python
 # Be explicit about versions
 def create_measurement_id(equipment_path: str, quantity: str, vis_version: VisVersion):

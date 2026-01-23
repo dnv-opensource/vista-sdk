@@ -1,16 +1,12 @@
 """Tests for the transport ISO19848 module."""
 
-from vista_sdk.transport.iso19848 import (  # type: ignore
+import pytest
+
+from vista_sdk.transport.iso19848 import (
     ISO19848,
     DataChannelTypeNames,
     FormatDataTypes,
     ISO19848Version,
-)
-from vista_sdk.transport.iso19848_dtos import (  # type: ignore
-    DataChannelTypeNameDto,
-    DataChannelTypeNamesDto,
-    FormatDataTypeDto,
-    FormatDataTypesDto,
 )
 
 
@@ -22,103 +18,138 @@ def test_iso19848_version_enum() -> None:
 
 
 def test_iso19848_singleton() -> None:
-    """Test ISO19848 singleton pattern."""
-    instance1 = ISO19848.get_instance()
-    instance2 = ISO19848.get_instance()
+    """Test ISO19848 singleton pattern.
+
+    Mirrors C#'s Test_Instance.
+    """
+    instance1 = ISO19848()
+    instance2 = ISO19848()
     assert instance1 is instance2
+    assert instance1 is not None
 
 
-def test_data_channel_type_names_dto() -> None:
-    """Test DataChannelTypeNamesDto."""
-    dto = DataChannelTypeNamesDto(
-        values=[DataChannelTypeNameDto("test-type", "Test Description")]
-    )
-    assert len(dto.values) == 1
-    assert dto.values[0].type == "test-type"
-    assert dto.values[0].description == "Test Description"
+@pytest.mark.parametrize("version", list(ISO19848Version))
+def test_data_channel_type_names_load(version: ISO19848Version) -> None:
+    """Test DataChannelTypeNames load for all versions.
+
+    Mirrors C#'s Test_DataChannelTypeNames_Load.
+    """
+    iso = ISO19848()
+    data_channel_type_names = iso.get_data_channel_type_names(version)
+    assert data_channel_type_names is not None
 
 
-def test_format_data_types_dto() -> None:
-    """Test FormatDataTypesDto."""
-    dto = FormatDataTypesDto(values=[FormatDataTypeDto("string", "String format")])
-    assert len(dto.values) == 1
-    assert dto.values[0].type == "string"
-    assert dto.values[0].description == "String format"
+def test_data_channel_type_names_parse_self() -> None:
+    """Test parsing data channel type names parses all its own values.
+
+    Mirrors C#'s Test_DataChannelTypeNames_Parse_Self.
+    """
+    iso = ISO19848()
+    data_channel_type_names = iso.get_data_channel_type_names(ISO19848Version.V2024)
+    assert data_channel_type_names is not None
+
+    for type_name in data_channel_type_names:
+        result = data_channel_type_names.parse(type_name.type)
+        assert isinstance(result, DataChannelTypeNames.ParseResult.Ok)
+        assert result.type_name.type == type_name.type
 
 
-def test_data_channel_type_names_parse_success() -> None:
-    """Test successful parsing of data channel type names."""
-    dto = DataChannelTypeNamesDto(
-        values=[DataChannelTypeNameDto("temperature", "Temperature measurement")]
-    )
-    type_names = DataChannelTypeNames(dto)
+@pytest.mark.parametrize(
+    ("value", "expected_result"),
+    [
+        ("Inst", True),
+        ("Average", True),
+        ("Max", True),
+        ("Min", True),
+        ("Median", True),
+        ("Mode", True),
+        ("StandardDeviation", True),
+        ("Calculated", True),
+        ("SetPoint", True),
+        ("Command", True),
+        ("Alert", True),
+        ("Status", True),
+        ("ManualInput", True),
+        ("manualInput", False),  # Case sensitive
+        ("asd", False),
+        ("some-random", False),
+        ("InputManual", False),
+    ],
+)
+def test_data_channel_type_names_parse(value: str, expected_result: bool) -> None:
+    """Test DataChannelTypeNames parsing with various inputs.
 
-    result = type_names.parse("temperature")
-    assert isinstance(result, DataChannelTypeNames.ParseResult.Ok)
-    ok_result = result  # type: DataChannelTypeNames.ParseResult.Ok
-    type_name_dto = ok_result.type_name  # type: DataChannelTypeNameDto
-    assert type_name_dto.type == "temperature"
+    Mirrors C#'s Test_DataChannelTypeNames_Parse.
+    """
+    iso = ISO19848()
+    data_channel_type_names = iso.get_data_channel_type_names(ISO19848Version.V2024)
+    assert data_channel_type_names is not None
 
+    result = data_channel_type_names.parse(value)
 
-def test_data_channel_type_names_parse_failure() -> None:
-    """Test failed parsing of data channel type names."""
-    dto = DataChannelTypeNamesDto(values=[])
-    type_names = DataChannelTypeNames(dto)
-
-    result = type_names.parse("unknown-type")
-    assert isinstance(result, DataChannelTypeNames.ParseResult.Invalid)
-    assert "Unknown data channel type" in result.message
-
-
-def test_format_data_types_parse_success() -> None:
-    """Test successful parsing of format data types."""
-    dto = FormatDataTypesDto(
-        values=[FormatDataTypeDto("decimal", "Decimal number format")]
-    )
-    format_types = FormatDataTypes(dto)
-
-    result = format_types.parse("decimal")
-    assert isinstance(result, FormatDataTypes.ParseResult.Ok)
-    assert result.type_name.type == "decimal"
-
-
-def test_format_data_types_parse_failure() -> None:
-    """Test failed parsing of format data types."""
-    dto = FormatDataTypesDto(values=[])
-    format_types = FormatDataTypes(dto)
-
-    result = format_types.parse("unknown-format")
-    assert isinstance(result, FormatDataTypes.ParseResult.Invalid)
-    assert "Unknown format data type" in result.message
+    if expected_result:
+        assert isinstance(result, DataChannelTypeNames.ParseResult.Ok)
+        assert result.type_name.type == value
+    else:
+        assert isinstance(result, DataChannelTypeNames.ParseResult.Invalid)
 
 
-def test_iso19848_get_data_channel_type_names() -> None:
-    """Test getting data channel type names from ISO19848."""
-    iso = ISO19848.get_instance()
+@pytest.mark.parametrize("version", list(ISO19848Version))
+def test_format_data_types_load(version: ISO19848Version) -> None:
+    """Test FormatDataTypes load for all versions.
 
-    # Test both versions
-    v2018_names = iso.get_data_channel_type_names(ISO19848Version.V2018)
-    v2024_names = iso.get_data_channel_type_names(ISO19848Version.V2024)
-
-    assert isinstance(v2018_names, DataChannelTypeNames)
-    assert isinstance(v2024_names, DataChannelTypeNames)
-
-    # Should return the same instance when called again (caching)
-    v2018_names_2 = iso.get_data_channel_type_names(ISO19848Version.V2018)
-    assert v2018_names is v2018_names_2
+    Mirrors C#'s Test_FormatDataTypes_Load.
+    """
+    iso = ISO19848()
+    format_types = iso.get_format_data_types(version)
+    assert format_types is not None
 
 
-def test_iso19848_get_format_data_types() -> None:
-    """Test getting format data types from ISO19848."""
-    iso = ISO19848.get_instance()
+def test_format_data_type_parse_self() -> None:
+    """Test parsing format data types parses all its own values.
 
-    # Test both versions
-    v2018_formats = iso.get_format_data_types(ISO19848Version.V2018)
-    v2024_formats = iso.get_format_data_types(ISO19848Version.V2024)
+    Mirrors C#'s Test_FormatDataType_Parse_Self.
+    """
+    iso = ISO19848()
+    format_types = iso.get_format_data_types(ISO19848Version.V2024)
+    assert format_types is not None
 
-    assert isinstance(v2018_formats, FormatDataTypes)
-    assert isinstance(v2024_formats, FormatDataTypes)
+    for type_name in format_types:
+        result = format_types.parse(type_name.type)
+        assert isinstance(result, FormatDataTypes.ParseResult.Ok)
+        assert result.type_name.type == type_name.type
+        failure = format_types.parse("Non_Existent-Type")
+        assert isinstance(failure, FormatDataTypes.ParseResult.Invalid)
 
-    # Should return the same instance when called again (caching)
-    v2018_formats_2 = iso.get_format_data_types(ISO19848Version.V2018)
-    assert v2018_formats is v2018_formats_2
+
+@pytest.mark.parametrize(
+    ("value", "expected_result"),
+    [
+        ("Decimal", True),
+        ("Integer", True),
+        ("Boolean", True),
+        ("String", True),
+        ("DateTime", True),
+        ("decimal", False),  # Case sensitive
+        ("string", False),
+        ("asd", False),
+        ("some-random", False),
+        ("TimeDate", False),
+    ],
+)
+def test_format_data_type_parse(value: str, expected_result: bool) -> None:
+    """Test FormatDataType parsing with various inputs.
+
+    Mirrors C#'s Test_FormatDataType_Parse.
+    """
+    iso = ISO19848()
+    format_types = iso.get_format_data_types(ISO19848Version.V2024)
+    assert format_types is not None
+
+    result = format_types.parse(value)
+
+    if expected_result:
+        assert isinstance(result, FormatDataTypes.ParseResult.Ok)
+        assert result.type_name.type == value
+    else:
+        assert isinstance(result, FormatDataTypes.ParseResult.Invalid)

@@ -170,6 +170,7 @@ class DecimalValue(Value):
     def __init__(self, value: float) -> None:
         """Initialize with decimal value."""
         super().__init__()
+
         self.value = value
 
     def __eq__(self, other: object) -> bool:

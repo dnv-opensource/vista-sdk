@@ -160,7 +160,8 @@ class TestClient:
                         "vista_sdk.client.json.load", return_value=mock_data
                     ):
                         # Test the method
-                        result = Client.get_gmod_versioning(self.TEST_VIS_VERSION)
+                        results = Client.get_gmod_versioning()
+                        result = results[self.TEST_VIS_VERSION]
 
                         # Assertions
                         assert isinstance(result, GmodVersioningDto)
@@ -171,28 +172,42 @@ class TestClient:
         """Test error handling when 'items' key is missing."""
         from vista_sdk.client import Client
 
-        # We need to fix the logger import first
-        with mock.patch("vista_sdk.client.logger") as mock_logger:  # noqa: F841
+        with mock.patch("vista_sdk.client.logger") as mock_logger:
             # Mock data missing 'items' key
             mock_data = {"visRelease": self.TEST_VIS_VERSION}
 
-            with mock.patch("vista_sdk.client.pkg_resources.path") as mock_path:
+            # Mock pkg_resources.files to return a fake directory with one file
+            mock_file = mock.MagicMock()
+            mock_file.name = f"gmod-vis-versioning-{self.TEST_VIS_VERSION}.json.gz"
+
+            mock_resources = mock.MagicMock()
+            mock_resources.iterdir.return_value = [mock_file]
+
+            with (
+                mock.patch(
+                    "vista_sdk.client.pkg_resources.files", return_value=mock_resources
+                ),
+                mock.patch("vista_sdk.client.pkg_resources.path") as mock_path,
+                mock.patch("vista_sdk.client.gzip.open") as mock_gzip_open,
+                mock.patch("vista_sdk.client.json.load", return_value=mock_data),
+            ):
                 mock_ctx = mock.MagicMock()
                 mock_path.return_value.__enter__.return_value = mock_ctx
 
-                with mock.patch("vista_sdk.client.gzip.open") as mock_gzip_open:
-                    mock_gzip_file = mock.MagicMock()
-                    mock_gzip_open.return_value.__enter__.return_value = mock_gzip_file
+                mock_gzip_file = mock.MagicMock()
+                mock_gzip_open.return_value.__enter__.return_value = mock_gzip_file
 
-                    with mock.patch(
-                        "vista_sdk.client.json.load", return_value=mock_data
-                    ):
-                        # Test the method raises ValueError
-                        with pytest.raises(KeyError) as exc_info:
-                            Client.get_gmod_versioning(self.TEST_VIS_VERSION)
+                # When 'items' is missing, the version is skipped (logged as warning)
+                # So the result dict won't contain the version key
+                result = Client.get_gmod_versioning()
 
-                        # Check error message
-                        assert "'items'" in str(exc_info.value)
+                # Verify warning was logged about missing 'items'
+                mock_logger.warning.assert_called()
+                warning_call = mock_logger.warning.call_args[0][0]
+                assert "Missing 'items' key" in warning_call
+
+                # Verify the version was not added to results
+                assert self.TEST_VIS_VERSION not in result
 
     def test_get_codebooks(self, monkeypatch) -> None:  # noqa: ANN001, ARG002
         """Test retrieving codebooks data."""
@@ -297,7 +312,7 @@ class TestClient:
 
                 with mock.patch("vista_sdk.client.json.load", return_value=mock_data):
                     # Test the method
-                    result = Client.get_gmod_versioning(self.TEST_VIS_VERSION)
+                    result = Client.get_gmod_versioning()[self.TEST_VIS_VERSION]
 
                     # Assertions
                     assert isinstance(result, GmodVersioningDto)
@@ -337,7 +352,7 @@ class TestClientIntegration:
         from vista_sdk.client import Client
 
         try:
-            result = Client.get_gmod_versioning(self.TEST_VIS_VERSION)
+            result = Client.get_gmod_versioning()[self.TEST_VIS_VERSION]
             assert isinstance(result, GmodVersioningDto)
         except FileNotFoundError:
             pytest.skip("Resource files not available - skipping integration test")

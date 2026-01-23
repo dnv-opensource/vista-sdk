@@ -183,13 +183,13 @@ class TimeSeriesData:
                         continue
 
                     # Validate value and get parsed value
-                    if data_channel.prop is None:
+                    if data_channel.property_ is None:
                         erroneous_data_channels.append(
                             (data_channel_id, "DataChannel property is None")
                         )
                         continue
 
-                    type_validation = data_channel.prop.format.validate_value(
+                    type_validation = data_channel.property_.format.validate_value(
                         dataset.value[j]
                     )
                     if isinstance(type_validation[0], Invalid):
@@ -254,7 +254,7 @@ class TimeSeriesData:
                 if not data_channel:
                     continue
 
-                if data_channel.prop is None:
+                if data_channel.property_ is None:
                     erroneous_data_channels.append(
                         (
                             event_data_item.data_channel_id,
@@ -263,7 +263,7 @@ class TimeSeriesData:
                     )
                     continue
 
-                type_validation = data_channel.prop.format.validate_value(
+                type_validation = data_channel.property_.format.validate_value(
                     event_data_item.value
                 )
                 if isinstance(type_validation[0], Invalid):

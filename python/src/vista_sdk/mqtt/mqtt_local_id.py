@@ -49,11 +49,7 @@ class MqttLocalId(LocalId):
 
         # Add VIS version
         buffer.write("vis-")
-        # Remove the 'v' prefix and replace underscores with hyphens
-        version_name = self.vis_version.name
-        if version_name.startswith("v"):
-            version_name = version_name[1:]
-        buffer.write(version_name.replace("_", "-"))
+        buffer.write(str(self.vis_version))
         buffer.write("/")
 
         # Add primary and secondary items
@@ -124,7 +120,6 @@ class MqttLocalId(LocalId):
             # For MQTT format, we need to use the full tag string with prefix
             # Use to_string method but capture output without trailing separator
             tag_builder: list[str] = []
-            tag.to_string(tag_builder, "")  # No separator since we add our own
+            tag.to_string(tag_builder)  # No separator since we add our own
             tag_str = "".join(tag_builder)
             buffer.write(tag_str)
-            buffer.write("/")

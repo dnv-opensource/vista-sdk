@@ -3,7 +3,6 @@
 from typing import ClassVar
 
 from vista_sdk.internal.local_id_parsing_state import LocalIdParsingState
-from vista_sdk.internal.location_parsing_error_builder import LocationValidationResult
 from vista_sdk.parsing_errors import ParsingErrors
 
 
@@ -57,9 +56,8 @@ class LocalIdParsingErrorBuilder:
         if not self._errors:
             return ParsingErrors.empty()
 
-        errors = [
-            (LocationValidationResult.INVALID, message)
-            for state, message in self._errors
+        errors: list[tuple[str, str]] = [
+            (str(state), message) for state, message in self._errors
         ]
         return ParsingErrors(errors)
 

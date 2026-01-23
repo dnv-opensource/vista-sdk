@@ -52,53 +52,35 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write("from __future__ import annotations\n\n")
         f.write("import enum\n\n\n")
 
-        # Write VisVersion enum
+        # Write VisVersion enum (use integer values for proper ordering, like C#)
         f.write("class VisVersion(enum.Enum):\n")
         f.write('    """Enumeration of VIS versions.\n\n')
         f.write(
             "    Represents the various versions of the Vessel Information Structure (VIS).\n"
         )
+        f.write("    Values are integers for proper ordering comparison.\n")
+        f.write("    Use str(version) to get the version string (e.g., '3-4a').\n")
         f.write('    """\n\n')
 
+        for i, version in enumerate(vis_versions):
+            enum_name = version.replace("-", "_").replace(".", "_")
+            f.write(f"    v{enum_name} = {i}\n")
+
+        # Add __str__ method to return version string
+        f.write("\n    def __str__(self) -> str:\n")
+        f.write('        """Return the version string representation."""\n')
+        f.write("        return _VERSION_TO_STRING[self]\n")
+
+        # Write the version-to-string mapping (used by __str__ and VisVersionExtension)
+        f.write("\n\n_VERSION_TO_STRING: dict[VisVersion, str] = {\n")
         for version in vis_versions:
             enum_name = version.replace("-", "_").replace(".", "_")
-            f.write(f'    v{enum_name} = "{version}"\n')
+            f.write(f'    VisVersion.v{enum_name}: "{version}",\n')
+        f.write("}\n")
 
         # Write VisVersionExtension class
         f.write("\n\nclass VisVersionExtension:\n")
         f.write('    """Utility class for VIS version string manipulation."""\n\n')
-
-        f.write("    @staticmethod\n")
-        f.write(
-            "    def to_version_string(version: VisVersion, builder: list[str] | None = None) -> str:\n"
-        )
-        f.write(
-            '        """Convert a VisVersion enum to its string representation."""\n'
-        )
-        f.write("        version_map = {\n")
-        for version in vis_versions:
-            enum_name = version.replace("-", "_").replace(".", "_")
-            f.write(f'            VisVersion.v{enum_name}: "{version}",\n')
-        f.write("        }\n")
-        f.write("        v = version_map.get(version)\n")
-        f.write("        if v is None:\n")
-        f.write(
-            '            raise ValueError(f"Invalid VisVersion enum value: {version}")\n'
-        )
-        f.write("        if builder is not None:\n")
-        f.write("            builder.append(v)\n")
-        f.write("        return v\n")
-
-        f.write("\n    @staticmethod\n")
-        f.write(
-            "    def to_string(version: VisVersion, builder: list[str] | None = None) -> str:\n"
-        )
-        f.write(
-            '        """Convert a VisVersion enum to its string representation."""\n'
-        )
-        f.write(
-            "        return VisVersionExtension.to_version_string(version, builder)\n"
-        )
 
         f.write("\n    @staticmethod\n")
         f.write("    def is_valid(version: object) -> bool:\n")
@@ -112,11 +94,7 @@ def generate_vis_version_script(directory: str, output_file: str) -> None:
         f.write("    @staticmethod\n")
         f.write("    def all_versions() -> list[VisVersion]:\n")
         f.write('        """Get all available VIS versions."""\n')
-        f.write("        return [\n")
-        f.write(
-            "            version for version in VisVersion if VisVersions.try_parse(version.value)\n"
-        )
-        f.write("        ]\n")
+        f.write("        return list(VisVersion)\n")
 
         f.write("\n    @staticmethod\n")
         f.write("    def try_parse(version_str: str) -> VisVersion | None:\n")

@@ -17,11 +17,15 @@ class TestCodebooks:
         # Get VIS instance
         self.vis = VIS()
 
-    def test_codebooks_loads(self) -> None:
+    @pytest.mark.parametrize("vis_version", list(VisVersion))
+    def test_codebooks_loads(self, vis_version: VisVersion) -> None:
         """Test that codebooks load correctly."""
-        codebooks = self.vis.get_codebooks(VisVersion.v3_4a)
+        codebooks = self.vis.get_codebooks(vis_version)
 
         assert codebooks is not None, "Codebooks should not be None"
+        assert codebooks[CodebookName.Position] is not None, (
+            "Position codebook should not be None"
+        )
 
     def test_codebooks_equality(self) -> None:
         """Test that codebooks are equal."""

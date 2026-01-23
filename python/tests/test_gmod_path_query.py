@@ -1,5 +1,6 @@
 """Test suite for GmodPathQueryBuilder functionality."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import pytest
@@ -142,14 +143,14 @@ def test_path_builder(data: InputData) -> None:
 
     for node, locs in data.parameters:
 
-        def node_selector(nodes: dict[str, GmodNode], node=node) -> GmodNode:  # noqa: ANN001
-            return nodes[node]
+        def node_selector(node: str) -> Callable[[dict[str, GmodNode]], GmodNode]:
+            return lambda nodes: nodes[node]
 
         if locs is None or len(locs) == 0:
-            builder = builder.with_node(node_selector, match_all_locations=True)
+            builder = builder.with_node(node_selector(node), match_all_locations=True)
         else:
             location_objects = [locations.parse(loc) for loc in locs]
-            builder = builder.with_node(node_selector, False, *location_objects)
+            builder = builder.with_node(node_selector(node), False, *location_objects)
 
     query = builder.build()
     match = query.match(path)
@@ -180,3 +181,66 @@ def test_nodes_builder(data: InputData) -> None:
     query = builder.build()
     match = query.match(path)
     assert match == data.expected_match
+
+
+def test_with_any_node_before() -> None:
+    """Test the WithAnyNodeBefore functionality."""
+    vis = VIS()
+    gmod = vis.get_gmod(VisVersion.v3_9a)
+
+    # Base path: 411.1/C101.31
+    base_path = gmod.parse_path("411.1/C101.31")
+
+    # Build query that ignores nodes before C101, but C101.31 must match
+    query = (
+        GmodPathQueryBuilder.from_path(base_path)
+        .with_any_node_before(lambda nodes: nodes["C101"])
+        .without_locations()
+        .build()
+    )
+
+    # Should match the base path
+    assert query.match(base_path) is True
+
+    # Should match path with same C101.31 but different parent (511.11 instead of 411.1)
+    path_different_parent = gmod.parse_path("511.11/C101.31")
+    assert query.match(path_different_parent) is True
+
+    # Should match path with location on C101.31
+    path_with_location = gmod.parse_path("411.1/C101.31-2")
+    assert query.match(path_with_location) is True
+
+    # Should NOT match path with different C-node (C102.31 instead of C101.31)
+    path_different_c_node = gmod.parse_path("411.1/C102.31")
+    assert query.match(path_different_c_node) is False
+
+    # Should NOT match path that doesn't contain C101.31
+    path_without_c101 = gmod.parse_path("411.1/C101.61/S203")
+    assert query.match(path_without_c101) is False
+
+
+def test_with_any_node_before_with_locations() -> None:
+    """Test WithAnyNodeBefore with locations."""
+    vis = VIS()
+    gmod = vis.get_gmod(VisVersion.v3_4a)
+
+    # Base path with location: 433.1-P/C322.31
+    base_path = gmod.parse_path("433.1-P/C322.31")
+
+    # Build query that ignores nodes before C322, keeps location requirement on C322.31
+    query = (
+        GmodPathQueryBuilder.from_path(base_path)
+        .with_any_node_before(lambda nodes: nodes["C322"])
+        .build()
+    )
+
+    # Should match the base path
+    assert query.match(base_path) is True
+
+    # Should match path with different parent but same C322.31
+    path_different_parent = gmod.parse_path("433.1-S/C322.31")
+    assert query.match(path_different_parent) is True
+
+    # Should match path without location on parent since we ignore nodes before C322
+    path_no_parent_location = gmod.parse_path("433.1/C322.31")
+    assert query.match(path_no_parent_location) is True

@@ -35,9 +35,9 @@ class GmodIndividualizableSet:
             )
 
         self._nodes = nodes
-        self._path = path
+        self._path = GmodPath(path.parents, path.node)
         self._path._parents = list(path.parents)
-        self._path.node = path.node
+        self._path.node = path.node.clone()
 
     @property
     def nodes(self) -> list[GmodNode]:
@@ -88,17 +88,21 @@ class GmodIndividualizableSet:
                 "Attempting to access nodes on a non-initialized or cleared path"
             )
         return "/".join(
-            str(self._path[i])
-            for i, _ in enumerate(self._nodes)
-            if self._path[i].is_leaf_node() or i == len(self._nodes) - 1
+            str(self._path[node_idx])
+            for i, node_idx in enumerate(self._nodes)
+            if self._path[node_idx].is_leaf_node or i == len(self._nodes) - 1
         )
+
+    def __repr__(self) -> str:
+        """Get the official string representation of this individualizable set."""
+        return f"GmodIndividualizableSet({self!s})"
 
 
 class GmodPath:
     """Represents a path in the Gmod hierarchy."""
 
     def __init__(
-        self, parents: list[GmodNode], node: GmodNode, skip_verify: bool = True
+        self, parents: list[GmodNode], node: GmodNode, skip_verify: bool = False
     ) -> None:
         """Initialize the GmodPath with parents and a node."""
         self._parents: list[GmodNode] = []
@@ -114,20 +118,19 @@ class GmodPath:
                     f"but was {parents[0].code}"
                 )
 
-            child_codes = {parents[0].code}
             for i in range(len(parents) - 1):
                 parent = parents[i]
-                child = parents[i + 1]
+                next_index = i + 1
+                child = parents[next_index] if next_index < len(parents) else node
                 if not parent.is_child(child):
                     raise ValueError(
                         f"Invalid gmod path - {child.code} not child of {parent.code}"
                     )
 
-                if child.code in child_codes:
-                    raise ValueError(
-                        f"Recursion in gmod path argument for code: {child.code}"
-                    )
-                child_codes.add(child.code)
+            visitor = LocationSetsVisitor()
+            for i in range(len(parents)):
+                n = parents[i] if i < len(parents) else node
+                visitor.visit(n, i, parents, node)
 
             if not parents[-1].is_child(node):
                 raise ValueError(
@@ -141,10 +144,6 @@ class GmodPath:
     def parents(self) -> list[GmodNode]:
         """Return the list of parent nodes in the GmodPath."""
         return self._parents
-
-    def set_parents(self, value: list[GmodNode]) -> None:
-        """Set the list of parent nodes in the GmodPath."""
-        self._parents = value
 
     @property
     def length(self) -> int:
@@ -164,7 +163,7 @@ class GmodPath:
 
     def __setitem__(self, depth: int, value: GmodNode) -> None:
         """Set the GmodNode at a specific depth in the GmodPath."""
-        if depth < 0 or depth >= len(self.parents):
+        if depth < 0 or depth > len(self.parents):
             raise IndexError("Index out of range for GmodPath indexer")
         if depth == len(self.parents):
             self.node = value
@@ -206,13 +205,17 @@ class GmodPath:
 
         # Add all parent nodes that are leaf nodes
         for parent in self.parents:
-            if parent.is_leaf_node():
+            if parent.is_leaf_node:
                 path_parts.append(str(parent))  # Use str() to include location
 
         # Always add the final node
         path_parts.append(str(self.node))  # Use str() to include location
 
         return "/".join(path_parts)
+
+    def __repr__(self) -> str:
+        """Get the official string representation of this GmodPath."""
+        return f"GmodPath({self!s})"
 
     @property
     def vis_version(self) -> VisVersion:
@@ -248,7 +251,7 @@ class GmodPath:
 
     def to_full_path_string(self) -> str:
         """Return the full path as a string representation."""
-        return "/".join([node[1].__str__() for node in self.get_full_path()])
+        return "/".join([str(node[1]) for node in self.get_full_path()])
 
     def to_string_dump(self) -> str:
         """Return a string representation of the GmodPath with additional metadata."""
@@ -305,6 +308,9 @@ class GmodPath:
                     raise IndexError("from_depth out of range")
 
                 self._current_index = from_depth - 1
+                self._current_node = (
+                    None if from_depth == 0 else self._path.parents[from_depth - 1]
+                )
 
         def __iter__(self) -> GmodPath.Enumerator:
             """Return the enumerator itself."""
@@ -314,10 +320,11 @@ class GmodPath:
             """Return the next index and node in the path."""
             if self._current_index < len(self._path.parents):
                 self._current_index += 1
-                if self._current_index == len(self._path.parents):
-                    self._current_node = self._path.node
-                else:
-                    self._current_node = self._path.parents[self._current_index]
+                self._current_node = (
+                    self._path.node
+                    if self._current_index == len(self._path.parents)
+                    else self._path.parents[self._current_index]
+                )
                 return self._current_index, self._current_node
             raise StopIteration
 
@@ -334,27 +341,13 @@ class GmodPath:
             result.append(
                 (
                     i,
-                    GmodNode(
-                        vis_version=parent.vis_version,
-                        code=parent.code,
-                        metadata=parent.metadata,
-                        location=parent.location,
-                        children=[],
-                        parents=[],
-                    ),
+                    parent,
                 )
             )
         result.append(
             (
                 len(self.parents),
-                GmodNode(
-                    vis_version=self.node.vis_version,
-                    code=self.node.code,
-                    metadata=self.node.metadata,
-                    location=self.node.location,
-                    children=[],
-                    parents=[],
-                ),
+                self.node,
             )
         )
         return result
@@ -373,7 +366,7 @@ class GmodPath:
         if not normal_assignment_names:
             return None
 
-        for i in range(len(self.parents) - 1, -1, -1):
+        for i in range(self.length - 1, -1, -1):
             child = self[i]
             name = normal_assignment_names.get(child.code)
             if name:
@@ -385,7 +378,7 @@ class GmodPath:
         """Yield common names for nodes in the path."""
         for depth, node in self.get_full_path():
             is_target = depth == len(self.parents)
-            if not (node.is_leaf_node() or is_target) or not node.is_function_node():
+            if not (node.is_leaf_node or is_target) or not node.is_function_node:
                 continue
 
             name = node.metadata.common_name or node.metadata.name
@@ -544,6 +537,10 @@ class GmodPath:
         """Internal method to parse a string into a GmodPath."""
         from vista_sdk.gmod import Gmod
 
+        # Assert Gmod argument type
+        if type(gmod) is not Gmod:
+            return GmodParsePathResult.Err("gmod argument is not of type Gmod")
+
         if gmod.vis_version != locations.vis_version:
             return GmodParsePathResult.Err(
                 f"Got different VIS versions for Gmod ({gmod.vis_version}) "
@@ -557,9 +554,6 @@ class GmodPath:
         parts: deque[GmodPath.PathNode] = deque()
 
         for part_str in item.split("/"):
-            if not part_str:
-                continue  # Skip empty segments from double slashes
-
             if "-" in part_str:
                 try:
                     code, loc_str = part_str.split("-", 1)  # Split on first hyphen only
@@ -646,17 +640,7 @@ class GmodPath:
             else:
                 start_node = end_node.parents[0] if len(end_node.parents) == 1 else None
 
-            if not start_node:
-                # Try to continue without start_node if we have at least some parents
-                if len(path_parents) > 0:
-                    context.path = GmodPath(path_parents, end_node)
-                    return TraversalHandlerResult.STOP
-                return TraversalHandlerResult.STOP
-
-            if len(start_node.parents) > 1:
-                # Multiple parents situation - try to continue with what we have
-                if len(path_parents) > 0:
-                    context.path = GmodPath(path_parents, end_node)
+            if not start_node or len(start_node.parents) > 1:
                 return TraversalHandlerResult.STOP
 
             while len(start_node.parents) == 1:
@@ -664,8 +648,8 @@ class GmodPath:
                 start_node = start_node.parents[0]
                 if len(start_node.parents) > 1:
                     return TraversalHandlerResult.STOP
-            if gmod.root_node:
-                path_parents.insert(0, gmod.root_node)
+
+            path_parents.insert(0, gmod.root_node)
 
             visitor = LocationSetsVisitor()
             for i in range(len(path_parents) + 1):
@@ -675,10 +659,7 @@ class GmodPath:
                     if n.location is not None:
                         return TraversalHandlerResult.STOP
                     continue
-                if set_result:
-                    start, end, location = set_result
-                else:
-                    start, end, location = 0, 0, None
+                start, end, location = set_result
                 if start == end:
                     continue
                 for j in range(start, end + 1):
@@ -755,6 +736,18 @@ class GmodPath:
         locations: Locations,
     ) -> GmodParsePathResult.Ok | GmodParsePathResult.Err:
         """Parse a full path string into a GmodPath using the provided Gmod and Locations."""  # noqa: E501
+        from vista_sdk.gmod import Gmod
+
+        # Assert Gmod argument type
+        if type(gmod) is not Gmod:
+            return GmodParsePathResult.Err("gmod argument is not of type Gmod")
+
+        if gmod.vis_version != locations.vis_version:
+            return GmodParsePathResult.Err(
+                f"Got different VIS versions for Gmod ({gmod.vis_version}) "
+                f"and Locations ({locations.vis_version}) arguments"
+            )
+
         if not path_str.strip():
             return GmodParsePathResult.Err("Item is empty")
 
@@ -764,23 +757,22 @@ class GmodPath:
             )
 
         nodes: list[GmodNode] = []
-        parts = path_str.strip().split("/")
 
-        for part in (p for p in parts if p):
-            dash_index = part.find("-")
+        for node_str in path_str.split("/"):
+            dash_index = node_str.find("-")
 
             try:
                 if dash_index == -1:
-                    success, node = gmod.try_get_node(part)
+                    success, node = gmod.try_get_node(node_str)
                     if not success:
                         return GmodParsePathResult.Err(
-                            f"Failed to get GmodNode for {part}"
+                            f"Failed to get GmodNode for {node_str}"
                         )
                 else:
-                    code = part[:dash_index]
-                    location_str = part[dash_index + 1 :]
+                    code = node_str[:dash_index]
+                    location_str = node_str[dash_index + 1 :]
                     success, node = gmod.try_get_node(code)
-                    if not success:
+                    if not success or not node:
                         return GmodParsePathResult.Err(
                             f"Failed to get GmodNode for {code}"
                         )
@@ -791,7 +783,10 @@ class GmodPath:
                             f"Failed to parse location - {location_str}"
                         )
                     node = node.with_location(location_str)
-
+                if not node:
+                    return GmodParsePathResult.Err(
+                        f"Failed to get GmodNode for {node_str}"
+                    )
                 nodes.append(node)
             except Exception as e:
                 return GmodParsePathResult.Err(f"Error parsing path: {e!s}")
@@ -803,22 +798,61 @@ class GmodPath:
             return GmodParsePathResult.Err("Sequence of nodes are invalid")
 
         visitor = LocationSetsVisitor()
-        for i, node in enumerate([*nodes, end_node]):
-            set_result = visitor.visit(node, i, nodes, end_node)
-            if set_result:
-                if set_result:
-                    start, end, location = set_result
-                else:
-                    start, end, location = 0, 0, None
+        prev_non_null_location: int | None = None
+        sets: list[tuple[int, int]] = []
+
+        for i in range(len(nodes) + 1):
+            n = nodes[i] if i < len(nodes) else end_node
+            set_result = visitor.visit(n, i, nodes, end_node)
+            if not set_result:
+                if prev_non_null_location is None and n.location is not None:
+                    prev_non_null_location = i
+                continue
+            start, end, location = set_result
+
+            if prev_non_null_location is not None:
+                for j in range(prev_non_null_location, start):
+                    pn = nodes[j] if j < len(nodes) else end_node
+                    if pn.location is not None:
+                        return GmodParsePathResult.Err(
+                            f"Expected all nodes in the set to be without invdividualization. Found {pn}"  # noqa: E501
+                        )
+            prev_non_null_location = None
+            sets.append((start, end))
+
+            if start == end:
+                continue
+            if location is not None:
                 for j in range(start, end + 1):
                     if j < len(nodes):
-                        nodes[j] = nodes[j].with_location(
-                            location.__str__() if location else None
-                        )
+                        nodes[j] = nodes[j].with_location(str(location))
                     else:
-                        end_node = end_node.with_location(
-                            location.__str__() if location else None
-                        )
+                        end_node = end_node.with_location(str(location))
+        current_set: tuple[int, int] = (-1, -1)
+        current_set_index = 0
+        for i in range(len(nodes) + 1):
+            while current_set_index < len(sets) and current_set[1] < i:
+                current_set = sets[current_set_index]
+                current_set_index += 1
+
+            inside_set = i >= current_set[0] and i <= current_set[1]
+            n = nodes[i] if i < len(nodes) else end_node
+            expected_location_node = (
+                nodes[current_set[1]]
+                if current_set[1] != -1 and current_set[1] < len(nodes)
+                else end_node
+            )
+
+            if inside_set:
+                if n.location != expected_location_node.location:
+                    return GmodParsePathResult.Err(
+                        f"Expected all nodes in the set to be individualized the same. Found {n.code} with location {n.location}"  # noqa: E501
+                    )
+            else:
+                if n.location is not None:
+                    return GmodParsePathResult.Err(
+                        f"Expected all nodes in the set to be without individualization. Found {n}"  # noqa: E501
+                    )
 
         return GmodParsePathResult.Ok(GmodPath(nodes, end_node, skip_verify=True))
 

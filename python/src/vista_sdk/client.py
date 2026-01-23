@@ -59,36 +59,59 @@ class Client:
             ) from err
 
     @staticmethod
-    def get_gmod_versioning(vis_version: str) -> GmodVersioningDto:
-        """Retrieve GMOD Versioning data for the specified VISTA version."""
-        resource_name: str = f"gmod-vis-versioning-{vis_version}.json.gz"
+    def get_gmod_versioning() -> dict[str, GmodVersioningDto]:
+        """Retrieve GMOD Versioning data for all available VIS versions.
 
-        logger.debug(f"Retrieving GMOD versioning data for {vis_version}")
+        Returns:
+            Dictionary mapping source version strings to their GmodVersioningDto.
+        """
+        result: dict[str, GmodVersioningDto] = {}
 
+        # Get all versioning files from resources
         try:
-            with (
-                pkg_resources.path(
-                    "vista_sdk.resources", resource_name
-                ) as resource_path,
-                gzip.open(resource_path, "rt") as gzip_file,
-            ):
-                data = json.load(gzip_file)
+            resources_path = pkg_resources.files("vista_sdk.resources")
+            versioning_files = [
+                f.name
+                for f in resources_path.iterdir()
+                if f.name.startswith("gmod-vis-versioning-")
+                and f.name.endswith(".json.gz")
+            ]
+        except Exception as err:
+            logger.error(f"Failed to list GMOD versioning resources: {err}")
+            raise
 
-            logger.debug(f"Successfully loaded GMOD versioning data for {vis_version}")
-
-            if "items" not in data:
-                logger.error(
-                    f"Missing 'items' key in GMOD versioning data for {vis_version}"
-                )
-
-            return GmodVersioningDto(visRelease=data["visRelease"], items=data["items"])
-        except FileNotFoundError as err:
-            logger.error(
-                f"Failed to load GMOD versioning data: {resource_name} not found"
+        for resource_name in versioning_files:
+            # Extract version from filename: gmod-vis-versioning-3-4a.json.gz -> 3-4a
+            version = resource_name.replace("gmod-vis-versioning-", "").replace(
+                ".json.gz", ""
             )
-            raise FileNotFoundError(
-                f"File: {resource_name} at given path was not found"
-            ) from err
+
+            try:
+                with (
+                    pkg_resources.path(
+                        "vista_sdk.resources", resource_name
+                    ) as resource_path,
+                    gzip.open(resource_path, "rt") as gzip_file,
+                ):
+                    data = json.load(gzip_file)
+
+                if "items" not in data:
+                    logger.warning(
+                        f"Missing 'items' key in GMOD versioning data for {version}"
+                    )
+                    continue
+
+                result[version] = GmodVersioningDto(
+                    visRelease=data["visRelease"], items=data["items"]
+                )
+                logger.debug(f"Loaded GMOD versioning data for {version}")
+
+            except FileNotFoundError:
+                logger.warning(f"GMOD versioning file not found: {resource_name}")
+            except Exception as err:
+                logger.error(f"Failed to load GMOD versioning for {version}: {err}")
+
+        return result
 
     @staticmethod
     def get_codebooks(vis_version: str) -> CodebooksDto:

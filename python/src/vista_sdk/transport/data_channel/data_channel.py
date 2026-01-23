@@ -2,23 +2,21 @@
 
 from __future__ import annotations
 
+import math
 import re
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Iterable, Iterator
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, TypeVar
 
 from vista_sdk.local_id import LocalId
 from vista_sdk.result import Invalid, Ok, ValidateResult
+from vista_sdk.transport.iso19848 import FormatDataType
 from vista_sdk.transport.ship_id import ShipId
-from vista_sdk.transport.value import (
-    AnyValue,
-    BooleanValue,
-    DateTimeValue,
-    DecimalValue,
-    IntegerValue,
-    StringValue,
+from vista_sdk.transport.time_series_data.time_series_data import (
+    ConfigurationReference as TimeSeriesConfigurationReference,
 )
+from vista_sdk.transport.value import AnyValue
 
 T = TypeVar("T")
 
@@ -76,6 +74,10 @@ class ConfigurationReference:
         self.id = config_id
         self.version = version
         self.timestamp = timestamp
+
+    def as_time_series_reference(self) -> TimeSeriesConfigurationReference:
+        """Convert to TimeSeriesData ConfigurationReference."""
+        return TimeSeriesConfigurationReference(self.id, self.timestamp)
 
 
 class VersionInformation:
@@ -205,21 +207,21 @@ class DataChannelList:
 class DataChannel:
     """Represents a data channel with ID and property."""
 
-    def __init__(self, data_channel_id: DataChannelId, prop: Property) -> None:
+    def __init__(self, data_channel_id: DataChannelId, property_: Property) -> None:
         """Initialize data channel."""
         self.data_channel_id = data_channel_id
         self._property = None
-        self.prop = prop  # This will trigger validation
+        self.property_ = property_  # This will trigger validation
 
     @property
-    def prop(self) -> Property:
+    def property_(self) -> Property:
         """Get the property."""
         if self._property is None:
             raise ValueError("Property not set")
         return self._property
 
-    @prop.setter
-    def prop(self, value: Property) -> None:
+    @property_.setter
+    def property_(self, value: Property) -> None:
         """Set the property with validation."""
         validation_result = value.validate()
         if isinstance(validation_result, Invalid):
@@ -426,67 +428,6 @@ class Format:
         return Ok(), parsed_value
 
 
-class FormatDataType:
-    """Represents a format data type with validation."""
-
-    def __init__(self, type_name: str) -> None:
-        """Initialize format data type."""
-        self.type = type_name
-
-    def validate(self, value: str) -> tuple[ValidateResult, AnyValue | None]:
-        """Validate and parse a string value, returning both result and parsed value."""
-        if self.type == "Decimal":
-            try:
-                return Ok(), DecimalValue(float(value))
-            except ValueError:
-                return Invalid([f"Invalid decimal value - Value='{value}'"]), None
-        if self.type == "Integer":
-            try:
-                return Ok(), IntegerValue(int(value))
-            except ValueError:
-                return Invalid([f"Invalid integer value - Value='{value}'"]), None
-        if self.type == "Boolean":
-            try:
-                return Ok(), BooleanValue(value.lower() in ("true", "false"))
-            except ValueError:
-                return Invalid([f"Invalid boolean value - Value='{value}'"]), None
-        if self.type == "String":
-            return Ok(), StringValue(value)
-        if self.type == "DateTime":
-            try:
-                # C# uses pattern "yyyy-MM-ddTHH:mm:ssZ"
-                parsed_dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
-                return Ok(), DateTimeValue(parsed_dt)
-            except ValueError:
-                return Invalid([f"Invalid datetime value - Value='{value}'"]), None
-        return Invalid([f"Invalid format type {self.type}"]), None
-
-    def match(
-        self,
-        value: str,
-        on_decimal: Callable[[float], T],
-        on_integer: Callable[[int], T],
-        on_boolean: Callable[[bool], T],
-        on_string: Callable[[str], T],
-        on_datetime: Callable[[datetime], T],
-    ) -> T:
-        """Pattern match on the format data type and return result."""
-        result, parsed_value = self.validate(value)
-        if isinstance(result, Invalid):
-            raise ValueError("Invalid value")
-        if isinstance(parsed_value, DecimalValue):
-            return on_decimal(parsed_value.value)
-        if isinstance(parsed_value, IntegerValue):
-            return on_integer(parsed_value.value)
-        if isinstance(parsed_value, BooleanValue):
-            return on_boolean(parsed_value.value)
-        if isinstance(parsed_value, StringValue):
-            return on_string(parsed_value.value)
-        if isinstance(parsed_value, DateTimeValue):
-            return on_datetime(parsed_value.value)
-        raise ValueError("Invalid type")
-
-
 class Restriction:
     """Validation restrictions for format values."""
 
@@ -538,47 +479,39 @@ class Restriction:
         if self.enumeration is not None and value not in self.enumeration:
             return Invalid([f"Value {value} is not in the enumeration"])
 
-        # Handle different data types
-        if format_obj.type == "Decimal":
-            return self._validate_decimal(value)
-        if format_obj.type == "Integer":
-            return self._validate_integer(value)
-        if format_obj.type == "String":
-            return self._validate_string(value)
+        # Use match pattern to dispatch validation based on data type
+        return format_obj.data_type.match(
+            value,
+            on_decimal=lambda dec: self._validate_decimal_value(dec),
+            on_integer=lambda i: self._validate_integer_value(i),
+            on_boolean=lambda _: Ok(),
+            on_string=lambda s: self._validate_string(s),
+            on_datetime=lambda _: Ok(),
+        )
 
-        return Ok()
-
-    def _validate_decimal(self, value: str) -> ValidateResult:
+    def _validate_decimal_value(self, dec: float) -> ValidateResult:
         """Validate decimal value against restrictions."""
-        try:
-            dec_value = float(value)
-            if self.fraction_digits is not None:
-                decimal_places = self._count_decimal_places(value)
-                if decimal_places > self.fraction_digits:
-                    return Invalid(["Value has more decimal places than allowed"])
-            return self._validate_number(dec_value)
-        except ValueError:
-            return Invalid([f"Invalid decimal value: {value}"])
+        if self.fraction_digits is not None:
+            decimal_places = self._count_decimal_places(str(dec))
+            if decimal_places > self.fraction_digits:
+                return Invalid(["Value has more decimal places than allowed"])
+        return self._validate_number(float(dec))
 
-    def _validate_integer(self, value: str) -> ValidateResult:
+    def _validate_integer_value(self, i: int) -> ValidateResult:
         """Validate integer value against restrictions."""
-        try:
-            int_value = int(value)
-            validation_result = self._validate_number(float(int_value))
-            if isinstance(validation_result, Invalid):
-                return validation_result
-            if self.total_digits is not None:
-                num_digits = len(str(abs(int_value)))
-                if num_digits != self.total_digits:
-                    return Invalid(
-                        [
-                            f"Value {int_value} has {num_digits} digits "
-                            f"but should be {self.total_digits}"
-                        ]
-                    )
-            return Ok()
-        except ValueError:
-            return Invalid([f"Invalid integer value: {value}"])
+        validation_result = self._validate_number(float(i))
+        if isinstance(validation_result, Invalid):
+            return validation_result
+        if self.total_digits is not None:
+            num_digits = 1 if i == 0 else math.floor(math.log10(abs(i)) + 1)
+            if num_digits != self.total_digits:
+                return Invalid(
+                    [
+                        f"Value {i} has {num_digits} digits "
+                        f"but should be {self.total_digits}"
+                    ]
+                )
+        return Ok()
 
     def _validate_string(self, value: str) -> ValidateResult:
         """Validate string value against restrictions."""
@@ -587,14 +520,14 @@ class Restriction:
             return Invalid(
                 [f"Value {value} has length {length} but should be {self.length}"]
             )
-        if self.max_length is not None and length > self.max_length:
+        if self.max_length is not None and length >= self.max_length:
             return Invalid(
                 [
                     f"Value {value} has length {length} "
                     f"but should be less than {self.max_length}"
                 ]
             )
-        if self.min_length is not None and length < self.min_length:
+        if self.min_length is not None and length <= self.min_length:
             return Invalid(
                 [
                     f"Value {value} has length {length} "
@@ -632,9 +565,9 @@ class Restriction:
 class WhiteSpace(Enum):
     """White space handling enumeration."""
 
-    PRESERVE = 0
-    REPLACE = 1
-    COLLAPSE = 2
+    Preserve = 0
+    Replace = 1
+    Collapse = 2
 
 
 class Range:

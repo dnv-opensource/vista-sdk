@@ -1,7 +1,7 @@
 """Gmod Versioning Data Transfer Object (DTO) for Vista SDK.
 
 This module defines the data structures for handling versioning changes in
-General Maritime Object Data (GMOD).
+Generic Product Model (GMOD).
 """
 
 from __future__ import annotations

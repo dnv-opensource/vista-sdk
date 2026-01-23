@@ -1,39 +1,40 @@
 """This file is part of the VISTA SDK."""
 
 from .data_channel_list import (
-    ChannelID,
-    ChannelList,
+    ConfigurationReference,
     DataChannel,
-    DataChannelListContainer,
-    DataChannelListID,
+    DataChannelID,
+    DataChannelList,
     DataChannelListPackage,
     DataChannelType,
     Format,
     Header,
     NameObject,
+    Package,
     Property,
     Range,
     Restriction,
     Unit,
     VersionInformation,
 )
-from .extensions import to_json_dto
+from .extensions import to_domain_model, to_json_dto
 
 __all__ = [
-    "ChannelID",
-    "ChannelList",
+    "ConfigurationReference",
     "DataChannel",
-    "DataChannelListContainer",
-    "DataChannelListID",
+    "DataChannelID",
+    "DataChannelList",
     "DataChannelListPackage",
     "DataChannelType",
     "Format",
     "Header",
     "NameObject",
+    "Package",
     "Property",
     "Range",
     "Restriction",
     "Unit",
     "VersionInformation",
+    "to_domain_model",
     "to_json_dto",
 ]

@@ -13,23 +13,18 @@ from vista_sdk.vis_version import VisVersion, VisVersionExtension, VisVersions
 class TestVisVersions:
     """Unit tests for the VisVersion, VisVersionExtension, and VisVersions classes."""
 
-    def test_to_version_string(self) -> None:
-        """Test the to_version_string method of VisVersionExtension."""
-        builder: list[str] = []
-        result = VisVersionExtension.to_version_string(VisVersion.v3_4a, builder)
-        assert result == "3-4a"
-        assert "3-4a" in builder
-
     def test_to_string(self) -> None:
         """Test the to_string method of VisVersionExtension."""
-        builder: list[str] = []
-        result = VisVersionExtension.to_string(VisVersion.v3_5a, builder)
+        result = str(VisVersion.v3_5a)
         assert result == "3-5a"
-        assert "3-5a" in builder
+
+        result = f"{VisVersion.v3_5a}"
+        assert result == "3-5a"
 
     def test_is_valid(self) -> None:
         """Test the is_valid method of VisVersionExtension."""
         assert not VisVersionExtension.is_valid("3-8a")
+        assert VisVersionExtension.is_valid(VisVersion.v3_8a)
 
     def test_all_versions(self) -> None:
         """Test the all_versions method of VisVersions."""
@@ -37,6 +32,7 @@ class TestVisVersions:
         assert VisVersion.v3_7a in versions
         assert VisVersion.v3_8a in versions
         assert VisVersion.v3_9a in versions
+        assert VisVersion.v3_10a in versions
         assert len(VisVersions.all_versions()) == 7, "There should be 7 versions"
 
     def test_try_parse(self) -> None:
@@ -57,3 +53,20 @@ class TestVisVersions:
         output_file = root_dir / "python" / "src" / "vista_sdk" / "vis_versions.py"
 
         generate_vis_version_script(str(resources_dir), str(output_file))
+
+    def test_ordering(self) -> None:
+        """Test ordering of VisVersion enums."""
+        versions = VisVersions.all_versions()
+        sorted_versions = sorted(versions, key=lambda v: v.value)
+        index34a = sorted_versions.index(VisVersion.v3_4a)
+        index310a = sorted_versions.index(VisVersion.v3_10a)
+        assert index34a < index310a, "VisVersion ordering is incorrect"
+        assert versions == sorted_versions, "VisVersions are not in the correct order"
+
+    def test_comparison(self) -> None:
+        """Test comparison between VisVersion enums."""
+        assert VisVersion.v3_4a != VisVersion.v3_5a
+        assert VisVersion.v3_6a == VisVersion.v3_6a
+        assert VisVersion.v3_7a.value < VisVersion.v3_8a.value
+        assert VisVersion.v3_9a.value <= VisVersion.v3_9a.value
+        assert VisVersion.v3_10a.value > VisVersion.v3_8a.value

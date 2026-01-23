@@ -132,6 +132,10 @@ class LocalId:
         """Convert this LocalId to its string representation."""
         return str(self._builder)
 
+    def __repr__(self) -> str:
+        """Get the official string representation of this LocalId."""
+        return f"LocalId({self!s})"
+
     @staticmethod
     def parse(local_id_str: str) -> LocalId:
         """Parse a local ID string into a LocalId.

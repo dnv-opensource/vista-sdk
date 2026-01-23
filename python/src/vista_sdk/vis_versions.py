@@ -22,43 +22,36 @@ class VisVersion(enum.Enum):
     """Enumeration of VIS versions.
 
     Represents the various versions of the Vessel Information Structure (VIS).
+    Values are integers for proper ordering comparison.
+    Use str(version) to get the version string (e.g., '3-4a').
     """
 
-    v3_4a = "3-4a"
-    v3_5a = "3-5a"
-    v3_6a = "3-6a"
-    v3_7a = "3-7a"
-    v3_8a = "3-8a"
-    v3_9a = "3-9a"
-    v3_10a = "3-10a"
+    v3_4a = 0
+    v3_5a = 1
+    v3_6a = 2
+    v3_7a = 3
+    v3_8a = 4
+    v3_9a = 5
+    v3_10a = 6
+
+    def __str__(self) -> str:
+        """Return the version string representation."""
+        return _VERSION_TO_STRING[self]
+
+
+_VERSION_TO_STRING: dict[VisVersion, str] = {
+    VisVersion.v3_4a: "3-4a",
+    VisVersion.v3_5a: "3-5a",
+    VisVersion.v3_6a: "3-6a",
+    VisVersion.v3_7a: "3-7a",
+    VisVersion.v3_8a: "3-8a",
+    VisVersion.v3_9a: "3-9a",
+    VisVersion.v3_10a: "3-10a",
+}
 
 
 class VisVersionExtension:
     """Utility class for VIS version string manipulation."""
-
-    @staticmethod
-    def to_version_string(version: VisVersion, builder: list[str] | None = None) -> str:
-        """Convert a VisVersion enum to its string representation."""
-        version_map = {
-            VisVersion.v3_4a: "3-4a",
-            VisVersion.v3_5a: "3-5a",
-            VisVersion.v3_6a: "3-6a",
-            VisVersion.v3_7a: "3-7a",
-            VisVersion.v3_8a: "3-8a",
-            VisVersion.v3_9a: "3-9a",
-            VisVersion.v3_10a: "3-10a",
-        }
-        v = version_map.get(version)
-        if v is None:
-            raise ValueError(f"Invalid VisVersion enum value: {version}")
-        if builder is not None:
-            builder.append(v)
-        return v
-
-    @staticmethod
-    def to_string(version: VisVersion, builder: list[str] | None = None) -> str:
-        """Convert a VisVersion enum to its string representation."""
-        return VisVersionExtension.to_version_string(version, builder)
 
     @staticmethod
     def is_valid(version: object) -> bool:
@@ -72,9 +65,7 @@ class VisVersions:
     @staticmethod
     def all_versions() -> list[VisVersion]:
         """Get all available VIS versions."""
-        return [
-            version for version in VisVersion if VisVersions.try_parse(version.value)
-        ]
+        return list(VisVersion)
 
     @staticmethod
     def try_parse(version_str: str) -> VisVersion | None:

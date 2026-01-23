@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import ClassVar
+
+from vista_sdk.parsing_errors import ParsingErrors
 
 
 class LocationValidationResult(Enum):
@@ -42,18 +43,8 @@ class LocationParsingErrorBuilder:
 
     def build(self) -> ParsingErrors:
         """Build and return the ParsingErrors object."""
-        return ParsingErrors(self._errors) if self._errors else ParsingErrors()
-
-
-class ParsingErrors:
-    """Data structure representing parsing errors related to location validation."""
-
-    empty: ClassVar[list[tuple[LocationValidationResult, str]]] = []
-
-    def __init__(self, errors: list = []) -> None:  # noqa : B006
-        """Initialize ParsingErrors with a list of errors."""
-        self.errors = [(error[0], error[1]) for error in errors]
-
-    def __repr__(self) -> str:
-        """Return a string representation of the ParsingErrors."""
-        return f"ParsingErrors({self.errors})"
+        return (
+            ParsingErrors([(e[0].name, e[1]) for e in self._errors])
+            if self._errors
+            else ParsingErrors()
+        )

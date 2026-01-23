@@ -112,6 +112,6 @@ class LocationSetsVisitor:
         """Check if the nodes set contains a leaf node."""
         for j in range(nodes[0], nodes[1] + 1):
             set_node = parents[j] if j < len(parents) else target
-            if set_node.is_leaf_node() or j == len(parents):
+            if set_node.is_leaf_node or j == len(parents):
                 return True
         return False

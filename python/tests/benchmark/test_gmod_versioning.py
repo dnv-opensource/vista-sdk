@@ -11,7 +11,7 @@ from tests.benchmark.benchmark_base import (
 )
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.vis import VIS
-from vista_sdk.vis_version import VisVersion
+from vista_sdk.vis_version import VisVersion, VisVersions
 
 
 @pytest.mark.benchmark(group="gmod")
@@ -29,12 +29,10 @@ class TestGmodVersioningConvertPath:
     @pytest.mark.parametrize(
         ("source_version", "target_version"),
         [
-            (VisVersion.v3_4a, VisVersion.v3_5a),
-            (VisVersion.v3_5a, VisVersion.v3_6a),
-            (VisVersion.v3_6a, VisVersion.v3_7a),
-            (VisVersion.v3_7a, VisVersion.v3_8a),
-            # Include v3_8a -> v3_9a but skip it in the test method
-            (VisVersion.v3_8a, VisVersion.v3_9a),
+            (source, target)
+            for source, target in zip(
+                VisVersions.all_versions(), VisVersions.all_versions()[1:], strict=False
+            )
         ],
     )
     def test_convert_path(

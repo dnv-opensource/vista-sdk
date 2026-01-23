@@ -55,27 +55,27 @@ class LocationBuilder:
 
     def with_number(self, number: int) -> LocationBuilder:
         """Set the number for the location."""
-        return self.with_value_internal(LocationGroup.NUMBER, number)
+        return self.with_value_internal(LocationGroup.Number, number)
 
     def with_side(self, side: str) -> LocationBuilder:
         """Set the side for the location."""
-        return self.with_value_internal(LocationGroup.SIDE, side)
+        return self.with_value_internal(LocationGroup.Side, side)
 
     def with_vertical(self, vertical: str) -> LocationBuilder:
         """Set the vertical for the location."""
-        return self.with_value_internal(LocationGroup.VERTICAL, vertical)
+        return self.with_value_internal(LocationGroup.Vertical, vertical)
 
     def with_transverse(self, transverse: str) -> LocationBuilder:
         """Set the transverse for the location."""
-        return self.with_value_internal(LocationGroup.TRANSVERSE, transverse)
+        return self.with_value_internal(LocationGroup.Transverse, transverse)
 
     def with_longitudinal(self, longitudinal: str) -> LocationBuilder:
         """Set the longitudinal for the location."""
-        return self.with_value_internal(LocationGroup.LONGITUDINAL, longitudinal)
+        return self.with_value_internal(LocationGroup.Longitudinal, longitudinal)
 
     def with_value(self, value: int) -> LocationBuilder:
         """Set the value for the location, which can be a number."""
-        return self.with_value_internal(LocationGroup.NUMBER, value)
+        return self.with_value_internal(LocationGroup.Number, value)
 
     def with_value_char(self, value: str) -> LocationBuilder:
         """Set the value for the location, which can be a single character."""
@@ -88,7 +88,7 @@ class LocationBuilder:
         self, group: LocationGroup, value: int | str | None
     ) -> LocationBuilder:
         """Set the value for the location based on the group and value type."""
-        if group == LocationGroup.NUMBER:
+        if group == LocationGroup.Number:
             if not isinstance(value, int):
                 raise ValueError("Value should be a number")
             if value < 1:
@@ -120,27 +120,35 @@ class LocationBuilder:
     def __str__(self) -> str:
         """Return a string representation of the location."""
         parts = [self.side, self.vertical, self.transverse, self.longitudinal]
-        parts = [p for p in parts if p is not None]
-        if self.number:
-            parts.insert(0, str(self.number))
-        return "".join(sorted([p for p in parts if p is not None]))
+        # Filter out None values and sort only the character parts
+        sorted_chars = sorted([p for p in parts if p is not None])
+
+        result = ""
+        if self.number is not None:
+            result = str(self.number)
+
+        return result + "".join(sorted_chars)
+
+    def __repr__(self) -> str:
+        """Return a string representation of the location."""
+        return f"LocationBuilder({self!s})"
 
     def without_number(self) -> LocationBuilder:
         """Remove the number from the location."""
-        return self.without_value(LocationGroup.NUMBER)
+        return self.without_value(LocationGroup.Number)
 
     def without_side(self) -> LocationBuilder:
         """Remove the side from the location."""
-        return self.without_value(LocationGroup.SIDE)
+        return self.without_value(LocationGroup.Side)
 
     def without_vertical(self) -> LocationBuilder:
         """Remove the vertical from the location."""
-        return self.without_value(LocationGroup.VERTICAL)
+        return self.without_value(LocationGroup.Vertical)
 
     def without_transverse(self) -> LocationBuilder:
         """Remove the transverse from the location."""
-        return self.without_value(LocationGroup.TRANSVERSE)
+        return self.without_value(LocationGroup.Transverse)
 
     def without_longitudinal(self) -> LocationBuilder:
         """Remove the longitudinal from the location."""
-        return self.without_value(LocationGroup.LONGITUDINAL)
+        return self.without_value(LocationGroup.Longitudinal)

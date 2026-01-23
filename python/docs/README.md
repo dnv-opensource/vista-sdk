@@ -9,7 +9,9 @@ This directory contains complete documentation for using the Vista SDK Python li
 ## 📚 Available Guides
 
 ### 🚀 [Getting Started](getting-started.md)
+
 **Perfect for newcomers** - Start here if you're new to the Vista SDK or VIS standards.
+
 - Quick 5-minute setup and first Local ID creation
 - Core concepts explained simply
 - Common use cases with examples
@@ -17,7 +19,9 @@ This directory contains complete documentation for using the Vista SDK Python li
 - Learning path recommendations
 
 ### 🎓 [Tutorials](tutorials.md)
+
 **Step-by-step learning** - Comprehensive tutorials covering all major features.
+
 - 14 detailed tutorials from basic to advanced
 - Working with GMOD equipment hierarchy
 - Building and parsing Local IDs
@@ -26,7 +30,9 @@ This directory contains complete documentation for using the Vista SDK Python li
 - Integration patterns and best practices
 
 ### 📋 [API Reference](API.md)
+
 **Complete technical reference** - Detailed documentation of all classes and methods.
+
 - All classes, methods, and properties documented
 - Parameters, return types, and exceptions
 - Code examples for every major feature
@@ -58,7 +64,7 @@ The Vista SDK provides Python tools for working with:
 
 - **🚢 VIS (Vessel Information Structure)** - DNV's standardized data model for vessel equipment and systems
 - **🏷️ Local IDs** - Unique, standardized identifiers for data channels following ISO 19847/19848
-- **🌳 GMOD** - General Model of Data representing hierarchical equipment structure
+- **🌳 GMOD** - Generic Product Model representing hierarchical equipment structure
 - **📚 Codebooks** - Standardized vocabularies for metadata tags
 - **📍 Locations** - Physical positioning information
 - **🔄 Version Management** - Support for multiple VIS versions with conversion capabilities
@@ -107,16 +113,19 @@ docs/
 Found an error or want to improve the documentation? We welcome contributions!
 
 ### Quick Fixes
+
 - **Typos/small errors**: Submit a pull request with the fix
 - **Missing examples**: Add practical examples to help other users
 - **Unclear explanations**: Suggest clearer wording or additional context
 
 ### Larger Contributions
+
 - **New tutorials**: Add tutorials for specific use cases or workflows
 - **Additional examples**: Create comprehensive examples for complex scenarios
 - **Translation**: Help make documentation accessible in other languages
 
 ### Documentation Guidelines
+
 - **Clear and concise**: Write for users with varying experience levels
 - **Code examples**: Include working, tested code examples
 - **Consistent formatting**: Follow the existing Markdown style
@@ -125,16 +134,19 @@ Found an error or want to improve the documentation? We welcome contributions!
 ## 🔗 Additional Resources
 
 ### Official Documentation
+
 - [DNV VISTA Documentation](https://docs.vista.dnv.com/docs/introduction/)
 - [ISO 19847 Standard](https://www.iso.org/standard/78260.html)
 - [ISO 19848 Standard](https://www.iso.org/standard/78262.html)
 
 ### Vista SDK Implementations
+
 - [C# Implementation](../../csharp/) - Full-featured C# SDK
 - [JavaScript Implementation](../../js/) - TypeScript/JavaScript SDK
 - [Python Implementation](../) - This Python SDK
 
 ### Community
+
 - [GitHub Repository](https://github.com/dnv-opensource/vista-sdk)
 - [Issues & Bug Reports](https://github.com/dnv-opensource/vista-sdk/issues)
 - [Discussions](https://github.com/dnv-opensource/vista-sdk/discussions)
@@ -142,17 +154,20 @@ Found an error or want to improve the documentation? We welcome contributions!
 ## 📞 Support
 
 ### Self-Help Resources
+
 1. **Search the documentation** - Use Ctrl+F to find specific topics
 2. **Check examples** - Look at [samples/](../samples/) for working code
 3. **Read error messages** - Most errors include helpful guidance
 4. **Review troubleshooting** - Common issues are documented
 
 ### Getting Help
+
 1. **GitHub Issues** - Report bugs or request features
 2. **GitHub Discussions** - Ask questions and share experiences
 3. **Stack Overflow** - Tag questions with `vista-sdk` and `python`
 
 ### Before Asking for Help
+
 - [ ] Searched existing documentation
 - [ ] Tried the examples in [samples/](../samples/)
 - [ ] Checked for similar issues on GitHub

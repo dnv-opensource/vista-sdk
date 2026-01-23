@@ -18,11 +18,11 @@ from .internal.location_parsing_error_builder import (
 class LocationGroup(Enum):
     """Enum representing different groups of location codes."""
 
-    NUMBER = 0
-    SIDE = 1
-    VERTICAL = 2
-    TRANSVERSE = 3
-    LONGITUDINAL = 4
+    Number = 0
+    Side = 1
+    Vertical = 2
+    Transverse = 3
+    Longitudinal = 4
 
 
 class Location:
@@ -115,7 +115,7 @@ class Locations:
         self.vis_version = version
         self._location_codes = [d.code for d in dto.items]
         self._relative_locations = []
-        self._reversed_groups = {}
+        self._reversed_groups: dict[str, LocationGroup] = {}
         groups: dict[LocationGroup, list[RelativeLocation]] = {}
 
         for relative_locations_dto in dto.items:
@@ -131,28 +131,29 @@ class Locations:
             if relative_locations_dto.code in ("H", "V"):
                 continue
 
-            key = self.determine_group_by_code(relative_locations_dto.code)
+            key = self._determine_group_by_code(relative_locations_dto.code)
             if key not in groups:
                 groups[key] = []
+            if key == LocationGroup.Number:
+                continue
+            self._reversed_groups[relative_locations_dto.code] = key
             groups[key].append(relative_location)
-            if key != LocationGroup.NUMBER:
-                self._reversed_groups[relative_locations_dto.code] = key
 
         self._groups: dict = {k: tuple(v) for k, v in groups.items()}
 
-    def determine_group_by_code(self, code: str) -> LocationGroup:
+    def _determine_group_by_code(self, code: str) -> LocationGroup:
         """Determine the group of a location code."""
         """Return the LocationGroup for a given code."""
         if code in "N":
-            return LocationGroup.NUMBER
+            return LocationGroup.Number
         if code in ("P", "C", "S"):
-            return LocationGroup.SIDE
+            return LocationGroup.Side
         if code in ("U", "M", "L"):
-            return LocationGroup.VERTICAL
+            return LocationGroup.Vertical
         if code in ("I", "O"):
-            return LocationGroup.TRANSVERSE
+            return LocationGroup.Transverse
         if code in ("F", "A"):
-            return LocationGroup.LONGITUDINAL
+            return LocationGroup.Longitudinal
         raise Exception(f"Unsupported code: {code}")
 
     @property
@@ -192,16 +193,12 @@ class Locations:
             return True, value
         if isinstance(value, str):
             error_builder = LocationParsingErrorBuilder.create()
-            location = None
-
-            if (
-                self.try_parse_internal(value if value else "", value, error_builder)
-                and value
-            ):
-                location = Location(value)
-            else:
-                return False, None
-            return location is not None, location
+            result = self.try_parse_internal(
+                value if value else "", value, error_builder
+            )
+            if result[0] and value:
+                return True, Location(value)
+            return False, None
         raise ValueError("Invalid value for location")
 
     def try_parse_with_errors(
@@ -212,7 +209,7 @@ class Locations:
         location = None
         result = self.try_parse_internal(value if value else "", value, error_builder)
         errors = error_builder.build()
-        if result and value:
+        if result[0] and value:
             location = Location(value)
         return result[0], location, errors
 
@@ -273,7 +270,6 @@ class Locations:
                             f"'{original_str or original_span}'",
                         )
                         return False, location
-
                 prev_digit_index = i
             else:
                 # Handle non-digit characters
@@ -283,8 +279,7 @@ class Locations:
                         f"'{c}'"
                         for c in value
                         if not c.isdigit()
-                        and c != "N"
-                        and c not in self._location_codes
+                        and (c == "N" or c not in self._location_codes)
                     ]
                     error_builder.add_error(
                         LocationValidationResult.INVALID_CODE,

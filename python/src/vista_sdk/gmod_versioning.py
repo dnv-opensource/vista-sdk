@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from enum import Enum
 
@@ -12,7 +11,7 @@ from vista_sdk.gmod_path import GmodPath
 from vista_sdk.gmod_versioning_dto import GmodNodeConversionDto, GmodVersioningDto
 from vista_sdk.local_id import LocalId
 from vista_sdk.local_id_builder import LocalIdBuilder
-from vista_sdk.vis_version import VisVersion
+from vista_sdk.vis_version import VisVersion, VisVersions
 
 
 class ConversionType(Enum):
@@ -85,7 +84,7 @@ class GmodVersioning:
         self._versionings_map: dict[VisVersion, GmodVersioningNode] = {}
 
         for version_str, version_dto in dto.items():
-            parsed_version = VisVersion[f"v{version_str.replace('-', '_')}"]
+            parsed_version = VisVersions.parse(version_str)
             versioning_node = GmodVersioningNode(parsed_version, version_dto.items)
             self._versionings_map[parsed_version] = versioning_node
 
@@ -105,11 +104,11 @@ class GmodVersioning:
         node: GmodNode | None = source_node
         source = source_version
 
-        while source._value_ < target_version._value_:
+        while source.value < target_version.value:
             if node is None:
                 break
 
-            target = self._get_next_version(source)
+            target = VisVersion(source.value + 1)
             if target is None:
                 break
 
@@ -117,17 +116,6 @@ class GmodVersioning:
             source = target
 
         return node
-
-    def _get_next_version(self, version: VisVersion) -> VisVersion | None:
-        """Get the next version in the sequence."""
-        version_sequence = {
-            VisVersion.v3_4a: VisVersion.v3_5a,
-            VisVersion.v3_5a: VisVersion.v3_6a,
-            VisVersion.v3_6a: VisVersion.v3_7a,
-            VisVersion.v3_7a: VisVersion.v3_8a,
-            VisVersion.v3_8a: None,
-        }
-        return version_sequence.get(version)
 
     def _convert_node_internal(
         self,
@@ -152,17 +140,10 @@ class GmodVersioning:
 
         found, target_node = target_gmod.try_get_node(next_code)
         if not found or target_node is None:
-            found, target_node = target_gmod.try_get_node(source_node.code)
-            if found and target_node is not None:
-                logging.debug(
-                    f"Using direct code mapping for {source_node.code} "
-                    f"({source_version} -> {target_version})"
-                )
-            else:
-                return None
+            return None
 
         if source_node.location is not None:
-            result = target_node.try_with_location(source_node.location.__str__())
+            result = target_node.try_with_location(str(source_node.location))
             if result.location != source_node.location:
                 raise Exception("Failed to set location")
             return result
@@ -199,19 +180,17 @@ class GmodVersioning:
             target_local_id = target_local_id.with_secondary_item(target_secondary_item)
 
         # Copy over all metadata tags
-        result = target_local_id.with_verbose_mode(source_local_id.verbose_mode)
-
-        # Using tuple unpacking to handle the (builder, success)
-        result, _ = result.try_with_metadata_tag(source_local_id.quantity)
-        result, _ = result.try_with_metadata_tag(source_local_id.content)
-        result, _ = result.try_with_metadata_tag(source_local_id.calculation)
-        result, _ = result.try_with_metadata_tag(source_local_id.state)
-        result, _ = result.try_with_metadata_tag(source_local_id.command)
-        result, _ = result.try_with_metadata_tag(source_local_id.type)
-        result, _ = result.try_with_metadata_tag(source_local_id.position)
-        result, _ = result.try_with_metadata_tag(source_local_id.detail)
-
-        return result
+        return (
+            target_local_id.with_verbose_mode(source_local_id.verbose_mode)
+            .try_with_metadata_tag(source_local_id.quantity)
+            .try_with_metadata_tag(source_local_id.content)
+            .try_with_metadata_tag(source_local_id.calculation)
+            .try_with_metadata_tag(source_local_id.state)
+            .try_with_metadata_tag(source_local_id.command)
+            .try_with_metadata_tag(source_local_id.type)
+            .try_with_metadata_tag(source_local_id.position)
+            .try_with_metadata_tag(source_local_id.detail)
+        )
 
     def convert_local_id_instance(
         self, source_local_id: LocalId, target_version: VisVersion
@@ -246,13 +225,20 @@ class GmodVersioning:
 
         target_gmod = vis.get_gmod(target_version)
 
-        qualifying_nodes = []
-        for path_item in source_path.get_full_path():
+        qualifying_nodes: list[tuple[GmodNode, GmodNode]] = []
+        source_full_path = source_path.get_full_path()
+        for path_item in source_full_path:
             source_node = path_item[1]
             target_node = self.convert_node(source_version, source_node, target_version)
             if target_node is None:
                 raise Exception("Could not convert node forward")
             qualifying_nodes.append((source_node, target_node))
+
+        # Early return if simple conversion produces valid path
+        potential_parents = [qn[1] for qn in qualifying_nodes[:-1]]
+        is_valid, _ = GmodPath.is_valid(potential_parents, target_end_node)
+        if is_valid:
+            return GmodPath(potential_parents, target_end_node, skip_verify=True)
 
         return self._build_path(
             qualifying_nodes, target_gmod, target_end_node, source_path
@@ -276,7 +262,7 @@ class GmodVersioning:
 
         return self._finalize_path(path, source_path)
 
-    def _process_qualifying_node(
+    def _process_qualifying_node(  # noqa: C901
         self,
         qualifying_nodes: list[tuple[GmodNode, GmodNode]],
         target_gmod: Gmod,
@@ -291,6 +277,37 @@ class GmodVersioning:
 
         # Skip duplicate codes in sequence
         if i > 0 and target_node.code == qualifying_nodes[i - 1][1].code:
+            # (Mes) The same as the current qualifying node, assumes same normal assignment [IF NOT THROW EXCEPTION, uncovered case] # noqa : E501
+            if (
+                source_node.product_type is not None
+                and source_node.product_type != qualifying_nodes[i - 1][1].product_type
+            ):
+                raise Exception(
+                    "Uncovered case: same code but different normal assignment"
+                )
+            # Check if skipped node is individualized
+            if target_node.location is not None:
+                indices = [
+                    n for n, qn in enumerate(path) if qn.code == target_node.code
+                ]
+                if len(indices) > 0:
+                    index = indices[0]  # Take the first occurrence
+                    if (
+                        path[index].location is not None
+                        and path[index].location != target_node.location
+                    ):
+                        raise Exception(
+                            f"Failed to convert path at node {target_node}. Uncovered case of multiple colliding locations while converting nodes"  # noqa : E501
+                        )
+                    if not path[index].is_individualizable(False, False):
+                        raise Exception(
+                            f"Failed to convert path at node {path[index]}. Uncovered case of non-individualizable node while converting nodes"  # noqa : E501
+                        )
+                    if path[index].location is None:
+                        path[index] = path[index].with_location(
+                            str(target_node.location)
+                        )
+
             return i + 1
 
         # Check what changed
@@ -302,63 +319,9 @@ class GmodVersioning:
             source_normal_assignment, target_normal_assignment
         )
 
-        next_i = self._handle_node_changes(
-            code_changed,
-            normal_assignment_changed,
-            source_normal_assignment,
-            target_normal_assignment,
-            target_node,
-            target_end_node,
-            qualifying_nodes,
-            target_gmod,
-            path,
-            i,
-        )
-
-        # Break if we've reached the target end node
-        if path and path[-1].code == target_end_node.code:
-            return len(qualifying_nodes)
-
-        return next_i
-
-    def _is_normal_assignment_changed(
-        self,
-        source_normal_assignment: GmodNode | None,
-        target_normal_assignment: GmodNode | None,
-    ) -> bool:
-        """Check if normal assignment has changed."""
-        return (
-            (source_normal_assignment is None and target_normal_assignment is not None)
-            or (
-                source_normal_assignment is not None
-                and target_normal_assignment is None
-            )
-            or (
-                source_normal_assignment is not None
-                and target_normal_assignment is not None
-                and source_normal_assignment.code != target_normal_assignment.code
-            )
-        )
-
-    def _handle_node_changes(
-        self,
-        code_changed: bool,
-        normal_assignment_changed: bool,
-        source_normal_assignment: GmodNode | None,
-        target_normal_assignment: GmodNode | None,
-        target_node: GmodNode,
-        target_end_node: GmodNode,
-        qualifying_nodes: list[tuple[GmodNode, GmodNode]],
-        target_gmod: Gmod,
-        path: list[GmodNode],
-        i: int,
-    ) -> int:
-        """Handle different types of node changes and return next index."""
         if code_changed:
             self._add_to_path(target_gmod, path, target_node)
-            return i + 1
-
-        if normal_assignment_changed:  # AC || AN || AD
+        elif normal_assignment_changed:  # AC || AN || AD
             was_deleted = (
                 source_normal_assignment is not None
                 and target_normal_assignment is None
@@ -381,24 +344,85 @@ class GmodVersioning:
                 and target_normal_assignment is not None
             ):
                 self._add_to_path(target_gmod, path, target_normal_assignment)
-                # Skip next iteration
-                return i + 2  # This matches C#'s single i++ increment
-
+                # Only skip next node if assignment CHANGED (not new) and next node is the old assignment # noqa : E501
+                if (
+                    source_normal_assignment is not None
+                    and target_normal_assignment is not None
+                    and source_normal_assignment.code != target_normal_assignment.code
+                ):
+                    if (
+                        i + 1 < len(qualifying_nodes)
+                        and qualifying_nodes[i + 1][0].code
+                        != source_normal_assignment.code
+                    ):
+                        raise Exception(
+                            f"Failed to convert path at node {target_node}. Expected next qualifying source node to match target normal assignment"  # noqa : E501
+                        )
+                    # Skip next iteration - the old assignment node
+                    i += 1
         # No changes - just add the target node
         if not code_changed and not normal_assignment_changed:
             self._add_to_path(target_gmod, path, target_node)
 
+        # Break if we've reached the target end node
+        if path and path[-1].code == target_end_node.code:
+            return len(qualifying_nodes)
+
         return i + 1
+
+    def _is_normal_assignment_changed(
+        self,
+        source_normal_assignment: GmodNode | None,
+        target_normal_assignment: GmodNode | None,
+    ) -> bool:
+        """Check if normal assignment has changed."""
+        return (
+            (source_normal_assignment is None and target_normal_assignment is not None)
+            or (
+                source_normal_assignment is not None
+                and target_normal_assignment is None
+            )
+            or (
+                source_normal_assignment is not None
+                and target_normal_assignment is not None
+                and source_normal_assignment.code != target_normal_assignment.code
+            )
+        )
 
     def _finalize_path(self, path: list[GmodNode], source_path: GmodPath) -> GmodPath:
         """Finalize and validate the constructed path."""
+        from vista_sdk.locations_sets_visitor import LocationSetsVisitor
+
         if not path:
             raise Exception(f"Did not end up with valid path for {source_path}")
 
         potential_parents = path[:-1]
         final_node = path[-1]
 
-        if not GmodPath.is_valid(potential_parents, final_node):
+        # Fix individualizable nodes with location from source path
+        visitor = LocationSetsVisitor()
+        for i in range(len(potential_parents) + 1):
+            n = potential_parents[i] if i < len(potential_parents) else final_node
+            set_nodes = visitor.visit(n, i, potential_parents, final_node)
+            if set_nodes is None:
+                if n.location is not None:
+                    break
+                continue
+            start_idx, end_idx, location = set_nodes
+            if start_idx == end_idx:
+                continue
+            if location is None:
+                continue
+            for j in range(start_idx, end_idx + 1):
+                if j < len(potential_parents):
+                    potential_parents[j] = potential_parents[j].with_location(
+                        str(location)
+                    )
+                else:
+                    final_node = final_node.with_location(str(location))
+        is_valid, _ = GmodPath.is_valid(potential_parents, final_node)
+
+        if not is_valid:
             raise Exception(f"Did not end up with valid path for {source_path}")
 
         return GmodPath(potential_parents, final_node)
@@ -412,7 +436,7 @@ class GmodVersioning:
         """Add node to path with proper parent-child relationship verification.
 
         1. If path is empty, just add the node
-        2. If the previous node is a child of the new node, just add it
+        2. If the previous node is a parent of the new node, just add it
         3. Otherwise, traverse backwards removing parents until we find a valid
            connection
         4. When we find a valid connection, add all missing intermediate nodes
@@ -449,28 +473,27 @@ class GmodVersioning:
                         if not n.is_individualizable(False, True):
                             nodes.append(n)
                         else:
-                            nodes.append(n.with_location(node.location.__str__()))
+                            nodes.append(n.with_location(str(node.location)))
                 else:
                     nodes.extend(remaining)
                 path.extend(nodes)
                 break
 
-        # Add the target node
         path.append(node)
 
     def _validate_source_and_target_versions(
         self, source_version: VisVersion, target_version: VisVersion
     ) -> None:
         """Validate version parameters."""
-        if not source_version or not source_version.value:
+        if source_version is None:
             raise ValueError(f"Invalid source VIS Version: {source_version}")
-        if not target_version or not target_version.value:
+        if target_version is None:
             raise ValueError(f"Invalid target VIS Version: {target_version}")
 
-        if source_version._value_ >= target_version._value_:
+        if source_version.value >= target_version.value:
             raise ValueError(
-                f"Source version ({source_version.value}) must be less than "
-                f"target version ({target_version.value})"
+                f"Source version ({source_version}) must be less than "
+                f"target version ({target_version})"
             )
 
     def _validate_source_and_target_version_pair(
@@ -480,16 +503,16 @@ class GmodVersioning:
         if source_version.value >= target_version.value:
             raise ValueError(
                 f"Source version must be less than target version. Source version: "
-                f"{source_version.value}, target version: {target_version.value}"
+                f"{source_version}, target version: {target_version}"
             )
         # Check that target version is exactly one step higher
-        next_version = self._get_next_version(source_version)
+        next_version = VisVersion(source_version.value + 1)
         if next_version != target_version:
             raise ValueError(
                 f"Target version must be exactly one version higher than "
-                f"source version. Source: {source_version.value}, "
-                f"Target: {target_version.value}, "
-                f"Expected: {next_version.value if next_version else 'None'}"
+                f"source version. Source: {source_version}, "
+                f"Target: {target_version}, "
+                f"Expected: {next_version if next_version else 'None'}"
             )
 
     def _try_get_versioning_node(
@@ -507,9 +530,7 @@ class GmodVersioning:
         version_info = []
         for version, node in self._versionings_map.items():
             num_rules = len(node._versioning_node_changes)
-            version_info.append(
-                f"Version {version.value}: {num_rules} conversion rules"
-            )
+            version_info.append(f"Version {version}: {num_rules} conversion rules")
 
         return (
             f"GmodVersioning(\n"

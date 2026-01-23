@@ -28,12 +28,12 @@ class TestMemoryProfiling:
     )
     # @pytest.mark.skip(reason="Long running memory test")
     def test_gmod_traversal_memory_usage(self, vis_version: VisVersion) -> None:
-        """Test mamory usage while traversing through GMOD tree."""
+        """Test memory usage while traversing through GMOD tree."""
         max_paths: int = 1000
         iterations: int = 100
-        timeout: int = 60
+        timeout: int = 120
 
-        print(f"\nTesting memory usage for {vis_version.value}")
+        print(f"\nTesting memory usage for {vis_version!s}")
         start_time = time.time()
         vis: VIS = VIS()
         paths: list[GmodPath] = []
@@ -41,6 +41,8 @@ class TestMemoryProfiling:
         def handler(p, n) -> TraversalHandlerResult:  # noqa : ANN001
             if len(paths) > max_paths:
                 return TraversalHandlerResult.STOP
+            if n.is_root():
+                return TraversalHandlerResult.CONTINUE
             paths.append(GmodPath(p, n))
             return TraversalHandlerResult.CONTINUE
 

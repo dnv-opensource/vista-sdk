@@ -15,6 +15,7 @@ The Vista SDK is built around these main components:
 ## 📚 Quick Reference
 
 ### Essential Imports
+
 ```python
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
@@ -25,6 +26,7 @@ from vista_sdk.codebook_names import CodebookName
 ```
 
 ### Common Operations
+
 ```python
 # Initialize VIS
 vis = VIS()
@@ -55,50 +57,61 @@ The main entry point for accessing all VIS data and services.
 #### Methods
 
 ##### `get_gmod(vis_version: VisVersion) -> Gmod`
+
 Retrieve GMOD data for a specific VIS version.
 
 **Parameters:**
+
 - `vis_version`: The VIS version to load
 
 **Returns:** `Gmod` instance with cached data
 
 **Example:**
+
 ```python
 vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)
 ```
 
 ##### `get_codebooks(vis_version: VisVersion) -> Codebooks`
+
 Retrieve codebooks for a specific VIS version.
 
 **Parameters:**
+
 - `vis_version`: The VIS version to load
 
 **Returns:** `Codebooks` instance with all available codebooks
 
 **Example:**
+
 ```python
 codebooks = vis.get_codebooks(VisVersion.v3_4a)
 position_book = codebooks[CodebookName.Position]
 ```
 
 ##### `get_locations(vis_version: VisVersion) -> Locations`
+
 Retrieve location definitions for a specific VIS version.
 
 **Parameters:**
+
 - `vis_version`: The VIS version to load
 
 **Returns:** `Locations` instance for positioning operations
 
 ##### `get_gmod_versioning(vis_version: VisVersion) -> GmodVersioning`
+
 Get version conversion capabilities for GMOD paths.
 
 **Parameters:**
+
 - `vis_version`: The base VIS version for conversions
 
 **Returns:** `GmodVersioning` instance for path conversion operations
 
 **Example:**
+
 ```python
 versioning = vis.get_gmod_versioning(VisVersion.v3_4a)
 new_path = versioning.convert_path("411.1/C101.72", VisVersion.v3_5a)
@@ -106,7 +119,7 @@ new_path = versioning.convert_path("411.1/C101.72", VisVersion.v3_5a)
 
 ---
 
-## GMOD (General Model of Data)
+## GMOD (Generic Product Model)
 
 Represents the hierarchical structure of vessel equipment and systems.
 
@@ -115,9 +128,11 @@ Represents the hierarchical structure of vessel equipment and systems.
 #### Methods
 
 ##### `get_node(code: str) -> GmodNode`
+
 Retrieve a specific node by its code.
 
 **Parameters:**
+
 - `code`: The node code (e.g., "411.1", "C101.31")
 
 **Returns:** `GmodNode` instance
@@ -125,14 +140,17 @@ Retrieve a specific node by its code.
 **Raises:** `KeyError` if node not found
 
 ##### `all_nodes() -> Iterator[GmodNode]`
+
 Iterate over all nodes in the GMOD.
 
 **Returns:** Iterator of all `GmodNode` instances
 
 ##### `try_get_node(code: str) -> GmodNode | None`
+
 Safely retrieve a node, returning None if not found.
 
 **Parameters:**
+
 - `code`: The node code to search for
 
 **Returns:** `GmodNode` instance or `None`
@@ -150,9 +168,11 @@ Safely retrieve a node, returning None if not found.
 #### Methods
 
 ##### `get_child(code: str) -> GmodNode`
+
 Get a direct child node by code.
 
 **Parameters:**
+
 - `code`: Child node code
 
 **Returns:** Child `GmodNode`
@@ -166,9 +186,11 @@ Represents a path through the GMOD hierarchy.
 #### Static Methods
 
 ##### `parse(path: str, vis_version: VisVersion) -> GmodPath`
+
 Parse a path string into a GmodPath.
 
 **Parameters:**
+
 - `path`: Path string (e.g., "411.1/C101.31-2")
 - `vis_version`: VIS version for parsing context
 
@@ -177,6 +199,7 @@ Parse a path string into a GmodPath.
 **Raises:** `ValueError` for invalid paths
 
 ##### `try_parse(path: str, vis_version: VisVersion) -> GmodPath | None`
+
 Safely parse a path, returning None if invalid.
 
 #### Properties
@@ -187,6 +210,7 @@ Safely parse a path, returning None if invalid.
 #### Methods
 
 ##### `get_full_path() -> Iterator[tuple[int, GmodNode]]`
+
 Iterate through the complete path from root to terminal node.
 
 **Returns:** Iterator of (depth, node) tuples
@@ -204,17 +228,21 @@ Builder for constructing Local IDs using the fluent interface pattern.
 #### Static Methods
 
 ##### `create(vis_version: VisVersion) -> LocalIdBuilder`
+
 Create a new builder instance.
 
 **Parameters:**
+
 - `vis_version`: VIS version for the Local ID
 
 **Returns:** New `LocalIdBuilder` instance
 
 ##### `parse(local_id: str, gmod: Gmod, codebooks: Codebooks, locations: Locations) -> LocalId`
+
 Parse a Local ID string.
 
 **Parameters:**
+
 - `local_id`: Local ID string to parse
 - `gmod`: GMOD instance for path validation
 - `codebooks`: Codebooks for tag validation
@@ -225,35 +253,43 @@ Parse a Local ID string.
 **Raises:** `ValueError` for invalid Local IDs
 
 ##### `try_parse(...) -> LocalId | None`
+
 Safely parse a Local ID, returning None if invalid.
 
 #### Builder Methods
 
 ##### `with_primary_item(path: GmodPath) -> LocalIdBuilder`
+
 Set the primary GMOD path.
 
 **Parameters:**
+
 - `path`: Primary GMOD path
 
 **Returns:** Updated builder
 
 ##### `with_secondary_item(path: GmodPath) -> LocalIdBuilder`
+
 Set the secondary GMOD path (for relationships).
 
 **Parameters:**
+
 - `path`: Secondary GMOD path
 
 **Returns:** Updated builder
 
 ##### `with_metadata_tag(tag: MetadataTag) -> LocalIdBuilder`
+
 Add a metadata tag (quantity, position, content, etc.).
 
 **Parameters:**
+
 - `tag`: MetadataTag instance created from codebooks
 
 **Returns:** Updated builder
 
 **Example:**
+
 ```python
 # Create tags from codebooks
 quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
@@ -268,14 +304,17 @@ builder = (LocalIdBuilder.create(VisVersion.v3_4a)
 **Note:** All metadata tags (quantity, position, content, state, command, type, detail) are added using the same `with_metadata_tag()` method. Tags must be created from codebooks first.
 
 ##### `with_verbose_mode(verbose: bool) -> LocalIdBuilder`
+
 Enable/disable verbose path representation.
 
 **Parameters:**
+
 - `verbose`: Whether to use verbose mode
 
 **Returns:** Updated builder
 
 ##### `build() -> LocalId`
+
 Build the final Local ID.
 
 **Returns:** Constructed `LocalId` instance
@@ -298,6 +337,7 @@ Represents a complete, validated Local ID.
 #### Methods
 
 ##### `__str__() -> str`
+
 Get the string representation of the Local ID.
 
 **Returns:** Complete Local ID string
@@ -315,23 +355,28 @@ Container for all codebook types.
 #### Methods
 
 ##### `__getitem__(name: CodebookName) -> Codebook`
+
 Get a specific codebook by name.
 
 **Parameters:**
+
 - `name`: Codebook identifier
 
 **Returns:** `Codebook` instance
 
 **Example:**
+
 ```python
 codebooks = vis.get_codebooks(VisVersion.v3_4a)
 positions = codebooks[CodebookName.Position]
 ```
 
 ##### `create_tag(name: CodebookName, value: str) -> MetadataTag`
+
 Create a metadata tag from any codebook.
 
 **Parameters:**
+
 - `name`: Codebook to use
 - `value`: Tag value
 
@@ -352,9 +397,11 @@ Individual codebook with validation rules.
 #### Methods
 
 ##### `create_tag(value: str) -> MetadataTag`
+
 Create a validated metadata tag.
 
 **Parameters:**
+
 - `value`: Tag value to create
 
 **Returns:** `MetadataTag` instance
@@ -362,20 +409,25 @@ Create a validated metadata tag.
 **Raises:** `ValueError` for invalid values
 
 ##### `try_create_tag(value: str) -> MetadataTag | None`
+
 Safely create a tag, returning None if invalid.
 
 ##### `has_standard_value(value: str) -> bool`
+
 Check if a value is in the standard vocabulary.
 
 **Parameters:**
+
 - `value`: Value to check
 
 **Returns:** True if standard, False if custom/invalid
 
 ##### `validate_position(position: str) -> PositionValidationResult`
+
 Special validation for position tags (only available on Position codebook).
 
 **Parameters:**
+
 - `position`: Position string to validate
 
 **Returns:** Validation result enum
@@ -383,6 +435,7 @@ Special validation for position tags (only available on Position codebook).
 ### Enum: `CodebookName`
 
 Available codebook types:
+
 - `Quantity` - Physical quantities (temperature, pressure, etc.)
 - `Content` - Substances and materials
 - `Position` - Physical positions and locations
@@ -415,9 +468,11 @@ Location validation and processing.
 #### Methods
 
 ##### `validate_location(location: str) -> bool`
+
 Validate a location string.
 
 **Parameters:**
+
 - `location`: Location string to validate
 
 **Returns:** True if valid
@@ -429,6 +484,7 @@ Validate a location string.
 ### Enum: `VisVersion`
 
 Available VIS versions:
+
 - `v3_4a` - VIS 3-4a
 - `v3_5a` - VIS 3-5a
 - `v3_6a` - VIS 3-6a
@@ -443,9 +499,11 @@ GMOD path conversion between versions.
 #### Methods
 
 ##### `convert_path(path: str, target_version: VisVersion) -> str`
+
 Convert a path from one VIS version to another.
 
 **Parameters:**
+
 - `path`: Source path string
 - `target_version`: Target VIS version
 
@@ -466,7 +524,7 @@ Convert a path from one VIS version to another.
 ### Best Practices
 
 1. **Use try/catch blocks** for parsing operations
-2. **Use try_* methods** when failure is acceptable
+2. **Use try\_\* methods** when failure is acceptable
 3. **Validate inputs** before building complex objects
 4. **Check is_valid** properties on built objects
 
@@ -499,16 +557,19 @@ else:
 ## Performance Notes
 
 ### Caching
+
 - VIS instances cache loaded data automatically
 - Multiple calls to `get_gmod()` with the same version return cached results
 - Codebooks and locations are also cached per version
 
 ### Memory Usage
+
 - Large GMOD structures are loaded on demand
 - Consider using `try_*` methods to avoid exceptions in tight loops
 - Cache frequently-used codebooks locally if making many tag operations
 
 ### Threading
+
 - VIS instances are thread-safe for read operations
 - Multiple threads can safely access the same VIS instance
 - Builder instances are NOT thread-safe - create separate builders per thread
@@ -518,19 +579,21 @@ else:
 ## Migration Guide
 
 ### From C# SDK
+
 Key differences when migrating from the C# implementation:
 
-| C# | Python | Notes |
-|----|--------|-------|
-| `VIS.Instance` | `VIS()` | Python uses regular constructor |
-| `GmodPath.TryParse()` | `GmodPath.try_parse()` | Python naming convention |
-| `LocalIdBuilder.Create()` | `LocalIdBuilder.create()` | Static method |
-| `codebook.StandardValues` | `codebook.standard_values` | Property vs method |
-| `tag.IsCustom` | `tag.is_custom` | Property naming |
+| C#                        | Python                     | Notes                           |
+| ------------------------- | -------------------------- | ------------------------------- |
+| `VIS.Instance`            | `VIS()`                    | Python uses regular constructor |
+| `GmodPath.TryParse()`     | `GmodPath.try_parse()`     | Python naming convention        |
+| `LocalIdBuilder.Create()` | `LocalIdBuilder.create()`  | Static method                   |
+| `codebook.StandardValues` | `codebook.standard_values` | Property vs method              |
+| `tag.IsCustom`            | `tag.is_custom`            | Property naming                 |
 
 ### Code Conversion Example
 
 **C#:**
+
 ```csharp
 var vis = VIS.Instance;
 var gmod = vis.GetGmod(VisVersion.v3_4a);
@@ -542,6 +605,7 @@ var localId = LocalIdBuilder.Create(VisVersion.v3_4a)
 ```
 
 **Python:**
+
 ```python
 vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)

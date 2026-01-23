@@ -10,10 +10,8 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import TypeAlias
 
-from .internal.location_parsing_error_builder import LocationValidationResult
-
 # Type alias for error entries (type, message)
-ErrorEntry: TypeAlias = tuple[LocationValidationResult, str]
+ErrorEntry: TypeAlias = tuple[str, str]
 
 
 class ParsingErrors:
@@ -36,7 +34,7 @@ class ParsingErrors:
         """Check if there are any parsing errors."""
         return len(self._errors) > 0
 
-    def has_error_type(self, error_type: LocationValidationResult) -> bool:
+    def has_error_type(self, error_type: str) -> bool:
         """Check if a specific error type exists in the collection."""
         return any(e[0] == error_type for e in self._errors)
 
