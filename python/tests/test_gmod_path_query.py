@@ -244,3 +244,104 @@ def test_with_any_node_before_with_locations() -> None:
     # Should match path without location on parent since we ignore nodes before C322
     path_no_parent_location = gmod.parse_path("433.1/C322.31")
     assert query.match(path_no_parent_location) is True
+
+
+def test_with_any_node_before_s206_sensor() -> None:
+    """Test with_any_node_before correctly matches only paths containing the target node.
+
+    This tests the scenario where we want to match any path ending with S206 sensor,
+    ignoring the parent nodes (411.1 and C101.63) in the matching.
+    """  # noqa: E501
+    vis = VIS()
+    version = VisVersion.v3_4a
+    gmod = vis.get_gmod(version)
+
+    # Build query: Match paths containing S206, ignoring parent nodes
+    sensor_path = gmod.parse_path("411.1/C101.63/S206")
+    query = (
+        GmodPathQueryBuilder.from_path(sensor_path)
+        .without_locations()
+        .with_any_node_before(lambda nodes: nodes["S206"])
+        .build()
+    )
+
+    # Paths WITH S206 - should match
+    path_with_s206_loc1 = gmod.parse_path("411.1-1/C101.63/S206")
+    path_with_s206_loc2 = gmod.parse_path("411.1-2/C101.63/S206")
+    assert query.match(path_with_s206_loc1) is True
+    assert query.match(path_with_s206_loc2) is True
+
+    # Paths WITHOUT S206 - should NOT match
+    path_c101_31 = gmod.parse_path("411.1/C101.31-2")
+    path_c101_31_loc5 = gmod.parse_path("411.1/C101.31-5")
+    assert query.match(path_c101_31) is False
+    assert query.match(path_c101_31_loc5) is False
+
+    # Different sensor type - should NOT match
+    path_s203 = gmod.parse_path("411.1/C101.61/S203")
+    assert query.match(path_s203) is False
+
+
+def test_with_any_node_after_prefix_matching() -> None:
+    """Test with_any_node_after for prefix-style matching.
+
+    This tests the scenario where we want to match any path starting with
+    a specific prefix like "411.1/C101/*".
+    """
+    vis = VIS()
+    version = VisVersion.v3_4a
+    gmod = vis.get_gmod(version)
+
+    # Build query: Match paths starting with 411.1/C101, ignoring children
+    # This is like matching "411.1/C101/*"
+    base_path = gmod.parse_path("411.1/C101.31")
+    query = (
+        GmodPathQueryBuilder.from_path(base_path)
+        .without_locations()
+        .with_any_node_after(lambda nodes: nodes["411.1"])
+        .build()
+    )
+
+    # Paths starting with 411.1 - should match
+    path_c101_31 = gmod.parse_path("411.1/C101.31-2")
+    path_c101_63 = gmod.parse_path("411.1/C101.63/S206")
+    path_c101_61 = gmod.parse_path("411.1-1/C101.61/S203")
+    assert query.match(path_c101_31) is True
+    assert query.match(path_c101_63) is True
+    assert query.match(path_c101_61) is True
+
+    # Paths NOT starting with 411.1 - should NOT match
+    path_411i = gmod.parse_path("411i")
+    path_511 = gmod.parse_path("511.11/C101.63/S206")
+    path_652 = gmod.parse_path("652.31/S90.3/S61")
+    assert query.match(path_411i) is False
+    assert query.match(path_511) is False
+    assert query.match(path_652) is False
+
+
+def test_with_any_node_after_mid_path() -> None:
+    """Test with_any_node_after matching up to a mid-path node."""
+    vis = VIS()
+    version = VisVersion.v3_4a
+    gmod = vis.get_gmod(version)
+
+    # Build query: Match paths containing 411.1/C101.6, ignoring what comes after
+    base_path = gmod.parse_path("411.1/C101.63/S206")
+    query = (
+        GmodPathQueryBuilder.from_path(base_path)
+        .without_locations()
+        .with_any_node_after(lambda nodes: nodes["C101.6"])
+        .build()
+    )
+
+    # Paths with 411.1/C101.6/* - should match
+    path_s206 = gmod.parse_path("411.1/C101.63/S206")
+    path_s208 = gmod.parse_path("411.1-1/C101.61/S203")
+    assert query.match(path_s206) is True
+    assert query.match(path_s208) is True
+
+    # Paths with different C-node - should NOT match
+    path_c101_31 = gmod.parse_path("411.1/C101.31-2")
+    path_c101_61 = gmod.parse_path("411.1/C101")
+    assert query.match(path_c101_31) is False
+    assert query.match(path_c101_61) is False

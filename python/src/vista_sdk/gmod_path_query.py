@@ -220,6 +220,59 @@ class Path(GmodPathQueryBuilder):
                 continue
             cloned._filter[path_node.code].ignore_in_matching = True
 
+        # Ensure the target node is in the filter so it's checked during matching
+        if node.code not in cloned._filter:
+            item = NodeItem(node, set())
+            item.match_all_locations = True
+            cloned._filter[node.code] = item
+
+        return cloned
+
+    def with_any_node_after(
+        self,
+        select: Callable[[dict[str, GmodNode]], GmodNode],
+    ) -> "Path":
+        """Mark all nodes after the selected node as ignorable in matching.
+
+        This allows matching paths that have a specific prefix, regardless of
+        what children come after. For example, to match "411.1/C101/*":
+
+            query = (
+                GmodPathQueryBuilder.from_path(gmod.parse_path("411.1/C101"))
+                .with_any_node_after(lambda nodes: nodes["C101"])
+                .build()
+            )
+
+        This will match any path starting with 411.1/C101, such as:
+        - 411.1/C101.31/C467
+        - 411.1/C101.63/S206
+        """
+        node = select(self._nodes)
+        return self._with_any_node_after_internal(node)
+
+    def _with_any_node_after_internal(self, node: GmodNode) -> "Path":
+        """Internal method to mark nodes after the given node as ignorable."""
+        full_path = list(self.gmod_path.get_full_path())
+        if not any(path_node.code == node.code for _, path_node in full_path):
+            raise ValueError(f"Node {node.code} is not in the path")
+
+        cloned = self._clone()
+
+        # Find the index of the target node
+        found = False
+        for _, path_node in full_path:
+            if path_node.code == node.code:
+                found = True
+                continue
+            if found and path_node.code in cloned._filter:
+                cloned._filter[path_node.code].ignore_in_matching = True
+
+        # Ensure the target node is in the filter so it's checked during matching
+        if node.code not in cloned._filter:
+            item = NodeItem(node, set())
+            item.match_all_locations = True
+            cloned._filter[node.code] = item
+
         return cloned
 
     def without_locations(self) -> "Path":

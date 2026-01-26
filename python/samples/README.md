@@ -56,6 +56,20 @@ python samples/gmod_operations.py
 python samples/advanced_local_ids.py
 ```
 
+### 🔍 [`local_id_query.py`](local_id_query.py)
+
+**Local ID Query operations** - Shows how to:
+
+- Use GmodPathQuery to match paths with or without locations
+- Use MetadataTagsQuery to filter by metadata tags
+- Combine path and tag queries with LocalIdQuery
+- Use NodesConfig and PathConfig for flexible matching
+- Filter sensor data in practical scenarios
+
+```bash
+python samples/local_id_query.py
+```
+
 ## 🚀 Running the Samples
 
 ### Prerequisites
@@ -121,6 +135,14 @@ done
 - Error handling strategies
 - Builder pattern best practices
 - Verbose mode usage
+
+### From `local_id_query.py`:
+
+- GmodPathQuery for path matching
+- MetadataTagsQuery for tag filtering
+- LocalIdQuery for combined queries
+- NodesConfig and PathConfig usage
+- Practical filtering scenarios
 
 ## 🔧 Customizing the Examples
 
