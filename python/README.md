@@ -300,10 +300,7 @@ python run_benchmarks.py
 python run_benchmarks.py --group gmod
 
 # Run with memory profiling
-python run_benchmarks.py --memory --save-data
-
-# Unix-style runner
-./benchmark.sh run all
+python run_benchmarks.py --save-data
 ```
 
 ## 📈 Performance
@@ -317,30 +314,22 @@ The Python implementation includes comprehensive benchmarks that mirror the C# i
 
 ### Benchmark Results
 
-#### Codebooks Lookup (time in nanoseconds)
+| Category | Operation | Mean Time | Throughput |
+|----------|-----------|-----------|------------|
+| Lookup | Codebooks lookup | 1.3 μs | 796K ops/s |
+| Lookup | Gmod node by code | 184 ns | 5.4M ops/s |
+| Lookup | DataChannel by short_id | 161 ns | 6.2M ops/s |
+| Lookup | DataChannel by local_id | 2.6 μs | 378K ops/s |
+| Serialization | JSON serialize (DC) | 21.8 μs | 46K ops/s |
+| Serialization | JSON deserialize (DC) | 52.0 μs | 19K ops/s |
+| Domain | DataChannelList to domain | 1.0 ms | 992 ops/s |
+| Domain | TimeSeriesData to domain | 48.3 μs | 21K ops/s |
+| Parsing | LocalId complex | 229.0 μs | 4K ops/s |
+| Parsing | GmodPath full path | 30.4 μs | 33K ops/s |
+| Versioning | Path conversion | 61.2 μs | 16K ops/s |
+| Traversal | Full Gmod traversal | 3.15 s | 0 ops/s |
 
-| Test                     | Mean            | Min      | Max        | Ops/sec |
-| ------------------------ | --------------- | -------- | ---------- | ------- |
-| `dict_lookup` (baseline) | 184 ns          | 172 ns   | 18,846 ns  | 5.43M   |
-| `frozen_dict_lookup`     | 780 ns (4.2x)   | 711 ns   | 512,398 ns | 1.28M   |
-| `codebooks_lookup`       | 1,278 ns (6.9x) | 1,172 ns | 283,627 ns | 783K    |
-
-#### GMOD Load (time in microseconds)
-
-| Test   | Mean    | Min     | Max     | Ops/sec |
-| ------ | ------- | ------- | ------- | ------- |
-| `load` | 2.18 µs | 1.34 µs | 9.14 µs | 458K    |
-
-#### GMOD Path Parse (time in microseconds)
-
-| Test                                 | Mean            | Min      | Max      | Ops/sec |
-| ------------------------------------ | --------------- | -------- | -------- | ------- |
-| `try_parse_full_path` (baseline)     | 30.3 µs         | 28.4 µs  | 428 µs   | 33.0K   |
-| `try_parse_full_path_individualized` | 53.0 µs (1.7x)  | 49.3 µs  | 4,070 µs | 18.9K   |
-| `try_parse_individualized`           | 98.1 µs (3.2x)  | 92.1 µs  | 2,714 µs | 10.2K   |
-| `try_parse`                          | 146.8 µs (4.8x) | 137.3 µs | 1,769 µs | 6.8K    |
-
-See [BENCHMARK_IMPLEMENTATION_SUMMARY.md](BENCHMARK_IMPLEMENTATION_SUMMARY.md) for detailed performance analysis.
+See [BENCHMARKS.md](BENCHMARKS.md) for comprehensive benchmark results.
 
 ## 🛠️ Development
 
