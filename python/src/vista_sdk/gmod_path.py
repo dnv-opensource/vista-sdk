@@ -170,6 +170,10 @@ class GmodPath:
         else:
             self.parents[depth] = value
 
+    def __len__(self) -> int:
+        """Return the length of the GmodPath."""
+        return self.length
+
     @property
     def individualizable_sets(self) -> list[GmodIndividualizableSet]:
         """Return a list of individualizable sets in the GmodPath."""

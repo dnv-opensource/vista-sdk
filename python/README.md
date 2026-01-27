@@ -35,6 +35,8 @@ pip install -e .
 
 ## 🚀 Quick Start
 
+> 💡 For more complete examples, see the [samples](https://github.com/dnv-opensource/vista-sdk/tree/main/python/samples) directory.
+
 ### Basic Usage
 
 ```python
@@ -101,7 +103,6 @@ print(f"Is 'centre' valid position? {position_codebook.has_standard_value('centr
 ```python
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
-from vista_sdk.gmod_path import GmodPath
 
 vis = VIS()
 
@@ -113,11 +114,12 @@ path = gmod.parse_path("411.1/C101.31-2")
 # Get path information
 print(f"Path depth: {len(path)}")
 print(f"Node at depth 1: {path.node}")
+print(f"Short path string: {str(path)}")
 print(f"Full path string: {path.to_full_path_string()}")
 
 # Traverse the path
 for depth, node in path.get_full_path():
-    print(f"Depth {depth}: {node.code} - {node.common_name}")
+    print(f"Depth {depth}: {node.code} - {node.metadata.common_name}")
 
 # Get common names context of the path
 for depth, common_name in path.get_common_names():
@@ -129,17 +131,19 @@ for depth, common_name in path.get_common_names():
 ```python
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
-from vista_sdk.gmod_path import GmodPath
 
 vis = VIS()
 
 # Convert paths between VIS versions
-old_path = "411.1/C101.72/I101"
-gmod_versioning = vis.get_gmod_versioning(VisVersion.v3_4a)
+source_version = VisVersion.v3_4a
+target_version = VisVersion.v3_5a
+
+gmod = vis.get_gmod(source_version)
+path = gmod.parse_path("411.1/C101.72/I101")
 
 try:
-    new_path = gmod_versioning.convert_path(old_path, VisVersion.v3_5a)
-    print(f"Converted path: {old_path} -> {new_path}")
+    new_path = vis.convert_path(source_version, path, target_version)
+    print(f"Converted path: {path} -> {new_path}")
 except Exception as e:
     print(f"Conversion failed: {e}")
 ```
@@ -199,27 +203,14 @@ The SDK follows a fluent builder pattern:
 
 ```python
 from vista_sdk.local_id_builder import LocalIdBuilder
-from vista_sdk.vis_version import VisVersion
-from vista_sdk.local_id_parsing_error_builder import LocalIdParsingErrorBuilder
 
-vis = VIS()
-gmod = vis.get_gmod(VisVersion.v3_4a)
-codebooks = vis.get_codebooks(VisVersion.v3_4a)
-locations = vis.get_locations(VisVersion.v3_4a)
+local_id_str = "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature"
 
-error_builder = LocalIdParsingErrorBuilder()
-local_id_str = "/dnv-v2/vis-3-4a/invalid/path/meta/qty-temperature"
-
-try:
-    local_id = LocalIdBuilder.try_parse(
-        local_id_str, gmod, codebooks, locations, error_builder
-    )
-    if error_builder.has_errors:
-        print("Parsing errors:")
-        for error in error_builder.errors:
-            print(f"  - {error.message}")
-except Exception as e:
-    print(f"Parsing failed: {e}")
+result, _, _ = LocalIdBuilder.try_parse(local_id_str)
+if result is not None:
+    print(f"Parsed Local ID: {result}")
+else:
+    print("Failed to parse Local ID")
 ```
 
 ### Working with Different VIS Versions
@@ -249,28 +240,14 @@ print(f"Loaded data for {len(version_data)} VIS versions")
 
 ```python
 from vista_sdk.mqtt import MqttLocalId
-from vista_sdk.vis import VIS
-from vista_sdk.vis_version import VisVersion
 from vista_sdk.local_id_builder import LocalIdBuilder
-from vista_sdk.gmod_path import GmodPath
-from vista_sdk.codebook_names import CodebookName
 
-# Create a Local ID
-vis = VIS()
-gmod = vis.get_gmod(VisVersion.v3_4a)
-codebooks = vis.get_codebooks(VisVersion.v3_4a)
-
-path = gmod.parse_path("411.1/C101.31")
-quantity_tag = codebooks.create_tag(CodebookName.Quantity, "temperature")
-
-builder = LocalIdBuilder.create(VisVersion.v3_4a)
-local_id = (builder
-    .with_primary_item(path)
-    .with_metadata_tag(quantity_tag)
-    .build())
+# Parse a Local ID string
+local_id_str = "/dnv-v2/vis-3-4a/411.1/C101.31/meta/qty-temperature"
+local_id = LocalIdBuilder.parse(local_id_str)
 
 # Convert to MQTT format
-mqtt_id = MqttLocalId(local_id.builder)
+mqtt_id = MqttLocalId(local_id)
 print(f"MQTT Topic: {mqtt_id}")  # Uses underscores instead of slashes
 ```
 
@@ -314,20 +291,20 @@ The Python implementation includes comprehensive benchmarks that mirror the C# i
 
 ### Benchmark Results
 
-| Category | Operation | Mean Time | Throughput |
-|----------|-----------|-----------|------------|
-| Lookup | Codebooks lookup | 1.3 μs | 796K ops/s |
-| Lookup | Gmod node by code | 184 ns | 5.4M ops/s |
-| Lookup | DataChannel by short_id | 161 ns | 6.2M ops/s |
-| Lookup | DataChannel by local_id | 2.6 μs | 378K ops/s |
-| Serialization | JSON serialize (DC) | 21.8 μs | 46K ops/s |
-| Serialization | JSON deserialize (DC) | 52.0 μs | 19K ops/s |
-| Domain | DataChannelList to domain | 1.0 ms | 992 ops/s |
-| Domain | TimeSeriesData to domain | 48.3 μs | 21K ops/s |
-| Parsing | LocalId complex | 229.0 μs | 4K ops/s |
-| Parsing | GmodPath full path | 30.4 μs | 33K ops/s |
-| Versioning | Path conversion | 61.2 μs | 16K ops/s |
-| Traversal | Full Gmod traversal | 3.15 s | 0 ops/s |
+| Category      | Operation                 | Mean Time | Throughput |
+| ------------- | ------------------------- | --------- | ---------- |
+| Lookup        | Codebooks lookup          | 1.3 μs    | 796K ops/s |
+| Lookup        | Gmod node by code         | 184 ns    | 5.4M ops/s |
+| Lookup        | DataChannel by short_id   | 161 ns    | 6.2M ops/s |
+| Lookup        | DataChannel by local_id   | 2.6 μs    | 378K ops/s |
+| Serialization | JSON serialize (DC)       | 21.8 μs   | 46K ops/s  |
+| Serialization | JSON deserialize (DC)     | 52.0 μs   | 19K ops/s  |
+| Domain        | DataChannelList to domain | 1.0 ms    | 992 ops/s  |
+| Domain        | TimeSeriesData to domain  | 48.3 μs   | 21K ops/s  |
+| Parsing       | LocalId complex           | 229.0 μs  | 4K ops/s   |
+| Parsing       | GmodPath full path        | 30.4 μs   | 33K ops/s  |
+| Versioning    | Path conversion           | 61.2 μs   | 16K ops/s  |
+| Traversal     | Full Gmod traversal       | 3.15 s    | 0 ops/s    |
 
 See [BENCHMARKS.md](BENCHMARKS.md) for comprehensive benchmark results.
 

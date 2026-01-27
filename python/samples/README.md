@@ -70,6 +70,45 @@ python samples/advanced_local_ids.py
 python samples/local_id_query.py
 ```
 
+### 🌳 [`gmod_subset.py`](gmod_subset.py)
+
+**Asset Model / Digital Twin structure** - Demonstrates:
+
+- Building an asset model tree from GmodPaths
+- Creating hierarchical visualizations
+- Extracting unique nodes across multiple paths
+- Generating LocalIds for sensor data
+
+```bash
+python samples/gmod_subset.py
+```
+
+### 📊 [`iso19848_json.py`](iso19848_json.py)
+
+**ISO19848 JSON serialization** - Shows how to:
+
+- Load DataChannelList and TimeSeriesData from JSON
+- Convert between JSON DTOs and domain models
+- Look up data channels by ShortId and LocalId
+- Validate TimeSeriesData against DataChannelList
+
+```bash
+python samples/iso19848_json.py
+```
+
+### 🔄 [`sensor_data_flow.py`](sensor_data_flow.py)
+
+**Sensor data transformation** - Demonstrates:
+
+- Transforming proprietary sensor data into ISO19848 format
+- Using DataChannelList as mapping between system IDs and LocalIds
+- Grouping channels by update_cycle into TabularData
+- Producing ISO19848 TimeSeriesDataPackage
+
+```bash
+python samples/sensor_data_flow.py
+```
+
 ## 🚀 Running the Samples
 
 ### Prerequisites
@@ -143,6 +182,27 @@ done
 - LocalIdQuery for combined queries
 - NodesConfig and PathConfig usage
 - Practical filtering scenarios
+
+### From `gmod_subset.py`:
+
+- Building asset models from GmodPaths
+- Tree structure creation and navigation
+- Path hierarchy extraction
+- Digital twin foundations
+
+### From `iso19848_json.py`:
+
+- ISO19848 data structures
+- JSON serialization/deserialization
+- Domain model conversion
+- Data channel lookups
+
+### From `sensor_data_flow.py`:
+
+- Proprietary to ISO19848 transformation
+- DataChannelList as a mapping source
+- TabularData grouping strategies
+- TimeSeriesDataPackage creation
 
 ## 🔧 Customizing the Examples
 
