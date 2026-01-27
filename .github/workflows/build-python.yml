@@ -16,6 +16,7 @@ on:
 
 env:
   CI_BUILD: true
+  BASE_VERSION: "0.2.0-preview"
 
 jobs:
   test:
@@ -112,6 +113,14 @@ jobs:
         run: |
           cd python
           uv run python src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir ../resources
+
+      # Set version using GitHub run number (matches C# pattern: 0.2.0-preview-{run_number})
+      - name: Set package version
+        run: |
+          VERSION="${BASE_VERSION}-${GITHUB_RUN_NUMBER}"
+          echo "Setting version to: $VERSION"
+          sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" python/src/vista_sdk/__init__.py
+          cat python/src/vista_sdk/__init__.py
 
       # Build the Python package (wheel and source distribution)
       - name: Build package

@@ -1,6 +1,6 @@
 [project]
 name = "vista-sdk"
-version = "0.1.0-preview"
+dynamic = ["version"]
 description = "Vista SDK for Python"
 authors = [{ name = "Vista Team", email = "vista@dnv.com" }]
 license = "MIT"
@@ -43,6 +43,10 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+# Version is set via PACKAGE_VERSION environment variable, with fallback for local dev
+path = "src/vista_sdk/__init__.py"
 
 [tool.ruff]
 # Consider packages in the src directory as first-party code
