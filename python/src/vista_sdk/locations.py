@@ -1,0 +1,384 @@
+"""Locations module for handling and parsing location codes in the VISTA SDK."""
+
+from __future__ import annotations
+
+from enum import Enum
+from typing import overload
+
+from vista_sdk.locations_dto import LocationsDto
+from vista_sdk.vis_version import VisVersion
+
+from .internal.location_parsing_error_builder import (
+    LocationParsingErrorBuilder,
+    LocationValidationResult,
+    ParsingErrors,
+)
+
+
+class LocationGroup(Enum):
+    """Enum representing different groups of location codes."""
+
+    Number = 0
+    Side = 1
+    Vertical = 2
+    Transverse = 3
+    Longitudinal = 4
+
+
+class Location:
+    """Represents a location with a string value."""
+
+    def __init__(self, value: str) -> None:
+        """Initialize a Location instance with a string value."""
+        self._value = value
+
+    @property
+    def value(self) -> str:
+        """Return the string value of the Location instance."""
+        return self._value
+
+    def __str__(self) -> str:
+        """Return the string representation of the Location instance."""
+        return self._value
+
+    def __repr__(self) -> str:
+        """Return a string representation of the Location instance."""
+        return f"Location(value={self._value!r})"
+
+    @staticmethod
+    def from_string(s: str) -> Location:
+        """Create a Location instance from a string."""
+        return Location(s)
+
+    def __eq__(self, other: object) -> bool:
+        """Check equality of two Location instances."""
+        if not isinstance(other, Location):
+            return NotImplemented
+        return self._value == other._value
+
+    def __hash__(self) -> int:
+        """Return a hash of the location value."""
+        return hash(self._value)
+
+
+class RelativeLocation:
+    """Represents a relative location with a code, name, and optional definition."""
+
+    def __init__(
+        self, code: str, name: str, location: Location, definition: str | None
+    ) -> None:
+        """Initialize RelativeLocation with code, name, location, and optional definition."""  # noqa: E501
+        if len(code) != 1:
+            raise ValueError(f"Expected a single character code, got: {code}.")
+
+        self._code: str = code
+        self._name: str = name
+        self._location: Location = location
+        self._definition: str | None = definition
+
+    @property
+    def code(self) -> str:
+        """Return the code of the relative location."""
+        return self._code
+
+    @property
+    def name(self) -> str:
+        """Return the name of the relative location."""
+        return self._name
+
+    @property
+    def location(self) -> Location:
+        """Return the Location object associated with the relative location."""
+        return self._location
+
+    @property
+    def definition(self) -> str | None:
+        """Return the definition of the relative location, if available."""
+        return self._definition
+
+    def __hash__(self) -> int:
+        """Return a hash of the relative location based on its code."""
+        return hash(self._code)
+
+    def __eq__(self, other: object) -> bool:
+        """Check equality of two RelativeLocation instances."""
+        if not isinstance(other, RelativeLocation):
+            return False
+        return self._code == other._code
+
+
+class Locations:
+    """Handles parsing and validation of location codes in the VISTA SDK."""
+
+    def __init__(self, version: VisVersion, dto: LocationsDto) -> None:
+        """Initialize Locations with a version and DTO."""
+        self.vis_version = version
+        self._location_codes = [d.code for d in dto.items]
+        self._relative_locations = []
+        self._reversed_groups: dict[str, LocationGroup] = {}
+        groups: dict[LocationGroup, list[RelativeLocation]] = {}
+
+        for relative_locations_dto in dto.items:
+            relative_location = RelativeLocation(
+                relative_locations_dto.code,
+                relative_locations_dto.name,
+                Location(str(relative_locations_dto.code)),
+                relative_locations_dto.definition,
+            )
+            self._relative_locations.append(relative_location)
+
+            # Not interested in horizontal or vertical codes
+            if relative_locations_dto.code in ("H", "V"):
+                continue
+
+            key = self._determine_group_by_code(relative_locations_dto.code)
+            if key not in groups:
+                groups[key] = []
+            if key == LocationGroup.Number:
+                continue
+            self._reversed_groups[relative_locations_dto.code] = key
+            groups[key].append(relative_location)
+
+        self._groups: dict = {k: tuple(v) for k, v in groups.items()}
+
+    def _determine_group_by_code(self, code: str) -> LocationGroup:
+        """Determine the group of a location code."""
+        """Return the LocationGroup for a given code."""
+        if code in "N":
+            return LocationGroup.Number
+        if code in ("P", "C", "S"):
+            return LocationGroup.Side
+        if code in ("U", "M", "L"):
+            return LocationGroup.Vertical
+        if code in ("I", "O"):
+            return LocationGroup.Transverse
+        if code in ("F", "A"):
+            return LocationGroup.Longitudinal
+        raise Exception(f"Unsupported code: {code}")
+
+    @property
+    def relative_locations(self) -> list[RelativeLocation]:
+        """Return a copy of the list of relative locations."""
+        return self._relative_locations.copy()
+
+    @property
+    def groups(self) -> dict[LocationGroup, list[RelativeLocation]]:
+        """Return a dictionary of location groups with their relative locations."""
+        return self._groups
+
+    def parse(self, location_str: str | None) -> Location:
+        """Parse a location string and return a Location object."""
+        error_builder = LocationParsingErrorBuilder.create()
+        location = None
+
+        success, location = self.try_parse_internal(
+            location_str if location_str else "", location_str, error_builder
+        )
+        if not success or not location:
+            error_details = error_builder.build()
+            raise ValueError(
+                f"Invalid value for location: '{location_str}', errors: {error_details}"
+            )
+
+        return location
+
+    @overload
+    def try_parse(self, value: str | None) -> tuple[bool, Location | None]: ...
+    @overload
+    def try_parse(self, value: Location | None) -> tuple[bool, Location | None]: ...
+
+    def try_parse(self, value: str | Location | None) -> tuple[bool, Location | None]:
+        """Try to parse a location string or Location object and return the result."""
+        if isinstance(value, Location):
+            return True, value
+        if isinstance(value, str):
+            error_builder = LocationParsingErrorBuilder.create()
+            result = self.try_parse_internal(
+                value if value else "", value, error_builder
+            )
+            if result[0] and value:
+                return True, Location(value)
+            return False, None
+        raise ValueError("Invalid value for location")
+
+    def try_parse_with_errors(
+        self, value: str | None
+    ) -> tuple[bool, Location | None, ParsingErrors]:
+        """Try to parse a location string and return the result with errors."""
+        error_builder = LocationParsingErrorBuilder.create()
+        location = None
+        result = self.try_parse_internal(value if value else "", value, error_builder)
+        errors = error_builder.build()
+        if result[0] and value:
+            location = Location(value)
+        return result[0], location, errors
+
+    def try_parse_internal(  # noqa: C901
+        self,
+        value: str,
+        original_str: str | None,
+        error_builder: LocationParsingErrorBuilder,
+    ) -> tuple[bool, Location | None]:
+        """Internal method to parse a location string and return a Location object."""
+        location = None
+
+        if not value or value.isspace():
+            error_builder.add_error(
+                LocationValidationResult.NULL_OR_WHITE_SPACE,
+                "Invalid location: contains only whitespace",
+            )
+            return False, location
+
+        original_span = value
+        prev_digit_index = None
+        digit_start_index = None
+        chars_start_index = None
+
+        if len(LocationGroup) != 5:
+            raise RuntimeError("LocationGroup enum should have 5 members")
+        char_dict = LocationCharDict(4)  # 4 slots for non-NUMBER groups
+
+        for i, ch in enumerate(value):
+            if ch.isdigit():
+                # First digit should be at index 0
+                if digit_start_index is None and i != 0:
+                    error_builder.add_error(
+                        LocationValidationResult.INVALID,
+                        "Invalid location: numeric location should start before "
+                        f"location code(s) in location: '{original_str or original_span}'",  # noqa: E501
+                    )
+                    return False, location
+
+                # Other digits should neighbor the first
+                if prev_digit_index is not None and prev_digit_index != (i - 1):
+                    error_builder.add_error(
+                        LocationValidationResult.INVALID,
+                        "Invalid location: cannot have multiple separated "
+                        f"digits in location: '{original_str or original_span}'",
+                    )
+                    return False, location
+
+                if digit_start_index is None:
+                    digit_start_index = i
+                else:
+                    try:
+                        int(value[digit_start_index : i + 1])
+                    except ValueError:
+                        error_builder.add_error(
+                            LocationValidationResult.INVALID,
+                            f"Invalid location: failed to parse numeric location: "
+                            f"'{original_str or original_span}'",
+                        )
+                        return False, location
+                prev_digit_index = i
+            else:
+                # Handle non-digit characters
+                if ch not in self._reversed_groups:
+                    # Get all invalid characters
+                    invalid_chars = [
+                        f"'{c}'"
+                        for c in value
+                        if not c.isdigit()
+                        and (c == "N" or c not in self._location_codes)
+                    ]
+                    error_builder.add_error(
+                        LocationValidationResult.INVALID_CODE,
+                        f"Invalid location code: '{original_str or original_span}' "
+                        f"with invalid location code(s): {','.join(invalid_chars)}",
+                    )
+                    return False, location
+
+                group = self._reversed_groups[ch]
+                success, existing_ch = char_dict.try_add(group, ch)
+                if not success:
+                    error_builder.add_error(
+                        LocationValidationResult.INVALID,
+                        f"Invalid location: Multiple '{group.name}' values. "
+                        f"Got both '{existing_ch}' and '{ch}' in "
+                        f"'{original_str or original_span}'",
+                    )
+                    return False, location
+
+                if chars_start_index is None:
+                    chars_start_index = i
+                elif i > 0:
+                    prev_ch = value[i - 1]
+                    if ch < prev_ch:
+                        error_builder.add_error(
+                            LocationValidationResult.INVALID_ORDER,
+                            f"Invalid location: '{original_str or original_span}' "
+                            "not alphabetically sorted",
+                        )
+                        return False, location
+
+        # If we got here, location is valid
+        location = Location(original_str if original_str is not None else value)
+        return True, location
+
+    @staticmethod
+    def try_parse_int(span: str, start: int, length: int) -> tuple[bool, int]:
+        """Try to parse an integer from a substring of the given span."""
+        try:
+            if start + length > len(span):
+                return False, 0
+            number = int(span[start : start + length])
+            return True, number
+        except ValueError:
+            return False, 0
+
+
+class LocationCodeError(Exception):
+    """Exception raised for errors in LocationCharDict operations."""
+
+
+class LocationCharDict:
+    """A dictionary-like structure to store location codes by their group.
+
+    This class maintains a fixed-size array of location codes, indexed by
+    LocationGroup values. It provides dictionary-like access while ensuring
+    type safety and bounds checking.
+    """
+
+    def __init__(self, size: int) -> None:
+        """Initialize the dictionary with a specified size."""
+        if size < 1:
+            raise ValueError("Size must be at least 1")
+        self._codes: list[str | None] = [None] * size
+
+    def __getitem__(self, key: LocationGroup) -> str | None:
+        """Get the location code for a given group."""
+        index = key.value - 1
+        if index >= len(self._codes):
+            raise LocationCodeError(
+                f"Location group {key.name} with value {key.value} "
+                f"exceeds storage size of {len(self._codes)}"
+            )
+        return self._codes[index]
+
+    def __setitem__(self, key: LocationGroup, new_value: str) -> None:
+        """Set the location code for a given group."""
+        index = key.value - 1
+        if index >= len(self._codes):
+            raise LocationCodeError(
+                f"Location group {key.name} with value {key.value} "
+                f"exceeds storage size of {len(self._codes)}"
+            )
+        self._codes[index] = new_value
+
+    def try_add(self, key: LocationGroup, value: str) -> tuple[bool, str | None]:
+        """Try to add a location code for a group if not already present."""
+        """Try to add a character for a location group."""
+        index = key.value - 1
+        if index >= len(self._codes):
+            raise ValueError(f"Unsupported code: {key}")
+
+        if self._codes[index] is not None:
+            existing_value = self._codes[index]
+            return False, existing_value
+
+        self._codes[index] = value
+        return True, None
+
+    def __len__(self) -> int:
+        """Get the total size of the internal storage."""
+        return len(self._codes)

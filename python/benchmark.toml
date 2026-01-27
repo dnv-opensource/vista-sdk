@@ -1,0 +1,48 @@
+# Vista SDK Python Benchmark Configuration
+# Mirrors C#'s benchmark configuration
+
+[benchmark]
+name = "Vista SDK Python Benchmarks"
+version = "1.0.0"
+
+# BenchmarkDotNet equivalent settings
+min_rounds = 20
+max_time = 1.0
+warmup = true
+warmup_iterations = 3
+disable_gc = true
+timer = "perf_counter"
+
+# Memory diagnostics (equivalent to MemoryDiagnoser)
+memory_diagnostics = true
+
+# Orderer settings (equivalent to BenchmarkDotNet orderer)
+method_order = "Declared"  # MethodOrderPolicy.Declared
+summary_order = "FastestToSlowest"  # SummaryOrderPolicy.FastestToSlowest
+
+# Groups and categories
+[benchmark.groups]
+codebooks = "Codebooks benchmarks"
+gmod = "GMOD benchmarks"
+transport = "Transport benchmarks"
+internal = "Internal benchmarks"
+
+[benchmark.categories]
+"No location" = "Benchmarks without location parsing"
+"With location" = "Benchmarks with location parsing"
+"Uncompressed" = "Uncompressed serialization benchmarks"
+"Brotli" = "Brotli compression benchmarks"
+"Bzip2" = "Bzip2 compression benchmarks"
+
+# Output settings
+[benchmark.output]
+json_file = "benchmark_results.json"
+csv_file = "benchmark_results.csv"
+save_data = true
+verbose = false
+
+# Test discovery
+[benchmark.discovery]
+test_pattern = "test_*.py"
+benchmark_pattern = "test_*benchmark*.py"
+base_path = "tests/benchmark/"

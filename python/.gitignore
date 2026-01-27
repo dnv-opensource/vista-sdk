@@ -1,3 +1,6 @@
+# Ignore default generated Benchmark result file
+benchmark_results.json
+
 # Ignore compiled Python bytecode files
 *.pyc
 

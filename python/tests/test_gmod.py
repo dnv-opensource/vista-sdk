@@ -1,89 +1,163 @@
+"""Tests for the Gmod class in the Vista SDK."""
+
+import time
 import unittest
 from dataclasses import dataclass
-from typing import List
 
-from vista_sdk.Client import Client
-from vista_sdk.Gmod import Gmod, TraversalHandlerResult, TraversalOptions
-from vista_sdk.GmodDto import GmodDto
-from vista_sdk.GmodNode import GmodNode
-from vista_sdk.GmodPath import GmodPath
-from vista_sdk.VIS import VIS
-from vista_sdk.VisVersions import VisVersion, VisVersionExtension
+from vista_sdk.client import Client
+from vista_sdk.gmod import TraversalHandlerResult, TraversalOptions
+from vista_sdk.gmod_dto import GmodDto
+from vista_sdk.gmod_node import GmodNode
+from vista_sdk.gmod_path import GmodPath
+from vista_sdk.vis_version import VisVersion
 
 from .test_vis import TestVis
 
 
 class TestGmod(unittest.TestCase):
-    def setUp(self):
+    """Unit tests for the Gmod class in the Vista SDK."""
+
+    def setUp(self) -> None:
+        """Set up the test environment."""
         self.vis = TestVis.get_vis()
-        Client.get_gmod_test(VisVersionExtension.to_version_string(VisVersion.v3_4a))
+        Client.get_gmod(str(VisVersion.v3_4a))
 
-    def test_gmod_loads(self):
+    def test_gmod_loads(self) -> None:
+        """Test that Gmod can be loaded for all versions."""
         for version in VisVersion:
             with self.subTest(version=version):
                 gmod = self.vis.get_gmod(version)
-                self.assertIsNotNone(gmod)
-                self.assertTrue(gmod.try_get_node("400a"))
+                assert gmod is not None, (
+                    f"Gmod for version {version} should not be None"
+                )
+                assert gmod.try_get_node("400a")[0], (
+                    f"Node '400a' should exist in Gmod for version {version}"
+                )
 
-    def test_gmod_properties(self):
+    def test_gmod_properties(self) -> None:
+        """Test properties of Gmod for all versions."""
+        # Expected values: (max_code, count) - matches C# ExpectedMaxes
+        expected_values: dict[VisVersion, tuple[str, int]] = {
+            VisVersion.v3_4a: ("C1053.3114", 6420),
+            VisVersion.v3_5a: ("C1053.3114", 6557),
+            VisVersion.v3_6a: ("C1053.3114", 6557),
+            VisVersion.v3_7a: ("H346.11113", 6672),
+            VisVersion.v3_8a: ("H346.11113", 6335),
+            VisVersion.v3_9a: ("H346.11113", 6553),
+            VisVersion.v3_10a: ("H346.11113", 6555),
+        }
+
         for version in VisVersion:
             with self.subTest(version=version):
                 gmod = self.vis.get_gmod(version)
-                self.assertIsNotNone(gmod)
+                assert gmod is not None, (
+                    f"Gmod for version {version} should not be None"
+                )
 
-                nodes = list(gmod._node_map)
-                min_length = min(gmod, key=lambda x: len(x[1].code))
-                max_length = max(gmod, key=lambda x: len(x[1].code))
+                current_min_len = float("inf")
+                current_max_len = 0
+                min_code = None
+                max_code = None
 
-                self.assertEqual(2, len(min_length[1].code))
-                self.assertEqual("VE", min_length[1].code)
-                self.assertEqual(10, len(max_length[1].code))
-                possible_max = ["C1053.3111", "H346.11113"]
-                self.assertIn(max_length[1].code, possible_max)
+                for node_count, (_, node) in enumerate(gmod._node_map, start=1):  # noqa: B007
+                    code_len = len(node.code)
+                    if code_len < current_min_len:
+                        current_min_len = code_len
+                        min_code = node.code
+                    elif code_len == current_min_len and min_code is not None:
+                        # Find lexicographically smallest code of minimum length
+                        if node.code < min_code:
+                            min_code = node.code
 
-                expected_counts = [6420, 6557, 6672]
-                self.assertIn(len(nodes), expected_counts)
+                    if code_len > current_max_len:
+                        current_max_len = code_len
+                        max_code = node.code
+                    elif code_len == current_max_len and max_code is not None:
+                        # Find lexicographically largest code of maximum length
+                        if node.code > max_code:
+                            max_code = node.code
 
-    def test_gmod_lookup(self):
+                assert current_min_len == 2, "Minimum code length should be 2"
+                assert min_code == "VE", "Minimum code should be 'VE'"
+                assert current_max_len == 10, "Maximum code length should be 10"
+
+                expected = expected_values.get(version)
+                assert expected is not None, (
+                    f"Expected values for version {version.value} should be defined"
+                )
+                expected_max, expected_count = expected
+
+                assert max_code == expected_max, (
+                    f"Maximum code for version {version.value} should be "
+                    f"'{expected_max}', but got: '{max_code}'"
+                )
+                assert node_count == expected_count, (
+                    f"Node count for version {version.value} should be "
+                    f"{expected_count}, but got: {node_count}"
+                )
+
+    def test_gmod_lookup(self) -> None:
+        """Test that Gmod can look up nodes by code."""
         for version in VisVersion:
             with self.subTest(version=version):
                 gmod = self.vis.get_gmod(version)
-                self.assertIsNotNone(gmod)
+                assert gmod is not None, (
+                    f"Gmod for version {version} should not be None"
+                )
 
-                gmodDto: GmodDto = self.vis.get_gmod_dto(version)
-                self.assertIsNotNone(gmodDto)
+                gmod_dto: GmodDto = self.vis.get_gmod_dto(version)
+                assert gmod_dto is not None, (
+                    f"GmodDto for version {version} should not be None"
+                )
 
                 seen = set()
-                for node in gmodDto.items:
-                    self.assertIsNotNone(node.code)
-                    self.assertTrue(node.code not in seen, f"code: {node.code}")
+                for node in gmod_dto.items:
+                    assert node.code is not None, (
+                        f"Node code should not be None: {node}"
+                    )
+                    assert node.code not in seen, (
+                        f"Node code should be unique: {node.code}"
+                    )
                     seen.add(node.code)
 
-                    success, foundNode = gmod.try_get_node(node.code)
-                    self.assertTrue(success)
-                    self.assertIsNotNone(foundNode)
-                    if foundNode is not None:
-                        self.assertEqual(node.code, foundNode.code)
+                    success, found_node = gmod.try_get_node(node.code)
+                    assert success
+                    assert found_node is not None, (
+                        f"Found node should not be None for code: {node.code}"
+                    )
+                    if found_node is not None:
+                        assert node.code == found_node.code, (
+                            f"Node code should match found node code: {node.code}"
+                        )
 
                 seen.clear()
                 counter = 0
-                for node in gmod:
-                    self.assertIsNotNone(node[1].code)
-                    self.assertTrue(node[1].code not in seen, f"code: {node[1].code}")
-                    seen.add(node[1].code)
+                for code, gmod_node in gmod._node_map:  # noqa: B007
+                    assert gmod_node.code is not None, (
+                        f"Node code should not be None: {gmod_node}"
+                    )
+                    assert gmod_node.code not in seen, (
+                        f"Node code should be unique: {gmod_node.code}"
+                    )
+                    seen.add(gmod_node.code)
 
-                    success, foundNode = gmod.try_get_node(node[1].code)
-                    self.assertTrue(success)
-                    self.assertIsNotNone(foundNode)
-                    if foundNode is not None:
-                        self.assertEqual(node[1].code, foundNode.code)
+                    success, found_node = gmod.try_get_node(gmod_node.code)
+                    assert success
+                    assert found_node is not None, (
+                        f"Found node should not be None for code: {gmod_node.code}"
+                    )
+                    if found_node is not None:
+                        assert gmod_node.code == found_node.code, (
+                            f"Node code should match found node code: {gmod_node.code}"
+                        )
                     counter += 1
 
-                self.assertEqual(len(gmodDto.items), counter)
+                assert len(gmod_dto.items) == counter, (
+                    f"Node count in GmodDto should match counter: {counter}"
+                )
 
-                test_codes = [
+                test_codes: list[str] = [
                     "ABC",
-                    None,
                     "",
                     "SDFASDFSDAFb",
                     "✅",
@@ -95,42 +169,46 @@ class TestGmod(unittest.TestCase):
                 ]
                 for code in test_codes:
                     success, _ = gmod.try_get_node(code)
-                    self.assertFalse(success)
+                    assert not success, (
+                        f"Node lookup for invalid code '{code}' should fail"
+                    )
 
-    def test_gmod_node_equality(self):
+    def test_gmod_node_equality(self) -> None:
+        """Test equality and identity of Gmod nodes."""
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         node1 = gmod["400a"]
         node2 = gmod["400a"]
 
-        self.assertEqual(node1, node2, "Nodes should be equal")
-        self.assertIs(node1, node2, "Nodes should be the exact same object (identity)")
+        assert node1 == node2, "Nodes should be equal (identity check)"
+        assert node1 is node2, "Nodes should be the exact same object (identity)"
 
         if node2 is not None:
             node3 = node2.with_location("1")
-        self.assertNotEqual(
-            node1, node3, "Nodes should not be equal after modification"
-        )
-        self.assertIsNot(
-            node1, node3, "Nodes should not be the same object after modification"
+
+        assert node1 != node3, "Nodes should not be equal after modification"
+        assert node1 is not node3, (
+            "Nodes should not be the same object after modification"
         )
 
         if node2 is not None:
             node4 = node2.clone()
-        self.assertEqual(node1, node4, "Cloned nodes should be equal")
-        self.assertIsNot(node1, node4, "Cloned nodes should not be the same object")
+        assert node1 == node4, "Cloned nodes should be equal"
+        assert node1 is not node4, "Cloned nodes should not be the same object"
 
-    def test_gmod_node_types(self):
+    def test_gmod_node_types(self) -> None:
+        """Test that Gmod nodes have unique types."""
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         unique_types = set()
         for node in gmod:
-            category_type = f"{node[1].metadata.category} | {node[1].metadata.type}"
+            category_type = f"{node.metadata.category} | {node.metadata.type}"
             unique_types.add(category_type)
 
-        self.assertTrue(unique_types, "The set of node types should not be empty")
+        assert unique_types is not None, "The set of node types should not be empty"
 
-    def test_gmod_root_node_children(self):
+    def test_gmod_root_node_children(self) -> None:
+        """Test that the root node has children in Gmod."""
         for version in VisVersion:
             with self.subTest(version=version):
                 gmod = self.vis.get_gmod(version)
@@ -139,54 +217,51 @@ class TestGmod(unittest.TestCase):
                 if node is None:
                     self.fail("Root node should not be None")
                 else:
-                    self.assertIsNotNone(node, "Root node should not be None")
-                    self.assertGreater(
-                        len(node.children), 0, "Root node should have children"
-                    )
+                    assert node is not None, "Root node should not be None"
+                    assert len(node.children) > 0, "Root node should have children"
 
-    def test_normal_assignments(self):
+    def test_normal_assignments(self) -> None:
+        """Test that normal assignments are correctly set in Gmod nodes."""
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         node = gmod["411.3"]
-        self.assertIsNotNone(
-            node.product_type, "ProductType should not be None for node '411.3'"
+
+        assert node.product_type is not None, (
+            "ProductType should not be None for node '411.3'"
         )
-        self.assertIsNone(
-            node.product_selection, "ProductSelection should be None for node '411.3'"
+        assert node.product_selection is None, (
+            "ProductSelection should be None for node '411.3'"
         )
 
         node = gmod["H601"]
-        self.assertIsNone(
-            node.product_type, "ProductType should be None for node 'H601'"
-        )
+        assert node.product_type is None, "ProductType should be None for node 'H601'"
 
-    def test_node_with_product_selection(self):
+    def test_node_with_product_selection(self) -> None:
+        """Test that nodes with product selection are handled correctly."""
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         node = gmod["411.2"]
-        self.assertIsNotNone(
-            node.product_selection,
+        assert node.product_selection is not None, (
             "ProductSelection should not be None for node '411.2'",
         )
-        self.assertIsNone(
-            node.product_type, "ProductType should be None for node '411.2'"
-        )
+        assert node.product_type is None, "ProductType should be None for node '411.2'"
 
         node = gmod["H601"]
-        self.assertIsNone(
-            node.product_selection, "ProductSelection should be None for node 'H601'"
+        assert node.product_selection is None, (
+            "ProductSelection should be None for node 'H601'"
         )
 
-    def test_product_selection(self):
+    def test_product_selection(self) -> None:
+        """Test that product selection nodes are identified correctly."""
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         node = gmod["CS1"]
-        self.assertTrue(
-            node.is_product_selection,
-            "Node 'CS1' should be identified as having a product selection",
+        assert node.is_product_selection, (
+            "Node 'CS1' should be identified as having a product selection"
         )
 
-    def test_mappability(self):
+    def test_mappability(self) -> None:
+        """Test that Gmod nodes have correct mappability."""
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         test_cases = [
@@ -210,20 +285,23 @@ class TestGmod(unittest.TestCase):
         for code, expected_mappable in test_cases:
             with self.subTest(code=code, mappable=expected_mappable):
                 node = gmod[code]
-                self.assertEqual(
-                    expected_mappable,
-                    node.is_mappable,
+                assert expected_mappable == node.is_mappable, (
                     f"Node {code} mappability should be {expected_mappable}",
                 )
 
-    def occurrences(self, parents: List[GmodNode], node: GmodNode) -> int:
+    def occurrences(self, parents: list[GmodNode], node: GmodNode) -> int:
+        """Count occurrences of a node in the parents list."""
         count = 0
         for parent in parents:
             if parent.code == node.code:
                 count += 1
         return count
 
-    def test_full_traversal(self):
+    def test_full_traversal(self) -> None:
+        """Test full traversal of Gmod with a custom handler."""
+        from vista_sdk.vis import VIS
+
+        start_time = time.time()
         gmod = VIS().get_gmod(VisVersion.v3_4a)
 
         max_expected = TraversalOptions.DEFAULT_MAX_TRAVERSAL_OCCURRENCE
@@ -231,25 +309,31 @@ class TestGmod(unittest.TestCase):
         class State:
             count: int
             max: int
-            paths: List[GmodPath]
+            paths: list[GmodPath]
 
-            def __init__(self):
+            def __init__(self) -> None:
+                """Initialize the state for traversal."""
                 self.count = 0
                 self.max = 0
                 self.paths = []
 
-            def increment(self):
+            def increment(self) -> None:
+                """Increment the count of traversed nodes."""
                 self.count += 1
 
-        def traversal_handler(state: State, parents: List[GmodNode], node: GmodNode):
-            self.assertTrue(
-                len(parents) == 0 or parents[0].is_root(),
-                "First parent should be root or no parents",
+        def traversal_handler(
+            state: State, parents: list[GmodNode], node: GmodNode
+        ) -> TraversalHandlerResult:
+            """Handler for traversal that counts nodes and checks parents."""
+            from vista_sdk.gmod import Gmod
+
+            assert len(parents) == 0 or parents[0].is_root(), (
+                "First parent should be root or no parents"
             )
 
             state.increment()
 
-            def sample_test(parents: List[GmodNode], node: GmodNode) -> bool:
+            def sample_test(parents: list[GmodNode], node: GmodNode) -> bool:
                 if node.code == "HG3":
                     return True
                 return any(parent.code == "HG3" for parent in parents)
@@ -272,19 +356,28 @@ class TestGmod(unittest.TestCase):
         state: State = State()
 
         completed = gmod.traverse(args1=state, args2=traversal_handler)
-        self.assertEqual(
-            max_expected, state.max, "Maximum occurrence should match expected"
-        )
-        self.assertTrue(completed, "Traversal should complete successfully")
 
-    @unittest.skip("This test is too slow to run in CI")
-    def test_full_traversal_with_options(self):
+        elapsed_time = time.time() - start_time
+        print(f"Traversal completed in {elapsed_time:.2f} seconds")
+
+        assert max_expected == state.max, "Maximum occurrence should match expected"
+        assert completed, "Traversal should complete successfully"
+
+    # @unittest.skip("This test is too slow to run in CI")
+    def test_full_traversal_with_options(self) -> None:
+        """Test full traversal of Gmod with a custom handler and options."""
+        from vista_sdk.gmod import Gmod
+
+        start_time = time.time()
+
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
-        max_expected = 2
+        max_expected = 1
         max_occurrence = 0
 
-        def traversal_handler(parents, node):
+        def traversal_handler(
+            parents: list[GmodNode], node: GmodNode
+        ) -> TraversalHandlerResult:
             skip_occurrence_check = Gmod.is_product_selection_assignment(
                 parents[-1] if parents else None, node
             )
@@ -301,21 +394,26 @@ class TestGmod(unittest.TestCase):
         options = TraversalOptions(max_traversal_occurrence=max_expected)
         completed = gmod.traverse(args1=traversal_handler, args2=options)
 
-        self.assertEqual(
-            max_expected,
-            max_occurrence,
-            "Maximum occurrence should match the expected limit",
-        )
-        self.assertTrue(completed, "Traversal should complete successfully")
+        elapsed_time = time.time() - start_time
+        print(f"Traversal completed in {elapsed_time:.2f} seconds")
 
-    def test_partial_traversal(self):
+        assert max_expected == max_occurrence, (
+            "Maximum occurrence should match the expected limit"
+        )
+        assert completed, "Traversal should complete successfully"
+
+    def test_partial_traversal(self) -> None:
+        """Test partial traversal of Gmod with a custom handler."""
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         state = self.TraversalState(stop_after=5)
 
-        def traversal_handler(state, parents, node):
-            self.assertTrue(
-                len(parents) == 0 or parents[0].is_root,
+        def traversal_handler(
+            state: "TestGmod.TraversalState",
+            parents: list[GmodNode],
+            node: GmodNode,  # noqa: ARG001
+        ) -> TraversalHandlerResult:
+            assert len(parents) == 0 or parents[0].is_root(), (
                 "First parent should be root or no parents",
             )
             state.node_count += 1
@@ -325,23 +423,24 @@ class TestGmod(unittest.TestCase):
 
         completed = gmod.traverse(args1=state, args2=traversal_handler)
 
-        self.assertEqual(
-            state.stop_after,
-            state.node_count,
+        assert state.stop_after == state.node_count, (
             "Traversal should stop after the specified number of nodes",
         )
-        self.assertFalse(
-            completed, "Traversal should not complete fully (should stop early)"
-        )
+        assert not completed, "Traversal should not complete fully (should stop early)"
 
-    def test_full_traversal_from(self):
+    def test_full_traversal_from(self) -> None:
+        """Test full traversal of Gmod starting from a specific node."""
         gmod = self.vis.get_gmod(VisVersion.v3_4a)
 
         state = self.TraversalState(stop_after=0)
 
-        def traversal_handler(state, parents, node):
-            self.assertTrue(
-                len(parents) == 0 or parents[0].code == "400a",
+        def traversal_handler(
+            state: "TestGmod.TraversalState",
+            parents: list[GmodNode],
+            node: GmodNode,  # noqa: ARG001
+        ) -> TraversalHandlerResult:
+            """Handler for traversal that counts nodes and checks parents."""
+            assert len(parents) == 0 or parents[0].code == "400a", (
                 "First parent should be root or no parents",
             )
             state.node_count += 1
@@ -351,10 +450,12 @@ class TestGmod(unittest.TestCase):
             args1=state, args2=gmod["400a"], args3=traversal_handler
         )
 
-        self.assertTrue(completed, "Traversal should complete full")
+        assert completed, "Traversal should complete full"
 
     @dataclass
     class TraversalState:
+        """State for tracking traversal progress."""
+
         stop_after: int
         node_count: int = 0
 

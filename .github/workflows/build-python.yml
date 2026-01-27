@@ -1,5 +1,10 @@
 name: Python Package
 
+# This workflow tests, builds, and publishes the Vista SDK Python package
+# - Tests: Run in parallel across Python 3.10, 3.11, 3.12, and 3.13
+# - Build: Creates distributable packages (only runs if all tests pass)
+# - Publish: Uploads to PyPI (only on push to the main branch)
+
 on:
   push:
     branches: [main]
@@ -11,68 +16,146 @@ on:
 
 env:
   CI_BUILD: true
+  BASE_VERSION: "0.2.0-preview"
 
 jobs:
-  build:
-    name: Build, test, and publish
+  test:
+    name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+      fail-fast: false # Continue testing other versions even if one fails
 
     steps:
+      # Get the source code from the repository
       - name: Checkout entire repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      # Set up the specific Python version for this matrix job
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
+          python-version: ${{ matrix.python-version }}
 
+      # Install uv package manager for fast dependency management
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      # Install all Python dependencies including dev dependencies
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pytest
-          pip install -r python/requirements.txt
+          cd python
+          uv sync --dev
 
-      - name: Copy resources folder into python/vista_sdk
+      # Copy shared resources into the Python package for runtime access
+      - name: Copy resources folder into python/src/vista_sdk
         run: |
-          cp -r ./resources ./python/vista_sdk/resources
+          # Remove existing resources directory if it exists
+          rm -rf ./python/src/vista_sdk/resources
+          # Copy resources directory
+          cp -r ./resources ./python/src/vista_sdk/resources
 
+      # Generate version-specific code based on available resources
       - name: Generate VisVersion script
         env:
-          PYTHONPATH: ${{ github.workspace }}/python # Set PYTHONPATH to the python directory
+          PYTHONPATH: ${{ github.workspace }}/python/src
         run: |
-          python python/vista_sdk/SourceGenerator/VisVersionsGenerator.py --resources-dir resources
+          cd python
+          uv run python src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir ../resources
 
+      # Run the test suite for this Python version (excluding benchmarks)
       - name: Run tests
         env:
-          PYTHONPATH: ${{ github.workspace }}/python # Ensure PYTHONPATH is set for tests as well
+          PYTHONPATH: ${{ github.workspace }}/python/src
         run: |
-          pytest python/tests
+          cd python
+          uv run pytest tests --ignore=tests/benchmark
 
-      - name: Move Python directory to root
-        run: |
-          mv python/* ./
-          mv python/.[!.]* ./
-          rm -rf python
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
 
-      - name: Set up Python again
-        uses: actions/setup-python@v2
+    steps:
+      # Get the source code from the repository
+      - name: Checkout entire repository
+        uses: actions/checkout@v4
+
+      # Set up Python 3.13 for building (latest supported version)
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
+          python-version: "3.13"
 
-      - name: Install dependencies for building
+      # Install uv package manager for fast dependency management
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      # Install Python dependencies (production only, no dev dependencies needed for building)
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install setuptools wheel twine
+          cd python
+          uv sync
 
-      - name: Build package
-        if: success()
+      # Copy shared resources into the Python package for runtime access
+      - name: Copy resources folder into python/src/vista_sdk
         run: |
-          python setup.py sdist bdist_wheel --version=${{ github.run_number }}
+          # Remove existing resources directory if it exists
+          rm -rf ./python/src/vista_sdk/resources
+          # Copy resources directory
+          cp -r ./resources ./python/src/vista_sdk/resources
 
-      - name: Publish package
-        if: success()
+      # Generate version-specific code based on available resources
+      - name: Generate VisVersion script
         env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+          PYTHONPATH: ${{ github.workspace }}/python/src
         run: |
-          twine upload dist/* --verbose
+          cd python
+          uv run python src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir ../resources
+
+      # Set version using GitHub run number (matches C# pattern: 0.2.0-preview-{run_number})
+      - name: Set package version
+        run: |
+          VERSION="${BASE_VERSION}-${GITHUB_RUN_NUMBER}"
+          echo "Setting version to: $VERSION"
+          sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" python/src/vista_sdk/__init__.py
+          cat python/src/vista_sdk/__init__.py
+
+      # Build the Python package (wheel and source distribution)
+      - name: Build package
+        run: |
+          cd python
+          uv build
+
+      # Store build artifacts for the publish job. The name and path are exlusive to GitHub Actions
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: python/dist/
+
+  publish:
+    # This job only runs when the workflow is manually triggered from the 'main' branch.
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: build
+    if: success() && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+
+    # OIDC permissions for trusted publishing to PyPI
+    permissions:
+      id-token: write
+
+    steps:
+      # Retrieve the built package from the build job
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      # Publish to PyPI using OIDC trusted publishing (no token needed)
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          print-hash: true

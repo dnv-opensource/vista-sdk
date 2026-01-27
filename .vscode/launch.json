@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Jest Tests",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/js",
+            "runtimeArgs": [
+                "--inspect-brk",
+                "${workspaceFolder}/js/node_modules/jest/bin/jest.js",
+                "--runInBand",
+                "--detectOpenHandles",
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Debug Python Test File",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}/python",
+            "args": [
+                "${file}",
+                "-v",
+                "-s",
+                "--no-cov"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug Selected Python Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}/python",
+            "args": [
+                "${file}::${command:python.interpreterPath} -c \"import ast; import sys; node = ast.parse(open('${file}').read()); test_class = None; test_func = None; target_line = ${selectedTextLineNumber}; [test_class := n.name for n in ast.walk(node) if isinstance(n, ast.ClassDef) and n.lineno <= target_line and (n.end_lineno or 9999) >= target_line]; [test_func := n.name for n in ast.walk(node) if isinstance(n, ast.FunctionDef) and n.lineno <= target_line and (n.end_lineno or 9999) >= target_line and n.name.startswith('test_')]; print(f'{test_class}::{test_func}' if test_class and test_func else (test_class if test_class else test_func if test_func else ''))\"",
+                "-v",
+                "-s",
+                "--no-cov"
+            ],
+            "justMyCode": true,
+            "console": "integratedTerminal"
+        }
+    ]
+}

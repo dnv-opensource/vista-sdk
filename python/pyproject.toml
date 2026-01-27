@@ -1,0 +1,134 @@
+[project]
+name = "vista-sdk"
+dynamic = ["version"]
+description = "Vista SDK for Python"
+authors = [{ name = "Vista Team", email = "vista@dnv.com" }]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2",
+    "cachetools>=5",
+    "python-dotenv>=1",
+    "pydantic>=2.10.5",
+    "pydantic-settings>=2.7.1",
+    "pandera>=0.22.1",
+    "pandas>=2.3.0",
+    "types-cachetools>=6.0.0.20250525",
+    "types-psutil>=7.0.0.20250601",
+    "pytest-cov>=6.1.1",
+    "pytest>=8.4.0",
+    "pytest-benchmark>=5.1.0",
+    "psutil>=7.0.0",
+    "brotli>=1.1.0",
+    "memory-profiler>=0.61.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.0.0",
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.3.1",
+    "memory-profiler>=0.61.0",
+    "psutil>=5.9.5",
+    "types-cachetools>=6.0.0.20250525",
+    "pre-commit>=4.2.0",
+    "ruff>=0.12.3",
+    "datamodel-code-generator>=0.25.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+# Version is set via PACKAGE_VERSION environment variable, with fallback for local dev
+path = "src/vista_sdk/__init__.py"
+
+[tool.ruff]
+# Consider packages in the src directory as first-party code
+src = ["src"]
+# Run ruff on Notebooks as well
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint.per-file-ignores]
+# Allow the use of assert in tests
+"tests/*" = ["S101"]
+# Auto-generated files - allow long lines
+"src/vista_sdk/vis_version.py" = ["E501"]
+"src/vista_sdk/source_generator/vis_versions_generator.py" = ["E501"]
+# Auto-generated DTO files - no docstrings needed
+"src/vista_sdk/system_text_json/*/data_channel_list.py" = ["D"]
+"src/vista_sdk/system_text_json/*/time_series_data.py" = ["D"]
+
+[tool.ruff.lint]
+select = [
+    "F",   # Pyflakes
+    "E",   # pycodestyle
+    "W",   # pycodestyle
+    "C90", # mccabe
+    "I",   # isort
+    "ICN", # flake8-import-conventions
+    "N",   # pep8-naming
+    "D",   # pydocstyle
+    "UP",  # pyupgrade
+    "ANN", # flake8-annotations
+    "S",   # flake8-bandit
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    "C4",  # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "FA",  # flake8-future-annotations
+    "ISC", # flake8-implicit-str-concat
+    "ICN", # flake8-import-conventions
+    "PT",  # flake8-pytest-style
+    "Q",   # flake8-quotes
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "ARG", # flake8-unused-arguments
+    "PTH", # flake8-use-pathlib
+    "PD",  # pandas-vet
+    "PLC", # Pylint convention
+    "PLE", # Pylint error
+    # "PLR",  # Pylint refactor
+    "NPY",  # NumPy
+    "FAST", # FastAPI
+    "RUF",  # Ruff-specific rules
+]
+ignore = ["PLC0415"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+
+# mypy configuration, taken from pydantic documentation
+[tool.mypy]
+plugins = ["pydantic.mypy", "pandera.mypy"]
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "src/vista_sdk"
+
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = true
+
+disallow_untyped_defs = true
+
+
+[tool.pytest.ini_options]
+# Tests are implemented, but code is not yet ready for production
+# These tests are also not pushed to Git
+addopts = "--ignore=tests/not_implemented"
+
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
