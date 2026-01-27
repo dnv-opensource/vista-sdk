@@ -90,9 +90,54 @@ public abstract record GmodPathQueryBuilder
                 item.IgnoreInMatching = true;
             }
 
-            return this with
+            // Ensure the target node is in the filter so it's checked during matching
+            if (!_filter.ContainsKey(node.Code))
             {
-                };
+                _filter.Add(node.Code, new(node, new()) { MatchAllLocations = true });
+            }
+
+            return this with { };
+        }
+
+        /// <summary>
+        /// Mark all nodes after the selected node as ignorable in matching.
+        /// This allows matching paths that have a specific prefix, regardless of
+        /// what children come after. For example, to match "411.1/C101/*".
+        /// </summary>
+        public Path WithAnyNodeAfter(Func<IReadOnlyDictionary<string, GmodNode>, GmodNode> select)
+        {
+            var node = select(_nodes);
+            return WithAnyNodeAfterInternal(node);
+        }
+
+        private Path WithAnyNodeAfterInternal(GmodNode node)
+        {
+            var fullPath = GmodPath.GetFullPath().ToList();
+            if (!fullPath.Any(v => v.Node.Code == node.Code))
+                throw new ArgumentException($"Node {node.Code} is not in the path");
+
+            // Find the index of the target node and mark everything after as ignorable
+            var found = false;
+            foreach (var (_, pathNode) in fullPath)
+            {
+                if (pathNode.Code == node.Code)
+                {
+                    found = true;
+                    continue;
+                }
+                if (found && _filter.TryGetValue(pathNode.Code, out var item))
+                {
+                    item.IgnoreInMatching = true;
+                }
+            }
+
+            // Ensure the target node is in the filter so it's checked during matching
+            if (!_filter.ContainsKey(node.Code))
+            {
+                _filter.Add(node.Code, new(node, new()) { MatchAllLocations = true });
+            }
+
+            return this with { };
         }
 
         public Path WithoutLocations()
