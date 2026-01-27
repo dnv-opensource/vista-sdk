@@ -3,9 +3,12 @@ name: Python Package
 # This workflow tests, builds, and publishes the Vista SDK Python package
 # - Tests: Run in parallel across Python 3.10, 3.11, 3.12, and 3.13
 # - Build: Creates distributable packages (only runs if all tests pass)
-# - Publish: Uploads to PyPI (only on manual dispatch from main branch)
+# - Publish: Uploads to PyPI (only on push to the main branch)
 
 on:
+  push:
+    branches: [main]
+    paths: ["python/**", ".github/workflows/build-python.yml"]
   pull_request:
     branches: [main]
     paths: ["python/**", ".github/workflows/build-python.yml"]
@@ -21,7 +24,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-      fail-fast: false  # Continue testing other versions even if one fails
+      fail-fast: false # Continue testing other versions even if one fails
 
     steps:
       # Get the source code from the repository
@@ -128,7 +131,11 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: success() && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+
+    # OIDC permissions for trusted publishing to PyPI
+    permissions:
+      id-token: write
 
     steps:
       # Retrieve the built package from the build job
@@ -138,19 +145,8 @@ jobs:
           name: python-package
           path: dist/
 
-      # Set up Python for publishing (same version as build for consistency)
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      # Publish to PyPI using OIDC trusted publishing (no token needed)
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          python-version: "3.13"
-
-      # Install uv for package publishing
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-
-      # Publish the package to PyPI using the UV_PUBLISH_TOKEN secret
-      - name: Publish package
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          uv publish dist/*
+          print-hash: true
