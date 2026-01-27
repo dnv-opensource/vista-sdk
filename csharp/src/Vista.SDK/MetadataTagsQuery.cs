@@ -35,12 +35,13 @@ public sealed record MetadataTagsQueryBuilder
     public MetadataTagsQueryBuilder WithTag(MetadataTag tag)
     {
         _tags[tag.Name] = tag;
-        return this with { };
+        return this;
     }
 
     public MetadataTagsQueryBuilder WithAllowOtherTags(bool allowOthers)
     {
-        return this with { _matchExact = !allowOthers };
+        _matchExact = !allowOthers;
+        return this;
     }
 
     internal bool Match(LocalId? localId)

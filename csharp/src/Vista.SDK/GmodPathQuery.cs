@@ -27,8 +27,8 @@ public abstract record GmodPathQueryBuilder
     public sealed record Path : GmodPathQueryBuilder
     {
         public readonly GmodPath GmodPath;
-        private Dictionary<string, GmodNode> _setNodes;
-        private Dictionary<string, GmodNode> _nodes;
+        private readonly Dictionary<string, GmodNode> _setNodes;
+        private readonly Dictionary<string, GmodNode> _nodes;
 
         internal Path(GmodPath path)
         {
@@ -56,9 +56,10 @@ public abstract record GmodPathQueryBuilder
             var node = select(_setNodes);
             if (!_filter.TryGetValue(node.Code, out var item))
                 throw new Exception("Expected to find a filter on the node in the path");
+
             item.Locations = new();
             item.MatchAllLocations = matchAllLocations;
-            return this with { };
+            return this;
         }
 
         public Path WithNode(Func<IReadOnlyDictionary<string, GmodNode>, GmodNode> select, params Location[]? locations)
@@ -66,8 +67,9 @@ public abstract record GmodPathQueryBuilder
             var node = select(_setNodes);
             if (!_filter.TryGetValue(node.Code, out var item))
                 throw new Exception("Expected to find a filter on the node in the path");
+
             item.Locations = locations is null ? new HashSet<Location>() : new(locations);
-            return this with { };
+            return this;
         }
 
         public Path WithAnyNodeBefore(Func<IReadOnlyDictionary<string, GmodNode>, GmodNode> select)
@@ -81,6 +83,7 @@ public abstract record GmodPathQueryBuilder
             var fullPath = GmodPath.GetFullPath();
             if (!fullPath.Any(v => v.Node.Code == node.Code))
                 throw new ArgumentException($"Node {node.Code} is not in the path");
+
             foreach (var (_, pathNode) in fullPath)
             {
                 if (pathNode.Code == node.Code)
@@ -96,7 +99,7 @@ public abstract record GmodPathQueryBuilder
                 _filter.Add(node.Code, new(node, new()) { MatchAllLocations = true });
             }
 
-            return this with { };
+            return this;
         }
 
         /// <summary>
@@ -137,7 +140,7 @@ public abstract record GmodPathQueryBuilder
                 _filter.Add(node.Code, new(node, new()) { MatchAllLocations = true });
             }
 
-            return this with { };
+            return this;
         }
 
         public Path WithoutLocations()
@@ -147,7 +150,8 @@ public abstract record GmodPathQueryBuilder
                 item.Locations = new();
                 item.MatchAllLocations = true;
             }
-            return this with { };
+
+            return this;
         }
     }
 
@@ -155,18 +159,19 @@ public abstract record GmodPathQueryBuilder
     {
         internal Nodes() { }
 
-        public Nodes WithNode(GmodNode node, bool MatchAllLocations = false)
+        public Nodes WithNode(GmodNode node, bool matchAllLocations = false)
         {
             if (_filter.TryGetValue(node.Code, out var item))
             {
                 item.Locations = new();
-                item.MatchAllLocations = MatchAllLocations;
+                item.MatchAllLocations = matchAllLocations;
             }
             else
             {
-                _filter.Add(node.Code, new(node, new()) { MatchAllLocations = MatchAllLocations });
+                _filter.Add(node.Code, new(node, new()) { MatchAllLocations = matchAllLocations });
             }
-            return this with { };
+
+            return this;
         }
 
         public Nodes WithNode(GmodNode node, params Location[]? locations)
@@ -180,7 +185,8 @@ public abstract record GmodPathQueryBuilder
             {
                 _filter.Add(node.Code, new(node, newLocations));
             }
-            return this with { };
+
+            return this;
         }
     }
 
@@ -255,7 +261,7 @@ public abstract record GmodPathQueryBuilder
     }
 }
 
-internal sealed record NodeItem
+internal sealed class NodeItem
 {
     public NodeItem(GmodNode node, HashSet<Location> locations)
     {
@@ -265,7 +271,6 @@ internal sealed record NodeItem
 
     public GmodNode Node { get; set; }
     public HashSet<Location> Locations { get; set; }
-
     public bool MatchAllLocations { get; set; }
     public bool IgnoreInMatching { get; set; }
 }
