@@ -64,13 +64,13 @@ jobs:
           cd python
           uv run python src/vista_sdk/source_generator/vis_versions_generator.py --resources_dir ../resources
 
-      # Run the test suite for this Python version (excluding benchmarks)
+      # Run the test suite for this Python version (excluding benchmarks and profiling)
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}/python/src
         run: |
           cd python
-          uv run pytest tests --ignore=tests/benchmark
+          uv run pytest tests --ignore=tests/benchmark --ignore=tests/profiling
 
   build:
     name: Build
