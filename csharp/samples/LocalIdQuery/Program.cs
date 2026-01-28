@@ -77,19 +77,11 @@ foreach (var lid in parsedLocalIds)
 
 // 1d. Match accross VIS versions
 Console.WriteLine($"\n1d. Match path across VIS versions (3-7a and {VIS.LatestVisVersion.ToVersionString()}):");
-var l1 = LocalId.Parse(
-        "/dnv-v2/vis-3-7a/411.1/C111.1/C103.17/meta/qty-temperature/cnt-exhaust.gas/pos-outlet"
-    );
-var l2 = VIS.Instance.ConvertLocalId(
-        l1,
-        VIS.LatestVisVersion
-    );
+var l1 = LocalId.Parse("/dnv-v2/vis-3-7a/411.1/C111.1/C103.17/meta/qty-temperature/cnt-exhaust.gas/pos-outlet");
+var l2 = VIS.Instance.ConvertLocalId(l1, VIS.LatestVisVersion);
 if (l2 is not null)
 {
-    var query = GmodPathQueryBuilder
-        .From(l1.PrimaryItem)
-        .WithoutLocations()
-        .Build();
+    var query = GmodPathQueryBuilder.From(l1.PrimaryItem).WithoutLocations().Build();
     foreach (var lid in new[] { l1, l2 })
     {
         if (query.Match(lid.PrimaryItem))
@@ -174,9 +166,7 @@ Console.WriteLine(new string('-', 50));
 Console.WriteLine("\n3a. Match by primary item path (411.1/C101.63/S206):");
 var primaryQuery = LocalIdQueryBuilder
     .Empty()
-    .WithPrimaryItem(
-        GmodPathQueryBuilder.From(gmod.ParsePath("411.1/C101.63/S206")).WithoutLocations().Build()
-    )
+    .WithPrimaryItem(GmodPathQueryBuilder.From(gmod.ParsePath("411.1/C101.63/S206")).WithoutLocations().Build())
     .Build();
 
 foreach (var lid in parsedLocalIds)

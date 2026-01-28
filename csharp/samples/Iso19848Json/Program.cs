@@ -396,7 +396,7 @@ DomainTimeSeries.TimeSeriesDataPackage CreateSampleTimeSeriesData(Domain.DataCha
     // Create tabular data with measurements (first two channels - numeric)
     var tabularData = new DomainTimeSeries.TabularData
     {
-        DataChannelIds = [.. dcIds.Take(2)],
+        DataChannelIds =  [.. dcIds.Take(2)],
         DataSets =
         [
             new DomainTimeSeries.TabularDataSet
