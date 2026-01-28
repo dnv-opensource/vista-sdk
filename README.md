@@ -5,15 +5,16 @@
 [![SDK NuGet current](https://img.shields.io/nuget/v/DNV.Vista.SDK?label=NuGet%20DNV.Vista.SDK)](https://www.nuget.org/packages/DNV.Vista.SDK)
 [![SDK NuGet prerelease](https://img.shields.io/nuget/vpre/DNV.Vista.SDK?label=NuGet%20DNV.Vista.SDK)](https://www.nuget.org/packages/DNV.Vista.SDK)<br/>
 [![SDK NPM current](https://img.shields.io/npm/v/dnv-vista-sdk?label=NPM%20dnv-vista-sdk)](https://www.npmjs.com/package/dnv-vista-sdk)
-[![SDK NPM current](https://img.shields.io/npm/v/dnv-vista-sdk/preview?label=NPM%20dnv-vista-sdk)](https://www.npmjs.com/package/dnv-vista-sdk)<br/>
+[![SDK NPM preview](https://img.shields.io/npm/v/dnv-vista-sdk/preview?label=NPM%20dnv-vista-sdk%20preview)](https://www.npmjs.com/package/dnv-vista-sdk)<br/>
 ![PyPI current](https://img.shields.io/pypi/v/vista-sdk?label=PyPI%20vista-sdk)
 
-
 ## Vista SDK
+
 The Vista team at DNV are working on tooling related to
-* DNV Vessel Information Structure (VIS)
-* ISO 19847 - Ships and marine technology — Shipboard data servers to share field data at sea
-* ISO 19848 - Ships and marine technology — Standard data for shipboard machinery and equipment
+
+- DNV Vessel Information Structure (VIS)
+- ISO 19847 - Ships and marine technology — Shipboard data servers to share field data at sea
+- ISO 19848 - Ships and marine technology — Standard data for shipboard machinery and equipment
 
 In this repository we codify the rules and principles of VIS and related ISO-standards to enable and support
 users and implementers of the standards.
@@ -21,123 +22,165 @@ users and implementers of the standards.
 Our plan is to develop SDKs for some of the most common platforms. We are starting with .NET, Python and JavaScript.
 We will be developing these SDKs as open source projects. Feel free to provide input, request changes or make contributions by creating issues in this repository.
 
-For general documentation relating to VIS and relating standard. See [docs.vista.dnv.com](https://docs.vista.dnv.com).
+For general documentation relating to VIS and related standards, see [docs.vista.dnv.com](https://docs.vista.dnv.com).
 
-### Status
+## 🎯 What Problem Does This Solve?
 
-> [!NOTE]
-> The **v0.1** versions of the SDK are currently in production use at DNV for various services.
-> We are currently working on the **v0.2** version of the SDKs where we are adressing several usability and API design issues.
-> When **v0.2** is finalized we are hoping that **v1.0** will quickly follow.
-> New users should stick to **v0.1** currently while we work on stabilizing APIs and design.
-> Functionally (in terms of domain), not much will change
+[ISO 19848](https://www.iso.org/standard/74324.html) defines a standard for identifying and describing sensor and event data channels on ships. It enables interoperability between different systems and stakeholders by providing:
 
-### Content
+- **Standardized naming conventions** - A structured way to identify what each data channel measures (e.g., "main engine cylinder 1 exhaust gas temperature at outlet")
+- **Standardized data formats** - Common structures for exchanging data channel metadata (DataChannelList) and measurements (TimeSeriesData)
 
-Each SDK makes use of the contents of the resources and schemas folders to generate code and use the standards.
+The **Vista SDK** implements the concepts defined in ISO 19848 and its Annex C ("dnv-v2" naming rule), providing tools to:
+
+- **Parse standardized identifiers** - Validate and extract structured information from Local IDs and Universal IDs received from other systems
+- **Build standardized identifiers** - Construct ISO 19848-compliant Local IDs and Universal IDs for your data channels
+- **Navigate the GMOD** - Traverse the Generic Product Model hierarchy that describes ship functions and components
+- **Work with Codebooks** - Use the standardized metadata vocabularies (quantity, content, position, state, etc.)
+- **Exchange data** - Serialize and deserialize ISO 19848 DataChannelList and TimeSeriesData packages
+
+## 📋 VIS Versions
+
+The SDK supports multiple versions of VIS. Each version includes updated GMOD structures and codebooks.
+
+**Versioning notes:**
+
+- The SDK includes only the "a" (annual) releases to avoid excessive versioning churn
+- A new VIS "a" release is typically published once a year (June)
+- Generally, using the latest version is recommended for new projects
+
+| Version   | Enum Value        |
+| --------- | ----------------- |
+| VIS 3.4a  | `v3_4a`           |
+| VIS 3.5a  | `v3_5a`           |
+| ...       |                   |
+| VIS 3.9a  | `v3_9a`           |
+| VIS 3.10a | `v3_10a` (Latest) |
+
+### Tackling Different VIS Versions
+
+In real-world scenarios, you may receive data using older VIS versions that need to be processed alongside newer versions. The SDK provides versioning utilities that enable on-the-fly upward conversion of GmodPaths and LocalIds between versions, allowing you to normalize data to a common version for consistent processing.
+
+## 📦 SDK Implementations
+
+We provide SDKs for the most common platforms. Each implementation has its own detailed README with installation instructions, quick start guides, and API documentation:
+
+| Platform                  | Package                                                                                                            | Implementation     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| **C#/.NET**               | [![NuGet](https://img.shields.io/nuget/v/DNV.Vista.SDK?label=NuGet)](https://www.nuget.org/packages/DNV.Vista.SDK) | [csharp/](csharp/) |
+| **JavaScript/TypeScript** | [![NPM](https://img.shields.io/npm/v/dnv-vista-sdk?label=NPM)](https://www.npmjs.com/package/dnv-vista-sdk)        | [js/](js/)         |
+| **Python**                | [![PyPI](https://img.shields.io/pypi/v/vista-sdk?label=PyPI)](https://pypi.org/project/vista-sdk/)                 | [python/](python/) |
+
+### Quick Installation
+
+```bash
+# C#/.NET
+dotnet add package DNV.Vista.SDK
+
+# JavaScript/TypeScript
+npm install dnv-vista-sdk
+
+# Python
+pip install vista-sdk
+```
+
+## 📁 Repository Structure
 
 ```
 📦vista-sdk
- ┣ 📂resources
- ┃ ┣ 📜codebooks-vis-3-4a.json.gz
- ┃ ┗ 📜gmod-vis-3-4a.json.gz
- ┣ 📂schemas
+ ┣ 📂resources          # VIS data files (GMOD, Codebooks)
+ ┃ ┣ 📜codebooks-vis-*.json.gz
+ ┃ ┣ 📜gmod-vis-*.json.gz
+ ┃ ┗ 📜gmod-vis-versioning-*.json.gz
+ ┣ 📂schemas            # JSON/XML schemas for ISO standards
  ┃ ┣ 📂json
  ┃ ┃ ┣ 📜DataChannelList.schema.json
  ┃ ┃ ┗ 📜TimeSeriesData.schema.json
- ┣ 📂csharp
- ┣ 📂python
- ┣ 📂js
+ ┃ ┗ 📂xml
+ ┣ 📂csharp             # C#/.NET SDK
+ ┣ 📂js                 # JavaScript/TypeScript SDK
+ ┣ 📂python             # Python SDK
+ ┣ 📂testdata           # Shared test data
  ┣ 📜LICENSE
  ┗ 📜README.md
 ```
 
-### SDK outline
+## 🧩 SDK Outline
 
-This section will outline the various components and modules in our SDKs.
+This section outlines the various components and modules in our SDKs.
 
-#### Vessel Information Structure
+| Component                   | Description                                    | C#  | JS  | Python |
+| --------------------------- | ---------------------------------------------- | :-: | :-: | :----: |
+| **Gmod**                    | Generic product model                          |  ✓  |  ✓  |   ✓    |
+| **Pmod**\*                  | Asset-specific product model (JS only for now) |     |  ✓  |        |
+| **Codebooks**               | Metadata tags                                  |  ✓  |  ✓  |   ✓    |
+| **Locations**               | Physical positioning                           |  ✓  |  ✓  |   ✓    |
+| **GmodPath Versioning**     | Path conversion between VIS versions           |  ✓  |     |   ✓    |
+| **Local ID & Universal ID** | Standardized sensor identification             |  ✓  |  ✓  |   ✓    |
+| **DataChannelList**         | ISO 19848 data channel definitions             |  ✓  |  ✓  |   ✓    |
+| **TimeSeriesData**          | ISO 19848 event and timeseries data            |  ✓  |  ✓  |   ✓    |
 
-There are various components of VIS in our SDKs:
+> \* The naming "Pmod" (Product Model) is inspired by DNV class terminology where it refers to asset-specific class information. In the Vista SDK, Pmod represents a subset of Gmod built from GmodPaths, which can originate from any source—not limited to class-specific data.
 
-* Generic product model (Gmod) - C#, JS
-* Product model (Pmod) - JS
-* Codebooks (metadata tags) - C#, JS
-* Locations - C#, JS
+For more information on these concepts, check out [docs.vista.dnv.com](https://docs.vista.dnv.com).
 
-For more information on this concepts, check out [docs.vista.dnv.com](https://docs.vista.dnv.com).
+## 🔧 API Patterns
 
-#### ISO-19848 and ISO-19847
+All SDKs follow consistent design patterns:
 
-Part of these standards are the definition of datastructures used for communicating and sharing sensor data.
-Note that while compression isnt explicitly mentioned in these standards, the standard doesnt prohibit use
-of compression when implementing these standards, as long as the datastructures remain the same.
+### Immutability
 
-Related components:
+Domain models are immutable. Builder APIs construct new instances while preserving unmodified data.
 
-* Universal ID & Local ID - C#, JS
-* DataChannelList & TimeSeriesData - C#, JS
-
-### Benchmarks
-
-We are developing some benchmarks to keep track of the performance characteristics of the libraries we are creating.
-
-#### Transport packages - DataChannelList and TimeSeriesData
-
-The ISO-19848/10947 standards define the schema for the XML encoding of the transport packages.
-The JSON encoding is only provded in example form, but we have developed [JSON schemas](https://json-schema.org/) for these packages [here](schemas/json/).
-
-In the benchmark below we try to isolate the difference between Json and Avro encoding, and measure the effect of compression using Bzip2 and Brotli.
-See the `Payload size` column below for an insight into size of ISO-19848 packages over the wire.
-Avro has been included as an example binary encoding - it is not currently part of the standard.
-The latency measurements in this context are less useful, as they are platform-specific.
-See [csharp/benchmark](csharp/benchmark) for more details on the method of the benchmarks.
-
-``` ini
-
-BenchmarkDotNet=v0.13.1, OS=Windows 10.0.19043.1645 (21H1/May2021Update)
-11th Gen Intel Core i9-11950H 2.60GHz, 1 CPU, 16 logical and 8 physical cores
-.NET SDK=6.0.202
-  [Host]                        : .NET 6.0.4 (6.0.422.16404), X64 RyuJIT
-  DataChannelList serialization : .NET 6.0.4 (6.0.422.16404), X64 RyuJIT
-
-Job=DataChannelList serialization  IterationCount=3  LaunchCount=1
-WarmupCount=3
+### Builder Pattern
 
 ```
-| Method |   Categories | CompressionLevel |         Mean |        Error |       StdDev | Payload size |
-|------- |------------- |----------------- |-------------:|-------------:|-------------:|-------------:|
-|   **Json** | **Uncompressed** |                **?** |     **906.4 μs** |     **106.4 μs** |      **5.83 μs** |    **285.92 KB** |
-|   Avro | Uncompressed |                ? |     702.2 μs |     337.7 μs |     18.51 μs |    113.22 KB |
-|        |              |                  |              |              |              |              |
-|   Json |       Brotli |                ? | 363,783.2 μs | 468,803.0 μs | 25,696.67 μs |     18.31 KB |
-|   Avro |       Brotli |                ? | 129,235.6 μs |  35,572.9 μs |  1,949.87 μs |     18.56 KB |
-|        |              |                  |              |              |              |              |
-|   **Json** |        **Bzip2** |                **5** |  **42,353.5 μs** |  **16,058.2 μs** |    **880.20 μs** |     **19.19 KB** |
-|   Avro |        Bzip2 |                5 |  12,175.2 μs |   9,095.2 μs |    498.54 μs |      19.5 KB |
-|   **Json** |        **Bzip2** |                **9** |  **48,419.8 μs** |  **16,895.3 μs** |    **926.09 μs** |     **19.19 KB** |
-|   Avro |        Bzip2 |                9 |  13,762.6 μs |   2,310.1 μs |    126.62 μs |      19.5 KB |
-
-
-### API patterns
-
-#### Immutability
-
-Domain models exposed in the SDKs are generally immutable,
-the builder APIs construct new instances while passing along the old data that is not modified by the builder method invoked.
-
-#### Builder pattern
-
-Typically, when the SDK provides code for building classes, it does so in a Builder Pattern. It provides possibility to chain using With, TryWith and Without methods.
-
-```csharp
-builder = Create(someIntro)
-    .WithSomeValue(someValue)
-    .TryWithSomeOtherValue(someOtherValue)
-    .WithoutSomeThirdValue() // usually without/limited arguments
-builder = builder.TryWithValue(item, out var success)
+builder = Create(intro)
+    .WithSomeValue(value)         // Throws on invalid input
+    .TryWithOtherValue(value)     // Only apply valid changes
+    .WithoutThirdValue()          // Removes component
 ```
 
-* `With` should be used when the operation is expected to receive non-nullable values and succeed without further checking. It will throw error if provided with wrong arguments.
-* `TryWith` should be used in two cases: When you don't want to be bothered by failures behind the scene, and when you want to know if it went ok, but without exceptions. If you want to check if the opration went as expected, you can use the try do out param - "succeeded" e.g. TryWithSomething(intput, out bool succeeded).
-* `Without` provides functionality for removing certain elements from the chain. Typically without arguments/limited arguments
+- **`With*`** - Use when operation is expected to succeed; throws on invalid input
+- **`TryWith*`** - Use for safe operations; only applies valid changes
+- **`Without*`** - Removes specific components from the builder
+
+## 📊 ISO 19848 Transport Packages
+
+Part of the ISO 19848/19847 standards is the definition of data structures used for communicating and sharing sensor data:
+
+- **DataChannelList** - Defines the data channels available on a ship
+- **TimeSeriesData** - Contains the actual measurement data and events
+
+Note that while compression isn't explicitly mentioned in these standards, the standards don't prohibit use of compression when implementing them, as long as the data structures remain the same.
+
+### Schemas
+
+The ISO 19848/19847 standards define XML and [JSON schemas](https://json-schema.org/) for transport packages:
+
+- [DataChannelList.schema.json](schemas/json/DataChannelList.schema.json)
+- [TimeSeriesData.schema.json](schemas/json/TimeSeriesData.schema.json)
+
+## 📈 Benchmarks
+
+We are developing benchmarks to track the performance characteristics of the libraries. See the respective implementations for details on methodology and results, including comparisons of JSON vs binary encodings and compression options.
+
+## 🤝 Contributing
+
+We welcome contributions! Feel free to:
+
+- Create issues for bugs or feature requests
+- Submit pull requests
+- Provide feedback on API design
+
+See the individual SDK READMEs for development setup instructions.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- **Documentation**: [docs.vista.dnv.com](https://docs.vista.dnv.com)
+- **GitHub**: [dnv-opensource/vista-sdk](https://github.com/dnv-opensource/vista-sdk)
+- **Issues**: [GitHub Issues](https://github.com/dnv-opensource/vista-sdk/issues)

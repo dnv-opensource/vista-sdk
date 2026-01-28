@@ -4,11 +4,7 @@
 [![Python Workflow Status](https://img.shields.io/github/actions/workflow/status/dnv-opensource/vista-sdk/build-python.yml?branch=main&label=Python)](https://github.com/dnv-opensource/vista-sdk/actions)
 [![GitHub](https://img.shields.io/github/license/dnv-opensource/vista-sdk?style=flat-square)](https://github.com/dnv-opensource/vista-sdk/blob/main/LICENSE)
 
-The Vista SDK Python implementation provides comprehensive tools for working with:
-
-- **DNV Vessel Information Structure (VIS)**
-- **ISO 19847** - Ships and marine technology — Shipboard data servers to share field data at sea
-- **ISO 19848** - Ships and marine technology — Standard data for shipboard machinery and equipment
+The Python implementation of the Vista SDK. For an overview of the SDK and its concepts, see the [main README](../README.md).
 
 ## 📦 Installation
 
@@ -35,7 +31,7 @@ pip install -e .
 
 ## 🚀 Quick Start
 
-> 💡 For more complete examples, see the [samples](https://github.com/dnv-opensource/vista-sdk/tree/main/python/samples) directory.
+> 💡 For more complete examples, see the [samples](samples/) directory.
 
 ### Basic Usage
 
@@ -43,7 +39,6 @@ pip install -e .
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
 from vista_sdk.local_id_builder import LocalIdBuilder
-from vista_sdk.gmod_path import GmodPath
 from vista_sdk.codebook_names import CodebookName
 
 # Initialize VIS instance
@@ -150,14 +145,11 @@ except Exception as e:
 
 ## 📚 Core Components
 
+For a detailed overview of VIS concepts (GMOD, Codebooks, Locations, etc.), see the [main README](../README.md).
+
 ### VIS (Vessel Information Structure)
 
-The main entry point for accessing VIS data:
-
-- **GMOD** (Generic Product Model) - Function and component hierarchy
-- **Codebooks** - Standardized metadata tags
-- **Locations** - Physical positioning information
-- **Versioning** - Path conversion between VIS versions
+The main entry point for accessing VIS data via `VIS()`.
 
 ### Local ID Builder
 
@@ -167,7 +159,6 @@ Construct standardized local identifiers:
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
 from vista_sdk.local_id_builder import LocalIdBuilder
-from vista_sdk.gmod_path import GmodPath
 from vista_sdk.codebook_names import CodebookName
 
 vis = VIS()
@@ -194,21 +185,21 @@ local_id = (builder
 The SDK follows a fluent builder pattern:
 
 - **`with_*()`** - Add or set values (throws on invalid input)
-- **`try_with_*()`** - Add values safely (returns success status)
+- **`try_with_*()`** - Only applies valid changes; returns builder for chaining
 - **`without_*()`** - Remove specific components
 
 ## 🔧 Advanced Usage
 
-### Custom Error Handling
+### Parsing Local IDs
 
 ```python
 from vista_sdk.local_id_builder import LocalIdBuilder
 
 local_id_str = "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature"
 
-result, _, _ = LocalIdBuilder.try_parse(local_id_str)
-if result is not None:
-    print(f"Parsed Local ID: {result}")
+result, _, local_id = LocalIdBuilder.try_parse(local_id_str)
+if result:
+    print(f"Parsed Local ID: {local_id}")
 else:
     print("Failed to parse Local ID")
 ```
@@ -306,7 +297,7 @@ The Python implementation includes comprehensive benchmarks that mirror the C# i
 | Versioning    | Path conversion           | 61.2 μs   | 16K ops/s  |
 | Traversal     | Full Gmod traversal       | 3.15 s    | 0 ops/s    |
 
-See [BENCHMARKS.md](https://github.com/dnv-opensource/vista-sdk/tree/main/python/BENCHMARKS.md) for comprehensive benchmark results.
+See [BENCHMARKS.md](BENCHMARKS.md) for comprehensive benchmark results.
 
 ## 🛠️ Development
 
