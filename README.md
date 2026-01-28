@@ -120,7 +120,7 @@ This section outlines the various components and modules in our SDKs.
 | **DataChannelList**         | ISO 19848 data channel definitions             |  ✓  |  ✓  |   ✓    |
 | **TimeSeriesData**          | ISO 19848 event and timeseries data            |  ✓  |  ✓  |   ✓    |
 
-> \* The naming "Pmod" (Product Model) is inspired by DNV class terminology where it refers to asset-specific class information. In the Vista SDK, Pmod represents a subset of Gmod built from GmodPaths, which can originate from any source—not limited to class-specific data.
+> \* The naming "Pmod" (Product Model) is inspired by DNV class terminology where it refers to asset-specific class information model. In the Vista SDK, Pmod represents a subset of Gmod built from GmodPaths or LocalIds, which can originate from any source—not limited to class-specific data.
 
 For more information on these concepts, check out [docs.vista.dnv.com](https://docs.vista.dnv.com).
 
@@ -134,7 +134,8 @@ Domain models are immutable. Builder APIs construct new instances while preservi
 
 ### Builder Pattern
 
-```
+```csharp
+// C# Example
 builder = Create(intro)
     .WithSomeValue(value)         // Throws on invalid input
     .TryWithOtherValue(value)     // Only apply valid changes
