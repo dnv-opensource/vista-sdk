@@ -306,7 +306,7 @@ The Python implementation includes comprehensive benchmarks that mirror the C# i
 | Versioning    | Path conversion           | 61.2 μs   | 16K ops/s  |
 | Traversal     | Full Gmod traversal       | 3.15 s    | 0 ops/s    |
 
-See [BENCHMARKS.md](BENCHMARKS.md) for comprehensive benchmark results.
+See [BENCHMARKS.md](https://github.com/dnv-opensource/vista-sdk/tree/main/python/BENCHMARKS.md) for comprehensive benchmark results.
 
 ## 🛠️ Development
 

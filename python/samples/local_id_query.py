@@ -53,7 +53,7 @@ def main() -> None:  # noqa: C901
 
     # 1a. Exact path match (with locations)
     print("\n1a. Exact path match (including locations):")
-    exact_path = GmodPath.parse("411.1/C101.31-2", arg=version)
+    exact_path = gmod.parse_path("411.1/C101.31-2")
     exact_query = GmodPathQueryBuilder.from_path(exact_path).build()
 
     for lid in parsed_local_ids:
@@ -62,7 +62,7 @@ def main() -> None:  # noqa: C901
 
     # 1b. Path match ignoring locations
     print("\n1b. Path match ignoring locations (matches any cylinder):")
-    path_no_loc = GmodPath.parse("411.1/C101.31-2", arg=version)
+    path_no_loc = gmod.parse_path("411.1/C101.31-2")
     query_no_loc = (
         GmodPathQueryBuilder.from_path(path_no_loc).without_locations().build()
     )
@@ -326,7 +326,7 @@ def main() -> None:  # noqa: C901
         if no_secondary_query.match(lid):
             print(f"   ✓ Matched: {lid}")
 
-    # 4f. Query requiring any secondary item
+    # 4f. Query with any or no secondary item
     print("\n4f. Match Local IDs that includes 411.1 with any secondary item:")
     any_secondary_query = (
         LocalIdQueryBuilder.empty()

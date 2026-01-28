@@ -37,11 +37,11 @@ from vista_sdk.transport.data_channel import (
     VersionInformation,
 )
 from vista_sdk.transport.ship_id import ShipId
-from vista_sdk.transport.time_series_data.time_series_data import (
-    ConfigurationReference as TimeSeriesConfigurationReference,
+from vista_sdk.transport.time_series_data import (
+    DataChannelId as TimeSeriesDataChannelId,
 )
 from vista_sdk.transport.time_series_data.time_series_data import (
-    DataChannelId as TimeSeriesDataChannelId,
+    ConfigurationReference as TimeSeriesConfigurationReference,
 )
 from vista_sdk.transport.time_series_data.time_series_data import (
     EventData,
@@ -254,6 +254,7 @@ def example_json_to_domain() -> None:
     print("=" * 60)
 
     # Create sample data
+    # This would typically be stored somewhere either as a JSON file or constructed from a database  # noqa: E501
     original = create_sample_data_channel_list()
     channel_count = len(original.data_channel_list)
     print(f"\n1. Created DataChannelListPackage with {channel_count} channels")
@@ -264,7 +265,8 @@ def example_json_to_domain() -> None:
 
     # Serialize to JSON string
     json_str = Serializer.serialize(json_dto)
-    print(f"3. Serialized to JSON ({len(json_str)} bytes)")
+    byte_count = len(json_str.encode("utf-8"))
+    print(f"3. Serialized to JSON ({byte_count} bytes)")
     print(f"   Preview: {json_str[:100]}...")
 
     # Deserialize JSON string to DTO
@@ -439,7 +441,8 @@ def example_time_series_json_roundtrip() -> None:
     # Convert to JSON DTO and serialize
     json_dto = JsonExtensions.TimeSeriesData.to_json_dto(original)
     json_str = Serializer.serialize(json_dto)
-    print(f"2. Serialized to JSON ({len(json_str)} bytes)")
+    byte_count = len(json_str.encode("utf-8"))
+    print(f"2. Serialized to JSON ({byte_count} bytes)")
 
     # Deserialize and convert back
     loaded_dto = Serializer.deserialize_time_series_data(json_str)
@@ -476,8 +479,9 @@ def example_time_series_json_to_domain() -> None:
     original = create_sample_time_series_data(dc_list_package)
     json_dto = JsonExtensions.TimeSeriesData.to_json_dto(original)
     json_str = Serializer.serialize(json_dto)
+    byte_count = len(json_str.encode("utf-8"))
 
-    print(f"\n1. Received JSON payload ({len(json_str)} bytes)")
+    print(f"\n1. Received JSON payload ({byte_count} bytes)")
     print(f"   Preview: {json_str[:80]}...")
 
     # Step 1: Deserialize JSON string to DTO

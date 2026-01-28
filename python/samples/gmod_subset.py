@@ -1,6 +1,6 @@
 """Asset Model Example: Building a Digital Twin Structure from GmodPaths.
 
-This example demonstrates how to build an asset model (digital twin structure)
+This example demonstrates one way to build an asset model (digital twin structure)
 from a list of GmodPaths. This is the foundation for:
 - Defining what equipment exists on your vessel
 - Creating hierarchical visualizations
@@ -36,10 +36,28 @@ class AssetNode:
     """
 
     node: GmodNode
-    path: GmodPath  # Full path to this node
+    path: GmodPath | None
     depth: int
-    children: list[AssetNode] = field(default_factory=list)
-    parent: AssetNode | None = field(default=None, repr=False)
+    children: list[AssetNode]
+    parent: AssetNode | None
+
+    def __init__(self, node: GmodNode, path: GmodPath | None, depth: int) -> None:
+        """Initialize an AssetNode."""
+        self.node = node
+        self.path = path
+        self.depth = depth
+        self.children = []
+        self.parent = None
+        # Common names are some time a combination of parent+child, so cache it here
+        # Example: Component "C101 - Reciprocating internal combustion engine" becomes "C101 - Propulsion engine" in context of 411.1  # noqa: E501
+        common_names = (
+            [c[1] for c in path.get_common_names()] if path is not None else []
+        )
+        self.display_name = (
+            common_names[-1]
+            if common_names
+            else node.metadata.common_name or node.metadata.name
+        )
 
     def add_child(self, child: AssetNode) -> None:
         """Add a child node."""
@@ -53,12 +71,15 @@ class AssetNode:
             "code": self.node.code,
             "name": self.node.metadata.name,
             "commonName": self.node.metadata.common_name,
+            "displayName": self.display_name,
             "category": self.node.metadata.category,
             "type": self.node.metadata.type,
             "location": str(self.node.location) if self.node.location else None,
             "children": [
                 child.to_dict()
-                for child in sorted(self.children, key=lambda c: str(c.path))
+                for child in sorted(
+                    self.children, key=lambda c: str(c.path) if c.path else ""
+                )
             ],
         }
 
@@ -66,10 +87,10 @@ class AssetNode:
         """Print the tree structure to console."""
         prefix = "  " * indent
         connector = "├─" if indent > 0 else ""
-        display_name = self.node.metadata.common_name or self.node.metadata.name
+        display_name = self.display_name
         location = f" [{self.node.location}]" if self.node.location else ""
         print(f"{prefix}{connector} {self.node.code}{location}: {display_name}")
-        for child in sorted(self.children, key=lambda c: str(c.path)):
+        for child in sorted(self.children, key=lambda c: str(c.path) if c.path else ""):
             child.print_tree(indent + 1)
 
 
@@ -255,24 +276,24 @@ def example_dual_engine_vessel() -> None:
     vis_version = VisVersion.v3_4a
 
     # Define the equipment that exists on this vessel
-    # Each path is a "leaf" item - the full hierarchy is implicit
+    # Each path is a "leaf" item e.g. ISO19848 Annex C short path - the full hierarchy is implicit  # noqa: E501
     asset_paths = [
-        # === Port Main Engine (411.1-1) with 6 cylinders ===
-        "411.1-1/C101/C101.31-1",  # Port engine, cylinder 1
-        "411.1-1/C101/C101.31-2",  # Port engine, cylinder 2
-        "411.1-1/C101/C101.31-3",  # Port engine, cylinder 3
-        "411.1-1/C101/C101.31-4",  # Port engine, cylinder 4
-        "411.1-1/C101/C101.31-5",  # Port engine, cylinder 5
-        "411.1-1/C101/C101.31-6",  # Port engine, cylinder 6
-        "411.1-1/C101/C101.63/S206",  # Port engine, charge air cooler, temperature sensor  # noqa: E501
-        # === Starboard Main Engine (411.1-2) with 6 cylinders ===
-        "411.1-2/C101/C101.31-1",  # Starboard engine, cylinder 1
-        "411.1-2/C101/C101.31-2",  # Starboard engine, cylinder 2
-        "411.1-2/C101/C101.31-3",  # Starboard engine, cylinder 3
-        "411.1-2/C101/C101.31-4",  # Starboard engine, cylinder 4
-        "411.1-2/C101/C101.31-5",  # Starboard engine, cylinder 5
-        "411.1-2/C101/C101.31-6",  # Starboard engine, cylinder 6
-        "411.1-2/C101/C101.63/S206",  # Starboard engine, charge air cooler, temp sensor
+        # === Port Main Engine (411.1-P) with 6 cylinders ===
+        "411.1-P/C101/C101.31-1",  # Port engine, cylinder 1
+        "411.1-P/C101/C101.31-2",  # Port engine, cylinder 2
+        "411.1-P/C101/C101.31-3",  # Port engine, cylinder 3
+        "411.1-P/C101/C101.31-4",  # Port engine, cylinder 4
+        "411.1-P/C101/C101.31-5",  # Port engine, cylinder 5
+        "411.1-P/C101/C101.31-6",  # Port engine, cylinder 6
+        "411.1-P/C101/C101.63/S206",  # Port engine, cooling system
+        # === Starboard Main Engine (411.1-S) with 6 cylinders ===
+        "411.1-S/C101/C101.31-1",  # Starboard engine, cylinder 1
+        "411.1-S/C101/C101.31-2",  # Starboard engine, cylinder 2
+        "411.1-S/C101/C101.31-3",  # Starboard engine, cylinder 3
+        "411.1-S/C101/C101.31-4",  # Starboard engine, cylinder 4
+        "411.1-S/C101/C101.31-5",  # Starboard engine, cylinder 5
+        "411.1-S/C101/C101.31-6",  # Starboard engine, cylinder 6
+        "411.1-S/C101/C101.63/S206",  # Starboard engine, cooling system
         # === Generator Sets ===
         "511.11-1/C101",  # Generator 1, diesel engine
         "511.11-2/C101",  # Generator 2, diesel engine
@@ -336,7 +357,7 @@ def example_json_export() -> None:
 
     model = AssetModel.from_path_strings(vis_version, asset_paths)
 
-    print("\n  JSON output (for D3.js, vis.js, etc.):")
+    print("\n  JSON output (for D3.js, etc.):")
     print()
     print(model.to_json(indent=2))
 

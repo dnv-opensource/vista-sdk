@@ -19,7 +19,7 @@ from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901
     """Demonstrate basic Vista SDK usage."""
     print("=== Vista SDK Basic Usage Example ===\n")
 
@@ -40,8 +40,27 @@ def main() -> None:
     print("   ✓ Codebooks loaded")
     print("   ✓ Locations loaded\n")
 
+    # Work with Gmod node
+    print("2. Working with Gmod nodes...")
+
+    engine_node = gmod["C101"]
+    print(f"   Node code: {engine_node.code}")
+    print(f"   Common name: {engine_node.metadata.common_name}")
+    print(f"   Category: {engine_node.metadata.category}")
+    print(f"   Is leaf: {engine_node.is_leaf_node}")
+
+    children = list(engine_node.children)
+    print(f"   Children ({len(children)}):")
+    for child in children[:5]:
+        print(f"     → {child.code}: {child.metadata.common_name}")
+
+    if len(children) > 5:
+        print(f"     ... and {len(children) - 5} more")
+
+    print()
+
     # Parse GMOD paths
-    print("2. Working with GMOD paths...")
+    print("3. Working with GMOD paths...")
     path_strings = ["411.1/C101.31-2", "612.21-1/C701.13/S93", "1021.1i-6P/H123"]
 
     paths = []
@@ -59,7 +78,7 @@ def main() -> None:
     print()
 
     # Work with codebooks
-    print("3. Using codebooks...")
+    print("4. Using codebooks...")
 
     # Get specific codebooks
     quantity_book = codebooks[CodebookName.Quantity]
@@ -79,7 +98,7 @@ def main() -> None:
     print()
 
     # Build Local IDs
-    print("4. Creating Local IDs...")
+    print("5. Creating Local IDs...")
 
     for i, path in enumerate(paths[:2]):  # Use first two paths
         try:
@@ -101,7 +120,7 @@ def main() -> None:
     print()
 
     # Demonstrate parsing existing Local IDs
-    print("5. Parsing existing Local IDs...")
+    print("6. Parsing existing Local IDs...")
 
     sample_local_ids = [
         "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",

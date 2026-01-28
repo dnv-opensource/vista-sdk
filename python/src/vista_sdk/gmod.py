@@ -240,8 +240,12 @@ class Gmod:
         arg2_type = type(args2)
         arg3_type = type(args3)
         arg4_type = type(args4)
-
-        if (
+        if args1_type is GmodNode and callable(args2):
+            handler = lambda handler, parents, node: handler(parents, node)  # noqa: E731
+            root_node = args1
+            state = args2
+            options = args3
+        elif (
             callable(args1)
             and self._check_signature(args1, 2)  # type: ignore
             and arg3_type is NoneType

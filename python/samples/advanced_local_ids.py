@@ -66,8 +66,8 @@ def main() -> None:  # noqa : C901
         )
 
         print(f"   Custom Local ID: {custom_local_id}")
-        print(f"   Quantity tag is custom: {custom_quantity.is_custom}")
-        print(f"   Position tag is custom: {custom_position.is_custom}")
+        print(f"   Quantity tag is custom: {custom_local_id.quantity.is_custom}")  # type: ignore
+        print(f"   Position tag is custom: {custom_local_id.position.is_custom}")  # type: ignore
 
     # 3. Error handling and validation
     print("\n3. Error Handling and Validation...")

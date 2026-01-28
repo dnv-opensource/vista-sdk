@@ -19,21 +19,13 @@ def main() -> None:  # noqa : C901
 
     # Initialize VIS
     vis = VIS()
-    version = VisVersion.v3_4a
+    version = VisVersion.v3_6a
     codebooks = vis.get_codebooks(version)
 
     # 1. Exploring available codebooks
     print("1. Available Codebooks...")
 
-    available_codebooks = [
-        CodebookName.Quantity,
-        CodebookName.Content,
-        CodebookName.Position,
-        CodebookName.State,
-        CodebookName.Command,
-        CodebookName.Type,
-        CodebookName.Detail,
-    ]
+    available_codebooks = list(CodebookName)
 
     for codebook_name in available_codebooks:
         codebook = codebooks[codebook_name]
@@ -43,18 +35,17 @@ def main() -> None:  # noqa : C901
         print()
 
     # 2. Creating standard metadata tags
-    print("2. Creating Standard Metadata Tags...")
+    print("2. Creating Metadata Tags...")
 
-    standard_tags = {
-        "quantity": ["temperature", "pressure", "flow"],
-        "position": ["centre", "inlet", "outlet"],
-        "state": ["opened", "closed", "high", "low"],
-        "content": ["cooling.water", "exhaust.gas", "fuel.oil"],
+    tags_to_create = {
+        CodebookName.Quantity: ["temperature", "pressure", "flow"],
+        CodebookName.Position: ["centre", "inlet", "outlet"],
+        CodebookName.State: ["opened", "closed", "high", "low"],
+        CodebookName.Content: ["cooling.water", "exhaust.gas", "fuel.oil"],
     }
 
-    for tag_type, values in standard_tags.items():
-        print(f"   {tag_type.title()} tags:")
-        codebook_name = getattr(CodebookName, tag_type.title())
+    for codebook_name, values in tags_to_create.items():
+        print(f"   {codebook_name.name} tags:")
         codebook = codebooks[codebook_name]
 
         for value in values:
@@ -135,16 +126,16 @@ def main() -> None:  # noqa : C901
     # 6. Exploring codebook content
     print("\n6. Exploring Codebook Content...")
 
-    quantity_codebook = codebooks[CodebookName.Quantity]
-    print("   Quantity codebook sample values:")
+    state_codebook = codebooks[CodebookName.State]
+    print("   State codebook sample values:")
 
     # Show first 10 standard values
-    values = list(quantity_codebook.standard_values)[:10]
+    values = list(state_codebook.standard_values)[:10]
     for value in values:
         print(f"     - {value}")
 
     print("   Quantity codebook sample groups:")
-    groups = list(quantity_codebook.groups)[:5]
+    groups = list(state_codebook.groups)[:5]
     for group in groups:
         print(f"     - {group}")
 

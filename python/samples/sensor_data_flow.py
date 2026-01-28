@@ -259,7 +259,8 @@ def main() -> None:
     if package:
         json_dto = JsonExtensions.TimeSeriesData.to_json_dto(package)
         json_str = Serializer.serialize(json_dto)
-        print(f"    ✓ {len(json_str)} bytes")
+        byte_count = len(json_str.encode("utf-8"))
+        print(f"    ✓ {byte_count} bytes")
         print(f"    Preview: {json_str[:80]}...")
 
     print("\n" + "=" * 60)

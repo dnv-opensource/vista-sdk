@@ -1,4 +1,4 @@
-using Vista.SDK.Internal;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Vista.SDK;
 
@@ -76,7 +76,7 @@ public class LocalId : ILocalId<LocalId>, IEquatable<LocalId>
 
     public static LocalId Parse(string localIdStr) => LocalIdBuilder.Parse(localIdStr).Build();
 
-    public static bool TryParse(string localIdStr, out ParsingErrors errors, out LocalId? localId)
+    public static bool TryParse(string localIdStr, out ParsingErrors errors, [MaybeNullWhen(false)] out LocalId localId)
     {
         if (!LocalIdBuilder.TryParse(localIdStr, out errors, out var localIdBuilder))
         {

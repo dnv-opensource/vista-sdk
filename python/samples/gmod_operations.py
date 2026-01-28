@@ -8,7 +8,9 @@ This example demonstrates working with GMOD (Generic Product Model):
 - Version conversion operations
 """
 
+from vista_sdk.gmod_node import GmodNode
 from vista_sdk.gmod_path import GmodPath
+from vista_sdk.traversal_handler_result import TraversalHandlerResult
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
 
@@ -68,12 +70,16 @@ def main() -> None:  # noqa : C901
 
     print(f"   Analyzing path: {deep_path}")
     print("   Full path traversal:")
-
+    common_names = {c[0]: c[1] for c in deep_path.get_common_names()}
     for depth, node in deep_path.get_full_path():
         if depth == 0:
             continue  # Skip root
+        # Common names must be looked up as they often are a combination between parent and child  # noqa: E501
+        common_name = common_names.get(depth)
+        if common_name is None:
+            common_name = node.metadata.common_name
         indent = "     " * (depth - 1)
-        print(f"   {indent}Depth {depth}: {node.code} - {node.metadata.common_name}")
+        print(f"   {indent}Depth {depth}: {node.code} - {common_name}")
 
     # 4. Node properties and metadata
     print("\n4. Node Properties and Metadata...")
@@ -81,13 +87,18 @@ def main() -> None:  # noqa : C901
     sample_nodes = ["411.1", "C101.31", "S206"]
 
     for node_code in sample_nodes:
+        # Access through try_get pattern...
+        success, lookup_node = gmod.try_get_node(node_code)
         try:
-            node = gmod[node_code]
+            # Or through direct lookup
+            lookup_node = gmod[node_code]
+            if lookup_node is None:
+                raise ValueError(f"Node {node_code} not found")
             print(f"   Node: {node_code}")
-            print(f"     → Name: {node.metadata.name}")
-            print(f"     → Common Name: {node.metadata.common_name}")
-            print(f"     → Is Mappable: {node.is_mappable}")
-            print(f"     → Has Children: {len(list(node.children)) > 0}")
+            print(f"     → Name: {lookup_node.metadata.name}")
+            print(f"     → Common Name: {lookup_node.metadata.common_name}")
+            print(f"     → Is Mappable: {lookup_node.is_mappable}")
+            print(f"     → Has Children: {len(lookup_node.children) > 0}")
             print()
         except Exception as e:
             print(f"   ✗ Node {node_code} not found: {e}")
@@ -112,8 +123,8 @@ def main() -> None:  # noqa : C901
 
     try:
         conversion_tests = [
-            ("411.1/C101.72/I101", VisVersion.v3_4a, VisVersion.v3_5a),
-            ("612.21/C701.13/S93", VisVersion.v3_5a, VisVersion.v3_6a),
+            ("111.3/H402", VisVersion.v3_7a, VisVersion.v3_8a),
+            ("846/G203", VisVersion.v3_7a, VisVersion.v3_8a),
         ]
 
         for old_path_str, source_version, target_version in conversion_tests:
@@ -124,6 +135,7 @@ def main() -> None:  # noqa : C901
                 # Convert using VIS convert_path method
                 new_path = vis.convert_path(source_version, old_path, target_version)
                 if new_path:
+                    # No changes are very common
                     print(f"   ✓ Converted: {old_path_str} → {new_path}")
                 else:
                     print(f"   ✗ Conversion returned None for {old_path_str}")
@@ -132,6 +144,43 @@ def main() -> None:  # noqa : C901
 
     except Exception as e:
         print(f"   ⚠ Version conversion not available: {e}")
+
+    print("\n7. GMOD Traversal...")
+    node_count = 0
+
+    def simple_handler(_: list[GmodNode], __: GmodNode) -> TraversalHandlerResult:
+        nonlocal node_count
+        node_count += 1
+        return TraversalHandlerResult.CONTINUE
+
+    completed = gmod.traverse(simple_handler)
+    print(f"   Traversal completed: {completed}, Nodes visited: {node_count}")
+    first_leaf: GmodNode | None = None
+
+    def early_stop_handler(_: list[GmodNode], node: GmodNode) -> TraversalHandlerResult:
+        nonlocal first_leaf
+        if node.is_leaf_node:
+            first_leaf = node
+            return TraversalHandlerResult.STOP
+        return TraversalHandlerResult.CONTINUE
+
+    completed = gmod.traverse(early_stop_handler)
+    print(f"   Traversal completed: {completed}, First leaf node: {first_leaf}")
+
+    start_node = gmod["411"]
+    child_cound = 0
+
+    def from_node_handler(
+        _: list[GmodNode],
+        __: GmodNode,
+    ) -> TraversalHandlerResult:
+        nonlocal child_cound
+        child_cound += 1
+        return TraversalHandlerResult.CONTINUE
+
+    completed = gmod.traverse(start_node, from_node_handler)
+
+    print(f"   Traversal completed: {completed}, Nodes under '411': {child_cound}")
 
     print("\n=== GMOD operations completed! ===")
 

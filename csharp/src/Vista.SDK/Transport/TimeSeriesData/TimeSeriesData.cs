@@ -34,6 +34,13 @@ public sealed record ConfigurationReference
 {
     public required string Id { get; set; }
     public required DateTimeOffset TimeStamp { get; set; }
+
+    public static ConfigurationReference From(DataChannelListPackage dc) =>
+        new()
+        {
+            Id = dc.Package.Header.DataChannelListId.Id,
+            TimeStamp = dc.Package.Header.DataChannelListId.TimeStamp,
+        };
 }
 
 public sealed record TimeSeriesData
