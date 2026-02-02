@@ -16,16 +16,19 @@ jobs:
   build:
     name: Build, test and publish
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC
+      contents: read
     defaults:
       run:
         working-directory: js/
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 24
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
@@ -40,5 +43,3 @@ jobs:
       - name: Publish
         if: ${{ success() && !github.base_ref }}
         run: cp ../README.md ./README.md; npm version $(node -p "require('./package.json').version").$(node -p "${{ github.run_number }}"); npm publish --access public --tag preview;
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
