@@ -1,8 +1,7 @@
 import { CodebooksDto } from "./types/CodebookDto";
 import { GmodDto } from "./types/GmodDto";
-import fetch from "cross-fetch";
-import { VisVersion, VisVersionExtension } from "./VisVersion";
 import { LocationsDto } from "./types/LocationDto";
+import { VisVersion, VisVersionExtension } from "./VisVersion";
 
 export class Client {
     private static readonly API_URL = "https://mavista.azureedge.net/vis/";

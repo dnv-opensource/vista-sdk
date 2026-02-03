@@ -109,10 +109,24 @@ describe("TimeSeriesDataPackage", () => {
     });
 
     it("JSONSchema validation", async () => {
-        var sample = await readFile('../schemas/json/TimeSeriesData.sample.json', { encoding: 'utf8', flag: 'r' });
-        var schema = await readFile('../schemas/json/TimeSeriesData.schema.json', { encoding: 'utf8', flag: 'r' });
+        var sample = await readFile(
+            "../schemas/json/TimeSeriesData.sample.json",
+            { encoding: "utf8", flag: "r" }
+        );
+        var schema = await readFile(
+            "../schemas/json/TimeSeriesData.schema.json",
+            { encoding: "utf8", flag: "r" }
+        );
 
-        const result = validate(JSON.parse(sample), JSON.parse(schema));
+        // Convert URN $id to URL format for jsonschema library compatibility with Node 24+
+        const schemaObj = JSON.parse(schema);
+        if (schemaObj.$id?.startsWith("urn:")) {
+            schemaObj.$id =
+                "https://standards.iso.org/iso/19848/" +
+                schemaObj.$id.split(":").pop();
+        }
+
+        const result = validate(JSON.parse(sample), schemaObj);
         expect(result.errors).toHaveLength(0);
         expect(result.valid).toBe(true);
     });
