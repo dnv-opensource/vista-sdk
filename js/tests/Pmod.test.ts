@@ -5,13 +5,13 @@ import {
     NotRelevant,
     Pmod,
     PmodNode,
+    VIS,
     VisVersion,
     VisVersions,
 } from "../lib";
 import { TraversalHandlerResult } from "../lib/types/Gmod";
 import { Ok } from "../lib/types/Result";
 import { StrippedNode } from "../lib/types/Tree";
-import { getVIS, getVISMap } from "./Fixture";
 
 // Used for testing
 type VmodNode = {
@@ -26,10 +26,6 @@ type VmodNode = {
 describe("Pmod", () => {
     const version = VisVersion.v3_4a;
 
-    beforeAll(() => {
-        return getVISMap();
-    });
-
     var testDataArr = Object.entries(testData).filter(
         ([k, _]) => k !== "default"
     );
@@ -43,9 +39,13 @@ describe("Pmod", () => {
         }
     );
 
-    it.each(testDataArr)("From LocalIds", (visVersion, testData) => {
+    it.each(testDataArr)("From LocalIds", async (visVersion, testData) => {
         var version = VisVersions.parse(visVersion);
-        const { gmod, codebooks: codeBooks, locations } = getVIS(version);
+        const {
+            gmod,
+            codebooks: codeBooks,
+            locations,
+        } = await VIS.instance.getVIS(version);
 
         const localIds = testData.localIds.map((localIdStr) =>
             LocalId.parse(localIdStr, gmod, codeBooks, locations)
@@ -76,119 +76,129 @@ describe("Pmod", () => {
         expect(pmod.isValid).toBeTruthy();
     });
 
-    it.each(testDataArr)("Traverse pmod from node", (visVersion, testData) => {
-        var version = VisVersions.parse(visVersion);
-        const { gmod, codebooks: codeBooks, locations } = getVIS(version);
+    it.each(testDataArr)(
+        "Traverse pmod from node",
+        async (visVersion, testData) => {
+            var version = VisVersions.parse(visVersion);
+            const {
+                gmod,
+                codebooks: codeBooks,
+                locations,
+            } = await VIS.instance.getVIS(version);
 
-        const localIds = testData.localIds.map((localIdStr) =>
-            LocalId.parse(localIdStr, gmod, codeBooks, locations)
-        );
+            const localIds = testData.localIds.map((localIdStr) =>
+                LocalId.parse(localIdStr, gmod, codeBooks, locations)
+            );
 
-        const pmod = Pmod.createFromLocalIds(VisVersion.v3_4a, localIds, {
-            imoNumber: ImoNumber.create(1234567),
-        });
+            const pmod = Pmod.createFromLocalIds(VisVersion.v3_4a, localIds, {
+                imoNumber: ImoNumber.create(1234567),
+            });
 
-        const rootNodeCode = "411.1";
+            const rootNodeCode = "411.1";
 
-        const rootNode = pmod.getNodesByCode(rootNodeCode);
-        const rootPath = gmod.tryParseFromFullPath(rootNode[0].id, locations);
+            const rootNode = pmod.getNodesByCode(rootNodeCode);
+            const rootPath = gmod.tryParseFromFullPath(
+                rootNode[0].id,
+                locations
+            );
 
-        const context = {
-            nodes: [] as VmodNode[],
-            nodeMap: new Map<string, VmodNode>(
-                rootNode[0].parents
-                    .reverse()
-                    .reduce<[string, VmodNode][]>((c, p, index, arr) => {
-                        if (index === 0) {
-                            c.push([
+            const context = {
+                nodes: [] as VmodNode[],
+                nodeMap: new Map<string, VmodNode>(
+                    rootNode[0].parents
+                        .reverse()
+                        .reduce<[string, VmodNode][]>((c, p, index, arr) => {
+                            if (index === 0) {
+                                c.push([
+                                    p.id,
+                                    {
+                                        key: p.id,
+                                        children: [],
+                                        code: p.code,
+                                        depth: 0,
+                                        merge: false,
+                                        skip: false,
+                                    },
+                                ]);
+                                return c;
+                            }
+
+                            c.unshift([
                                 p.id,
                                 {
                                     key: p.id,
-                                    children: [],
+                                    children: [c[index - 1][1]],
                                     code: p.code,
-                                    depth: 0,
+                                    depth: index,
                                     merge: false,
                                     skip: false,
                                 },
                             ]);
                             return c;
-                        }
+                        }, [])
+                        .reverse()
+                ),
+                iter: 0,
+            };
 
-                        c.unshift([
-                            p.id,
-                            {
-                                key: p.id,
-                                children: [c[index - 1][1]],
-                                code: p.code,
-                                depth: index,
-                                merge: false,
-                                skip: false,
-                            },
-                        ]);
-                        return c;
-                    }, [])
-                    .reverse()
-            ),
-            iter: 0,
-        };
+            const createKey = (parents: PmodNode[], node: PmodNode) =>
+                parents
+                    .concat(node)
+                    .map((n) => n.toString())
+                    .join("/");
 
-        const createKey = (parents: PmodNode[], node: PmodNode) =>
-            parents
-                .concat(node)
-                .map((n) => n.toString())
-                .join("/");
+            pmod.traverse(
+                (parents, node, context) => {
+                    const key = createKey(parents, node);
 
-        pmod.traverse(
-            (parents, node, context) => {
-                const key = createKey(parents, node);
+                    if (context.nodeMap.has(key))
+                        return TraversalHandlerResult.Continue;
 
-                if (context.nodeMap.has(key))
+                    const vmodNode: VmodNode = {
+                        key,
+                        children: [],
+                        depth: node.depth,
+                        code: node.code,
+                        merge: false,
+                        skip: false,
+                    };
+
+                    context.nodeMap.set(key, vmodNode);
+                    if (context.nodes.length === 0) {
+                        context.nodes.push(vmodNode);
+                        return TraversalHandlerResult.Continue;
+                    }
+
+                    let parentKey = createKey(
+                        parents,
+                        parents.splice(parents.length - 1, 1)[0]
+                    );
+
+                    let vmodParent = context.nodeMap.get(parentKey);
+                    if (!vmodParent)
+                        throw new Error("Unexpected state: should find parent");
+
+                    vmodParent.children.push(vmodNode);
                     return TraversalHandlerResult.Continue;
+                },
+                { state: context, fromPath: rootPath }
+            );
 
-                const vmodNode: VmodNode = {
-                    key,
-                    children: [],
-                    depth: node.depth,
-                    code: node.code,
-                    merge: false,
-                    skip: false,
-                };
+            expect(context.nodes[0].code).toEqual(rootNodeCode);
+        }
+    );
 
-                context.nodeMap.set(key, vmodNode);
-                if (context.nodes.length === 0) {
-                    context.nodes.push(vmodNode);
-                    return TraversalHandlerResult.Continue;
-                }
-
-                let parentKey = createKey(
-                    parents,
-                    parents.splice(parents.length - 1, 1)[0]
-                );
-
-                let vmodParent = context.nodeMap.get(parentKey);
-                if (!vmodParent)
-                    throw new Error("Unexpected state: should find parent");
-
-                vmodParent.children.push(vmodNode);
-                return TraversalHandlerResult.Continue;
-            },
-            { state: context, fromPath: rootPath }
-        );
-
-        expect(context.nodes[0].code).toEqual(rootNodeCode);
-    });
-
-    it.each(fullPaths)("Tree parse paths %s", (visVersion, testPath) => {
+    it.each(fullPaths)("Tree parse paths %s", async (visVersion, testPath) => {
         var version = VisVersions.parse(visVersion);
-        const { gmod, locations } = getVIS(version);
+        const { gmod, locations } = await VIS.instance.getVIS(version);
 
         const path = gmod.parseFromFullPath(testPath, locations);
         expect(path).toBeTruthy();
     });
 
-    it.each(testDataArr)("Tree", (visVersion, testData) => {
+    it.each(testDataArr)("Tree", async (visVersion, testData) => {
         var version = VisVersions.parse(visVersion);
-        const { gmod, locations } = getVIS(version);
+        const { gmod, locations } = await VIS.instance.getVIS(version);
 
         const paths = testData.fullPaths.map((path) =>
             gmod.parseFromFullPath(path, locations)
