@@ -1,26 +1,24 @@
-import { LocationBuilder, VIS, VisVersion, VisVersions } from "../lib";
 import * as testData from "../../testdata/Locations.json";
+import { LocationBuilder, VIS, VisVersion, VisVersions } from "../lib";
 import { LocationParsingErrorBuilder } from "../lib/internal/LocationParsingErrorBuilder";
-import { getVIS, getVISMap } from "./Fixture";
 
 describe("Location", () => {
     const version = VisVersion.v3_4a;
 
-    beforeAll(() => {
-        return getVISMap();
-    });
+    it.each(VisVersions.all)(
+        "Location loads for VIS version %s",
+        async (version) => {
+            const { locations } = await VIS.instance.getVIS(version);
 
-    it.each(VisVersions.all)("Location loads for VIS version %s", (version) => {
-        const location = getVIS(version).locations;
-
-        expect(location).toBeTruthy();
-        expect(location.groups).toBeTruthy();
-    });
+            expect(locations).toBeTruthy();
+            expect(locations.groups).toBeTruthy();
+        }
+    );
 
     it.each(testData.locations.map((l) => [l]))(
         "Location parsing - %s",
-        ({ value, success, output, expectedErrorMessages }) => {
-            const locations = getVIS(version).locations;
+        async ({ value, success, output, expectedErrorMessages }) => {
+            const { locations } = await VIS.instance.getVIS(version);
 
             const errorBuilder = new LocationParsingErrorBuilder();
             const createdLocation = locations.tryParse(value, errorBuilder);
@@ -42,15 +40,15 @@ describe("Location", () => {
         }
     );
 
-    it("Location parsing throws", () => {
-        const locations = getVIS(version).locations;
+    it("Location parsing throws", async () => {
+        const { locations } = await VIS.instance.getVIS(version);
 
         expect(() => locations.parse(null!)).toThrowError();
         expect(() => locations.parse(undefined!)).toThrowError();
     });
 
-    it("Location builder", () => {
-        const locations = getVIS(version).locations;
+    it("Location builder", async () => {
+        const { locations } = await VIS.instance.getVIS(version);
 
         const locationStr = "21FIPU";
         var location = locations.parse(locationStr);

@@ -1,20 +1,15 @@
 import { CodebookName, VIS } from "../lib";
-import { getVIS, getVISMap } from "./Fixture";
 
 const visVersion = VIS.latestVisVersion;
 
-beforeAll(() => {
-    return getVISMap();
-});
-
-it("Codebooks load", () => {
-    const { codebooks } = getVIS(visVersion);
+it("Codebooks load", async () => {
+    const { codebooks } = await VIS.instance.getVIS(visVersion);
     expect(codebooks).toBeTruthy();
     expect(codebooks.getCodebook(CodebookName.Position)).toBeTruthy();
 });
 
-it("Codebooks equality", () => {
-    const { codebooks } = getVIS(visVersion);
+it("Codebooks equality", async () => {
+    const { codebooks } = await VIS.instance.getVIS(visVersion);
     const codebook = codebooks.getCodebook(CodebookName.Position);
     expect(codebook.hasStandardValue("centre")).toBe(true);
 });

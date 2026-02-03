@@ -3,15 +3,12 @@ import {
     ParsingState,
     UniversalId,
     UniversalIdBuilder,
+    VIS,
     VisVersion,
 } from "../lib";
-import { getVIS, getVISMap } from "./Fixture";
 
 describe("UniversalId", () => {
     const visVersion = VisVersion.v3_4a;
-    beforeAll(() => {
-        return getVISMap();
-    });
     const validTestData = [
         "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
         "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/1021.1i-6P/H123/meta/qty-volume/cnt-cargo/pos~percentage",
@@ -22,8 +19,10 @@ describe("UniversalId", () => {
         "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/411.1/C101/meta/qty-temperature",
     ];
 
-    it("Valid parsing", () => {
-        const { gmod, codebooks, locations } = getVIS(visVersion);
+    it("Valid parsing", async () => {
+        const { gmod, codebooks, locations } = await VIS.instance.getVIS(
+            visVersion
+        );
 
         validTestData.forEach((testData) => {
             const errorBuilder = new LocalIdParsingErrorBuilder();
@@ -65,8 +64,10 @@ describe("UniversalId", () => {
         },
     ];
 
-    it("Invalid parsing", () => {
-        const { gmod, codebooks, locations } = getVIS(visVersion);
+    it("Invalid parsing", async () => {
+        const { gmod, codebooks, locations } = await VIS.instance.getVIS(
+            visVersion
+        );
 
         invalidTestData.forEach((data) => {
             const errorBuilder = LocalIdParsingErrorBuilder.create();

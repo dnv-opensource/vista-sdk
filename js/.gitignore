@@ -1,3 +1,5 @@
 dist
 node_modules
 resources
+# Test suite cache
+tests/setup/.vis-cache

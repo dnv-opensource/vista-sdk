@@ -1,25 +1,19 @@
-import { Gmod, GmodNode, GmodPath, VisVersion, VisVersions } from "../lib";
+import { Gmod, GmodNode, GmodPath, VIS, VisVersion, VisVersions } from "../lib";
 import { TraversalHandlerResult } from "../lib/types/Gmod";
 import { naturalSort } from "../lib/util/util";
-import { VIS } from "../lib/VIS";
-import { getVIS, getVISMap } from "./Fixture";
 
 const version = VIS.latestVisVersion;
 const testVersions = VisVersions.all;
 
-beforeAll(async () => {
-    await getVISMap();
-});
-
-it.each(testVersions)("Gmod loads %s", (version) => {
-    const { gmod } = getVIS(version);
+it.each(testVersions)("Gmod loads %s", async (version) => {
+    const { gmod } = await VIS.instance.getVIS(version);
 
     expect(gmod).toBeTruthy();
     expect(gmod.tryGetNode("400a")).toBeTruthy();
 });
 
-it("Gmod sorted", () => {
-    const { gmod } = getVIS(version);
+it("Gmod sorted", async () => {
+    const { gmod } = await VIS.instance.getVIS(version);
     const context = { isSorted: true };
     gmod.traverse(
         (_, node, context) => {
@@ -41,8 +35,8 @@ it("Gmod sorted", () => {
     expect(context.isSorted).toBe(true);
 });
 
-it("Gmod node equality", () => {
-    const { gmod, locations } = getVIS(version);
+it("Gmod node equality", async () => {
+    const { gmod, locations } = await VIS.instance.getVIS(version);
 
     const node1 = gmod.getNode("411.1");
     const node2 = gmod.getNode("411.1");
@@ -69,8 +63,8 @@ const expectedMaxes = new Map<VisVersion, { max: string; count: number }>([
     [VisVersion.v3_10a, { max: "H346.11113", count: 6555 }],
 ]);
 
-it.each(testVersions)("Test gmod properties %s", (visVersion) => {
-    const { gmod } = getVIS(visVersion);
+it.each(testVersions)("Test gmod properties %s", async (visVersion) => {
+    const { gmod } = await VIS.instance.getVIS(visVersion);
 
     expect(gmod).not.toBeNull();
 
@@ -135,7 +129,7 @@ it.each(testVersions)("Test gmod properties %s", (visVersion) => {
 });
 
 it.each(testVersions)("Gmod lookup %s", async (visVersion) => {
-    const { gmod } = getVIS(visVersion);
+    const { gmod } = await VIS.instance.getVIS(visVersion);
 
     expect(gmod).not.toBeNull();
 
@@ -188,16 +182,16 @@ it.each(testVersions)("Gmod lookup %s", async (visVersion) => {
     expect(gmod.tryGetNode("ag✅")).toBeUndefined();
 });
 
-it.each(testVersions)("Gmod rootnode children", (version) => {
-    const { gmod } = getVIS(version);
+it.each(testVersions)("Gmod rootnode children", async (version) => {
+    const { gmod } = await VIS.instance.getVIS(version);
 
     const node = gmod.rootNode;
 
     expect(node.children).not.toHaveLength(0);
 });
 
-it("Normal assignments", () => {
-    const { gmod } = getVIS(VisVersion.v3_4a);
+it("Normal assignments", async () => {
+    const { gmod } = await VIS.instance.getVIS(VisVersion.v3_4a);
 
     const node1 = gmod.getNode("411.3");
 
@@ -208,8 +202,8 @@ it("Normal assignments", () => {
     expect(node2.productType).toBeFalsy();
 });
 
-it("Product selection", () => {
-    const { gmod } = getVIS(VisVersion.v3_4a);
+it("Product selection", async () => {
+    const { gmod } = await VIS.instance.getVIS(VisVersion.v3_4a);
 
     const node = gmod.getNode("CS1");
 
@@ -234,8 +228,8 @@ const testMappabilityData = [
     { input: "C101.211", output: false },
 ];
 
-it("Mappability", () => {
-    const { gmod } = getVIS(VisVersion.v3_4a);
+it("Mappability", async () => {
+    const { gmod } = await VIS.instance.getVIS(VisVersion.v3_4a);
 
     testMappabilityData.forEach(({ input, output }) => {
         const node = gmod.getNode(input);
@@ -243,8 +237,8 @@ it("Mappability", () => {
     });
 });
 
-it("Full traversal", () => {
-    const { gmod } = getVIS(version);
+it("Full traversal", async () => {
+    const { gmod } = await VIS.instance.getVIS(version);
 
     const context: {
         paths: Map<string, GmodPath>;
@@ -282,8 +276,8 @@ it("Full traversal", () => {
     expect(context.paths.size).toBe(punctureTests.length);
 });
 
-it("Full traversal with options", () => {
-    const { gmod } = getVIS(version);
+it("Full traversal with options", async () => {
+    const { gmod } = await VIS.instance.getVIS(version);
 
     const context: {
         readonly maxTraversalOccurrence: number;
@@ -313,8 +307,8 @@ it("Full traversal with options", () => {
     expect(context.maxOccurrence).toEqual(context.maxTraversalOccurrence);
 });
 
-it("Partial traversal", () => {
-    const { gmod } = getVIS(version);
+it("Partial traversal", async () => {
+    const { gmod } = await VIS.instance.getVIS(version);
 
     const context = { count: 0 };
     const stop = 5;
@@ -333,8 +327,8 @@ it("Partial traversal", () => {
     expect(context.count).toBe(stop);
 });
 
-it("Full traversal from", () => {
-    const { gmod } = getVIS(version);
+it("Full traversal from", async () => {
+    const { gmod } = await VIS.instance.getVIS(version);
 
     const context = { invalidPaths: [] as GmodPath[] };
     const rootCode = "400a";

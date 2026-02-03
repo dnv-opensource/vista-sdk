@@ -1,7 +1,6 @@
-import { CodebookName, Experimental, VisVersion } from "../../lib";
+import { CodebookName, Experimental, VIS, VisVersion } from "../../lib";
 import { DataId } from "../../lib/experimental";
 import { PMSLocalId } from "../../lib/experimental/PMSLocalId";
-import { getVIS, getVISMap } from "../Fixture";
 
 type Input = {
     primaryItem: string;
@@ -14,10 +13,6 @@ type Input = {
 
 describe("LocalId", () => {
     const visVersion = VisVersion.v3_6a;
-
-    beforeAll(() => {
-        return getVISMap();
-    });
 
     const createInput = (
         primaryItem: string,
@@ -128,8 +123,10 @@ describe("LocalId", () => {
 
     it.each(testData)(
         "LocalId valid build for $output",
-        ({ input, output }) => {
-            const { gmod, codebooks, locations } = getVIS(visVersion);
+        async ({ input, output }) => {
+            const { gmod, codebooks, locations } = await VIS.instance.getVIS(
+                visVersion
+            );
 
             const primaryItem = gmod.parsePath(input.primaryItem, locations);
             const secondaryItem = input.secondaryItem
@@ -162,8 +159,10 @@ describe("LocalId", () => {
         }
     );
 
-    it.each(testData)("LocalId equality for $output", ({ input }) => {
-        const { gmod, codebooks, locations } = getVIS(visVersion);
+    it.each(testData)("LocalId equality for $output", async ({ input }) => {
+        const { gmod, codebooks, locations } = await VIS.instance.getVIS(
+            visVersion
+        );
 
         const primaryItem = gmod.parsePath(input.primaryItem, locations);
         const secondaryItem = input.secondaryItem
@@ -213,38 +212,45 @@ describe("LocalId", () => {
         expect(localId).not.toBe(otherLocalId);
     });
 
-    it.each(testData)("Without MaintenanceCategory $output", ({ input }) => {
-        const { gmod, codebooks, locations } = getVIS(visVersion);
-
-        const primaryItem = gmod.parsePath(input.primaryItem, locations);
-        const secondaryItem = input.secondaryItem
-            ? gmod.parsePath(input.secondaryItem, locations)
-            : undefined;
-
-        let localId = Experimental.PMSLocalIdBuilder.create(visVersion)
-            .withPrimaryItem(primaryItem)
-            .tryWithSecondaryItem(secondaryItem)
-            .withVerboseMode(input.verbose)
-            .tryWithMetadataTag(
-                codebooks.tryCreateTag(
-                    CodebookName.MaintenanceCategory,
-                    input.mainenanceCategory
-                )
-            )
-            .tryWithMetadataTag(
-                codebooks.tryCreateTag(CodebookName.Content, input.content)
-            )
-            .tryWithMetadataTag(
-                codebooks.tryCreateTag(
-                    CodebookName.ActivityType,
-                    input.activityType
-                )
+    it.each(testData)(
+        "Without MaintenanceCategory $output",
+        async ({ input }) => {
+            const { gmod, codebooks, locations } = await VIS.instance.getVIS(
+                visVersion
             );
 
-        localId = localId.withoutMetadataTag(CodebookName.MaintenanceCategory);
+            const primaryItem = gmod.parsePath(input.primaryItem, locations);
+            const secondaryItem = input.secondaryItem
+                ? gmod.parsePath(input.secondaryItem, locations)
+                : undefined;
 
-        expect(localId.maintenanceCategory).toBeFalsy();
-    });
+            let localId = Experimental.PMSLocalIdBuilder.create(visVersion)
+                .withPrimaryItem(primaryItem)
+                .tryWithSecondaryItem(secondaryItem)
+                .withVerboseMode(input.verbose)
+                .tryWithMetadataTag(
+                    codebooks.tryCreateTag(
+                        CodebookName.MaintenanceCategory,
+                        input.mainenanceCategory
+                    )
+                )
+                .tryWithMetadataTag(
+                    codebooks.tryCreateTag(CodebookName.Content, input.content)
+                )
+                .tryWithMetadataTag(
+                    codebooks.tryCreateTag(
+                        CodebookName.ActivityType,
+                        input.activityType
+                    )
+                );
+
+            localId = localId.withoutMetadataTag(
+                CodebookName.MaintenanceCategory
+            );
+
+            expect(localId.maintenanceCategory).toBeFalsy();
+        }
+    );
 
     it.each(testData)("Parsing", async ({ output }) => {
         const pmsLocalId = await PMSLocalId.parseAsync(output);

@@ -1,21 +1,18 @@
 import { LocationBuilder, VIS } from "../lib";
-import { getVIS, getVISMap } from "./Fixture";
 
 describe("Immutability test", () => {
-    beforeAll(() => {
-        return getVISMap();
-    });
-
-    it("GmodNode", () => {
-        const { gmod, locations } = getVIS(VIS.latestVisVersion);
+    it("GmodNode", async () => {
+        const { gmod, locations } = await VIS.instance.getVIS(
+            VIS.latestVisVersion
+        );
         const node = gmod.getNode("411.1");
         const other = node.withLocation(locations.parse("1"));
         expect(node).not.toEqual(other);
         expect(node).not.toBe(other);
     });
 
-    it("LocationsBuilder", () => {
-        const { locations } = getVIS(VIS.latestVisVersion);
+    it("LocationsBuilder", async () => {
+        const { locations } = await VIS.instance.getVIS(VIS.latestVisVersion);
         const builder = LocationBuilder.create(locations);
         const location = builder.build();
 
@@ -28,8 +25,10 @@ describe("Immutability test", () => {
         expect(location).not.toBe(otherLocation);
     });
 
-    it("GmodPath", () => {
-        const { gmod, locations } = getVIS(VIS.latestVisVersion);
+    it("GmodPath", async () => {
+        const { gmod, locations } = await VIS.instance.getVIS(
+            VIS.latestVisVersion
+        );
         const path = gmod.parseFromFullPath(
             "VE/400a/410/411/411i/411.1/CS1/C101/C101.3/C101.3i/C101.31/C101.311-1",
             locations
@@ -67,8 +66,10 @@ describe("Immutability test", () => {
         expect(path.parents[parentIndex]).not.toBe(other.parents[parentIndex]);
     });
 
-    it("Individualizable sets", () => {
-        const { gmod, locations } = getVIS(VIS.latestVisVersion);
+    it("Individualizable sets", async () => {
+        const { gmod, locations } = await VIS.instance.getVIS(
+            VIS.latestVisVersion
+        );
         const path = gmod.parseFromFullPath(
             "VE/400a/410/411/411i/411.1/CS1/C101/C101.3/C101.3i/C101.31/C101.311-1",
             locations
