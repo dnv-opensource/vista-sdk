@@ -43,8 +43,8 @@ describe("Location", () => {
     it("Location parsing throws", async () => {
         const { locations } = await VIS.instance.getVIS(version);
 
-        expect(() => locations.parse(null!)).toThrowError();
-        expect(() => locations.parse(undefined!)).toThrowError();
+        expect(() => locations.parse(null!)).toThrow();
+        expect(() => locations.parse(undefined!)).toThrow();
     });
 
     it("Location builder", async () => {
@@ -72,12 +72,12 @@ describe("Location", () => {
         expect(builder.transverse).toEqual("I");
         expect(builder.longitudinal).toEqual("F");
 
-        expect(() => (builder = builder.withValue("X"))).toThrowError();
-        expect(() => (builder = builder.withNumber(-1))).toThrowError();
-        expect(() => (builder = builder.withNumber(0))).toThrowError();
-        expect(() => (builder = builder.withNumber(1.5))).toThrowError();
-        expect(() => (builder = builder.withSide("A"))).toThrowError();
-        expect(() => (builder = builder.withValue("a"))).toThrowError();
+        expect(() => (builder = builder.withValue("X"))).toThrow();
+        expect(() => (builder = builder.withNumber(-1))).toThrow();
+        expect(() => (builder = builder.withNumber(0))).toThrow();
+        expect(() => (builder = builder.withNumber(1.5))).toThrow();
+        expect(() => (builder = builder.withSide("A"))).toThrow();
+        expect(() => (builder = builder.withValue("a"))).toThrow();
 
         expect(builder.build()).toEqual(location);
 
