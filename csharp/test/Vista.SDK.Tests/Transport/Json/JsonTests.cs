@@ -174,7 +174,7 @@ public class JsonTests
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
     [InlineData("schemas/json/DataChannelList.sample.json")]
-    // [InlineData("schemas/json/DataChannelList.sample.compact.json")]
+    [InlineData("schemas/json/DataChannelList.sample.compact.json")]
     public async Task Test_DataChannelList_Domain_Model_Roundtrip(string file)
     {
         await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -191,7 +191,7 @@ public class JsonTests
     [Theory]
     [InlineData("Transport/Json/_files/DataChannelList.json")]
     [InlineData("schemas/json/DataChannelList.sample.json")]
-    // [InlineData("schemas/json/DataChannelList.sample.compact.json")]
+    [InlineData("schemas/json/DataChannelList.sample.compact.json")]
     public async Task Test_DataChannelListId_Date_Consistency(string file)
     {
         await using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
