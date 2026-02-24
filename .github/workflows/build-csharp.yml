@@ -16,6 +16,8 @@ jobs:
   build:
     name: Build, test and publish
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Enable GitHub OIDC token issuance for trusted publishing
     defaults:
       run:
         working-directory: csharp/
@@ -50,6 +52,13 @@ jobs:
       - name: Pack
         run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.2.0-preview-$GITHUB_RUN_NUMBER
 
+      - name: NuGet login (OIDC)
+        if: ${{ success() && !github.base_ref }}
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push
         if: ${{ success() && !github.base_ref }}
-        run: dotnet nuget push artifacts/**.nupkg -s https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
+        run: dotnet nuget push artifacts/**.nupkg -s https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
