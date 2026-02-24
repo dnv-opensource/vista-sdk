@@ -43,6 +43,22 @@ var version = VisVersion.v3_4a;
 var gmod = VIS.Instance.GetGmod(version);
 var codebooks = VIS.Instance.GetCodebooks(version);
 
+// Get a GMOD node by lookup
+var node = gmod["411.1"];
+Console.WriteLine($"Node code: {node.Code}");
+Console.WriteLine($"Node common name: {node.Metadata.CommonName}");
+
+// Get a GMOD node by TryGet pattern
+if(gmod.TryGetNode("411.1", out var node2))
+{
+    Console.WriteLine($"Node code: {node2.Code}");
+    Console.WriteLine($"Node common name: {node2.Metadata.CommonName}");
+}
+else
+{
+    Console.WriteLine("Node not found");
+}
+
 // Parse a GMOD path
 if (gmod.TryParsePath("411.1/C101.31-2", out var path))
 {

@@ -11,7 +11,11 @@ The Python implementation of the Vista SDK. For an overview of the SDK and its c
 ### PyPI Installation
 
 ```bash
-pip install vista-sdk
+pip install vista-sdk --pre
+```
+
+```bash
+uv add vista-sdk --prerelease allow
 ```
 
 ### Development Installation
@@ -48,6 +52,17 @@ vis = VIS()
 gmod = vis.get_gmod(VisVersion.v3_4a)
 codebooks = vis.get_codebooks(VisVersion.v3_4a)
 locations = vis.get_locations(VisVersion.v3_4a)
+
+# Get a GMOD node by code by lookup
+node = gmod["411.1"]
+print(f"Node code: {node.code}")
+print(f"Node common name: {node.metadata.common_name}")
+
+# Get a GMOD node by try_get
+result, node = gmod.try_get_node("411.1")
+print(f"Get node result: {result}")
+print(f"Node code: {node.code}")
+print(f"Node common name: {node.metadata.common_name}")
 
 # Parse a GMOD path
 path = gmod.parse_path("411.1/C101.31-2")
