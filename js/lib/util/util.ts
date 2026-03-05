@@ -56,7 +56,7 @@ export const sortChildren = (gmodNode: GmodNode | PmodNode) => {
     if (gmodNode.children.length === 0) return 0;
     if (gmodNode.children.length > 0) {
         gmodNode.children.sort((a, b) =>
-            naturalSort(a.toString(), b.toString())
+            naturalSort(a.toString(), b.toString()),
         );
         gmodNode.children.forEach(sortChildren);
     }
@@ -78,7 +78,7 @@ export const createKey = <T = GmodNode | PmodNode>(parents: T[], node: T) =>
  */
 export const isNodeSkippable = (
     parent: GmodNode | PmodNode,
-    node: GmodNode | PmodNode
+    node: GmodNode | PmodNode,
 ) => {
     const p = parent instanceof PmodNode ? parent.node : parent;
     const n = node instanceof PmodNode ? node.node : node;
@@ -94,7 +94,7 @@ export const isNodeSkippable = (
  */
 export const isNodeMergeable = (
     parent: GmodNode | PmodNode,
-    node: GmodNode | PmodNode
+    node: GmodNode | PmodNode,
 ) => {
     const p = parent instanceof PmodNode ? parent.node : parent;
     const n = node instanceof PmodNode ? node.node : node;

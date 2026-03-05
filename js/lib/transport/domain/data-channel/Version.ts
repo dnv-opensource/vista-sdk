@@ -62,11 +62,11 @@ export class Version {
     }
 
     public static parse(version?: VisVersion | string): Version {
+        if (isNullOrWhiteSpace(version))
+            throw new Error(`${Version.name}.parse: value is null`);
         if (typeof version === "string") {
             return new Version(version);
         }
-        if (isNullOrWhiteSpace(version))
-            throw new Error(`${Version.name}.parse: value is null`);
 
         return new Version(version);
     }

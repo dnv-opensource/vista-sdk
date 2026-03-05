@@ -3,25 +3,25 @@ import { TimeSeriesDto } from "./time-series-data/TimeSeriesData";
 
 export class Serializer {
     public static deserializeDataChannelList(
-        payload: string
+        payload: string,
     ): DataChannelListDto.DataChannelListPackage {
         return JSON.parse(payload);
     }
 
     public static deserializeTimeSeriesData(
-        payload: string
+        payload: string,
     ): TimeSeriesDto.TimeSeriesDataPackage {
         return JSON.parse(payload.toString());
     }
 
     public static serializeDataChannelList(
-        dataChannelList: DataChannelListDto.DataChannelListPackage
+        dataChannelList: DataChannelListDto.DataChannelListPackage,
     ): string {
         return JSON.stringify(dataChannelList);
     }
 
     public static serializeTimeSeriesData(
-        timeSeriesData: TimeSeriesDto.TimeSeriesDataPackage
+        timeSeriesData: TimeSeriesDto.TimeSeriesDataPackage,
     ): string {
         return JSON.stringify(timeSeriesData);
     }

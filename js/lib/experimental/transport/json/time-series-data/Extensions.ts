@@ -5,7 +5,7 @@ import { TimeSeries } from "../../domain/time-series-data/TimeSeriesData";
 
 export class Extensions {
     public static toJsonDto(
-        domain: TimeSeries.TimeSeriesDataPackage
+        domain: TimeSeries.TimeSeriesDataPackage,
     ): TimeSeriesDto.TimeSeriesDataPackage {
         const p = domain.package;
         const h = domain.package.header;
@@ -23,7 +23,7 @@ export class Extensions {
                                   (s) => ({
                                       ID: s.id,
                                       TimeStamp: s.timeStamp,
-                                  })
+                                  }),
                               ),
                           TimeSpan: h.timeSpan
                               ? { End: h.timeSpan.end, Start: h.timeSpan.start }
@@ -49,7 +49,7 @@ export class Extensions {
                                               DataId: d.dataId.toString(),
                                               Value: d.value,
                                               Quality: d.quality,
-                                          })
+                                          }),
                                       ),
                               }
                             : undefined,
@@ -64,7 +64,7 @@ export class Extensions {
                                         TimeStamp: td.timeStamp,
                                         Value: td.value,
                                     })),
-                                })
+                                }),
                             ),
                         ...t.customProperties,
                     })),
@@ -74,7 +74,7 @@ export class Extensions {
     }
 
     public static async toDomainModel(
-        dto: TimeSeriesDto.TimeSeriesDataPackage
+        dto: TimeSeriesDto.TimeSeriesDataPackage,
     ): Promise<TimeSeries.TimeSeriesDataPackage> {
         const p = dto.Package;
         const h = dto.Package.Header;

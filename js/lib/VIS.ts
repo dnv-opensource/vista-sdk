@@ -82,15 +82,15 @@ export class VIS {
     }
 
     public async getGmodsMap(
-        visVersions: VisVersion[]
+        visVersions: VisVersion[],
     ): Promise<Map<VisVersion, Gmod>> {
         var invalidVisVersions = visVersions.filter(
-            (v) => !VisVersionExtension.isValid(v)
+            (v) => !VisVersionExtension.isValid(v),
         );
         if (invalidVisVersions.length > 0) {
             throw new Error(
                 "Invalid VIS versions provided: " +
-                    invalidVisVersions.join(", ")
+                    invalidVisVersions.join(", "),
             );
         }
 
@@ -103,12 +103,15 @@ export class VIS {
         const gmods = await Promise.all(gmodPromises);
 
         return new Map(
-            Object.assign({}, ...gmods.map((g) => ({ [g.visVersion]: g.gmod })))
+            Object.assign(
+                {},
+                ...gmods.map((g) => ({ [g.visVersion]: g.gmod })),
+            ),
         );
     }
 
     private async getGmodVersioningDto(
-        version: VisVersion
+        version: VisVersion,
     ): Promise<GmodVersioningDto> {
         let dto: Promise<GmodVersioningDto> | undefined =
             this._versioningDtoCache.get(version);
@@ -163,7 +166,7 @@ export class VIS {
     public async convertPath(
         sourceVersion: VisVersion,
         sourcePath: GmodPath,
-        targetVersion: VisVersion
+        targetVersion: VisVersion,
     ): Promise<GmodPath | undefined> {
         const versioning = await this.getGmodVersioning();
         return versioning.convertPath(sourceVersion, sourcePath, targetVersion);
@@ -180,7 +183,7 @@ export class VIS {
     public async convertNode(
         sourceVersion: VisVersion,
         sourceNode: GmodNode,
-        targetVersion: VisVersion
+        targetVersion: VisVersion,
     ): Promise<GmodNode | undefined> {
         const versioning = await this.getGmodVersioning();
         return versioning.convertNode(sourceVersion, sourceNode, targetVersion);
@@ -195,7 +198,7 @@ export class VIS {
      */
     public async convertLocalId(
         sourceLocalId: LocalId,
-        targetVersion: VisVersion
+        targetVersion: VisVersion,
     ): Promise<LocalId | undefined> {
         const versioning = await this.getGmodVersioning();
         return versioning.convertLocalId(sourceLocalId, targetVersion);
@@ -210,7 +213,7 @@ export class VIS {
      */
     public async convertLocalIdBuilder(
         sourceLocalId: LocalIdBuilder,
-        targetVersion: VisVersion
+        targetVersion: VisVersion,
     ): Promise<LocalIdBuilder | undefined> {
         const versioning = await this.getGmodVersioning();
 
@@ -218,7 +221,7 @@ export class VIS {
     }
 
     private async getCodebooksDto(
-        visVersion: VisVersion
+        visVersion: VisVersion,
     ): Promise<CodebooksDto> {
         let codebooksDto: Promise<CodebooksDto> | undefined =
             this._codebooksDtoCache.get(visVersion);
@@ -237,7 +240,7 @@ export class VIS {
 
         codebooks = new Codebooks(
             visVersion,
-            await this.getCodebooksDto(visVersion)
+            await this.getCodebooksDto(visVersion),
         );
 
         this._codebooksCache.set(visVersion, codebooks);
@@ -245,15 +248,15 @@ export class VIS {
     }
 
     public async getCodebooksMap(
-        visVersions: VisVersion[]
+        visVersions: VisVersion[],
     ): Promise<Map<VisVersion, Codebooks>> {
         var invalidVisVersions = visVersions.filter(
-            (v) => !VisVersionExtension.isValid(v)
+            (v) => !VisVersionExtension.isValid(v),
         );
         if (invalidVisVersions.length > 0) {
             throw new Error(
                 "Invalid VIS versions provided: " +
-                    invalidVisVersions.join(", ")
+                    invalidVisVersions.join(", "),
             );
         }
 
@@ -267,21 +270,21 @@ export class VIS {
         return new Map(
             Object.assign(
                 {},
-                ...codebooks.map((c) => ({ [c.visVersion]: c.codebooks }))
-            )
+                ...codebooks.map((c) => ({ [c.visVersion]: c.codebooks })),
+            ),
         );
     }
 
     public async getLocationsMap(
-        visVersions: VisVersion[]
+        visVersions: VisVersion[],
     ): Promise<Map<VisVersion, Locations>> {
         var invalidVisVersions = visVersions.filter(
-            (v) => !VisVersionExtension.isValid(v)
+            (v) => !VisVersionExtension.isValid(v),
         );
         if (invalidVisVersions.length > 0) {
             throw new Error(
                 "Invalid VIS versions provided: " +
-                    invalidVisVersions.join(", ")
+                    invalidVisVersions.join(", "),
             );
         }
 
@@ -295,13 +298,13 @@ export class VIS {
         return new Map(
             Object.assign(
                 {},
-                ...locations.map((c) => ({ [c.visVersion]: c.location }))
-            )
+                ...locations.map((c) => ({ [c.visVersion]: c.location })),
+            ),
         );
     }
 
     public async getVIS(
-        visVersion: VisVersion
+        visVersion: VisVersion,
     ): Promise<{ gmod: Gmod; codebooks: Codebooks; locations: Locations }> {
         const promises = [
             this.getGmod(visVersion),
@@ -312,7 +315,7 @@ export class VIS {
         const [gmod, codebooks, locations] = (await Promise.all(promises)) as [
             Gmod,
             Codebooks,
-            Locations
+            Locations,
         ];
 
         return { gmod, codebooks, locations };
@@ -329,12 +332,12 @@ export class VIS {
         >
     > {
         var invalidVisVersions = visVersions.filter(
-            (v) => !VisVersionExtension.isValid(v)
+            (v) => !VisVersionExtension.isValid(v),
         );
         if (invalidVisVersions.length > 0) {
             throw new Error(
                 "Invalid VIS versions provided: " +
-                    invalidVisVersions.join(", ")
+                    invalidVisVersions.join(", "),
             );
         }
         const promises = visVersions.map((v) => this.getVIS(v));
@@ -351,7 +354,7 @@ export class VIS {
     }
 
     private async getLocationsDto(
-        visVersion: VisVersion
+        visVersion: VisVersion,
     ): Promise<LocationsDto> {
         let locationDto: Promise<LocationsDto> | undefined =
             this._locationDtoCache.get(visVersion);
@@ -371,7 +374,7 @@ export class VIS {
 
         location = new Locations(
             visVersion,
-            await this.getLocationsDto(visVersion)
+            await this.getLocationsDto(visVersion),
         );
 
         return location;

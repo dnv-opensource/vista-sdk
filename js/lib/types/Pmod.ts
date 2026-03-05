@@ -10,12 +10,12 @@ export type PmodInfo = Partial<{
 
 export type TraversalHandler = (
     parents: PmodNode[],
-    node: PmodNode
+    node: PmodNode,
 ) => TraversalHandlerResult;
 export type TraversalHandlerWithState<T> = (
     parents: PmodNode[],
     node: PmodNode,
-    state: T
+    state: T,
 ) => TraversalHandlerResult;
 
 export type TraversalContext<T> = {

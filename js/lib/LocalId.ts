@@ -64,20 +64,20 @@ export class LocalId implements ILocalIdGeneric<LocalId> {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return LocalIdParser.parse(
             localIdStr,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         ).build();
     }
 
     public static async parseAsync(
         localIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return (
             await LocalIdParser.parseAsync(localIdString, errorBuilder)

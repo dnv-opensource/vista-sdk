@@ -36,10 +36,7 @@ export class VisVersionExtension {
         return version;
     }
 
-    public static toString(
-        version: VisVersion,
-        builder?: string[],
-    ): string {
+    public static toString(version: VisVersion, builder?: string[]): string {
         return this.toVersionString(version, builder);
     }
 

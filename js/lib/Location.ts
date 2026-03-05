@@ -83,7 +83,7 @@ export class Locations {
 
             if (key === undefined)
                 throw new Error(
-                    `Unsupported code: ${relativeLocationDto.code}`
+                    `Unsupported code: ${relativeLocationDto.code}`,
                 );
             if (!groups.has(key)) groups.set(key, []);
 
@@ -97,7 +97,7 @@ export class Locations {
 
     public parse(
         locationStr: string,
-        errorBuilder?: LocationParsingErrorBuilder
+        errorBuilder?: LocationParsingErrorBuilder,
     ): Location {
         const location = this.tryParse(locationStr, errorBuilder);
         if (!location) {
@@ -109,21 +109,21 @@ export class Locations {
 
     public tryParse(
         locationStr?: string | null | undefined,
-        errorBuilder?: LocationParsingErrorBuilder
+        errorBuilder?: LocationParsingErrorBuilder,
     ): Location | undefined {
         return this.tryParseInternal(locationStr, errorBuilder);
     }
 
     private tryParseInternal(
         location: string | null | undefined,
-        errorBuilder?: LocationParsingErrorBuilder
+        errorBuilder?: LocationParsingErrorBuilder,
     ): Location | undefined {
         if (!location) return;
 
         if (isNullOrWhiteSpace(location)) {
             addError(
                 LocationValidationResult.NullOrWhiteSpace,
-                "Invalid location: contains only whitespace"
+                "Invalid location: contains only whitespace",
             );
             return;
         }
@@ -145,7 +145,7 @@ export class Locations {
                 if (digitStartIndex === null && i !== 0) {
                     addError(
                         LocationValidationResult.Invalid,
-                        `Invalid location: numeric location should start before location code(s) in location: '${location}'`
+                        `Invalid location: numeric location should start before location code(s) in location: '${location}'`,
                     );
                     return;
                 }
@@ -154,7 +154,7 @@ export class Locations {
                 if (prevDigitIndex !== null && prevDigitIndex !== i - 1) {
                     addError(
                         LocationValidationResult.Invalid,
-                        `Invalid location: cannot have multiple separated digits in location: '${location}'`
+                        `Invalid location: cannot have multiple separated digits in location: '${location}'`,
                     );
                     return;
                 }
@@ -166,7 +166,7 @@ export class Locations {
                     if (isNaN(number)) {
                         addError(
                             LocationValidationResult.Invalid,
-                            `Invalid location: failed to parse numeric location: '${location}'`
+                            `Invalid location: failed to parse numeric location: '${location}'`,
                         );
                         return;
                     }
@@ -179,14 +179,14 @@ export class Locations {
                         .filter(
                             (c) =>
                                 !isDigitCode(c) &&
-                                (c === "N" || !this._locationCodes.includes(c))
+                                (c === "N" || !this._locationCodes.includes(c)),
                         )
                         .map((c) => `'${c}'`)
                         .join(",");
 
                     addError(
                         LocationValidationResult.InvalidCode,
-                        `Invalid location code: '${location}' with invalid location code(s): ${invalidChars}`
+                        `Invalid location code: '${location}' with invalid location code(s): ${invalidChars}`,
                     );
                     return;
                 }
@@ -197,8 +197,8 @@ export class Locations {
                         `Invalid location: Multiple '${
                             LocationGroup[group]
                         }' values. Got both '${charDict.get(
-                            group
-                        )}' and '${ch}' in '${location}'`
+                            group,
+                        )}' and '${ch}' in '${location}'`,
                     );
                     return;
                 }
@@ -210,7 +210,7 @@ export class Locations {
                     if (ch.localeCompare(prevCh) < 0) {
                         addError(
                             LocationValidationResult.InvalidOrder,
-                            `Invalid location: '${location}' not alphabetically sorted`
+                            `Invalid location: '${location}' not alphabetically sorted`,
                         );
                         return;
                     }

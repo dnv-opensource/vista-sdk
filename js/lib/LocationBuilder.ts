@@ -15,11 +15,11 @@ export class LocationBuilder {
     private constructor(previous: LocationBuilder);
     private constructor(
         visVersion: VisVersion,
-        reversedGroups: Map<string, LocationGroup>
+        reversedGroups: Map<string, LocationGroup>,
     );
     private constructor(
         arg1: VisVersion | LocationBuilder,
-        arg2?: Map<string, LocationGroup>
+        arg2?: Map<string, LocationGroup>,
     ) {
         if (arg1 instanceof LocationBuilder && arg2 === undefined) {
             this.number = arg1.number;
@@ -38,7 +38,7 @@ export class LocationBuilder {
     public static create(locations: Locations) {
         return new LocationBuilder(
             locations.visVersion,
-            locations.reversedGroups
+            locations.reversedGroups,
         );
     }
 
@@ -106,7 +106,7 @@ export class LocationBuilder {
 
     public withValue(
         value: number | string,
-        group: LocationGroup | undefined = undefined
+        group: LocationGroup | undefined = undefined,
     ): LocationBuilder {
         if (group !== undefined) return this.withValueInternal(group, value);
         if (typeof value === "number") {
@@ -115,7 +115,7 @@ export class LocationBuilder {
             const key = this._reversedGroups.get(value);
             if (!key)
                 throw new Error(
-                    `The value ${value} is an invalid Locations value`
+                    `The value ${value} is an invalid Locations value`,
                 );
             return this.withValueInternal(key, value);
         }
@@ -123,7 +123,7 @@ export class LocationBuilder {
 
     private withValueInternal(
         group: LocationGroup,
-        value: number | string
+        value: number | string,
     ): LocationBuilder {
         if (group === LocationGroup.Number) {
             if (typeof value !== "number")
@@ -143,7 +143,7 @@ export class LocationBuilder {
         const key = this._reversedGroups.get(value);
         if (key === undefined || key !== group) {
             throw new Error(
-                `The value ${value} is an invalid ${LocationGroup[group]} value`
+                `The value ${value} is an invalid ${LocationGroup[group]} value`,
             );
         }
 
@@ -151,10 +151,10 @@ export class LocationBuilder {
             [LocationGroup.Side]: this.with((s) => (s.side = value)),
             [LocationGroup.Vertical]: this.with((s) => (s.vertical = value)),
             [LocationGroup.Transverse]: this.with(
-                (s) => (s.transverse = value)
+                (s) => (s.transverse = value),
             ),
             [LocationGroup.Longitudinal]: this.with(
-                (s) => (s.longitudinal = value)
+                (s) => (s.longitudinal = value),
             ),
         }[key];
     }
@@ -184,13 +184,13 @@ export class LocationBuilder {
             [LocationGroup.Number]: this.with((s) => (s.number = undefined)),
             [LocationGroup.Side]: this.with((s) => (s.side = undefined)),
             [LocationGroup.Vertical]: this.with(
-                (s) => (s.vertical = undefined)
+                (s) => (s.vertical = undefined),
             ),
             [LocationGroup.Transverse]: this.with(
-                (s) => (s.transverse = undefined)
+                (s) => (s.transverse = undefined),
             ),
             [LocationGroup.Longitudinal]: this.with(
-                (s) => (s.longitudinal = undefined)
+                (s) => (s.longitudinal = undefined),
             ),
         }[group];
     }

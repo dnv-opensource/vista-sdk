@@ -38,11 +38,11 @@ export class PMSLocalId implements ILocalIdGeneric<PMSLocalId> {
     constructor(builder: PMSLocalIdBuilder) {
         if (builder.isEmpty)
             throw new Error(
-                "PMSLocalId cannot be constructed from empty PMSLocalIdBuilder"
+                "PMSLocalId cannot be constructed from empty PMSLocalIdBuilder",
             );
         if (!builder.isValid)
             throw new Error(
-                "PMSLocalId cannot be constructed from invalid PMSLocalIdBuilder"
+                "PMSLocalId cannot be constructed from invalid PMSLocalIdBuilder",
             );
         this._builder = builder;
     }
@@ -56,20 +56,20 @@ export class PMSLocalId implements ILocalIdGeneric<PMSLocalId> {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): PMSLocalId {
         return PMSLocalIdBuilder.parse(
             localIdStr,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         ).build();
     }
 
     public static parseAsync(
         localIdStr: string,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return PMSLocalIdBuilder.parseAsync(localIdStr, errorBuilder);
     }

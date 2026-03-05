@@ -36,7 +36,7 @@ export class Pmod {
         visVersion: VisVersion,
         rootNode: PmodNode,
         nodeMap: Map<string, PmodNode>,
-        info?: PmodInfo
+        info?: PmodInfo,
     ) {
         this.visVersion = visVersion;
         this._info = info;
@@ -47,7 +47,7 @@ export class Pmod {
     public static createFromPaths(
         visVersion: VisVersion,
         paths: GmodPath[],
-        info?: PmodInfo
+        info?: PmodInfo,
     ) {
         const nodeMap = new Map<string, PmodNode>();
 
@@ -84,7 +84,7 @@ export class Pmod {
                 if (isNullOrWhiteSpace(parentId) || isNullOrWhiteSpace(nodeId))
                     throw new Error(
                         "Invalid generated pathId for node:" +
-                            pathNode.toString()
+                            pathNode.toString(),
                     );
 
                 if (nodeMap.has(nodeId)) continue;
@@ -96,13 +96,13 @@ export class Pmod {
 
                 if (!childNode)
                     throw new Error(
-                        "Unable to get node: " + pathNode.toString()
+                        "Unable to get node: " + pathNode.toString(),
                     );
 
                 if (!parentNode)
                     throw new Error(
                         "Unable to get parent node for node: " +
-                            pathNode.toString()
+                            pathNode.toString(),
                     );
 
                 childNode.addParent(parentNode);
@@ -119,7 +119,7 @@ export class Pmod {
     public static createFromLocalIds(
         visVersion: VisVersion,
         localIds: ILocalId[] | ILocalIdBuilder[],
-        info?: PmodInfo
+        info?: PmodInfo,
     ) {
         const paths = localIds
             .flatMap((localId) => [localId.primaryItem, localId.secondaryItem])
@@ -142,7 +142,7 @@ export class Pmod {
 
     public get maxDepth() {
         return Math.max(
-            ...Array.from(this._nodeMap.values()).map((n) => n.depth)
+            ...Array.from(this._nodeMap.values()).map((n) => n.depth),
         );
     }
 
@@ -156,13 +156,13 @@ export class Pmod {
 
     public getNodesByCode(code: string) {
         return Array.from(this._nodeMap.values()).filter(
-            (n) => n.node.code === code
+            (n) => n.node.code === code,
         );
     }
 
     public getNodesByPath(
         query: GmodPath,
-        withoutLocation?: boolean
+        withoutLocation?: boolean,
     ): PmodNode[] {
         const nodes: PmodNode[] = [];
 
@@ -184,7 +184,7 @@ export class Pmod {
         params?: {
             fromPath?: GmodPath;
             state?: T;
-        }
+        },
     ): boolean {
         const { fromPath = new GmodPath([], this._rootNode.node), state } =
             params || {};
@@ -193,21 +193,21 @@ export class Pmod {
             return this.traverseFromNodeWithState(
                 handler as TraversalHandler,
                 fromPath,
-                (parents, node, handler) => handler(parents, node)
+                (parents, node, handler) => handler(parents, node),
             );
         }
 
         return this.traverseFromNodeWithState(
             state,
             fromPath,
-            handler as TraversalHandlerWithState<T>
+            handler as TraversalHandlerWithState<T>,
         );
     }
 
     public traverseFromNodeWithState<T>(
         state: T,
         fromPath: GmodPath,
-        handler: TraversalHandlerWithState<T>
+        handler: TraversalHandlerWithState<T>,
     ): boolean {
         const parents = new Parents(fromPath);
 
@@ -227,14 +227,14 @@ export class Pmod {
 
     private traverseNode<T>(
         context: TraversalContext<T>,
-        node: PmodNode
+        node: PmodNode,
     ): TraversalHandlerResult {
         if (context.parents.has(node)) return TraversalHandlerResult.Continue;
 
         let result = context.handler(
             context.parents.asList,
             node,
-            context.state
+            context.state,
         );
 
         if (
@@ -257,7 +257,7 @@ export class Pmod {
 
     public getVisualizableTreeNodes<
         TNode extends TreeNode<TNode> = TreeNode,
-        TState = unknown
+        TState = unknown,
     >(
         handler: TreeHandler<TNode> | TreeHandlerWithState<TState, TNode>,
         params?: {
@@ -266,7 +266,7 @@ export class Pmod {
             /**@description matches paths without location. Then resolves least common parent and traverse tree from there.  */
             withoutLocation?: boolean;
             state?: TState;
-        }
+        },
     ): Ok<TNode> | NotRelevant<TNode> {
         const {
             fromPath = new GmodPath([], this._rootNode.node),
@@ -283,7 +283,7 @@ export class Pmod {
                     fromPath: undefined,
                     state,
                     formatNode,
-                })
+                }),
             );
 
         if (hits.length === 1) {
@@ -292,7 +292,7 @@ export class Pmod {
                     fromPath: hits[0].path,
                     state,
                     formatNode,
-                })
+                }),
             );
         }
 
@@ -332,7 +332,7 @@ export class Pmod {
         } else {
             result = new GmodPath(
                 hits[0].path.parents.slice(0, commonDepth) ?? [],
-                hits[0].path.parents.slice(commonDepth)[0]
+                hits[0].path.parents.slice(commonDepth)[0],
             );
         }
 
@@ -341,7 +341,7 @@ export class Pmod {
                 fromPath: result,
                 state,
                 formatNode,
-            })
+            }),
         );
     }
 
@@ -356,14 +356,14 @@ export class Pmod {
 
     private getVisualizableTreeNodesInternal<
         TNode extends TreeNode<TNode> = TreeNode,
-        TState = unknown
+        TState = unknown,
     >(
         handler: TreeHandler<TNode> | TreeHandlerWithState<TState, TNode>,
         params?: {
             fromPath?: GmodPath;
             formatNode?: FormatNode<TNode>;
             state?: TState;
-        }
+        },
     ): TNode {
         const {
             fromPath = new GmodPath([], this._rootNode.node),
@@ -380,7 +380,7 @@ export class Pmod {
                 handler as TreeHandler<TNode>,
                 fromPath,
                 formatter,
-                (node, handler) => handler(node)
+                (node, handler) => handler(node),
             );
         }
 
@@ -388,18 +388,18 @@ export class Pmod {
             state,
             fromPath,
             formatter,
-            handler as TreeHandlerWithState<TState, TNode>
+            handler as TreeHandlerWithState<TState, TNode>,
         );
     }
 
     private createVisualizableTree<
         TState,
-        TNode extends TreeNode<TNode> = TreeNode
+        TNode extends TreeNode<TNode> = TreeNode,
     >(
         userState: TState,
         fromPath: GmodPath,
         formatNode: FormatNode<TNode>,
-        handler: TreeHandlerWithState<TState, TNode>
+        handler: TreeHandlerWithState<TState, TNode>,
     ): TNode {
         type LocalTraverseContext = {
             nodes: TNode[];
@@ -413,7 +413,7 @@ export class Pmod {
             parents: GmodNode[],
             node: GmodNode,
             context: LocalTraverseContext,
-            handler?: TreeHandlerWithState<TState, TNode>
+            handler?: TreeHandlerWithState<TState, TNode>,
         ) => {
             const path = new GmodPath(parents, node);
             const key = path.toFullPathString();
@@ -425,7 +425,7 @@ export class Pmod {
             if (parentNode) {
                 const parentPath = new GmodPath(
                     parents.slice(0, parents.length - 1),
-                    parentNode
+                    parentNode,
                 );
                 const pKey = parentPath.toFullPathString();
 
@@ -489,18 +489,18 @@ export class Pmod {
                      */
                     if (!parent.parent) {
                         throw new Error(
-                            "Unexpected state: No parent of parent when merge"
+                            "Unexpected state: No parent of parent when merge",
                         );
                     }
 
                     treeNode.mergedNode = Object.assign({}, parent);
 
                     const parentAsChildIndex = parent.parent.children.findIndex(
-                        (c) => c.key === parent?.key
+                        (c) => c.key === parent?.key,
                     );
                     if (parentAsChildIndex === -1)
                         throw new Error(
-                            "Unexpected state: Parent not found as child of parents parent"
+                            "Unexpected state: Parent not found as child of parents parent",
                         );
 
                     parent = parent.parent as TNode;
@@ -539,12 +539,12 @@ export class Pmod {
                     parents.map((n) => n.node),
                     node.node,
                     context,
-                    handler
+                    handler,
                 );
                 if (!result) throw new Error("Expected result from iteration");
                 return result;
             },
-            { state: context, fromPath }
+            { state: context, fromPath },
         );
 
         if (context.nodes.length > 1)
@@ -561,7 +561,7 @@ export class Pmod {
 
     private getMetadataState(
         parent: GmodNode | PmodNode,
-        node: GmodNode | PmodNode
+        node: GmodNode | PmodNode,
     ): "skip" | "merge" | undefined {
         if (isNodeSkippable(parent, node)) {
             return "skip";

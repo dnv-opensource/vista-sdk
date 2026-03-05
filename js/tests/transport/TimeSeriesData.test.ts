@@ -68,54 +68,54 @@ describe("TimeSeriesDataPackage", () => {
         expect(timeSeriesDataPackage.package.timeSeriesData.length).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.dataConfiguration!
-                .id
+                .id,
         ).toEqual(idStr);
 
         // EventData
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
-                .numberOfDataSet
+                .numberOfDataSet,
         ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
-                .dataSet![0]!.value
+                .dataSet![0]!.value,
         ).toEqual(value);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
-                .dataSet![0]!.dataChannelId
+                .dataSet![0]!.dataChannelId,
         ).toBe(dataChannelId);
 
         // TabularData
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .numberOfDataSet
+                .numberOfDataSet,
         ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .numberOfDataChannel
+                .numberOfDataChannel,
         ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .dataChannelId![0]
+                .dataChannelId![0],
         ).toBe(dataChannelId);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .dataSet![0]!.value.length
+                .dataSet![0]!.value.length,
         ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .dataSet![0]!.value[0]
+                .dataSet![0]!.value[0],
         ).toEqual(value);
     });
 
     it("JSONSchema validation", async () => {
         var sample = await readFile(
             "../schemas/json/TimeSeriesData.sample.json",
-            { encoding: "utf8", flag: "r" }
+            { encoding: "utf8", flag: "r" },
         );
         var schema = await readFile(
             "../schemas/json/TimeSeriesData.schema.json",
-            { encoding: "utf8", flag: "r" }
+            { encoding: "utf8", flag: "r" },
         );
 
         // Convert URN $id to URL format for jsonschema library compatibility with Node 24+

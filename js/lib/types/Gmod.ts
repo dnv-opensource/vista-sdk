@@ -14,12 +14,12 @@ export enum TraversalHandlerResult {
 
 export type TraversalHandler = (
     parents: GmodNode[],
-    node: GmodNode
+    node: GmodNode,
 ) => TraversalHandlerResult;
 export type TraversalHandlerWithState<T> = (
     parents: GmodNode[],
     node: GmodNode,
-    state: T
+    state: T,
 ) => TraversalHandlerResult;
 
 export type TraversalContext<T> = {

@@ -1,11 +1,11 @@
 export type CodebookDto = {
-  name: string;
-  values: {
-    [k: string]: string[];
-  };
+    name: string;
+    values: {
+        [k: string]: string[];
+    };
 };
 
 export type CodebooksDto = {
-  visVersion: string;
-  items: CodebookDto[];
+    visVersion: string;
+    items: CodebookDto[];
 };

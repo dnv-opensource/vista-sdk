@@ -92,8 +92,8 @@ export namespace DataChannelListDto {
         [k: string]: unknown;
     }
     export enum WhiteSpace {
-        Preserve = 'Preserve',
-        Replace = 'Replace',
-        Collapse = 'Collapse',
+        Preserve = "Preserve",
+        Replace = "Replace",
+        Collapse = "Collapse",
     }
 }

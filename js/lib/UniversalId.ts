@@ -38,7 +38,7 @@ export class UniversalId {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return new UniversalId(
             UniversalIdBuilder.parse(
@@ -46,14 +46,14 @@ export class UniversalId {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
-            )
+                errorBuilder,
+            ),
         );
     }
 
     public static async parseAsync(
         universalIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return (
             await UniversalIdBuilder.parseAsync(universalIdString, errorBuilder)

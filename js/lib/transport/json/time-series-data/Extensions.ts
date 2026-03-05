@@ -3,7 +3,7 @@ import { TimeSeriesDto } from "./TimeSeriesData";
 
 export class Extensions {
     public static toJsonDto(
-        domain: TimeSeries.TimeSeriesDataPackage
+        domain: TimeSeries.TimeSeriesDataPackage,
     ): TimeSeriesDto.TimeSeriesDataPackage {
         const p = domain.package;
         const h = domain.package.header;
@@ -20,7 +20,7 @@ export class Extensions {
                               (s) => ({
                                   ID: s.id,
                                   TimeStamp: s.timeStamp,
-                              })
+                              }),
                           ),
                           TimeSpan: h.timeSpan
                               ? { End: h.timeSpan.end, Start: h.timeSpan.start }
@@ -50,7 +50,7 @@ export class Extensions {
                         NumberOfDataSet: d.numberOfDataSet,
                         NumberOfDataChannel: d.numberOfDataChannel,
                         DataChannelID: d.dataChannelId?.map((i) =>
-                            i.toString()
+                            i.toString(),
                         ),
                         DataSet: d.dataSet?.map((td) => ({
                             Quality: td.quality,
@@ -65,7 +65,7 @@ export class Extensions {
     }
 
     public static async toDomainModel(
-        dto: TimeSeriesDto.TimeSeriesDataPackage
+        dto: TimeSeriesDto.TimeSeriesDataPackage,
     ): Promise<TimeSeries.TimeSeriesDataPackage> {
         const timeSeriesData: TimeSeries.TimeSeriesData[] = [];
 
@@ -81,7 +81,7 @@ export class Extensions {
             if (EventData?.DataSet) {
                 for (let ed of EventData.DataSet) {
                     const dataChannelId = await DataChannelId.parseAsync(
-                        ed.DataChannelID
+                        ed.DataChannelID,
                     );
                     eventDataSet.push({
                         dataChannelId,

@@ -23,7 +23,7 @@ export default async function globalSetup() {
         writeFileSync(
             join(cacheDir, `${version}.json`),
             JSON.stringify(dtos),
-            "utf-8"
+            "utf-8",
         );
     }
 }

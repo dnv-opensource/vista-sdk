@@ -21,7 +21,7 @@ describe("Transport JSON", () => {
                         {
                             dataId: {
                                 localId: await LocalId.parseAsync(
-                                    "/dnv-v2/vis-3-4a/411.1/C101.63/S206/meta/qty-temperature/cnt-cooling.water/pos-inlet"
+                                    "/dnv-v2/vis-3-4a/411.1/C101.63/S206/meta/qty-temperature/cnt-cooling.water/pos-inlet",
                                 ),
                             },
                             property: {
@@ -81,7 +81,7 @@ describe("Transport JSON", () => {
         const domain = await JSONExtensions.TimeSeries.toDomainModel(json);
 
         expect(domain.package.header!.assetId.imoNumber!.value).toEqual(
-            1234567
+            1234567,
         );
         expect(dto.Package.Header!.AssetId).toEqual("IMO1234567");
     });

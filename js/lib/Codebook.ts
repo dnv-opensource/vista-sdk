@@ -54,7 +54,7 @@ export class Codebook {
         const data = Object.entries(dto.values).flatMap(([key, values]) =>
             values
                 .map((v) => ({ group: key, value: v.trim() }))
-                .filter((v) => v.value !== "<number>")
+                .filter((v) => v.value !== "<number>"),
         );
 
         for (const t of data) {
@@ -114,7 +114,7 @@ export class Codebook {
         const tag = this.tryCreateTag(value);
         if (!tag)
             throw new Error(
-                `Invalid value for metadata tag: codebook=${this.name}, value=${value}`
+                `Invalid value for metadata tag: codebook=${this.name}, value=${value}`,
             );
         return tag;
     }
@@ -122,7 +122,7 @@ export class Codebook {
     public static isValidTag(
         name: CodebookName,
         value: string,
-        codebook: Codebook
+        codebook: Codebook,
     ) {
         if (!value || isNullOrWhiteSpace(value)) return false;
 
@@ -140,7 +140,7 @@ export class Codebook {
     }
     private static validatePositionInternal(
         position: string,
-        codebook: Codebook
+        codebook: Codebook,
     ): PositionValidationResult {
         if (isNullOrWhiteSpace(position) || !VIS.isISOString(position))
             return PositionValidationResult.Invalid;
@@ -160,7 +160,7 @@ export class Codebook {
         const validations: PositionValidationResult[] = [];
         for (const positionStr of positions) {
             validations.push(
-                this.validatePositionInternal(positionStr, codebook)
+                this.validatePositionInternal(positionStr, codebook),
             );
         }
 
@@ -168,7 +168,7 @@ export class Codebook {
 
         const numberNotAtEnd = !!positions.find(
             (pValue, pIndex) =>
-                tryParseInt(pValue) && pIndex < positions.length - 1
+                tryParseInt(pValue) && pIndex < positions.length - 1,
         );
         const positionsWithoutNumber = positions.filter((p) => !tryParseInt(p));
         const alphabeticallySorted = [...positionsWithoutNumber].sort();
@@ -181,7 +181,7 @@ export class Codebook {
 
         if (validations.every((v) => v === PositionValidationResult.Valid)) {
             const groups = positions.map((p) =>
-                tryParseInt(p) ? "<number>" : codebook.groupMap.get(p) ?? ""
+                tryParseInt(p) ? "<number>" : (codebook.groupMap.get(p) ?? ""),
             );
 
             const groupsSet = new Set<string>(groups);

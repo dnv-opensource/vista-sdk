@@ -10,7 +10,7 @@ export class PmodNode {
                 "Invalid GmodNode with code: " +
                     node.toString() +
                     " - Parents: " +
-                    node.parents.map((s) => s.toString()).join(", ")
+                    node.parents.map((s) => s.toString()).join(", "),
             );
         this._node = node;
         this._depth = depth;
@@ -81,9 +81,9 @@ export class PmodNode {
                 this._node.metadata,
                 this._node.location,
                 this._node.parents,
-                this._node.children
+                this._node.children,
             ),
-            this._depth
+            this._depth,
         );
     }
 }

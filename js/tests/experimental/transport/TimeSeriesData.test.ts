@@ -66,43 +66,43 @@ describe("TimeSeriesDataPackage", () => {
         expect(timeSeriesDataPackage.package.timeSeriesData.length).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.dataConfiguration!
-                .id
+                .id,
         ).toEqual(idStr);
 
         // EventData
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
-                .numberOfDataSet
+                .numberOfDataSet,
         ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
-                .dataSet![0]!.value
+                .dataSet![0]!.value,
         ).toEqual(value);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.eventData!
-                .dataSet![0]!.dataId
+                .dataSet![0]!.dataId,
         ).toBe(dataId);
 
         // TabularData
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .numberOfDataSet
+                .numberOfDataSet,
         ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .numberOfDataPoints
+                .numberOfDataPoints,
         ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .dataId![0]
+                .dataId![0],
         ).toBe(dataId);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .dataSet![0]!.value.length
+                .dataSet![0]!.value.length,
         ).toEqual(1);
         expect(
             timeSeriesDataPackage.package.timeSeriesData[0]!.tabularData![0]!
-                .dataSet![0]!.value[0]
+                .dataSet![0]!.value[0],
         ).toEqual(value);
     });
 });

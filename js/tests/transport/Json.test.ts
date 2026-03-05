@@ -11,9 +11,8 @@ describe("Transport JSON", () => {
 
         const initDto = VistaJSONSerializer.deserializeDataChannelList(sample);
 
-        const domain = await JSONExtensions.DataChannelList.toDomainModel(
-            initDto
-        );
+        const domain =
+            await JSONExtensions.DataChannelList.toDomainModel(initDto);
 
         const dto = JSONExtensions.DataChannelList.toJsonDto(domain);
 

@@ -41,7 +41,7 @@ export class DataChannelId {
 
     public match<T>(
         onLocalId: (localId: LocalId) => T,
-        onShortId: (shortId: string) => T
+        onShortId: (shortId: string) => T,
     ): T {
         switch (this._tag) {
             case 1:
@@ -55,7 +55,7 @@ export class DataChannelId {
 
     public switch(
         onLocalId: (localId: LocalId) => void,
-        onShortId: (shortId: string) => void
+        onShortId: (shortId: string) => void,
     ): void {
         switch (this._tag) {
             case 1:
@@ -85,7 +85,7 @@ export class DataChannelId {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): DataChannelId {
         if (isNullOrWhiteSpace(value))
             throw new Error(`${this.parse.name}: value is null`);
@@ -98,7 +98,7 @@ export class DataChannelId {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
+                errorBuilder,
             ))
         ) {
             return new DataChannelId(localId.build());
@@ -109,7 +109,7 @@ export class DataChannelId {
 
     public static async parseAsync(
         value: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         if (isNullOrWhiteSpace(value))
             throw new Error(`${this.parse.name}: value is null`);
