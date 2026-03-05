@@ -39,7 +39,7 @@ describe("LocalId", () => {
         content?: string,
         position?: string,
         verbose = false,
-        visVersion = VisVersion.v3_4a
+        visVersion = VisVersion.v3_4a,
     ): Input => {
         return {
             primaryItem,
@@ -63,7 +63,7 @@ describe("LocalId", () => {
                 undefined,
                 "temperature",
                 "exhaust.gas",
-                "inlet"
+                "inlet",
             ),
             output: "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
         },
@@ -75,7 +75,7 @@ describe("LocalId", () => {
                 "exhaust.gas",
                 "inlet",
 
-                true
+                true,
             ),
             output: "/dnv-v2/vis-3-4a/411.1/C101.63/S206/sec/411.1/C101.31-5/~propulsion.engine/~cooling.system/~for.propulsion.engine/~cylinder.5/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
         },
@@ -87,7 +87,7 @@ describe("LocalId", () => {
                 "starting.air",
                 "inlet",
                 true,
-                VisVersion.v3_6a
+                VisVersion.v3_6a,
             ),
             output: "/dnv-v2/vis-3-6a/511.11/C101.67/S208/~main.generator.engine/~starting.system.pneumatic/meta/qty-pressure/cnt-starting.air/pos-inlet",
         },
@@ -96,9 +96,8 @@ describe("LocalId", () => {
     it("LocalId valid build", async () => {
         for (const { input, output } of testData) {
             const visVersion = input.visVersion;
-            const { gmod, locations, codebooks } = await VIS.instance.getVIS(
-                visVersion
-            );
+            const { gmod, locations, codebooks } =
+                await VIS.instance.getVIS(visVersion);
 
             const primaryItem = gmod.parsePath(input.primaryItem, locations);
             const secondaryItem = input.secondaryItem
@@ -112,17 +111,17 @@ describe("LocalId", () => {
                 .tryWithMetadataTag(
                     codebooks.tryCreateTag(
                         CodebookName.Quantity,
-                        input.quantity
-                    )
+                        input.quantity,
+                    ),
                 )
                 .tryWithMetadataTag(
-                    codebooks.tryCreateTag(CodebookName.Content, input.content)
+                    codebooks.tryCreateTag(CodebookName.Content, input.content),
                 )
                 .tryWithMetadataTag(
                     codebooks.tryCreateTag(
                         CodebookName.Position,
-                        input.position
-                    )
+                        input.position,
+                    ),
                 );
             const localIdStr = localId.toString();
 
@@ -132,9 +131,8 @@ describe("LocalId", () => {
 
     it.each(testData)("LocalId equality", async ({ input }) => {
         const visVersion = input.visVersion;
-        const { gmod, locations, codebooks } = await VIS.instance.getVIS(
-            visVersion
-        );
+        const { gmod, locations, codebooks } =
+            await VIS.instance.getVIS(visVersion);
 
         const primaryItem = gmod.parsePath(input.primaryItem, locations);
         const secondaryItem = input.secondaryItem
@@ -146,13 +144,13 @@ describe("LocalId", () => {
             .tryWithSecondaryItem(secondaryItem)
             .withVerboseMode(input.verbose)
             .tryWithMetadataTag(
-                codebooks.tryCreateTag(CodebookName.Quantity, input.quantity)
+                codebooks.tryCreateTag(CodebookName.Quantity, input.quantity),
             )
             .tryWithMetadataTag(
-                codebooks.tryCreateTag(CodebookName.Content, input.content)
+                codebooks.tryCreateTag(CodebookName.Content, input.content),
             )
             .tryWithMetadataTag(
-                codebooks.tryCreateTag(CodebookName.Position, input.position)
+                codebooks.tryCreateTag(CodebookName.Position, input.position),
             );
 
         let otherLocalId = localId;
@@ -170,8 +168,8 @@ describe("LocalId", () => {
             .tryWithMetadataTag(
                 codebooks.tryCreateTag(
                     CodebookName.Position,
-                    localId.position?.value
-                )
+                    localId.position?.value,
+                ),
             );
         expect(localId.equals(otherLocalId)).toBe(true);
         expect(localId).not.toBe(otherLocalId);
@@ -188,9 +186,8 @@ describe("LocalId", () => {
     ];
     it("LocalId parsing", async () => {
         const visVersion = VisVersion.v3_4a;
-        const { gmod, locations, codebooks } = await VIS.instance.getVIS(
-            visVersion
-        );
+        const { gmod, locations, codebooks } =
+            await VIS.instance.getVIS(visVersion);
 
         for (const s of parseTestData) {
             const errorBuilder = new LocalIdParsingErrorBuilder();
@@ -199,7 +196,7 @@ describe("LocalId", () => {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
+                errorBuilder,
             );
 
             expect(localId).toBeTruthy();
@@ -220,9 +217,8 @@ describe("LocalId", () => {
     const invalidParseTestData: string =
         "/dnv-v2/vis-3-4a/1021.1i-3AC/H121/meta/qty-temperature/cnt-cargo/cal";
     it("LocalId invalid parsing", async () => {
-        const { gmod, locations, codebooks } = await VIS.instance.getVIS(
-            visVersion
-        );
+        const { gmod, locations, codebooks } =
+            await VIS.instance.getVIS(visVersion);
 
         const errorBuilder = new LocalIdParsingErrorBuilder();
         const localId = LocalIdBuilder.tryParse(
@@ -230,7 +226,7 @@ describe("LocalId", () => {
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
         expect(errorBuilder.hasError).toBeTruthy();
         expect(localId).toBeUndefined();
@@ -238,9 +234,8 @@ describe("LocalId", () => {
 
     it.skip("LocalId smoketest parsing", async () => {
         const visVersion = VisVersion.v3_4a;
-        const { gmod, locations, codebooks } = await VIS.instance.getVIS(
-            visVersion
-        );
+        const { gmod, locations, codebooks } =
+            await VIS.instance.getVIS(visVersion);
 
         const fileStream = fs.createReadStream(testDataPath);
         const rl = readline.createInterface({
@@ -255,7 +250,7 @@ describe("LocalId", () => {
                 if (
                     localIdStr.includes("qty-content") ||
                     localIdStr.includes(
-                        "/dnv-v2/vis-3-4a/621.1/sec/625.21/C823/meta/qty-level/cnt-marine.gas.oil/state-low"
+                        "/dnv-v2/vis-3-4a/621.1/sec/625.21/C823/meta/qty-level/cnt-marine.gas.oil/state-low",
                     )
                 )
                     continue;
@@ -264,7 +259,7 @@ describe("LocalId", () => {
                     gmod,
                     codebooks,
                     locations,
-                    errorBuilder
+                    errorBuilder,
                 );
                 const parsedLocalIdStr = localId?.toString();
 
@@ -296,13 +291,12 @@ describe("LocalId", () => {
         InvalidData.InvalidLocalIds.map((l) => [
             l.input,
             l.expectedErrorMessages,
-        ])
+        ]),
     )(
         "LocalId parsing validation - %s",
         async (input, expectedErrorMessages) => {
-            const { gmod, locations, codebooks } = await VIS.instance.getVIS(
-                visVersion
-            );
+            const { gmod, locations, codebooks } =
+                await VIS.instance.getVIS(visVersion);
 
             const errorBuilder = new LocalIdParsingErrorBuilder();
             const localId = LocalIdBuilder.tryParse(
@@ -310,31 +304,75 @@ describe("LocalId", () => {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
+                errorBuilder,
             );
 
             expect(localId).toBeUndefined();
             expect(errorBuilder.errors.map((e) => e.message)).toEqual(
-                expectedErrorMessages
+                expectedErrorMessages,
             );
-        }
+        },
     );
 
     it("LocalId Metadata Equality", async () => {
         const t1 = await LocalIdBuilder.parseAsync(
-            "/dnv-v2/vis-3-4a/087/meta/qty-time/detail-one.more"
+            "/dnv-v2/vis-3-4a/087/meta/qty-time/detail-one.more",
         );
         const t2 = await LocalIdBuilder.parseAsync(
-            "/dnv-v2/vis-3-4a/087/meta/qty-time"
+            "/dnv-v2/vis-3-4a/087/meta/qty-time",
         );
 
         expect(t1.equals(t2)).toEqual(false);
         expect(t2.equals(t1)).toEqual(false);
     });
 
+    it("LocalId Build AllWithout", async () => {
+        const { gmod, locations, codebooks } =
+            await VIS.instance.getVIS(visVersion);
+
+        const primaryItem = gmod.parsePath("411.1/C101.31-2", locations);
+        const secondaryItem = gmod.parsePath("411.1/C101.31-5", locations);
+
+        const localId = LocalIdBuilder.create(visVersion)
+            .withPrimaryItem(primaryItem)
+            .tryWithSecondaryItem(secondaryItem)
+            .withVerboseMode(true)
+            .tryWithMetadataTag(
+                codebooks.tryCreateTag(CodebookName.Quantity, "quantity"),
+            )
+            .tryWithMetadataTag(
+                codebooks.tryCreateTag(CodebookName.Content, "content"),
+            )
+            .tryWithMetadataTag(
+                codebooks.tryCreateTag(CodebookName.Position, "position"),
+            )
+            .tryWithMetadataTag(
+                codebooks.tryCreateTag(CodebookName.State, "state"),
+            )
+            .tryWithMetadataTag(
+                codebooks.tryCreateTag(CodebookName.Content, "content"),
+            )
+            .tryWithMetadataTag(
+                codebooks.tryCreateTag(CodebookName.Calculation, "calculate"),
+            );
+
+        expect(localId.isValid).toBe(true);
+
+        const allWithout = localId
+            .withoutPrimaryItem()
+            .withoutSecondaryItem()
+            .withoutMetadataTag(CodebookName.Quantity)
+            .withoutMetadataTag(CodebookName.Position)
+            .withoutMetadataTag(CodebookName.State)
+            .withoutMetadataTag(CodebookName.Content)
+            .withoutMetadataTag(CodebookName.Calculation);
+
+        expect(allWithout.isEmpty).toBe(true);
+    });
+
     it("LocalId path location equality", async () => {
         const initBuilder = await LocalIdBuilder.parseAsync(
-            "/dnv-v2/vis-3-4a/411.1-1/meta/qty-time/detail-one.more"
+            "/dnv-v2/vis-3-4a/411.1-1/meta/qty-time/detail-one.more",
         );
         const visVersion = initBuilder.visVersion!;
         const vis = await VIS.instance.getVIS(visVersion);
@@ -358,7 +396,7 @@ describe("LocalId", () => {
             localIds.reduce((state, current) => {
                 if (base.equals(current)) state++;
                 return state;
-            }, 0)
+            }, 0),
         ).toEqual(1);
     });
 });

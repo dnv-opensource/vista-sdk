@@ -1,13 +1,19 @@
+import { Client } from "./Client";
 import { CodebooksDto } from "./types/CodebookDto";
 import { VisVersion, VisVersionExtension, VisVersions } from "./VisVersion";
-import { Client } from "./Client";
 
 import LRUCache from "lru-cache";
-import { GmodDto } from "./types/GmodDto";
-import { Gmod } from "./Gmod";
 import { Codebooks } from "./Codebooks";
-import { LocationsDto } from "./types/LocationDto";
+import { Gmod } from "./Gmod";
+import { GmodNode } from "./GmodNode";
+import { GmodPath } from "./GmodPath";
+import { GmodVersioning } from "./GmodVersioning";
+import { LocalId } from "./LocalId";
+import { LocalIdBuilder } from "./LocalId.Builder";
 import { Locations } from "./Location";
+import { GmodDto } from "./types/GmodDto";
+import { GmodVersioningDto } from "./types/GmodVersioning";
+import { LocationsDto } from "./types/LocationDto";
 
 export class VIS {
     public static readonly instance = new VIS();
@@ -26,6 +32,12 @@ export class VIS {
         Promise<LocationsDto>
     >;
     private readonly _locationCache: LRUCache<VisVersion, Locations>;
+    private readonly _versioningDtoCache: LRUCache<
+        VisVersion,
+        Promise<GmodVersioningDto>
+    >;
+    private readonly _gmodVersioningCache: LRUCache<string, GmodVersioning>;
+    private static readonly GmodVersioningKey = "versioning";
 
     public constructor() {
         this._gmodDtoCache = new LRUCache(this.options);
@@ -34,6 +46,8 @@ export class VIS {
         this._codebooksCache = new LRUCache(this.options);
         this._locationDtoCache = new LRUCache(this.options);
         this._locationCache = new LRUCache(this.options);
+        this._versioningDtoCache = new LRUCache(this.options);
+        this._gmodVersioningCache = new LRUCache(this.options);
     }
 
     private readonly options = {
@@ -93,14 +107,115 @@ export class VIS {
         );
     }
 
-    // private async getGmodVersioningDto() : Promise<GmodVersioningDto> {
-    //     return await Client.visGetGmodVersioning();
-    // }
+    private async getGmodVersioningDto(
+        version: VisVersion
+    ): Promise<GmodVersioningDto> {
+        let dto: Promise<GmodVersioningDto> | undefined =
+            this._versioningDtoCache.get(version);
 
-    // public async getGmodVersioning() : Promise<GmodVersioning> {
-    //     const dto = await this.getGmodVersioningDto();
-    //     return  new GmodVersioning(dto);
-    // }
+        if (dto) {
+            return await dto;
+        }
+
+        dto = Client.visGetGmodVersioning(version);
+        this._versioningDtoCache.set(version, dto);
+        return dto;
+    }
+
+    /**
+     * Get the GmodVersioning instance, loading all versioning data.
+     * This will load versioning data for all VIS versions.
+     */
+    public async getGmodVersioning(): Promise<GmodVersioning> {
+        const cached = this._gmodVersioningCache.get(VIS.GmodVersioningKey);
+        if (cached) {
+            return cached;
+        }
+
+        // Load versioning data for all versions except the first one
+        // (versioning data describes changes TO a version, so v3_4a has no versioning data)
+        const versions = VisVersions.all.slice(1);
+        const dtoMap = new Map<string, GmodVersioningDto>();
+
+        const promises = versions.map(async (v) => {
+            const dto = await this.getGmodVersioningDto(v);
+            return { version: v, dto };
+        });
+
+        const results = await Promise.all(promises);
+        for (const { version, dto } of results) {
+            dtoMap.set(VisVersionExtension.toString(version), dto);
+        }
+        const versioning = new GmodVersioning(dtoMap);
+        this._gmodVersioningCache.set(VIS.GmodVersioningKey, versioning);
+
+        return versioning;
+    }
+
+    /**
+     * Convert a GmodPath from source to target VIS version.
+     *
+     * @param sourceVersion - The source VIS version
+     * @param sourcePath - The path to convert
+     * @param targetVersion - The target VIS version
+     * @returns The converted path, or undefined if conversion failed
+     */
+    public async convertPath(
+        sourceVersion: VisVersion,
+        sourcePath: GmodPath,
+        targetVersion: VisVersion
+    ): Promise<GmodPath | undefined> {
+        const versioning = await this.getGmodVersioning();
+        return versioning.convertPath(sourceVersion, sourcePath, targetVersion);
+    }
+
+    /**
+     * Convert a GmodNode from source to target VIS version.
+     *
+     * @param sourceVersion - The source VIS version
+     * @param sourceNode - The node to convert
+     * @param targetVersion - The target VIS version
+     * @returns The converted node, or undefined if conversion failed
+     */
+    public async convertNode(
+        sourceVersion: VisVersion,
+        sourceNode: GmodNode,
+        targetVersion: VisVersion
+    ): Promise<GmodNode | undefined> {
+        const versioning = await this.getGmodVersioning();
+        return versioning.convertNode(sourceVersion, sourceNode, targetVersion);
+    }
+
+    /**
+     * Convert a LocalId from source to target VIS version.
+     *
+     * @param sourceLocalId - The LocalId to convert
+     * @param targetVersion - The target VIS version
+     * @returns The converted LocalId, or undefined if conversion failed
+     */
+    public async convertLocalId(
+        sourceLocalId: LocalId,
+        targetVersion: VisVersion
+    ): Promise<LocalId | undefined> {
+        const versioning = await this.getGmodVersioning();
+        return versioning.convertLocalId(sourceLocalId, targetVersion);
+    }
+
+    /**
+     * Convert a LocalIdBuilder from source to target VIS version.
+     *
+     * @param sourceLocalId - The LocalIdBuilder to convert
+     * @param targetVersion - The target VIS version
+     * @returns The converted LocalIdBuilder, or undefined if conversion failed
+     */
+    public async convertLocalIdBuilder(
+        sourceLocalId: LocalIdBuilder,
+        targetVersion: VisVersion
+    ): Promise<LocalIdBuilder | undefined> {
+        const versioning = await this.getGmodVersioning();
+
+        return versioning.convertLocalIdBuilder(sourceLocalId, targetVersion);
+    }
 
     private async getCodebooksDto(
         visVersion: VisVersion

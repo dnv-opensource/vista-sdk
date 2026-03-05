@@ -22,7 +22,7 @@ export class GmodNode {
         metadata: GmodNodeMetadata,
         location?: Location,
         parents?: GmodNode[],
-        children?: GmodNode[]
+        children?: GmodNode[],
     );
     private constructor(
         arg1: string | GmodNode,
@@ -31,7 +31,7 @@ export class GmodNode {
         metadata?: GmodNodeMetadata,
         location?: Location,
         parents?: GmodNode[],
-        children?: GmodNode[]
+        children?: GmodNode[],
     ) {
         if (arg1 instanceof GmodNode) {
             const previous = arg1;
@@ -88,10 +88,10 @@ export class GmodNode {
                 commonDefinition: commonDefinition ?? undefined,
                 installSubstructure: installSubstructure ?? undefined,
                 normalAssignmentNames: new Map<string, string>(
-                    Object.entries(normalAssignmentNames ?? {})
+                    Object.entries(normalAssignmentNames ?? {}),
                 ),
             },
-            undefined
+            undefined,
         );
     }
 
@@ -102,7 +102,7 @@ export class GmodNode {
         metadata: GmodNodeMetadata,
         location?: Location,
         parents?: GmodNode[],
-        children?: GmodNode[]
+        children?: GmodNode[],
     ) {
         return new GmodNode(
             id,
@@ -111,7 +111,7 @@ export class GmodNode {
             metadata,
             location,
             parents,
-            children
+            children,
         );
     }
 
@@ -123,7 +123,7 @@ export class GmodNode {
             this.metadata,
             this._location,
             [],
-            []
+            [],
         );
     }
 
@@ -133,7 +133,7 @@ export class GmodNode {
 
     public withLocation(
         location: string | undefined,
-        locations: Locations
+        locations: Locations,
     ): GmodNode;
     public withLocation(location: Location): GmodNode;
     public withLocation(location: unknown, locations?: unknown): GmodNode {
@@ -154,11 +154,11 @@ export class GmodNode {
     public tryWithLocation(location: Location): GmodNode | undefined;
     public tryWithLocation(
         location: string | undefined,
-        locations: Locations
+        locations: Locations,
     ): GmodNode | undefined;
     public tryWithLocation(
         location: unknown,
-        locations?: unknown
+        locations?: unknown,
     ): GmodNode | undefined {
         // if (!isIndividualizable(this, false, false)) return undefined; // TODO what to do about this case
         if (location instanceof Location) {
@@ -179,7 +179,7 @@ export class GmodNode {
         return this.withLocation(parsedLocation);
     }
     public async tryWithLocationAsync(
-        location?: string
+        location?: string,
     ): Promise<GmodNode | undefined> {
         const locations = await VIS.instance.getLocations(this._visVersion);
         return this.tryWithLocation(location, locations);
@@ -217,6 +217,10 @@ export class GmodNode {
 
     public get isAsset() {
         return Gmod.isAsset(this.metadata);
+    }
+
+    public get isRoot() {
+        return this.code === "VE";
     }
 
     public get productType(): GmodNode | undefined {
@@ -295,6 +299,28 @@ export class GmodNode {
         );
     }
 
+    public get isAssetFunctionNode(): boolean {
+        return Gmod.isAssetFunctionNode(this.metadata);
+    }
+
+    public isIndividualizable(
+        isTargetNode: boolean = false,
+        isInSet: boolean = false,
+    ): boolean {
+        if (this.metadata.type === "GROUP") return false;
+        if (this.metadata.type === "SELECTION") return false;
+        if (this.isProductType) return false;
+        if (this.metadata.category === "ASSET" && this.metadata.type == "TYPE")
+            return false;
+        if (this.isFunctionComposition)
+            return (
+                this.code[this.code.length - 1] === "i" ||
+                isTargetNode ||
+                isInSet
+            );
+        return true;
+    }
+
     private with(u: { (state: GmodNode): void }): GmodNode {
         const n = this.clone();
         u && u(n);
@@ -304,31 +330,4 @@ export class GmodNode {
     public clone(): GmodNode {
         return new GmodNode(this);
     }
-}
-
-export function isIndividualizable(
-    node: GmodNode,
-    isTargetNode: boolean,
-    isInSet: boolean = false
-): boolean {
-    if (node.metadata.type === "GROUP") return false;
-    if (node.metadata.type === "SELECTION") return false;
-    if (node.isProductType) return false;
-    if (node.metadata.category === "ASSET" && node.metadata.type == "TYPE")
-        return false;
-    if (
-        node.metadata.category === "ASSET FUNCTION" &&
-        node.metadata.type === "COMPOSITION"
-    )
-        return (
-            node.code[node.code.length - 1] === "i" || isTargetNode || isInSet
-        );
-    if (
-        node.metadata.category === "PRODUCT FUNCTION" &&
-        node.metadata.type === "COMPOSITION"
-    )
-        return (
-            node.code[node.code.length - 1] === "i" || isTargetNode || isInSet
-        );
-    return true;
 }

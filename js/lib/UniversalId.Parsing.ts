@@ -1,11 +1,11 @@
 import {
-    Gmod,
     Codebooks,
-    LocalIdParsingErrorBuilder,
-    UniversalIdBuilder,
-    ParsingState,
+    Gmod,
     ImoNumber,
     LocalIdBuilder,
+    LocalIdParsingErrorBuilder,
+    ParsingState,
+    UniversalIdBuilder,
     VIS,
 } from ".";
 import { parseVisVersion } from "./internal/Parsing";
@@ -17,14 +17,14 @@ export class UniversalIdParser {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         const result = this.tryParse(
             universalId,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
         if (!result) {
             throw new Error("Failed to parse Universal id: " + universalId);
@@ -38,7 +38,7 @@ export class UniversalIdParser {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): UniversalIdBuilder | undefined {
         const localIdStartIndex = universalId.indexOf("/dnv-v");
 
@@ -66,7 +66,7 @@ export class UniversalIdParser {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
+                errorBuilder,
             );
 
         let nextSegmentIndex = universalIdSegment.indexOf("/");
@@ -117,16 +117,16 @@ export class UniversalIdParser {
 
     public static async parseAsync(
         universalIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         var universalId = await this.tryParseAsync(
             universalIdString,
-            errorBuilder
+            errorBuilder,
         );
 
         if (!universalId)
             throw new Error(
-                "Couldn't parse local ID from: " + universalIdString
+                "Couldn't parse local ID from: " + universalIdString,
             );
 
         return universalId;
@@ -134,10 +134,10 @@ export class UniversalIdParser {
 
     public static async tryParseAsync(
         universalIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         const version = parseVisVersion(universalIdString, errorBuilder);
-        if (!version) return;
+        if (version === undefined) return;
 
         const gmod = await VIS.instance.getGmod(version);
         const codebooks = await VIS.instance.getCodebooks(version);
@@ -148,7 +148,7 @@ export class UniversalIdParser {
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 }

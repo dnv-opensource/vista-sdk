@@ -164,3 +164,45 @@ it.each(testCases)("IsValid", async (name, value, valid) => {
     const isValid = Codebook.isValidTag(name, value, codebook);
     expect(isValid).toEqual(valid);
 });
+
+it("Standard values", async () => {
+    const { codebooks } = await VIS.instance.getVIS(version);
+    const positions = codebooks.getCodebook(CodebookName.Position);
+
+    expect(positions.hasStandardValue("upper")).toBe(true);
+    expect(positions.standardValues.values.size).toBeGreaterThan(0);
+    expect(positions.standardValues.values.has("upper")).toBe(true);
+});
+
+it("Get groups", async () => {
+    const { codebooks } = await VIS.instance.getVIS(version);
+    const positions = codebooks.getCodebook(CodebookName.Position);
+
+    const groups = positions.groups;
+    expect(groups.count).toBeGreaterThan(1);
+    expect(groups.contains("Vertical")).toBe(true);
+});
+
+it("Iterate groups", async () => {
+    const { codebooks } = await VIS.instance.getVIS(version);
+    const groups = codebooks.getCodebook(CodebookName.Position).groups;
+
+    let count = 0;
+    for (const _ of groups.values) {
+        count++;
+    }
+
+    expect(count).toBe(11);
+});
+
+it("Iterate values", async () => {
+    const { codebooks } = await VIS.instance.getVIS(version);
+    const values = codebooks.getCodebook(CodebookName.Position).standardValues;
+
+    let count = 0;
+    for (const _ of values.values) {
+        count++;
+    }
+
+    expect(count).toBe(28);
+});

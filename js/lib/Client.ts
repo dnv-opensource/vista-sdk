@@ -1,5 +1,6 @@
 import { CodebooksDto } from "./types/CodebookDto";
 import { GmodDto } from "./types/GmodDto";
+import { GmodVersioningDto } from "./types/GmodVersioning";
 import { LocationsDto } from "./types/LocationDto";
 import { VisVersion, VisVersionExtension } from "./VisVersion";
 
@@ -8,7 +9,7 @@ export class Client {
 
     public static async visGetGmod(version: VisVersion): Promise<GmodDto> {
         const url = `${this.API_URL}gmod-vis-${VisVersionExtension.toString(
-            version
+            version,
         )}.json`;
 
         const response = await fetch(url);
@@ -18,13 +19,32 @@ export class Client {
 
         throw new Error(
             `Failed to fetch gmod version ${VisVersionExtension.toString(
-                version
-            )}: ${response.statusText}.`
+                version,
+            )}: ${response.statusText}.`,
+        );
+    }
+
+    public static async visGetGmodVersioning(
+        version: VisVersion,
+    ): Promise<GmodVersioningDto> {
+        const url = `${
+            this.API_URL
+        }gmod-vis-versioning-${VisVersionExtension.toString(version)}.json`;
+
+        const response = await fetch(url);
+        if (response.ok) {
+            return (await response.json()) as GmodVersioningDto;
+        }
+
+        throw new Error(
+            `Failed to fetch gmod versioning ${VisVersionExtension.toString(
+                version,
+            )}: ${response.statusText}.`,
         );
     }
 
     public static async visGetCodebooks(
-        version: VisVersion
+        version: VisVersion,
     ): Promise<CodebooksDto> {
         const url = `${
             this.API_URL
@@ -37,13 +57,13 @@ export class Client {
 
         throw new Error(
             `Failed to fetch codebook version ${VisVersionExtension.toString(
-                version
-            )}: ${response.statusText}.`
+                version,
+            )}: ${response.statusText}.`,
         );
     }
 
     public static async visGetLocation(
-        version: VisVersion
+        version: VisVersion,
     ): Promise<LocationsDto> {
         const url = `${
             this.API_URL
@@ -56,8 +76,8 @@ export class Client {
 
         throw new Error(
             `Failed to fetch locations version ${VisVersionExtension.toString(
-                version
-            )}: ${response.statusText}.`
+                version,
+            )}: ${response.statusText}.`,
         );
     }
 }

@@ -27,7 +27,7 @@ describe("Pmod", () => {
     const version = VisVersion.v3_4a;
 
     var testDataArr = Object.entries(testData).filter(
-        ([k, _]) => k !== "default"
+        ([k, _]) => k !== "default",
     );
     var fullPaths = testDataArr.flatMap<[VisVersion, string]>(
         ([version, data]) => {
@@ -36,7 +36,7 @@ describe("Pmod", () => {
                 visVersion,
                 fullPath,
             ]);
-        }
+        },
     );
 
     it.each(testDataArr)("From LocalIds", async (visVersion, testData) => {
@@ -48,13 +48,13 @@ describe("Pmod", () => {
         } = await VIS.instance.getVIS(version);
 
         const localIds = testData.localIds.map((localIdStr) =>
-            LocalId.parse(localIdStr, gmod, codeBooks, locations)
+            LocalId.parse(localIdStr, gmod, codeBooks, locations),
         );
 
         const maxDepth = Math.max(
             ...localIds
                 .flatMap((l) => [l.primaryItem, l.secondaryItem])
-                .map((p) => (p ? p.getFullPath().length - 1 : 0))
+                .map((p) => (p ? p.getFullPath().length - 1 : 0)),
         );
 
         const pmod = Pmod.createFromLocalIds(VisVersion.v3_4a, localIds, {
@@ -87,7 +87,7 @@ describe("Pmod", () => {
             } = await VIS.instance.getVIS(version);
 
             const localIds = testData.localIds.map((localIdStr) =>
-                LocalId.parse(localIdStr, gmod, codeBooks, locations)
+                LocalId.parse(localIdStr, gmod, codeBooks, locations),
             );
 
             const pmod = Pmod.createFromLocalIds(VisVersion.v3_4a, localIds, {
@@ -99,7 +99,7 @@ describe("Pmod", () => {
             const rootNode = pmod.getNodesByCode(rootNodeCode);
             const rootPath = gmod.tryParseFromFullPath(
                 rootNode[0].id,
-                locations
+                locations,
             );
 
             const context = {
@@ -136,7 +136,7 @@ describe("Pmod", () => {
                             ]);
                             return c;
                         }, [])
-                        .reverse()
+                        .reverse(),
                 ),
                 iter: 0,
             };
@@ -171,7 +171,7 @@ describe("Pmod", () => {
 
                     let parentKey = createKey(
                         parents,
-                        parents.splice(parents.length - 1, 1)[0]
+                        parents.splice(parents.length - 1, 1)[0],
                     );
 
                     let vmodParent = context.nodeMap.get(parentKey);
@@ -181,16 +181,15 @@ describe("Pmod", () => {
                     vmodParent.children.push(vmodNode);
                     return TraversalHandlerResult.Continue;
                 },
-                { state: context, fromPath: rootPath }
+                { state: context, fromPath: rootPath },
             );
 
             expect(context.nodes[0].code).toEqual(rootNodeCode);
-        }
+        },
     );
 
     it.each(fullPaths)("Tree parse paths %s", async (visVersion, testPath) => {
-        var version = VisVersions.parse(visVersion);
-        const { gmod, locations } = await VIS.instance.getVIS(version);
+        const { gmod, locations } = await VIS.instance.getVIS(visVersion);
 
         const path = gmod.parseFromFullPath(testPath, locations);
         expect(path).toBeTruthy();
@@ -201,7 +200,7 @@ describe("Pmod", () => {
         const { gmod, locations } = await VIS.instance.getVIS(version);
 
         const paths = testData.fullPaths.map((path) =>
-            gmod.parseFromFullPath(path, locations)
+            gmod.parseFromFullPath(path, locations),
         );
 
         const pmod = Pmod.createFromPaths(VisVersion.v3_6a, paths, {
@@ -210,7 +209,7 @@ describe("Pmod", () => {
 
         const rootPath = gmod.parseFromFullPath(
             "VE/500a/510/511/511.1/511.1i/511.11/CS1/C101",
-            locations
+            locations,
         );
 
         type VmodNode = StrippedNode<{ another: string }> & {
@@ -228,7 +227,7 @@ describe("Pmod", () => {
                 fromPath: rootPath,
                 withoutLocation: true,
                 formatNode: (node) => ({ ...node, another: node.key }),
-            }
+            },
         );
 
         expect(result instanceof Ok).toBeTruthy();
@@ -240,7 +239,7 @@ describe("Pmod", () => {
             (node, _) => {
                 return TraversalHandlerResult.Continue;
             },
-            { fromPath: rootPath, withoutLocation: false }
+            { fromPath: rootPath, withoutLocation: false },
         );
 
         expect(result instanceof NotRelevant).toBeTruthy();

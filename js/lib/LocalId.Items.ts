@@ -28,33 +28,43 @@ export class LocalIdItems {
 
         if (verboseMode) {
             if (!!this.primaryItem) {
-                for (const {
-                    depth,
-                    name,
-                } of this.primaryItem.getCommonNames()) {
+                for (const { depth, name } of this.primaryItem.getCommonNames(
+                    true,
+                )) {
                     builder.push("~");
                     const location = this.primaryItem.getNode(depth).location;
-                    LocalIdItems.appendCommonName(builder, name);
+                    LocalIdItems.appendCommonName(
+                        builder,
+                        name,
+                        location?.toString(),
+                    );
                     builder.push("/");
                 }
             }
 
             if (!!this.secondaryItem) {
                 let prefix = "~for.";
-                for (const {
-                    depth,
-                    name,
-                } of this.secondaryItem.getCommonNames()) {
+                for (const { depth, name } of this.secondaryItem.getCommonNames(
+                    true,
+                )) {
                     builder.push(prefix);
                     if (prefix !== "~") prefix = "~";
                     const location = this.secondaryItem.getNode(depth).location;
-                    LocalIdItems.appendCommonName(builder, name);
+                    LocalIdItems.appendCommonName(
+                        builder,
+                        name,
+                        location?.toString(),
+                    );
                     builder.push("/");
                 }
             }
         }
     }
-    private static appendCommonName(builder: string[], commonName: string) {
+    private static appendCommonName(
+        builder: string[],
+        commonName: string,
+        location?: string,
+    ) {
         let prev: string | undefined = undefined;
         for (const ch of commonName) {
             if (ch === "/") continue;
@@ -77,6 +87,11 @@ export class LocalIdItems {
             if (current === "." && prev === ".") continue;
             builder.push(current);
             prev = current;
+        }
+
+        if (location && location.length > 0) {
+            builder.push(".");
+            builder.push(location);
         }
     }
 

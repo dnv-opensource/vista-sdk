@@ -1,4 +1,4 @@
-import { VisVersion } from "../../..";
+import { VisVersion, VisVersionExtension, VisVersions } from "../../..";
 import { isNullOrWhiteSpace } from "../../../util/util";
 
 export class Version {
@@ -7,18 +7,24 @@ export class Version {
     private readonly _otherVersion?: string;
 
     private constructor(version: VisVersion | string) {
-        if (this.isVisVersion(version)) {
+        if (typeof version === "string") {
+            const parsed = VisVersions.tryParse(version);
+            if (parsed !== undefined) {
+                this._tag = 1;
+                this._visVersion = parsed;
+            } else {
+                this._tag = 2;
+                this._otherVersion = version;
+            }
+        } else {
             this._tag = 1;
             this._visVersion = version;
-        } else {
-            this._tag = 2;
-            this._otherVersion = version;
         }
     }
 
     public match<T>(
         onVisVersion: (version: VisVersion) => T,
-        onOtherVersion: (version: string) => T
+        onOtherVersion: (version: string) => T,
     ): T {
         switch (this._tag) {
             case 1:
@@ -32,7 +38,7 @@ export class Version {
 
     public switch(
         onVisVersion: (version: VisVersion) => void,
-        onOtherVersion: (version: string) => void
+        onOtherVersion: (version: string) => void,
     ) {
         switch (this._tag) {
             case 1:
@@ -47,7 +53,7 @@ export class Version {
     public toString() {
         switch (this._tag) {
             case 1:
-                return this._visVersion!.toString();
+                return VisVersionExtension.toVersionString(this._visVersion!);
             case 2:
                 return this._otherVersion!;
             default:
@@ -55,14 +61,13 @@ export class Version {
         }
     }
 
-    public static parse(version?: string): Version {
+    public static parse(version?: VisVersion | string): Version {
+        if (typeof version === "string") {
+            return new Version(version);
+        }
         if (isNullOrWhiteSpace(version))
             throw new Error(`${Version.name}.parse: value is null`);
 
         return new Version(version);
-    }
-
-    private isVisVersion(version: string): version is VisVersion {
-        return Object.values(VisVersion).map(toString).includes(version);
     }
 }

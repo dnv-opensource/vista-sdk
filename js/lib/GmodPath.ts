@@ -1,10 +1,10 @@
 import { VIS, VisVersion } from ".";
 import { Gmod, PotentialParentScopeTypes } from "./Gmod";
-import { GmodNode, isIndividualizable } from "./GmodNode";
-import { Locations, Location } from "./Location";
+import { GmodNode } from "./GmodNode";
+import { Location, Locations } from "./Location";
 import { TraversalHandlerResult } from "./types/Gmod";
-import { PathNode, ParseContext } from "./types/GmodPath";
-import { match, isNullOrWhiteSpace } from "./util/util";
+import { ParseContext, PathNode } from "./types/GmodPath";
+import { isNullOrWhiteSpace, match } from "./util/util";
 
 export class GmodIndividualizableSet {
     public get location(): Location | undefined {
@@ -45,8 +45,7 @@ export class GmodIndividualizableSet {
         if (
             _nodes.some(
                 (i) =>
-                    !isIndividualizable(
-                        this.getNode(i),
+                    !this.getNode(i).isIndividualizable(
                         i === _path.parents.length,
                         _nodes.length > 1
                     )
@@ -142,7 +141,7 @@ export class GmodPath {
         this.node = node;
     }
 
-    private static isValid(parents: GmodNode[], node: GmodNode): boolean {
+    public static isValid(parents: GmodNode[], node: GmodNode): boolean {
         if (parents.length === 0 && node.code !== "VE") return false;
         if (parents.length > 0 && parents[0].code !== "VE") return false;
 
@@ -765,7 +764,7 @@ export class GmodPath {
     }
 }
 
-function locationSetsVisitor() {
+export function locationSetsVisitor() {
     let currentParentStart = -1;
 
     return (
@@ -778,13 +777,13 @@ function locationSetsVisitor() {
         const isTargetNode = i === parents.length;
         if (currentParentStart === -1) {
             if (isParent) currentParentStart = i;
-            if (isIndividualizable(node, isTargetNode))
+            if (node.isIndividualizable(isTargetNode))
                 return [i, i, node.location];
         } else {
             if (isParent || isTargetNode) {
                 let nodes: [number, number, Location | undefined] | null = null;
                 if (currentParentStart + 1 === i) {
-                    if (isIndividualizable(node, isTargetNode))
+                    if (node.isIndividualizable(isTargetNode))
                         nodes = [i, i, node.location];
                 } else {
                     let skippedOne = -1;
@@ -793,8 +792,7 @@ function locationSetsVisitor() {
                         const setNode =
                             j < parents.length ? parents[j] : target;
                         if (
-                            !isIndividualizable(
-                                setNode,
+                            !setNode.isIndividualizable(
                                 j == parents.length,
                                 true
                             )
@@ -855,7 +853,7 @@ function locationSetsVisitor() {
                 }
             }
 
-            if (isTargetNode && isIndividualizable(node, isTargetNode))
+            if (isTargetNode && node.isIndividualizable(isTargetNode))
                 return [i, i, node.location];
         }
         return null;

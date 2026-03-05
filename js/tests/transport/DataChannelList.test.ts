@@ -1,6 +1,11 @@
 import { readFile } from "fs/promises";
 import { validate } from "jsonschema";
-import { LocalId, LocalIdBuilder, VisVersion } from "../../lib";
+import {
+    LocalId,
+    LocalIdBuilder,
+    VisVersion,
+    VisVersionExtension,
+} from "../../lib";
 import { DataChannelList, ShipId } from "../../lib/transport/domain";
 import { Version } from "../../lib/transport/domain/data-channel/Version";
 
@@ -84,46 +89,46 @@ describe("DataChannel", () => {
 
         // Header
         expect(
-            dataChannelListPackage.package.header.dataChannelListId.id
+            dataChannelListPackage.package.header.dataChannelListId.id,
         ).toEqual(idStr);
         expect(dataChannelListPackage.package.header.shipId).toBe(shipId);
         expect(
-            dataChannelListPackage.package.header.dataChannelListId.version
+            dataChannelListPackage.package.header.dataChannelListId.version,
         ).toBe(version);
         expect(
-            dataChannelListPackage.package.header.dataChannelListId.version!.toString()
-        ).toEqual(VisVersion.v3_5a);
+            dataChannelListPackage.package.header.dataChannelListId.version!.toString(),
+        ).toEqual(VisVersionExtension.toVersionString(VisVersion.v3_5a));
 
         // DataChannels
         expect(
-            dataChannelListPackage.package.dataChannelList.dataChannel
+            dataChannelListPackage.package.dataChannelList.dataChannel,
         ).toHaveLength(1);
         expect(
             dataChannelListPackage.package.dataChannelList.dataChannel[0]!
-                .dataChannelId.localId
+                .dataChannelId.localId,
         ).toBe(localId);
         expect(
             dataChannelListPackage.package.dataChannelList.dataChannel[0]!
-                .dataChannelId.nameObject!.namingRule
+                .dataChannelId.nameObject!.namingRule,
         ).toEqual(namingRule);
         expect(
             dataChannelListPackage.package.dataChannelList.dataChannel[0]!
-                .property.format
+                .property.format,
         ).toBeTruthy();
         expect(
             dataChannelListPackage.package.dataChannelList.dataChannel[0]!
-                .property.dataChannelType.type
+                .property.dataChannelType.type,
         ).toEqual("Inst");
     });
 
     it("JSONSchema validation", async () => {
         var sample = await readFile(
             "../schemas/json/DataChannelList.sample.json",
-            { encoding: "utf8", flag: "r" }
+            { encoding: "utf8", flag: "r" },
         );
         var schema = await readFile(
             "../schemas/json/DataChannelList.schema.json",
-            { encoding: "utf8", flag: "r" }
+            { encoding: "utf8", flag: "r" },
         );
 
         // Convert URN $id to URL format for jsonschema library compatibility with Node 24+

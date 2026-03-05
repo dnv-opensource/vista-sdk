@@ -12,9 +12,10 @@ import { MetadataTag } from "./MetadataTag";
 import { ParsingState } from "./types/LocalId";
 import { VisVersion } from "./VisVersion";
 
-export class LocalIdBuilder
-    implements ILocalIdBuilderGeneric<LocalIdBuilder, LocalId>
-{
+export class LocalIdBuilder implements ILocalIdBuilderGeneric<
+    LocalIdBuilder,
+    LocalId
+> {
     public static readonly namingRule = "dnv-v2";
     public static readonly usedCodebooks = [
         CodebookName.Quantity,
@@ -118,7 +119,7 @@ export class LocalIdBuilder
     }
 
     public validate(
-        errorBuilder = new LocalIdParsingErrorBuilder()
+        errorBuilder = new LocalIdParsingErrorBuilder(),
     ): LocalIdParsingErrorBuilder {
         // Add validation for primaryItem
         if (!this.primaryItem) {
@@ -138,7 +139,7 @@ export class LocalIdBuilder
         if (!other) return false;
         if (this.visVersion !== other.visVersion)
             throw new Error(
-                "Cant compare local IDs from different VisVersions"
+                "Cant compare local IDs from different VisVersions",
             );
 
         return !!(
@@ -182,7 +183,7 @@ export class LocalIdBuilder
         if (builder[builder.length - 1].endsWith("/")) {
             builder[builder.length - 1] = builder[builder.length - 1].slice(
                 0,
-                -1
+                -1,
             );
         }
         const result = builder.join("");
@@ -210,7 +211,7 @@ export class LocalIdBuilder
                 return this.detail;
             default:
                 throw new Error(
-                    `Unknown or invalid metadata tag name: ${name}`
+                    `Unknown or invalid metadata tag name: ${name}`,
                 );
         }
     }
@@ -319,7 +320,7 @@ export class LocalIdBuilder
                 return this.withDetail(metadataTag);
             default:
                 throw new Error(
-                    `Unknown or invalid metadata tag name: ${metadataTag.name}`
+                    `Unknown or invalid metadata tag name: ${metadataTag.name}`,
                 );
         }
     }
@@ -344,7 +345,7 @@ export class LocalIdBuilder
                 return this.withoutDetail();
             default:
                 throw new Error(
-                    `Unknown or invalid metadata tag name: ${name}`
+                    `Unknown or invalid metadata tag name: ${name}`,
                 );
         }
     }
@@ -387,20 +388,20 @@ export class LocalIdBuilder
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return LocalIdParser.parse(
             localIdStr,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 
     public static async parseAsync(
         localIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return LocalIdParser.parseAsync(localIdString, errorBuilder);
     }
@@ -410,20 +411,20 @@ export class LocalIdBuilder
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return LocalIdParser.tryParse(
             localIdStr,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 
     public static async tryParseAsync(
         localIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return LocalIdParser.tryParseAsync(localIdString, errorBuilder);
     }
