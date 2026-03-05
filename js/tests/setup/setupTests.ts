@@ -36,7 +36,7 @@ Client.visGetGmod = async (version: VisVersion): Promise<GmodDto> => {
     const cached = dtoCache.get(version);
     if (cached) return cached.gmodDto;
     console.warn(
-        `[setupTests] Cache miss for Gmod ${version}, fetching from network`
+        `[setupTests] Cache miss for Gmod ${version}, fetching from network`,
     );
     return originalVisGetGmod(version);
 };
@@ -46,7 +46,7 @@ Client.visGetCodebooks = async (version: VisVersion): Promise<CodebooksDto> => {
     const cached = dtoCache.get(version);
     if (cached) return cached.codebooksDto;
     console.warn(
-        `[setupTests] Cache miss for Codebooks ${version}, fetching from network`
+        `[setupTests] Cache miss for Codebooks ${version}, fetching from network`,
     );
     return originalVisGetCodebooks(version);
 };
@@ -56,7 +56,7 @@ Client.visGetLocation = async (version: VisVersion): Promise<LocationsDto> => {
     const cached = dtoCache.get(version);
     if (cached) return cached.locationsDto;
     console.warn(
-        `[setupTests] Cache miss for Locations ${version}, fetching from network`
+        `[setupTests] Cache miss for Locations ${version}, fetching from network`,
     );
     return originalVisGetLocation(version);
 };

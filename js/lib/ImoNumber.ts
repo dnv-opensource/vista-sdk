@@ -9,7 +9,7 @@ export class ImoNumber {
 
     public static create(value: string | number) {
         let num: number;
-        if (typeof value === 'string') {
+        if (typeof value === "string") {
             const parsedValue = ImoNumber.tryParseInternal(value);
             if (parsedValue === undefined)
                 throw new Error("Invalid IMO number: " + value);
@@ -18,8 +18,7 @@ export class ImoNumber {
             num = value;
         }
 
-        if (!this.isValid(num))
-            throw new Error("Invalid IMO number: " + value);
+        if (!this.isValid(num)) throw new Error("Invalid IMO number: " + value);
 
         return new ImoNumber(num);
     }

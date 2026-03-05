@@ -16,5 +16,6 @@ export interface ILocalId {
     toString(): string;
 }
 
-export interface ILocalIdGeneric<T extends ILocalIdGeneric<T>>
-    extends ILocalId {}
+export interface ILocalIdGeneric<
+    T extends ILocalIdGeneric<T>,
+> extends ILocalId {}

@@ -26,7 +26,7 @@ export class ShipId {
 
     public match<T>(
         onImoNumber: (imoNumber: ImoNumber) => T,
-        onOtherId: (otherId: string) => T
+        onOtherId: (otherId: string) => T,
     ): T {
         switch (this._tag) {
             case 1:
@@ -40,7 +40,7 @@ export class ShipId {
 
     public switch(
         onImoNumber: (imoNumber: ImoNumber) => void,
-        onOtherId: (otherId: string) => void
+        onOtherId: (otherId: string) => void,
     ): void {
         switch (this._tag) {
             case 1:

@@ -1,172 +1,101 @@
+export enum VisVersion {
+    v3_4a = "3-4a",
+    v3_5a = "3-5a",
+    v3_6a = "3-6a",
+    v3_7a = "3-7a",
+    v3_8a = "3-8a",
+    v3_9a = "3-9a",
+    v3_10a = "3-10a",
+}
 
-        export enum  VisVersion{
-            v3_4a = "3-4a"
-,v3_5a = "3-5a"
-,v3_6a = "3-6a"
-,v3_7a = "3-7a"
-,v3_8a = "3-8a"
-,v3_9a = "3-9a"
-,v3_10a = "3-10a"
+export const allVisVersions: VisVersion[] = [
+    VisVersion.v3_4a,
+    VisVersion.v3_5a,
+    VisVersion.v3_6a,
+    VisVersion.v3_7a,
+    VisVersion.v3_8a,
+    VisVersion.v3_9a,
+    VisVersion.v3_10a,
+];
 
+const versionToIndex = new Map<VisVersion, number>(
+    allVisVersions.map((v, i) => [v, i]),
+);
+const stringToVersion = new Map<string, VisVersion>(
+    allVisVersions.map((v) => [v as string, v]),
+);
+
+export class VisVersionExtension {
+    public static toVersionString(
+        version: VisVersion,
+        builder?: string[],
+    ): string {
+        if (builder) {
+            builder.push(version);
         }
+        return version;
+    }
 
-        export const allVisVersions: VisVersion[] = [
-            VisVersion.v3_4a,
-VisVersion.v3_5a,
-VisVersion.v3_6a,
-VisVersion.v3_7a,
-VisVersion.v3_8a,
-VisVersion.v3_9a,
-VisVersion.v3_10a
-        ];
+    public static toString(version: VisVersion, builder?: string[]): string {
+        return this.toVersionString(version, builder);
+    }
 
-        export class VisVersionExtension {
-            public static toVersionString(version: VisVersion, builder?: string[]): string {
-              let v: string;
-              switch (version) {
-                  case VisVersion.v3_4a:
-                  v = "3-4a";
-                  break;case VisVersion.v3_5a:
-                  v = "3-5a";
-                  break;case VisVersion.v3_6a:
-                  v = "3-6a";
-                  break;case VisVersion.v3_7a:
-                  v = "3-7a";
-                  break;case VisVersion.v3_8a:
-                  v = "3-8a";
-                  break;case VisVersion.v3_9a:
-                  v = "3-9a";
-                  break;case VisVersion.v3_10a:
-                  v = "3-10a";
-                  break;
-                default:
-                  throw new Error('Invalid VisVersion enum value: ' + version);
-              }
+    public static isValid(version: VisVersion): boolean {
+        return versionToIndex.has(version);
+    }
 
-              if (builder) {
-                builder.push(v);
-              }
-              return v;
-            }
+    public static compare(a: VisVersion, b: VisVersion): number {
+        const ai = versionToIndex.get(a);
+        const bi = versionToIndex.get(b);
+        if (ai === undefined || bi === undefined) {
+            throw new Error("Invalid VisVersion");
+        }
+        return ai - bi;
+    }
 
-            public static toString(version: VisVersion, builder?: string[]): string {
-              let v: string;
-              switch (version) {
-                    case VisVersion.v3_4a:
-                    v = "3-4a";
-                    break;case VisVersion.v3_5a:
-                    v = "3-5a";
-                    break;case VisVersion.v3_6a:
-                    v = "3-6a";
-                    break;case VisVersion.v3_7a:
-                    v = "3-7a";
-                    break;case VisVersion.v3_8a:
-                    v = "3-8a";
-                    break;case VisVersion.v3_9a:
-                    v = "3-9a";
-                    break;case VisVersion.v3_10a:
-                    v = "3-10a";
-                    break;
-                default:
-                  throw new Error('Invalid VisVersion enum value: ' + version);
-              }
+    public static lessThan(a: VisVersion, b: VisVersion): boolean {
+        return this.compare(a, b) < 0;
+    }
 
-              if (builder) {
-                builder.push(v);
-              }
-              return v;
-            }
+    public static lessThanOrEqual(a: VisVersion, b: VisVersion): boolean {
+        return this.compare(a, b) <= 0;
+    }
 
-            public static isValid(version: VisVersion): boolean {
-              switch (version) {
-                    case VisVersion.v3_4a:
-                    return true;
-case VisVersion.v3_5a:
-                    return true;
-case VisVersion.v3_6a:
-                    return true;
-case VisVersion.v3_7a:
-                    return true;
-case VisVersion.v3_8a:
-                    return true;
-case VisVersion.v3_9a:
-                    return true;
-case VisVersion.v3_10a:
-                    return true;
+    public static greaterThan(a: VisVersion, b: VisVersion): boolean {
+        return this.compare(a, b) > 0;
+    }
 
-                default:
-                  return false;
-              }
-            }
+    public static greaterThanOrEqual(a: VisVersion, b: VisVersion): boolean {
+        return this.compare(a, b) >= 0;
+    }
 
-            public static compare(a: VisVersion, b: VisVersion): number {
-                    const aStr = VisVersionExtension.toVersionString(a);
-                    const bStr = VisVersionExtension.toVersionString(b);
-                    return aStr.localeCompare(bStr, undefined, {
-                        numeric: true,
-                        sensitivity: "base",
-                        ignorePunctuation: true,
-                    });
-                }
+    public static equals(a: VisVersion, b: VisVersion): boolean {
+        return a === b;
+    }
 
-            public static lessThan(a: VisVersion, b: VisVersion): boolean {
-                return this.compare(a, b) < 0;
-            }
+    public static increment(version: VisVersion): VisVersion | undefined {
+        const index = versionToIndex.get(version);
+        if (index === undefined || index >= allVisVersions.length - 1) {
+            return undefined;
+        }
+        return allVisVersions[index + 1];
+    }
+}
 
-            public static lessThanOrEqual(a: VisVersion, b: VisVersion): boolean {
-                return this.compare(a, b) <= 0;
-            }
+export class VisVersions {
+    public static get all(): VisVersion[] {
+        return allVisVersions;
+    }
 
-            public static greaterThan(a: VisVersion, b: VisVersion): boolean {
-                return this.compare(a, b) > 0;
-            }
+    public static parse(version: string): VisVersion {
+        const v = this.tryParse(version);
+        if (v === undefined) {
+            throw new Error("Couldnt parse version string: " + version);
+        }
+        return v;
+    }
 
-            public static greaterThanOrEqual(a: VisVersion, b: VisVersion): boolean {
-                return this.compare(a, b) >= 0;
-            }
-
-            public static equals(a: VisVersion, b: VisVersion): boolean {
-                return a === b;
-            }
-
-          }
-
-        export class VisVersions {
-            public static get all(): VisVersion[] {
-              return allVisVersions;
-            }
-
-            public static parse(version: string): VisVersion {
-              const v = this.tryParse(version);
-              if (!v) {
-                throw new Error('Couldnt parse version string: ' + version);
-              }
-
-              return v;
-            }
-
-            public static tryParse(version: string): VisVersion | undefined {
-              switch (version) {
-                  case "3-4a":
-                    return VisVersion.v3_4a;
-case "3-5a":
-                    return VisVersion.v3_5a;
-case "3-6a":
-                    return VisVersion.v3_6a;
-case "3-7a":
-                    return VisVersion.v3_7a;
-case "3-8a":
-                    return VisVersion.v3_8a;
-case "3-9a":
-                    return VisVersion.v3_9a;
-case "3-10a":
-                    return VisVersion.v3_10a;
-
-                default:
-                  return;
-              }
-            }
-
-
-          }
-        
+    public static tryParse(version: string): VisVersion | undefined {
+        return stringToVersion.get(version);
+    }
+}

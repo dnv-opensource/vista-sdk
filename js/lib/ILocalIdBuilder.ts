@@ -21,7 +21,7 @@ export interface ILocalIdBuilder {
     toString(builder?: string[]): string;
     equals(other?: ILocalIdBuilder): boolean;
     validate(
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): LocalIdParsingErrorBuilder;
 
     build(): ILocalId;
@@ -29,11 +29,9 @@ export interface ILocalIdBuilder {
 
 export interface ILocalIdBuilderGeneric<
     TBuilder extends ILocalIdBuilderGeneric<TBuilder, TResult>,
-    TResult extends ILocalIdGeneric<TResult>
+    TResult extends ILocalIdGeneric<TResult>,
 > extends ILocalIdBuilder {
-    withVisVersion(visVersion: string): TBuilder;
     withVisVersion(visVersion: VisVersion): TBuilder;
-    tryWithVisVersion(visVersion?: string): TBuilder;
     tryWithVisVersion(visVersion?: VisVersion): TBuilder;
     withoutVisVersion(): TBuilder;
 

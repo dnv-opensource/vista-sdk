@@ -30,14 +30,14 @@ export class PMSLocalIdParser {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): PMSLocalIdBuilder {
         const localId = PMSLocalIdParser.tryParse(
             localIdStr,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
         if (!localId)
             throw new Error("Couldn't parse local ID from: " + localIdStr);
@@ -46,7 +46,7 @@ export class PMSLocalIdParser {
 
     public static async parseAsync(
         localIdStr: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): Promise<PMSLocalIdBuilder> {
         const localId = await this.tryParseAsync(localIdStr, errorBuilder);
 
@@ -60,7 +60,7 @@ export class PMSLocalIdParser {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): PMSLocalIdBuilder | undefined {
         if (!localIdStr || isNullOrWhiteSpace(localIdStr))
             throw new Error("Invalid LocalId string");
@@ -123,7 +123,7 @@ export class PMSLocalIdParser {
                         context,
                         context.i,
                         context.segment,
-                        context.state
+                        context.state,
                     );
                     break;
                 case ParsingState.VisVersion:
@@ -138,10 +138,10 @@ export class PMSLocalIdParser {
                         return;
                     }
                     const version = VisVersions.tryParse(
-                        context.segment.slice("vis-".length)
+                        context.segment.slice("vis-".length),
                     );
 
-                    if (!version) {
+                    if (version === undefined) {
                         errorBuilder?.push(ParsingState.VisVersion);
                         return;
                     }
@@ -150,7 +150,7 @@ export class PMSLocalIdParser {
                         context,
                         context.i,
                         context.segment,
-                        context.state
+                        context.state,
                     );
                     break;
                 case ParsingState.PrimaryItem:
@@ -161,12 +161,12 @@ export class PMSLocalIdParser {
 
                                 const path = context.span.slice(
                                     primaryItemStart,
-                                    context.i - 1
-                                ); // context.i - 1
+                                    context.i - 1,
+                                );
 
                                 const gmodPath = gmod.tryParsePath(
                                     path,
-                                    locations
+                                    locations,
                                 );
                                 if (gmodPath === undefined) {
                                     errorBuilder?.push({
@@ -206,7 +206,7 @@ export class PMSLocalIdParser {
                             this.advanceParser(
                                 context,
                                 context.i,
-                                context.segment
+                                context.segment,
                             );
                         } else {
                             let nextState: ParsingState = context.state;
@@ -232,12 +232,12 @@ export class PMSLocalIdParser {
                             if (nextState !== context.state) {
                                 const path = context.span.slice(
                                     primaryItemStart,
-                                    context.i - 1
-                                ); // context.i - 1
+                                    context.i - 1,
+                                );
 
                                 const gmodPath = gmod.tryParsePath(
                                     path,
-                                    locations
+                                    locations,
                                 );
                                 if (gmodPath === undefined) {
                                     // Displays the full GmodPath when first part of PrimaryItem is invalid
@@ -253,7 +253,7 @@ export class PMSLocalIdParser {
                                         endOfNextStateIndex,
                                     } = this.getNextStateIndexes(
                                         context.span,
-                                        context.state
+                                        context.state,
                                     );
 
                                     context.i = endOfNextStateIndex;
@@ -262,7 +262,7 @@ export class PMSLocalIdParser {
                                         undefined,
                                         undefined,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                     break;
                                 }
@@ -274,7 +274,7 @@ export class PMSLocalIdParser {
                                         undefined,
                                         undefined,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                 else
                                     this.advanceParser(
@@ -282,7 +282,7 @@ export class PMSLocalIdParser {
                                         context.i,
                                         context.segment,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                 break;
                             }
@@ -297,7 +297,7 @@ export class PMSLocalIdParser {
                                 const { nextStateIndex, endOfNextStateIndex } =
                                     this.getNextStateIndexes(
                                         context.span,
-                                        context.state
+                                        context.state,
                                     );
                                 if (nextStateIndex === -1) {
                                     errorBuilder?.push({
@@ -308,7 +308,7 @@ export class PMSLocalIdParser {
                                     return;
                                 }
                                 const nextSegment = context.span.slice(
-                                    nextStateIndex + 1
+                                    nextStateIndex + 1,
                                 );
 
                                 const [sec, meta, tilde] = [
@@ -334,7 +334,7 @@ export class PMSLocalIdParser {
                                 const invalidPrimaryItemPath =
                                     context.span.slice(
                                         context.i,
-                                        nextStateIndex
+                                        nextStateIndex,
                                     );
                                 errorBuilder?.push({
                                     type: ParsingState.PrimaryItem,
@@ -349,14 +349,14 @@ export class PMSLocalIdParser {
                                     undefined,
                                     undefined,
                                     context.state,
-                                    nextState
+                                    nextState,
                                 );
                                 break;
                             }
                             this.advanceParser(
                                 context,
                                 context.i,
-                                context.segment
+                                context.segment,
                             );
                         }
                     }
@@ -387,7 +387,7 @@ export class PMSLocalIdParser {
                             this.advanceParser(
                                 context,
                                 context.i,
-                                context.segment
+                                context.segment,
                             );
                         } else {
                             let nextState: ParsingState = context.state;
@@ -410,11 +410,11 @@ export class PMSLocalIdParser {
                             if (nextState !== context.state) {
                                 const path = context.span.slice(
                                     secondaryItemStart,
-                                    context.i - 1
+                                    context.i - 1,
                                 );
                                 const gmodPath = gmod.tryParsePath(
                                     path,
-                                    locations
+                                    locations,
                                 );
                                 if (gmodPath === undefined) {
                                     // Displays the full GmodPath when first part of SecondaryItem is invalid
@@ -431,7 +431,7 @@ export class PMSLocalIdParser {
                                         endOfNextStateIndex,
                                     } = this.getNextStateIndexes(
                                         context.span,
-                                        context.state
+                                        context.state,
                                     );
                                     context.i = endOfNextStateIndex;
                                     this.advanceParser(
@@ -439,7 +439,7 @@ export class PMSLocalIdParser {
                                         undefined,
                                         undefined,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                     break;
                                 }
@@ -451,7 +451,7 @@ export class PMSLocalIdParser {
                                         undefined,
                                         undefined,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                 else
                                     this.advanceParser(
@@ -459,7 +459,7 @@ export class PMSLocalIdParser {
                                         context.i,
                                         context.segment,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
 
                                 break;
@@ -475,7 +475,7 @@ export class PMSLocalIdParser {
                                 const { nextStateIndex, endOfNextStateIndex } =
                                     this.getNextStateIndexes(
                                         context.span,
-                                        context.state
+                                        context.state,
                                     );
                                 if (nextStateIndex === -1) {
                                     errorBuilder?.push({
@@ -487,7 +487,7 @@ export class PMSLocalIdParser {
                                 }
 
                                 const nextSegment = context.span.slice(
-                                    nextStateIndex + 1
+                                    nextStateIndex + 1,
                                 );
                                 const [meta, tilde] = [
                                     nextSegment.startsWith("meta"),
@@ -507,7 +507,7 @@ export class PMSLocalIdParser {
                                 const invalidSecondaryItemPath =
                                     context.span.slice(
                                         context.i,
-                                        nextStateIndex
+                                        nextStateIndex,
                                     );
                                 errorBuilder?.push({
                                     type: ParsingState.SecondaryItem,
@@ -523,14 +523,14 @@ export class PMSLocalIdParser {
                                     undefined,
                                     undefined,
                                     context.state,
-                                    nextState
+                                    nextState,
                                 );
                                 break;
                             }
                             this.advanceParser(
                                 context,
                                 context.i,
-                                context.segment
+                                context.segment,
                             );
                         }
                     }
@@ -554,13 +554,13 @@ export class PMSLocalIdParser {
 
                     context.segment = context.span.slice(
                         context.i,
-                        metaIndex + metaStr.length
+                        metaIndex + metaStr.length,
                     );
                     this.advanceParser(
                         context,
                         context.i,
                         context.segment,
-                        context.state
+                        context.state,
                     );
                     break;
                 case ParsingState.MetaQuantity:
@@ -579,7 +579,7 @@ export class PMSLocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            qty
+                            qty,
                         );
                         if (!res) continue;
                         qty = res;
@@ -600,7 +600,7 @@ export class PMSLocalIdParser {
                             context.segment,
                             codebooks,
                             errorBuilder,
-                            cnt
+                            cnt,
                         );
                         if (!res) continue;
                         cnt = res;
@@ -622,7 +622,7 @@ export class PMSLocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            stateTag
+                            stateTag,
                         );
                         if (!res) continue;
                         stateTag = res;
@@ -644,7 +644,7 @@ export class PMSLocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            cmd
+                            cmd,
                         );
                         if (!res) continue;
                         cmd = res;
@@ -665,7 +665,7 @@ export class PMSLocalIdParser {
                             context.segment,
                             codebooks,
                             errorBuilder,
-                            func
+                            func,
                         );
                         if (!res) continue;
                         func = res;
@@ -686,7 +686,7 @@ export class PMSLocalIdParser {
                             context.segment,
                             codebooks,
                             errorBuilder,
-                            maint
+                            maint,
                         );
                         if (!res) continue;
                         maint = res;
@@ -707,7 +707,7 @@ export class PMSLocalIdParser {
                             context.segment,
                             codebooks,
                             errorBuilder,
-                            act
+                            act,
                         );
                         if (!res) continue;
                         act = res;
@@ -729,7 +729,7 @@ export class PMSLocalIdParser {
                             codebooks,
 
                             errorBuilder,
-                            pos
+                            pos,
                         );
                         if (!res) continue;
                         pos = res;
@@ -751,7 +751,7 @@ export class PMSLocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            detail
+                            detail,
                         );
                         if (!res) continue;
                         detail = res;
@@ -762,7 +762,7 @@ export class PMSLocalIdParser {
                         context,
                         context.i,
                         context.segment,
-                        context.state
+                        context.state,
                     );
                     break;
             }
@@ -797,10 +797,10 @@ export class PMSLocalIdParser {
 
     public static async tryParseAsync(
         localIdStr: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): Promise<PMSLocalIdBuilder | undefined> {
         const version = parseVisVersion(localIdStr, errorBuilder);
-        if (!version) return;
+        if (version === undefined) return;
 
         const gmod = await VIS.instance.getGmod(version);
         const codebooks = await VIS.instance.getCodebooks(version);
@@ -811,7 +811,7 @@ export class PMSLocalIdParser {
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 
@@ -823,7 +823,7 @@ export class PMSLocalIdParser {
         segment: string,
         codebooks: Codebooks,
         errorBuilder?: LocalIdParsingErrorBuilder,
-        tag?: MetadataTag
+        tag?: MetadataTag,
     ): MetadataTag | undefined {
         if (!codebooks) return;
 
@@ -861,7 +861,7 @@ export class PMSLocalIdParser {
                 undefined,
                 undefined,
                 state,
-                actualState
+                actualState,
             );
             return;
         }
@@ -970,7 +970,7 @@ export class PMSLocalIdParser {
 
     static getNextStateIndexes(
         span: string,
-        state: ParsingState
+        state: ParsingState,
     ): NextStateIndexTuple {
         const customIndex = span.indexOf("~");
         const endOfCustomIndex = customIndex + "~".length + 1;
@@ -988,14 +988,14 @@ export class PMSLocalIdParser {
                           endOfNextStateIndex: endOfSecIndex,
                       }
                     : customIndex != -1
-                    ? {
-                          nextStateIndex: customIndex,
-                          endOfNextStateIndex: endOfCustomIndex,
-                      }
-                    : {
-                          nextStateIndex: metaIndex,
-                          endOfNextStateIndex: endOfMetaIndex,
-                      };
+                      ? {
+                            nextStateIndex: customIndex,
+                            endOfNextStateIndex: endOfCustomIndex,
+                        }
+                      : {
+                            nextStateIndex: metaIndex,
+                            endOfNextStateIndex: endOfMetaIndex,
+                        };
             }
             case ParsingState.SecondaryItem:
                 return customIndex != -1
@@ -1020,7 +1020,7 @@ export class PMSLocalIdParser {
         i?: number,
         segment?: string,
         state?: ParsingState,
-        to?: ParsingState
+        to?: ParsingState,
     ) {
         if (i !== undefined && segment !== undefined) {
             context.i += segment.length + 1;

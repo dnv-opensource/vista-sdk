@@ -3,10 +3,10 @@ import { GmodPath } from "./GmodPath";
 import { Locations } from "./Location";
 import {
     GmodTuple,
-    TraversalHandler,
-    TraversalHandlerWithState,
     TraversalContext,
+    TraversalHandler,
     TraversalHandlerResult,
+    TraversalHandlerWithState,
     TraversalOptions,
 } from "./types/Gmod";
 import { GmodDto } from "./types/GmodDto";
@@ -45,11 +45,11 @@ export class Gmod {
             const childNode = this._nodeMap.get(childCode);
             if (!parentNode)
                 throw new Error(
-                    "Couldnt find parent node with code: " + parentCode
+                    "Couldnt find parent node with code: " + parentCode,
                 );
             if (!childNode)
                 throw new Error(
-                    "Couldnt find child node with code: " + parentCode
+                    "Couldnt find child node with code: " + parentCode,
                 );
 
             parentNode.addChild(childNode);
@@ -89,12 +89,12 @@ export class Gmod {
         const c = typeof category === "string" ? category : category.category;
         return c !== "PRODUCT" && c !== "ASSET";
     }
+    public static isAssetFunctionNode(metadata: GmodNodeMetadata): boolean {
+        return metadata.category === "ASSET FUNCTION";
+    }
 
     public static isProductSelection(metadata: GmodNodeMetadata) {
-        return (
-            metadata.category.includes("PRODUCT") &&
-            metadata.type.includes("SELECTION")
-        );
+        return metadata.category === "PRODUCT" && metadata.type === "SELECTION";
     }
 
     public static isProductType(metadata: GmodNodeMetadata) {
@@ -118,7 +118,7 @@ export class Gmod {
 
     public static isProductSelectionAssignment(
         parent?: GmodNode,
-        child?: GmodNode
+        child?: GmodNode,
     ) {
         if (!parent || !child) return false;
         if (!parent.metadata.category.includes("FUNCTION")) return false;
@@ -158,7 +158,7 @@ export class Gmod {
 
     public tryParsePath(
         item: string,
-        locations: Locations
+        locations: Locations,
     ): GmodPath | undefined {
         return GmodPath.tryParse(item, locations, this);
     }
@@ -170,7 +170,7 @@ export class Gmod {
 
     public tryParseFromFullPath(
         item: string,
-        locations: Locations
+        locations: Locations,
     ): GmodPath | undefined {
         return GmodPath.tryParseFromFullPath(item, this, locations);
     }
@@ -178,7 +178,7 @@ export class Gmod {
     // Traversal
     public traverse<T>(
         handler: TraversalHandler | TraversalHandlerWithState<T>,
-        params?: TraversalOptions<T>
+        params?: TraversalOptions<T>,
     ): boolean {
         const {
             rootNode = this._rootNode,
@@ -190,7 +190,7 @@ export class Gmod {
             return this.traverseFromNodeWithState(
                 handler as TraversalHandler,
                 rootNode,
-                (parents, node, handler) => handler(parents, node)
+                (parents, node, handler) => handler(parents, node),
             );
         }
 
@@ -198,7 +198,7 @@ export class Gmod {
             state,
             rootNode,
             handler as TraversalHandlerWithState<T>,
-            { maxTraversalOccurrence }
+            { maxTraversalOccurrence },
         );
     }
 
@@ -206,7 +206,7 @@ export class Gmod {
         state: T,
         rootNode: GmodNode,
         handler: TraversalHandlerWithState<T>,
-        options?: Pick<TraversalOptions<T>, "maxTraversalOccurrence">
+        options?: Pick<TraversalOptions<T>, "maxTraversalOccurrence">,
     ): boolean {
         const context: TraversalContext<T> = {
             parents: new Parents(),
@@ -222,7 +222,7 @@ export class Gmod {
 
     private traverseNode<T>(
         context: TraversalContext<T>,
-        node: GmodNode
+        node: GmodNode,
     ): TraversalHandlerResult {
         // note: installSubstructure doesn't work - martinothamar
         // if (node.metadata.installSubstructure === false)
@@ -231,7 +231,7 @@ export class Gmod {
         let result = context.handler(
             context.parents.asList,
             node,
-            context.state
+            context.state,
         );
 
         if (
@@ -242,7 +242,7 @@ export class Gmod {
 
         var skipOccurenceCheck = Gmod.isProductSelectionAssignment(
             context.parents.last(),
-            node
+            node,
         );
         // Skip the occurence check for "hidden" nodes such as selections, etc.
         if (!skipOccurenceCheck) {
@@ -251,7 +251,7 @@ export class Gmod {
                 return TraversalHandlerResult.SkipSubtree;
             if (occ > context.maxTraversalOccurrence)
                 throw new Error(
-                    "Invalid state - node occured more than expected"
+                    "Invalid state - node occured more than expected",
                 );
         }
 

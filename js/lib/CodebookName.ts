@@ -75,7 +75,7 @@ export class CodebookNames {
                 return "activityType";
             default:
                 throw new Error(
-                    `Unknown or invalid metadata tag name: ${name}`
+                    `Unknown or invalid metadata tag name: ${name}`,
                 );
         }
     }
@@ -106,7 +106,7 @@ export class CodebookNames {
                 return "act.type";
             default:
                 throw new Error(
-                    "Unknown or invalid metadata tag name: " + name
+                    "Unknown or invalid metadata tag name: " + name,
                 );
         }
     }

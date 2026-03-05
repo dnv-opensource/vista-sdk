@@ -2,12 +2,12 @@ import { GmodPath } from "..";
 import { TraversalHandlerResult } from "./Gmod";
 
 export type TreeHandler<TNode extends TreeNode<TNode>> = (
-    node: TNode
+    node: TNode,
 ) => TraversalHandlerResult;
 
 export type TreeHandlerWithState<TState, TNode> = (
     node: TNode,
-    state: TState
+    state: TState,
 ) => TraversalHandlerResult;
 
 export type TreeNode<T = unknown> = Omit<
@@ -34,5 +34,5 @@ export type InitNode<T> = Record<"children", TreeNode<T>[]> & {
 };
 
 export type FormatNode<TNode extends TreeNode<TNode>> = (
-    baseNode: InitNode<TNode>
+    baseNode: InitNode<TNode>,
 ) => TNode;

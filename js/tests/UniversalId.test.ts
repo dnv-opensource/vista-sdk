@@ -20,9 +20,8 @@ describe("UniversalId", () => {
     ];
 
     it("Valid parsing", async () => {
-        const { gmod, codebooks, locations } = await VIS.instance.getVIS(
-            visVersion
-        );
+        const { gmod, codebooks, locations } =
+            await VIS.instance.getVIS(visVersion);
 
         validTestData.forEach((testData) => {
             const errorBuilder = new LocalIdParsingErrorBuilder();
@@ -31,7 +30,7 @@ describe("UniversalId", () => {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
+                errorBuilder,
             );
             expect(universalId.imoNumber.value).toBe(1234567);
             expect(universalId.builder.localId?.isValid).toBe(true);
@@ -65,9 +64,8 @@ describe("UniversalId", () => {
     ];
 
     it("Invalid parsing", async () => {
-        const { gmod, codebooks, locations } = await VIS.instance.getVIS(
-            visVersion
-        );
+        const { gmod, codebooks, locations } =
+            await VIS.instance.getVIS(visVersion);
 
         invalidTestData.forEach((data) => {
             const errorBuilder = LocalIdParsingErrorBuilder.create();
@@ -77,16 +75,16 @@ describe("UniversalId", () => {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
+                errorBuilder,
             );
 
             expect(universalIdBuilder).toBeTruthy();
             expect(universalIdBuilder?.localId?.isValid).toBe(
-                data.validLocalId
+                data.validLocalId,
             );
             expect(errorBuilder.errors).toHaveLength(data.numErrors);
             expect(errorBuilder.errors.map((e) => e.type).sort()).toEqual(
-                data.errorTypes.sort()
+                data.errorTypes.sort(),
             );
         });
     });
@@ -100,5 +98,58 @@ describe("UniversalId", () => {
         const universalId = await UniversalIdBuilder.tryParseAsync(s, errors);
 
         expect(universalId?.isValid).toEqual(true);
+    });
+
+    it.each(validTestData)("ToString roundtrip: %s", async (testCase) => {
+        const { gmod, codebooks, locations } =
+            await VIS.instance.getVIS(visVersion);
+
+        const errorBuilder = new LocalIdParsingErrorBuilder();
+        const universalIdBuilder = UniversalIdBuilder.tryParse(
+            testCase,
+            gmod,
+            codebooks,
+            locations,
+            errorBuilder,
+        );
+
+        expect(universalIdBuilder).toBeTruthy();
+        const universalIdString = universalIdBuilder!.toString();
+        expect(universalIdString).toBe(testCase);
+    });
+
+    it("Builder add and remove all", async () => {
+        const { gmod, codebooks, locations } =
+            await VIS.instance.getVIS(visVersion);
+
+        const testCase = validTestData[0];
+        const errorBuilder = new LocalIdParsingErrorBuilder();
+        const universalIdBuilder = UniversalIdBuilder.tryParse(
+            testCase,
+            gmod,
+            codebooks,
+            locations,
+            errorBuilder,
+        );
+
+        expect(universalIdBuilder).toBeTruthy();
+        expect(universalIdBuilder!.localId).toBeTruthy();
+        expect(universalIdBuilder!.imoNumber).toBeTruthy();
+
+        const id = universalIdBuilder!.withoutImoNumber().withoutLocalId();
+
+        expect(id.localId).toBeFalsy();
+        expect(id.imoNumber).toBeFalsy();
+    });
+
+    it("Builder tryWith null/undefined", () => {
+        const builder = UniversalIdBuilder.create(VisVersion.v3_4a)
+            .withoutLocalId()
+            .withoutImoNumber()
+            .tryWithLocalId(undefined)
+            .tryWithImoNumber(undefined);
+
+        expect(builder.localId).toBeFalsy();
+        expect(builder.imoNumber).toBeFalsy();
     });
 });

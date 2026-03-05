@@ -10,26 +10,26 @@ describe("GmodPath", () => {
         "Valid path %p",
         async ({ path: testPath, visVersion }) => {
             const { gmod, locations } = await VIS.instance.getVIS(
-                VisVersions.parse(visVersion)
+                VisVersions.parse(visVersion),
             );
             const path = gmod.parsePath(testPath, locations);
             expect(path).toBeTruthy();
             const result = path!.toString();
             expect(result).toEqual(testPath);
-        }
+        },
     );
 
     it.each(GmodPaths.Invalid)(
         "Invalid path %p",
         async ({ path: testPath, visVersion }) => {
             const { gmod, locations } = await VIS.instance.getVIS(
-                VisVersions.parse(visVersion)
+                VisVersions.parse(visVersion),
             );
 
             const path = GmodPath.tryParse(testPath, locations, gmod);
 
             expect(path).toBeFalsy();
-        }
+        },
     );
 
     it.each([
@@ -50,7 +50,7 @@ describe("GmodPath", () => {
         const parsedPath = GmodPath.tryParseFromFullPath(
             fullString,
             gmod,
-            locations
+            locations,
         );
         expect(parsedPath).toBeTruthy();
         expect(path.equals(parsedPath)).toBe(true);
@@ -65,7 +65,7 @@ describe("GmodPath", () => {
 
         let path = gmod.parseFromFullPath(
             "VE/400a/410/411/411i/411.1/CS1/C101/C101.3/C101.3i/C101.31/C101.311-1",
-            locations
+            locations,
         );
         const newLocation = locations.parse("2");
 
@@ -116,12 +116,12 @@ describe("GmodPath", () => {
         let path = gmod.parsePath("511.11-1/C101.663i-1/C663", locations);
 
         expect(path.toFullPathString()).toEqual(
-            "VE/500a/510/511/511.1/511.1i-1/511.11-1/CS1/C101/C101.6/C101.66/C101.663/C101.663i-1/C663"
+            "VE/500a/510/511/511.1/511.1i-1/511.11-1/CS1/C101/C101.6/C101.66/C101.663/C101.663i-1/C663",
         );
 
         path = gmod.parsePath("846/G203.32-2/S110.2-1/E31", locations);
         expect(path.toFullPathString()).toEqual(
-            "VE/800a/840/846/G203/G203.3-2/G203.32-2/S110/S110.2-1/CS1/E31"
+            "VE/800a/840/846/G203/G203.3-2/G203.32-2/S110/S110.2-1/CS1/E31",
         );
     });
 
@@ -147,7 +147,7 @@ describe("GmodPath", () => {
             for (let i = 0; i < testCase.expected.length; i++) {
                 expect(sets[i].codes).toEqual(testCase.expected[i]);
             }
-        }
+        },
     );
 
     it.each(IndividualizableSets)(
@@ -165,21 +165,21 @@ describe("GmodPath", () => {
 
             const path = gmod.parseFromFullPath(
                 gmod.parsePath(testCase.path, locations).toFullPathString(),
-                locations
+                locations,
             );
             const sets = path.individualizableSets;
             expect(sets.length).toBe(testCase.expected.length);
             for (let i = 0; i < testCase.expected.length; i++) {
                 expect(sets[i].codes).toEqual(testCase.expected[i]);
             }
-        }
+        },
     );
 
     it.each(GmodPaths.Valid)(
         "Individualizable sets valid paths %p",
         async ({ path: testPath, visVersion }) => {
             const { gmod, locations } = await VIS.instance.getVIS(
-                VisVersions.parse(visVersion)
+                VisVersions.parse(visVersion),
             );
 
             const path = GmodPath.parse(testPath, locations, gmod);
@@ -192,20 +192,20 @@ describe("GmodPath", () => {
                     uniqueCodes.add(node.code);
                 }
             }
-        }
+        },
     );
 
     it.each(GmodPaths.Valid)(
         "Individualizable sets valid paths full path %p",
         async ({ path: testPath, visVersion }) => {
             const { gmod, locations } = await VIS.instance.getVIS(
-                VisVersions.parse(visVersion)
+                VisVersions.parse(visVersion),
             );
 
             const path = GmodPath.parseFromFullPath(
                 GmodPath.parse(testPath, locations, gmod).toFullPathString(),
                 gmod,
-                locations
+                locations,
             );
             const sets = path.individualizableSets;
 
@@ -216,7 +216,7 @@ describe("GmodPath", () => {
                     uniqueCodes.add(node.code);
                 }
             }
-        }
+        },
     );
 
     it("CommonNames", async () => {
@@ -247,5 +247,79 @@ describe("GmodPath", () => {
                 name: "Main bearing",
             },
         ]);
+    });
+
+    it("GetFullPath", async () => {
+        const { gmod, locations } = await VIS.instance.getVIS(visVersion);
+
+        const pathStr = "411.1/C101.72/I101";
+        const expectation: Record<number, string> = {
+            0: "VE",
+            1: "400a",
+            2: "410",
+            3: "411",
+            4: "411i",
+            5: "411.1",
+            6: "CS1",
+            7: "C101",
+            8: "C101.7",
+            9: "C101.72",
+            10: "I101",
+        };
+
+        const path = GmodPath.parse(pathStr, locations, gmod);
+        const fullPath = path.getFullPath();
+
+        const seen = new Set<number>();
+        for (let depth = 0; depth < fullPath.length; depth++) {
+            expect(seen.has(depth)).toBe(false);
+            seen.add(depth);
+            expect(fullPath[depth].code).toBe(expectation[depth]);
+        }
+
+        const expectedKeys = Object.keys(expectation)
+            .map(Number)
+            .sort((a, b) => a - b);
+        const seenKeys = Array.from(seen).sort((a, b) => a - b);
+        expect(seenKeys).toEqual(expectedKeys);
+    });
+
+    it("GetFullPathFrom", async () => {
+        const { gmod, locations } = await VIS.instance.getVIS(visVersion);
+
+        const pathStr = "411.1/C101.72/I101";
+        const expectation: Record<number, string> = {
+            4: "411i",
+            5: "411.1",
+            6: "CS1",
+            7: "C101",
+            8: "C101.7",
+            9: "C101.72",
+            10: "I101",
+        };
+
+        const path = GmodPath.parse(pathStr, locations, gmod);
+        const fullPath = path.getFullPath();
+        const startDepth = 4;
+
+        const seen = new Set<number>();
+        for (let depth = startDepth; depth < fullPath.length; depth++) {
+            expect(seen.has(depth)).toBe(false);
+            seen.add(depth);
+            expect(fullPath[depth].code).toBe(expectation[depth]);
+        }
+
+        const expectedKeys = Object.keys(expectation)
+            .map(Number)
+            .sort((a, b) => a - b);
+        const seenKeys = Array.from(seen).sort((a, b) => a - b);
+        expect(seenKeys).toEqual(expectedKeys);
+    });
+
+    it("Does not individualize", async () => {
+        const { gmod, locations } = await VIS.instance.getVIS(VisVersion.v3_7a);
+
+        const path = gmod.tryParsePath("500a-1", locations);
+        expect(path).toBeFalsy();
     });
 });

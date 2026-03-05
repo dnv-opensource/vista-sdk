@@ -11,7 +11,7 @@ describe("isISOString", () => {
         (ch) => {
             const result = VIS.isISOString(ch);
             expect(result).toBe(true);
-        }
+        },
     );
 
     it.each([

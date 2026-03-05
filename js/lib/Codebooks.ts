@@ -37,7 +37,7 @@ export class Codebooks {
 
     public tryCreateTag(
         name: CodebookName,
-        value?: string
+        value?: string,
     ): MetadataTag | undefined {
         return this.getCodebook(name).tryCreateTag(value);
     }
@@ -49,7 +49,7 @@ export class Codebooks {
     public static async tryCreateTagAsync(
         name: CodebookName,
         value: string,
-        visVersion: VisVersion
+        visVersion: VisVersion,
     ) {
         const codebook = await VIS.instance.getCodebooks(visVersion);
 
@@ -59,7 +59,7 @@ export class Codebooks {
     public static async createTagAsync(
         name: CodebookName,
         value: string,
-        visVersion: VisVersion
+        visVersion: VisVersion,
     ) {
         const tag = await this.tryCreateTagAsync(name, value, visVersion);
 

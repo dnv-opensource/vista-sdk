@@ -109,16 +109,23 @@ pip install vista-sdk
 
 This section outlines the various components and modules in our SDKs.
 
-| Component                   | Description                                    | C#  | JS  | Python |
-| --------------------------- | ---------------------------------------------- | :-: | :-: | :----: |
-| **Gmod**                    | Generic product model                          |  ✓  |  ✓  |   ✓    |
-| **Pmod**\*                  | Asset-specific product model (JS only for now) |     |  ✓  |        |
-| **Codebooks**               | Metadata tags                                  |  ✓  |  ✓  |   ✓    |
-| **Locations**               | Physical positioning                           |  ✓  |  ✓  |   ✓    |
-| **GmodPath Versioning**     | Path conversion between VIS versions           |  ✓  |     |   ✓    |
-| **Local ID & Universal ID** | Standardized sensor identification             |  ✓  |  ✓  |   ✓    |
-| **DataChannelList**         | ISO 19848 data channel definitions             |  ✓  |  ✓  |   ✓    |
-| **TimeSeriesData**          | ISO 19848 event and timeseries data            |  ✓  |  ✓  |   ✓    |
+| Component                  | Description                                       | C#  | JS  | Python |
+| -------------------------- | ------------------------------------------------- | :-: | :-: | :----: |
+| **Gmod**                   | Generic product model (traversal, node lookup)    |  ✓  |  ✓  |   ✓    |
+| **GmodPath**               | Path parsing, full-path support, serialization    |  ✓  |  ✓  |   ✓    |
+| **Pmod**\*                 | Asset-specific product model                      |     |  ✓  |        |
+| **Codebooks**              | Metadata tag lookup and validation                |  ✓  |  ✓  |   ✓    |
+| **Locations**              | Physical positioning and location parsing         |  ✓  |  ✓  |   ✓    |
+| **Local ID**               | Parsing, building, and serialization              |  ✓  |  ✓  |   ✓    |
+| **Universal ID**           | Parsing, building, and serialization              |  ✓  |  ✓  |   ✓    |
+| **GmodPath Versioning**    | Path/node/LocalId conversion between VIS versions |  ✓  |  ✓  |   ✓    |
+| **ImoNumber**              | IMO number validation                             |  ✓  |  ✓  |   ✓    |
+| **LocalIdQuery**           | Programmatic filtering of Local IDs               |  ✓  |  ✓  |   ✓    |
+| **GmodPathQuery**          | Querying and filtering GmodPaths                  |  ✓  |  ✓  |   ✓    |
+| **MetadataTagsQuery**      | Querying and filtering metadata tags              |  ✓  |  ✓  |   ✓    |
+| **DataChannelList (JSON)** | ISO 19848 data channel definitions                |  ✓  |  ✓  |   ✓    |
+| **TimeSeriesData (JSON)**  | ISO 19848 timeseries and event data               |  ✓  |  ✓  |   ✓    |
+| **MQTT Transport**         | MQTT-specific Local ID support                    |  ✓  |     |   ✓    |
 
 > \* The naming "Pmod" (Product Model) is inspired by DNV class terminology where it refers to asset-specific class information model. In the Vista SDK, Pmod represents a subset of Gmod built from GmodPaths or LocalIds, which can originate from any source—not limited to class-specific data.
 

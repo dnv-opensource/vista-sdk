@@ -3,7 +3,7 @@ import { LocationBuilder, VIS } from "../lib";
 describe("Immutability test", () => {
     it("GmodNode", async () => {
         const { gmod, locations } = await VIS.instance.getVIS(
-            VIS.latestVisVersion
+            VIS.latestVisVersion,
         );
         const node = gmod.getNode("411.1");
         const other = node.withLocation(locations.parse("1"));
@@ -27,11 +27,11 @@ describe("Immutability test", () => {
 
     it("GmodPath", async () => {
         const { gmod, locations } = await VIS.instance.getVIS(
-            VIS.latestVisVersion
+            VIS.latestVisVersion,
         );
         const path = gmod.parseFromFullPath(
             "VE/400a/410/411/411i/411.1/CS1/C101/C101.3/C101.3i/C101.31/C101.311-1",
-            locations
+            locations,
         );
 
         const other = path.clone();
@@ -54,25 +54,25 @@ describe("Immutability test", () => {
 
         // Change parent
         path.parents[parentIndex] = path.parents[parentIndex].withLocation(
-            locations.parse("1")
+            locations.parse("1"),
         );
         other.parents[parentIndex] = other.parents[parentIndex].withLocation(
-            locations.parse("2")
+            locations.parse("2"),
         );
 
         expect(path.parents[parentIndex]).not.toEqual(
-            other.parents[parentIndex]
+            other.parents[parentIndex],
         );
         expect(path.parents[parentIndex]).not.toBe(other.parents[parentIndex]);
     });
 
     it("Individualizable sets", async () => {
         const { gmod, locations } = await VIS.instance.getVIS(
-            VIS.latestVisVersion
+            VIS.latestVisVersion,
         );
         const path = gmod.parseFromFullPath(
             "VE/400a/410/411/411i/411.1/CS1/C101/C101.3/C101.3i/C101.31/C101.311-1",
-            locations
+            locations,
         );
         const sets = path.individualizableSets;
         const selectedIndex = sets.length - 1;

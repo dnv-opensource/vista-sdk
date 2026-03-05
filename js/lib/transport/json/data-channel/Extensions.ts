@@ -10,7 +10,7 @@ abstract class IExtension {
 
 export class Extensions implements IExtension {
     public static toJsonDto(
-        domain: DataChannelList.DataChannelListPackage
+        domain: DataChannelList.DataChannelListPackage,
     ): DataChannelListDto.DataChannelListPackage {
         const p = domain.package;
         const h = domain.package.header;
@@ -37,7 +37,7 @@ export class Extensions implements IExtension {
                 },
                 DataChannelList: {
                     DataChannel: p.dataChannelList.dataChannel.map(
-                        DataChannelExtension.toJsonDto
+                        DataChannelExtension.toJsonDto,
                     ),
                 },
             },
@@ -45,12 +45,14 @@ export class Extensions implements IExtension {
     }
 
     public static async toDomainModel(
-        dto: DataChannelListDto.DataChannelListPackage
+        dto: DataChannelListDto.DataChannelListPackage,
     ): Promise<DataChannelList.DataChannelListPackage> {
         const dataChannels: DataChannelList.DataChannel[] = [];
 
         for (let dataChannel of dto.Package.DataChannelList.DataChannel) {
-            dataChannels.push(await DataChannelExtension.toDomainModel(dataChannel));
+            dataChannels.push(
+                await DataChannelExtension.toDomainModel(dataChannel),
+            );
         }
 
         const {
@@ -93,7 +95,7 @@ export class Extensions implements IExtension {
 
 export class DataChannelExtension {
     public static toJsonDto(
-        dataChannel: DataChannelList.DataChannel
+        dataChannel: DataChannelList.DataChannel,
     ): DataChannelListDto.DataChannel {
         return {
             DataChannelID: {
@@ -106,8 +108,10 @@ export class DataChannelExtension {
                 ShortID: dataChannel.dataChannelId.shortId,
                 NameObject: dataChannel.dataChannelId.nameObject
                     ? {
-                          NamingRule: dataChannel.dataChannelId.nameObject.namingRule,
-                          ...dataChannel.dataChannelId.nameObject.customProperties,
+                          NamingRule:
+                              dataChannel.dataChannelId.nameObject.namingRule,
+                          ...dataChannel.dataChannelId.nameObject
+                              .customProperties,
                       }
                     : undefined,
             },
@@ -116,34 +120,47 @@ export class DataChannelExtension {
                     Type: dataChannel.property.dataChannelType.type,
                     CalculationPeriod:
                         dataChannel.property.dataChannelType.calculationPeriod,
-                    UpdateCycle: dataChannel.property.dataChannelType.updateCycle,
+                    UpdateCycle:
+                        dataChannel.property.dataChannelType.updateCycle,
                 },
                 Format: {
                     Type: dataChannel.property.format.type,
                     Restriction: dataChannel.property.format.restriction
                         ? {
                               Enumeration:
-                                  dataChannel.property.format.restriction.enumeration,
+                                  dataChannel.property.format.restriction
+                                      .enumeration,
                               FractionDigits:
-                                  dataChannel.property.format.restriction.fractionDigits,
-                              Length: dataChannel.property.format.restriction.length,
+                                  dataChannel.property.format.restriction
+                                      .fractionDigits,
+                              Length: dataChannel.property.format.restriction
+                                  .length,
                               MaxExclusive:
-                                  dataChannel.property.format.restriction.maxExclusive,
+                                  dataChannel.property.format.restriction
+                                      .maxExclusive,
                               MaxInclusive:
-                                  dataChannel.property.format.restriction.maxInclusive,
+                                  dataChannel.property.format.restriction
+                                      .maxInclusive,
                               MaxLength:
-                                  dataChannel.property.format.restriction.maxLength,
+                                  dataChannel.property.format.restriction
+                                      .maxLength,
                               MinExclusive:
-                                  dataChannel.property.format.restriction.minExclusive,
+                                  dataChannel.property.format.restriction
+                                      .minExclusive,
                               MinInclusive:
-                                  dataChannel.property.format.restriction.minInclusive,
+                                  dataChannel.property.format.restriction
+                                      .minInclusive,
                               MinLength:
-                                  dataChannel.property.format.restriction.minLength,
-                              Pattern: dataChannel.property.format.restriction.pattern,
+                                  dataChannel.property.format.restriction
+                                      .minLength,
+                              Pattern:
+                                  dataChannel.property.format.restriction
+                                      .pattern,
                               TotalDigits:
-                                  dataChannel.property.format.restriction.totalDigits,
-                              WhiteSpace: dataChannel.property.format.restriction
-                                  .whiteSpace
+                                  dataChannel.property.format.restriction
+                                      .totalDigits,
+                              WhiteSpace: dataChannel.property.format
+                                  .restriction.whiteSpace
                                   ? (dataChannel.property.format.restriction
                                         .whiteSpace as unknown as DataChannelListDto.WhiteSpace)
                                   : undefined,
@@ -173,10 +190,10 @@ export class DataChannelExtension {
     }
 
     public static async toDomainModel(
-        dataChannel: DataChannelListDto.DataChannel
+        dataChannel: DataChannelListDto.DataChannel,
     ): Promise<DataChannelList.DataChannel> {
         const localId = await LocalId.parseAsync(
-            dataChannel.DataChannelID.LocalID
+            dataChannel.DataChannelID.LocalID,
         );
 
         const mapNameObject = (): DataChannelList.NameObject | undefined => {

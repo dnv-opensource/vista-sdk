@@ -30,7 +30,7 @@ it("Gmod sorted", async () => {
             }
             return TraversalHandlerResult.Continue;
         },
-        { state: context }
+        { state: context },
     );
     expect(context.isSorted).toBe(true);
 });
@@ -123,7 +123,7 @@ it.each(testVersions)("Test gmod properties %s", async (visVersion) => {
     expect(expectedValues).toBeDefined();
 
     expect(maxLengthLexiographicallyOrderedNode?.code).toBe(
-        expectedValues?.max
+        expectedValues?.max,
     );
     expect(nodeCount).toBe(expectedValues?.count);
 });
@@ -263,14 +263,14 @@ it("Full traversal", async () => {
 
             var skipOccurenceCheck = Gmod.isProductSelectionAssignment(
                 parents.length > 0 ? parents[parents.length - 1] : undefined,
-                node
+                node,
             );
             if (skipOccurenceCheck) return TraversalHandlerResult.Continue;
             var occ = occurrences(parents, node);
             if (occ > context.maxOccurrence) context.maxOccurrence = occ;
             return TraversalHandlerResult.Continue;
         },
-        { state: context }
+        { state: context },
     );
     expect(context.maxOccurrence).toEqual(context.maxTraversalOccurrence);
     expect(context.paths.size).toBe(punctureTests.length);
@@ -291,7 +291,7 @@ it("Full traversal with options", async () => {
         (parents, node, context) => {
             var skipOccurenceCheck = Gmod.isProductSelectionAssignment(
                 parents.length > 0 ? parents[parents.length - 1] : undefined,
-                node
+                node,
             );
             if (skipOccurenceCheck) return TraversalHandlerResult.Continue;
             var occ = occurrences(parents, node);
@@ -302,7 +302,7 @@ it("Full traversal with options", async () => {
             maxTraversalOccurrence: context.maxTraversalOccurrence,
             state: context,
             rootNode: gmod.getNode("411.1"),
-        }
+        },
     );
     expect(context.maxOccurrence).toEqual(context.maxTraversalOccurrence);
 });
@@ -321,7 +321,7 @@ it("Partial traversal", async () => {
             context.count++;
             return TraversalHandlerResult.Continue;
         },
-        { state: context }
+        { state: context },
     );
 
     expect(context.count).toBe(stop);
@@ -344,10 +344,32 @@ it("Full traversal from", async () => {
         {
             rootNode: gmod.getNode(rootCode),
             state: context,
-        }
+        },
     );
 
     expect(context.invalidPaths.length).toBe(0);
+});
+
+it("Node types", async () => {
+    const { gmod } = await VIS.instance.getVIS(VisVersion.v3_4a);
+
+    const set = new Set<string>();
+    for (const node of gmod) {
+        set.add(`${node.metadata.category} | ${node.metadata.type}`);
+    }
+
+    expect(set.size).toBeGreaterThan(0);
+});
+
+it("Node with product selection", async () => {
+    const { gmod } = await VIS.instance.getVIS(VisVersion.v3_4a);
+
+    const node1 = gmod.getNode("411.2");
+    expect(node1.productSelection).toBeTruthy();
+    expect(node1.productType).toBeFalsy();
+
+    const node2 = gmod.getNode("H601");
+    expect(node2.productSelection).toBeFalsy();
 });
 
 function occurrences(parents: GmodNode[], node: GmodNode) {

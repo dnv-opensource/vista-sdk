@@ -1,45 +1,68 @@
+import { Client } from "./Client";
 import { Codebook } from "./Codebook";
 import { CodebookName, CodebookNames } from "./CodebookName";
 import { Codebooks } from "./Codebooks";
 import { Gmod } from "./Gmod";
-import { Pmod } from "./Pmod";
 import { GmodNode } from "./GmodNode";
-import { GmodPath, GmodIndividualizableSet } from "./GmodPath";
+import { GmodIndividualizableSet, GmodPath } from "./GmodPath";
+import {
+    NodesBuilder as GmodPathNodesBuilder,
+    PathBuilder as GmodPathPathBuilder,
+    GmodPathQuery,
+    GmodPathQueryBuilder,
+} from "./GmodPathQuery";
+import { GmodVersioning } from "./GmodVersioning";
+import { ILocalId, ILocalIdGeneric } from "./ILocalId";
+import { ILocalIdBuilder, ILocalIdBuilderGeneric } from "./ILocalIdBuilder";
 import { ImoNumber } from "./ImoNumber";
 import { LocalId } from "./LocalId";
-import { ILocalId, ILocalIdGeneric } from "./ILocalId";
 import { LocalIdBuilder } from "./LocalId.Builder";
 import { LocalIdParser } from "./LocalId.Parsing";
-import { MetadataTag } from "./MetadataTag";
-import { UniversalId } from "./UniversalId";
-import { UniversalIdBuilder } from "./UniversalId.Builder";
-import { VisVersion, VisVersionExtension, VisVersions } from "./VisVersion";
-import { VIS } from "./VIS";
-import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
-import { GmodNodeMetadata } from "./types/GmodNode";
-import { ParsingState } from "./types/LocalId";
-import { PmodInfo, NotRelevant } from "./types/Pmod";
-import { Result, Ok, Err } from "./types/Result";
-import { Client } from "./Client";
-import { PmodNode } from "./PmodNode";
-import { UniversalIdParser } from "./UniversalId.Parsing";
+import {
+    LocalIdQuery,
+    LocalIdQueryBuilder,
+    NodesQueryConfiguration,
+    PathQueryConfiguration,
+} from "./LocalIdQuery";
 import { Location, LocationGroup, Locations } from "./Location";
 import { LocationBuilder } from "./LocationBuilder";
+import { MetadataTag } from "./MetadataTag";
 import {
-    JSONExtensions,
-    VistaJSONSerializer,
-    DataChannelListDto,
-    TimeSeriesDto,
-} from "./transport/json";
+    MetadataTagsQuery,
+    MetadataTagsQueryBuilder,
+} from "./MetadataTagsQuery";
+import { Pmod } from "./Pmod";
+import { PmodNode } from "./PmodNode";
+import { UniversalId } from "./UniversalId";
+import { UniversalIdBuilder } from "./UniversalId.Builder";
+import { UniversalIdParser } from "./UniversalId.Parsing";
+import { VIS } from "./VIS";
+import { VisVersion, VisVersionExtension, VisVersions } from "./VisVersion";
+import * as Experimental from "./experimental";
+import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
 import {
-    TimeSeries,
     DataChannelId,
     DataChannelList,
     ShipId,
+    TimeSeries,
 } from "./transport/domain";
-import * as Experimental from "./experimental";
+import {
+    DataChannelListDto,
+    JSONExtensions,
+    TimeSeriesDto,
+    VistaJSONSerializer,
+} from "./transport/json";
+import { GmodNodeMetadata } from "./types/GmodNode";
+import {
+    ConversionType,
+    GmodNodeConversion,
+    GmodNodeConversionDto,
+    GmodVersioningDto,
+} from "./types/GmodVersioning";
+import { ParsingState } from "./types/LocalId";
+import { NotRelevant, PmodInfo } from "./types/Pmod";
+import { Err, Ok, Result } from "./types/Result";
 import { TreeNode } from "./types/Tree";
-import { ILocalIdBuilder, ILocalIdBuilderGeneric } from "./ILocalIdBuilder";
 
 // Types
 export type { GmodNodeMetadata, PmodInfo, TreeNode };
@@ -48,48 +71,71 @@ export { VisVersion, VisVersionExtension, VisVersions };
 // VIS
 export { VIS };
 // Codebooks and metadata
-export { CodebookName, CodebookNames, Codebook, Codebooks, MetadataTag };
+export {
+    Codebook,
+    CodebookName,
+    CodebookNames,
+    Codebooks,
+    MetadataTag,
+    MetadataTagsQuery,
+    MetadataTagsQueryBuilder,
+};
 // LocalId
 export {
-    LocalId,
-    LocalIdBuilder,
-    ParsingState,
-    ImoNumber,
-    LocalIdParser,
-    LocalIdParsingErrorBuilder,
     ILocalId,
-    ILocalIdGeneric,
     ILocalIdBuilder,
     ILocalIdBuilderGeneric,
+    ILocalIdGeneric,
+    ImoNumber,
+    LocalId,
+    LocalIdBuilder,
+    LocalIdParser,
+    LocalIdParsingErrorBuilder,
+    LocalIdQuery,
+    LocalIdQueryBuilder,
+    ParsingState,
 };
+export type { NodesQueryConfiguration, PathQueryConfiguration };
 
 // Locations
-export { Location, LocationGroup, Locations, LocationBuilder };
+export { Location, LocationBuilder, LocationGroup, Locations };
 
 // Experimental
 export { Experimental };
 
 // UniversalId
-export { UniversalIdParser, UniversalIdBuilder, UniversalId };
+export { UniversalId, UniversalIdBuilder, UniversalIdParser };
 
 // Gmod
-export { Gmod, GmodNode, GmodPath, GmodIndividualizableSet };
+export {
+    ConversionType,
+    Gmod,
+    GmodIndividualizableSet,
+    GmodNode,
+    GmodPath,
+    GmodPathNodesBuilder,
+    GmodPathPathBuilder,
+    GmodPathQuery,
+    GmodPathQueryBuilder,
+    GmodVersioning,
+};
+export type { GmodNodeConversion, GmodNodeConversionDto, GmodVersioningDto };
 // Pmod
-export { Pmod, PmodNode, NotRelevant };
+export { NotRelevant, Pmod, PmodNode };
 // Client
 export { Client };
 
 // General
-export { Result, Ok, Err };
+export { Err, Ok, Result };
 
 // Transport
 export {
-    JSONExtensions,
-    VistaJSONSerializer,
-    DataChannelListDto,
-    TimeSeriesDto,
-    TimeSeries,
     DataChannelId,
     DataChannelList,
+    DataChannelListDto,
+    JSONExtensions,
     ShipId,
+    TimeSeries,
+    TimeSeriesDto,
+    VistaJSONSerializer,
 };

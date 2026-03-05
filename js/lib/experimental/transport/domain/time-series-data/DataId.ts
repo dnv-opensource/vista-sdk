@@ -54,7 +54,7 @@ export class DataId {
     public match<T>(
         onLocalId: (localId: LocalId) => T,
         onPMSLocalId: (pmsLocalId: PMSLocalId) => T,
-        onShortId: (shortId: string) => T
+        onShortId: (shortId: string) => T,
     ): T {
         switch (this._tag) {
             case 1:
@@ -71,7 +71,7 @@ export class DataId {
     public switch(
         onLocalId: (localId: LocalId) => void,
         onPMSLocalId: (pmsLocalId: PMSLocalId) => void,
-        onShortId: (shortId: string) => void
+        onShortId: (shortId: string) => void,
     ): void {
         switch (this._tag) {
             case 1:
@@ -106,7 +106,7 @@ export class DataId {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): DataId {
         if (isNullOrWhiteSpace(value))
             throw new Error(`${this.parse.name}: value is null`);
@@ -120,7 +120,7 @@ export class DataId {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
+                errorBuilder,
             ))
         ) {
             return new DataId(localId.build());
@@ -130,7 +130,7 @@ export class DataId {
                 gmod,
                 codebooks,
                 locations,
-                errorBuilder
+                errorBuilder,
             ))
         ) {
             return new DataId(pmsLocalId.build());
@@ -141,7 +141,7 @@ export class DataId {
 
     public static async parseAsync(
         value: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         if (isNullOrWhiteSpace(value))
             throw new Error(`${this.parse.name}: value is null`);
@@ -156,7 +156,7 @@ export class DataId {
         } else if (
             (pmsLocalId = await PMSLocalIdBuilder.tryParseAsync(
                 value,
-                errorBuilder
+                errorBuilder,
             ))
         ) {
             return new DataId(pmsLocalId.build());

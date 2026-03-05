@@ -14,9 +14,10 @@ import { Locations } from "../Location";
 import { PMSLocalId } from "./PMSLocalId";
 import { PMSLocalIdParser } from "./PMSLocalId.Parser";
 
-export class PMSLocalIdBuilder
-    implements ILocalIdBuilderGeneric<PMSLocalIdBuilder, PMSLocalId>
-{
+export class PMSLocalIdBuilder implements ILocalIdBuilderGeneric<
+    PMSLocalIdBuilder,
+    PMSLocalId
+> {
     public static readonly namingRule = "dnv-v2-experimental";
     public static readonly usedCodebooks = [
         CodebookName.Quantity,
@@ -67,11 +68,11 @@ export class PMSLocalIdBuilder
     public build(): PMSLocalId {
         if (this.isEmpty)
             throw new Error(
-                "Cant build to PMSLocalId from empty PMSLocalIdBuilder"
+                "Cant build to PMSLocalId from empty PMSLocalIdBuilder",
             );
         if (!this.isValid) {
             throw new Error(
-                "Cant build to PMSLocalId from invalid PMSLocalIdBuilder"
+                "Cant build to PMSLocalId from invalid PMSLocalIdBuilder",
             );
         }
 
@@ -135,7 +136,7 @@ export class PMSLocalIdBuilder
     }
 
     public validate(
-        errorBuilder = new LocalIdParsingErrorBuilder()
+        errorBuilder = new LocalIdParsingErrorBuilder(),
     ): LocalIdParsingErrorBuilder {
         // Add validation for primaryItem
         if (!this.primaryItem) {
@@ -155,7 +156,7 @@ export class PMSLocalIdBuilder
         if (!other) return false;
         if (this.visVersion !== other.visVersion)
             throw new Error(
-                "Cant compare local IDs from different VisVersions"
+                "Cant compare local IDs from different VisVersions",
             );
 
         return !!(
@@ -203,7 +204,7 @@ export class PMSLocalIdBuilder
         if (builder[builder.length - 1].endsWith("/")) {
             builder[builder.length - 1] = builder[builder.length - 1].slice(
                 0,
-                -1
+                -1,
             );
         }
 
@@ -232,7 +233,7 @@ export class PMSLocalIdBuilder
                 return this.detail;
             default:
                 throw new Error(
-                    `Unknown or invalid metadata tag name: ${name}`
+                    `Unknown or invalid metadata tag name: ${name}`,
                 );
         }
     }
@@ -246,7 +247,7 @@ export class PMSLocalIdBuilder
     }
 
     public tryWithVisVersion(visVersion: VisVersion): PMSLocalIdBuilder {
-        if (!visVersion) return this;
+        if (visVersion === undefined) return this;
         return this.withVisVersion(visVersion);
     }
 
@@ -309,7 +310,7 @@ export class PMSLocalIdBuilder
     }
 
     public withMaintenanceCategory(
-        metadataTag: MetadataTag
+        metadataTag: MetadataTag,
     ): PMSLocalIdBuilder {
         return this.with((s) => (s.maintenanceCategory = metadataTag));
     }
@@ -349,7 +350,7 @@ export class PMSLocalIdBuilder
                 return this.withDetail(metadataTag);
             default:
                 throw new Error(
-                    `Unknown or invalid metadata tag name: ${metadataTag.name}`
+                    `Unknown or invalid metadata tag name: ${metadataTag.name}`,
                 );
         }
     }
@@ -376,7 +377,7 @@ export class PMSLocalIdBuilder
                 return this.withoutDetail();
             default:
                 throw new Error(
-                    `Unknown or invalid metadata tag name: ${name}`
+                    `Unknown or invalid metadata tag name: ${name}`,
                 );
         }
     }
@@ -421,20 +422,20 @@ export class PMSLocalIdBuilder
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return PMSLocalIdParser.parse(
             localIdStr,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 
     public static async parseAsync(
         localIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return PMSLocalIdParser.parseAsync(localIdString, errorBuilder);
     }
@@ -444,20 +445,20 @@ export class PMSLocalIdBuilder
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return PMSLocalIdParser.tryParse(
             localIdStr,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 
     public static async tryParseAsync(
         localIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return PMSLocalIdParser.tryParseAsync(localIdString, errorBuilder);
     }

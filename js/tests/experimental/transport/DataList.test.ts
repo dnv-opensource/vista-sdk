@@ -1,4 +1,9 @@
-import { LocalId, LocalIdBuilder, VisVersion } from "../../../lib";
+import {
+    LocalId,
+    LocalIdBuilder,
+    VisVersion,
+    VisVersionExtension,
+} from "../../../lib";
 import { AssetIdentifier } from "../../../lib/experimental";
 import { DataList } from "../../../lib/experimental/transport/domain/data-list/DataList";
 import { Version } from "../../../lib/transport/domain/data-channel/Version";
@@ -61,7 +66,8 @@ describe("Data", () => {
                                         minLength: 1,
                                         pattern: "pattern",
                                         totalDigits: 1,
-                                        whiteSpace: DataList.WhiteSpace.Preserve,
+                                        whiteSpace:
+                                            DataList.WhiteSpace.Preserve,
                                     },
                                 },
                                 alertPriority: "alertPriority",
@@ -85,23 +91,23 @@ describe("Data", () => {
         expect(dataListPackage.package.header.assetId).toBe(shipId);
         expect(dataListPackage.package.header.dataListId.version).toBe(version);
         expect(
-            dataListPackage.package.header.dataListId.version!.toString()
-        ).toEqual(VisVersion.v3_4a);
+            dataListPackage.package.header.dataListId.version!.toString(),
+        ).toEqual(VisVersionExtension.toVersionString(VisVersion.v3_4a));
 
         // Datas
         expect(dataListPackage.package.dataList.data).toHaveLength(1);
         expect(dataListPackage.package.dataList.data[0]!.dataId.localId).toBe(
-            localId
+            localId,
         );
         expect(
             dataListPackage.package.dataList.data[0]!.dataId.nameObject!
-                .namingRule
+                .namingRule,
         ).toEqual(namingRule);
         expect(
-            dataListPackage.package.dataList.data[0]!.property.format
+            dataListPackage.package.dataList.data[0]!.property.format,
         ).toBeTruthy();
         expect(
-            dataListPackage.package.dataList.data[0]!.property.dataType.type
+            dataListPackage.package.dataList.data[0]!.property.dataType.type,
         ).toEqual("Inst");
     });
 });

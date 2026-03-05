@@ -21,11 +21,14 @@ export class LocalIdParsingErrorBuilder extends ErrorBuilder<ParsingState> {
 
         map.set(ParsingState.NamingRule, "Missing or invalid naming rule");
         map.set(ParsingState.VisVersion, "Missing or invalid vis version");
-        map.set(ParsingState.PrimaryItem, "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag.");
+        map.set(
+            ParsingState.PrimaryItem,
+            "Invalid or missing Primary item. Local IDs require atleast primary item and 1 metadata tag.",
+        );
         map.set(ParsingState.SecondaryItem, "Invalid secondary item");
         map.set(
             ParsingState.ItemDescription,
-            "Missing or invalid /meta prefix"
+            "Missing or invalid /meta prefix",
         );
         map.set(ParsingState.MetaQuantity, "Invalid metadata tag: Quantity");
         map.set(ParsingState.MetaContent, "Invalid metadata tag: Content");
@@ -33,7 +36,7 @@ export class LocalIdParsingErrorBuilder extends ErrorBuilder<ParsingState> {
         map.set(ParsingState.MetaPosition, "Invalid metadata tag: Position");
         map.set(
             ParsingState.MetaCalculation,
-            "Invalid metadata tag: Calculation"
+            "Invalid metadata tag: Calculation",
         );
         map.set(ParsingState.MetaState, "Invalid metadata tag: State");
         map.set(ParsingState.MetaType, "Invalid metadata tag: Type");

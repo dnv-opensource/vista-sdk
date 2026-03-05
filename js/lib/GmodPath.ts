@@ -1,10 +1,10 @@
 import { VIS, VisVersion } from ".";
 import { Gmod, PotentialParentScopeTypes } from "./Gmod";
-import { GmodNode, isIndividualizable } from "./GmodNode";
-import { Locations, Location } from "./Location";
+import { GmodNode } from "./GmodNode";
+import { Location, Locations } from "./Location";
 import { TraversalHandlerResult } from "./types/Gmod";
-import { PathNode, ParseContext } from "./types/GmodPath";
-import { match, isNullOrWhiteSpace } from "./util/util";
+import { ParseContext, PathNode } from "./types/GmodPath";
+import { isNullOrWhiteSpace, match } from "./util/util";
 
 export class GmodIndividualizableSet {
     public get location(): Location | undefined {
@@ -39,39 +39,41 @@ export class GmodIndividualizableSet {
         return this._nodes.map((i) => this.getNode(i).code);
     }
 
-    constructor(private _nodes: number[], private _path: GmodPath) {
+    constructor(
+        private _nodes: number[],
+        private _path: GmodPath,
+    ) {
         if (_nodes.length === 0)
             throw new Error("GmodIndividualizableSet cant be empty");
         if (
             _nodes.some(
                 (i) =>
-                    !isIndividualizable(
-                        this.getNode(i),
+                    !this.getNode(i).isIndividualizable(
                         i === _path.parents.length,
-                        _nodes.length > 1
-                    )
+                        _nodes.length > 1,
+                    ),
             )
         )
             throw new Error(
-                "GmodIndividualizableSet nodes must be individualizable"
+                "GmodIndividualizableSet nodes must be individualizable",
             );
         if (
             new Set<string | undefined>(
-                _nodes.map((i) => this.getNode(i).location?.value)
+                _nodes.map((i) => this.getNode(i).location?.value),
             ).size !== 1
         )
             throw new Error(
-                "GmodIndividualizableSet must have a common location"
+                "GmodIndividualizableSet must have a common location",
             );
         if (
             !_nodes.some(
                 (i) =>
                     this.getNode(i).equals(_path.node) ||
-                    this.getNode(i).isLeafNode
+                    this.getNode(i).isLeafNode,
             )
         )
             throw new Error(
-                "GmodIndividualizableSet has no nodes that are part of short path"
+                "GmodIndividualizableSet has no nodes that are part of short path",
             );
 
         this._path = _path.clone();
@@ -94,7 +96,7 @@ export class GmodIndividualizableSet {
         return this._nodes
             .filter(
                 (i, j) =>
-                    this.getNode(i).isLeafNode || j === this._nodes.length - 1
+                    this.getNode(i).isLeafNode || j === this._nodes.length - 1,
             )
             .map((i) => this.getNode(i).toString())
             .join("/");
@@ -108,16 +110,16 @@ export class GmodPath {
     public constructor(
         parents: GmodNode[],
         node: GmodNode,
-        skipVerify = false
+        skipVerify = false,
     ) {
         if (!skipVerify) {
             if (parents.length === 0 && node.code !== "VE")
                 throw new Error(
-                    `Invalid gmod path - no parents, and ${node.code} is not the root of gmod`
+                    `Invalid gmod path - no parents, and ${node.code} is not the root of gmod`,
                 );
             if (parents.length > 0 && parents[0].code !== "VE")
                 throw new Error(
-                    `Invalid gmod path - first parent should be root of gmod (VE), but was ${parents[0].code}`
+                    `Invalid gmod path - first parent should be root of gmod (VE), but was ${parents[0].code}`,
                 );
 
             for (let i = 0; i < parents.length; i++) {
@@ -127,7 +129,7 @@ export class GmodPath {
                     nextIndex < parents.length ? parents[nextIndex] : node;
                 if (!parent.isChild(child))
                     throw new Error(
-                        `Invalid gmod path - ${child.code} not child of ${parent.code}`
+                        `Invalid gmod path - ${child.code} not child of ${parent.code}`,
                     );
             }
 
@@ -142,7 +144,7 @@ export class GmodPath {
         this.node = node;
     }
 
-    private static isValid(parents: GmodNode[], node: GmodNode): boolean {
+    public static isValid(parents: GmodNode[], node: GmodNode): boolean {
         if (parents.length === 0 && node.code !== "VE") return false;
         if (parents.length > 0 && parents[0].code !== "VE") return false;
 
@@ -198,7 +200,7 @@ export class GmodPath {
     public withoutLocation(): GmodPath {
         return new GmodPath( // TODO inst sets
             this.parents.map((p) => p.withoutLocation()),
-            this.node.withoutLocation()
+            this.node.withoutLocation(),
         );
     }
 
@@ -305,10 +307,10 @@ export class GmodPath {
 
     public getCommonNames(): { depth: number; name: string }[];
     public getCommonNames(
-        excludeLocation: boolean
+        excludeLocation: boolean,
     ): { depth: number; name: string }[];
     public getCommonNames(
-        excludeLocation?: boolean
+        excludeLocation?: boolean,
     ): { depth: number; name: string }[] {
         const commonNames: { depth: number; name: string }[] = [];
         const fullPath = this.getFullPath();
@@ -331,7 +333,7 @@ export class GmodPath {
 
                 for (let i = this.parents.length - 1; i >= depth; i--) {
                     const assignment = normalAssignmentNames.get(
-                        this.parents[i].code
+                        this.parents[i].code,
                     );
                     if (!assignment) continue;
                     name = assignment;
@@ -349,7 +351,7 @@ export class GmodPath {
     public static parse(
         item: string,
         locations: Locations,
-        gmod: Gmod
+        gmod: Gmod,
     ): GmodPath {
         const path = this.tryParse(item, locations, gmod);
         if (!path) throw new Error("Couldnt parse GmodPath from item");
@@ -360,7 +362,7 @@ export class GmodPath {
     public static tryParse(
         item: string | undefined,
         locations: Locations,
-        gmod: Gmod
+        gmod: Gmod,
     ): GmodPath | undefined {
         const result = this.parseInternal(item, locations, gmod);
         const out = match<GmodParsePathResult, GmodPath | undefined>(result)
@@ -379,7 +381,7 @@ export class GmodPath {
     private static parseInternal(
         item: string | undefined,
         locations: Locations,
-        gmod: Gmod
+        gmod: Gmod,
     ): GmodParsePathResult {
         try {
             if (!item || !gmod || !locations)
@@ -401,17 +403,17 @@ export class GmodPath {
                     const parsedLocation = locations.tryParse(split[1]);
                     if (!gmod.tryGetNode(split[0]))
                         return new GmodParsePathResult.Err(
-                            `Failed to get GmodNode for ${split[0]}`
+                            `Failed to get GmodNode for ${split[0]}`,
                         );
                     if (!parsedLocation)
                         return new GmodParsePathResult.Err(
-                            `Failed to parse location ${split[1]}`
+                            `Failed to parse location ${split[1]}`,
                         );
                     parts.push({ code: split[0], location: parsedLocation });
                 } else {
                     if (!gmod.tryGetNode(partStr))
                         return new GmodParsePathResult.Err(
-                            `Failed to get GmodNode for ${partStr}`
+                            `Failed to get GmodNode for ${partStr}`,
                         );
                     parts.push({ code: partStr });
                 }
@@ -426,7 +428,7 @@ export class GmodPath {
             const toFind = parts.shift();
             if (!toFind)
                 return new GmodParsePathResult.Err(
-                    "Invalid queue operation - Shift empty array"
+                    "Invalid queue operation - Shift empty array",
                 );
             const baseNode = gmod.tryGetNode(toFind.code);
             if (!baseNode)
@@ -483,8 +485,8 @@ export class GmodPath {
                     let startNode = firstParentHasSingleParent
                         ? pathParents[0].parents[0]
                         : currentNodeHasSingleParent
-                        ? endNode.parents[0]
-                        : undefined;
+                          ? endNode.parents[0]
+                          : undefined;
 
                     // Stop if there is no startNode or the parent doesnt have a direct path to root.
                     if (!startNode || startNode.parents.length > 1)
@@ -532,19 +534,19 @@ export class GmodPath {
                     context.path = new GmodPath(pathParents, endNode);
                     return TraversalHandlerResult.Stop;
                 },
-                { state: context, rootNode: baseNode }
+                { state: context, rootNode: baseNode },
             );
 
             if (!context.path) {
                 return new GmodParsePathResult.Err(
-                    "Failed to find path after travesal"
+                    "Failed to find path after travesal",
                 );
             }
 
             return new GmodParsePathResult.Ok(context.path);
         } catch {
             return new GmodParsePathResult.Err(
-                "Unknown error occured during parsing"
+                "Unknown error occured during parsing",
             );
         }
     }
@@ -552,7 +554,7 @@ export class GmodPath {
     public static parseFromFullPath(
         item: string,
         gmod: Gmod,
-        locations: Locations
+        locations: Locations,
     ): GmodPath {
         const path = this.tryParseFromFullPath(item, gmod, locations);
 
@@ -565,7 +567,7 @@ export class GmodPath {
 
     public static async parseAsync(
         item: string,
-        visVersion: VisVersion
+        visVersion: VisVersion,
     ): Promise<GmodPath> {
         const path = await this.tryParseAsync(item, visVersion);
 
@@ -578,7 +580,7 @@ export class GmodPath {
 
     public static async parseAsyncFromFullPath(
         item: string,
-        visVersion: VisVersion
+        visVersion: VisVersion,
     ): Promise<GmodPath> {
         const path = await this.tryParseFromFullPathAsync(item, visVersion);
 
@@ -591,7 +593,7 @@ export class GmodPath {
     public static tryParseFromFullPath(
         item: string,
         gmod: Gmod,
-        locations: Locations
+        locations: Locations,
     ) {
         const result = this.parseFromFullPathInternal(item, gmod, locations);
         const out = match<GmodParsePathResult, GmodPath | undefined>(result)
@@ -610,14 +612,14 @@ export class GmodPath {
     private static parseFromFullPathInternal(
         item: string,
         gmod: Gmod,
-        locations: Locations
+        locations: Locations,
     ): GmodParsePathResult {
         if (isNullOrWhiteSpace(item))
             return new GmodParsePathResult.Err("Item is empty");
 
         if (!item.startsWith(gmod.rootNode.code))
             return new GmodParsePathResult.Err(
-                `Path must start with ${gmod.rootNode.code}`
+                `Path must start with ${gmod.rootNode.code}`,
             );
 
         const parts: string[] = item.split("/");
@@ -625,19 +627,19 @@ export class GmodPath {
         for (const part of parts)
             if (!VIS.isISOString(part))
                 return new GmodParsePathResult.Err(
-                    `Input string contains invalid characters in part - ${part}`
+                    `Input string contains invalid characters in part - ${part}`,
                 );
 
         const endPathNode = parts.pop();
         if (!endPathNode)
             return new GmodParsePathResult.Err(
-                "No nodes found in input string"
+                "No nodes found in input string",
             );
 
         const getNode = (
             code: string,
             gmod: Gmod,
-            locations: Locations
+            locations: Locations,
         ): GmodNode | undefined => {
             const dashIndex = code.indexOf("-");
             if (dashIndex === -1) {
@@ -648,7 +650,7 @@ export class GmodPath {
                 const node = gmod.tryGetNode(code.substring(0, dashIndex));
                 if (!node) return;
                 const location = locations.tryParse(
-                    code.substring(dashIndex + 1)
+                    code.substring(dashIndex + 1),
                 );
                 if (!location) return;
                 return node.withLocation(location);
@@ -688,7 +690,7 @@ export class GmodPath {
                         i < pathParents.length ? pathParents[i] : endNode;
                     if (pn.location !== undefined)
                         return new GmodParsePathResult.Err(
-                            `Expected all nodes in the set to be without individualization. Found ${pn.toString()}`
+                            `Expected all nodes in the set to be without individualization. Found ${pn.toString()}`,
                         );
                 }
             }
@@ -725,18 +727,18 @@ export class GmodPath {
             if (insideSet) {
                 if (n.location?.equals(expectedLocationNode.location) === false)
                     return new GmodParsePathResult.Err(
-                        `Expected all nodes in the set to be individualized the same. Found ${n.code} with location ${n.location}. Expected location ${expectedLocationNode.location}`
+                        `Expected all nodes in the set to be individualized the same. Found ${n.code} with location ${n.location}. Expected location ${expectedLocationNode.location}`,
                     );
             } else {
                 if (n.location !== undefined)
                     return new GmodParsePathResult.Err(
-                        `Expected all nodes in the set to be without individualization. Found ${n}`
+                        `Expected all nodes in the set to be without individualization. Found ${n}`,
                     );
             }
         }
 
         return new GmodParsePathResult.Ok(
-            new GmodPath(pathParents, endNode, true)
+            new GmodPath(pathParents, endNode, true),
         );
     }
 
@@ -749,7 +751,7 @@ export class GmodPath {
 
     public static async tryParseFromFullPathAsync(
         item: string,
-        visVersion: VisVersion
+        visVersion: VisVersion,
     ) {
         const gmod = await VIS.instance.getGmod(visVersion);
         const locations = await VIS.instance.getLocations(visVersion);
@@ -760,31 +762,31 @@ export class GmodPath {
     public clone(): GmodPath {
         return new GmodPath(
             this.parents.map((p) => p.clone()),
-            this.node.clone()
+            this.node.clone(),
         );
     }
 }
 
-function locationSetsVisitor() {
+export function locationSetsVisitor() {
     let currentParentStart = -1;
 
     return (
         node: GmodNode,
         i: number,
         parents: GmodNode[],
-        target: GmodNode
+        target: GmodNode,
     ): [number, number, Location | undefined] | null => {
         const isParent = PotentialParentScopeTypes.includes(node.metadata.type);
         const isTargetNode = i === parents.length;
         if (currentParentStart === -1) {
             if (isParent) currentParentStart = i;
-            if (isIndividualizable(node, isTargetNode))
+            if (node.isIndividualizable(isTargetNode))
                 return [i, i, node.location];
         } else {
             if (isParent || isTargetNode) {
                 let nodes: [number, number, Location | undefined] | null = null;
                 if (currentParentStart + 1 === i) {
-                    if (isIndividualizable(node, isTargetNode))
+                    if (node.isIndividualizable(isTargetNode))
                         nodes = [i, i, node.location];
                 } else {
                     let skippedOne = -1;
@@ -793,10 +795,9 @@ function locationSetsVisitor() {
                         const setNode =
                             j < parents.length ? parents[j] : target;
                         if (
-                            !isIndividualizable(
-                                setNode,
+                            !setNode.isIndividualizable(
                                 j == parents.length,
-                                true
+                                true,
                             )
                         ) {
                             if (nodes !== null) skippedOne = j;
@@ -810,13 +811,13 @@ function locationSetsVisitor() {
                             !setNode.location.equals(nodes[2])
                         ) {
                             throw new Error(
-                                `Mapping error: different locations in the same nodeset: ${nodes[2]}, ${setNode.location}`
+                                `Mapping error: different locations in the same nodeset: ${nodes[2]}, ${setNode.location}`,
                             );
                         }
 
                         if (skippedOne !== -1) {
                             throw new Error(
-                                "Cant skip in the middle of individualizable set"
+                                "Cant skip in the middle of individualizable set",
                             );
                         }
 
@@ -855,7 +856,7 @@ function locationSetsVisitor() {
                 }
             }
 
-            if (isTargetNode && isIndividualizable(node, isTargetNode))
+            if (isTargetNode && node.isIndividualizable(isTargetNode))
                 return [i, i, node.location];
         }
         return null;

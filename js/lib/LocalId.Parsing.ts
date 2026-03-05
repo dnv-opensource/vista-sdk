@@ -30,14 +30,14 @@ export class LocalIdParser {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): LocalIdBuilder {
         const localId = LocalIdParser.tryParse(
             localIdStr,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
         if (!localId)
             throw new Error("Couldn't parse local ID from: " + localIdStr);
@@ -46,7 +46,7 @@ export class LocalIdParser {
 
     public static async parseAsync(
         localIdStr: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): Promise<LocalIdBuilder> {
         const localId = await this.tryParseAsync(localIdStr, errorBuilder);
 
@@ -60,7 +60,7 @@ export class LocalIdParser {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): LocalIdBuilder | undefined {
         if (!localIdStr || isNullOrWhiteSpace(localIdStr))
             throw new Error("Invalid LocalId string");
@@ -122,7 +122,7 @@ export class LocalIdParser {
                         context,
                         context.i,
                         context.segment,
-                        context.state
+                        context.state,
                     );
                     break;
                 case ParsingState.VisVersion:
@@ -137,10 +137,10 @@ export class LocalIdParser {
                         return;
                     }
                     const version = VisVersions.tryParse(
-                        context.segment.slice("vis-".length)
+                        context.segment.slice("vis-".length),
                     );
 
-                    if (!version) {
+                    if (version === undefined) {
                         errorBuilder?.push(ParsingState.VisVersion);
                         return;
                     }
@@ -149,7 +149,7 @@ export class LocalIdParser {
                         context,
                         context.i,
                         context.segment,
-                        context.state
+                        context.state,
                     );
                     break;
                 case ParsingState.PrimaryItem:
@@ -160,12 +160,12 @@ export class LocalIdParser {
 
                                 const path = context.span.slice(
                                     primaryItemStart,
-                                    context.i - 1
+                                    context.i - 1,
                                 ); // context.i - 1
 
                                 const gmodPath = gmod.tryParsePath(
                                     path,
-                                    locations
+                                    locations,
                                 );
                                 if (gmodPath === undefined) {
                                     errorBuilder?.push({
@@ -205,7 +205,7 @@ export class LocalIdParser {
                             this.advanceParser(
                                 context,
                                 context.i,
-                                context.segment
+                                context.segment,
                             );
                         } else {
                             let nextState: ParsingState = context.state;
@@ -231,12 +231,12 @@ export class LocalIdParser {
                             if (nextState !== context.state) {
                                 const path = context.span.slice(
                                     primaryItemStart,
-                                    context.i - 1
+                                    context.i - 1,
                                 ); // context.i - 1
 
                                 const gmodPath = gmod.tryParsePath(
                                     path,
-                                    locations
+                                    locations,
                                 );
                                 if (gmodPath === undefined) {
                                     // Displays the full GmodPath when first part of PrimaryItem is invalid
@@ -252,7 +252,7 @@ export class LocalIdParser {
                                         endOfNextStateIndex,
                                     } = this.getNextStateIndexes(
                                         context.span,
-                                        context.state
+                                        context.state,
                                     );
 
                                     context.i = endOfNextStateIndex;
@@ -261,7 +261,7 @@ export class LocalIdParser {
                                         undefined,
                                         undefined,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                     break;
                                 }
@@ -273,7 +273,7 @@ export class LocalIdParser {
                                         undefined,
                                         undefined,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                 else
                                     this.advanceParser(
@@ -281,7 +281,7 @@ export class LocalIdParser {
                                         context.i,
                                         context.segment,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                 break;
                             }
@@ -296,7 +296,7 @@ export class LocalIdParser {
                                 const { nextStateIndex, endOfNextStateIndex } =
                                     this.getNextStateIndexes(
                                         context.span,
-                                        context.state
+                                        context.state,
                                     );
                                 if (nextStateIndex === -1) {
                                     errorBuilder?.push({
@@ -307,7 +307,7 @@ export class LocalIdParser {
                                     return;
                                 }
                                 const nextSegment = context.span.slice(
-                                    nextStateIndex + 1
+                                    nextStateIndex + 1,
                                 );
 
                                 const [sec, meta, tilde] = [
@@ -333,7 +333,7 @@ export class LocalIdParser {
                                 const invalidPrimaryItemPath =
                                     context.span.slice(
                                         context.i,
-                                        nextStateIndex
+                                        nextStateIndex,
                                     );
                                 errorBuilder?.push({
                                     type: ParsingState.PrimaryItem,
@@ -348,14 +348,14 @@ export class LocalIdParser {
                                     undefined,
                                     undefined,
                                     context.state,
-                                    nextState
+                                    nextState,
                                 );
                                 break;
                             }
                             this.advanceParser(
                                 context,
                                 context.i,
-                                context.segment
+                                context.segment,
                             );
                         }
                     }
@@ -386,7 +386,7 @@ export class LocalIdParser {
                             this.advanceParser(
                                 context,
                                 context.i,
-                                context.segment
+                                context.segment,
                             );
                         } else {
                             let nextState: ParsingState = context.state;
@@ -409,11 +409,11 @@ export class LocalIdParser {
                             if (nextState !== context.state) {
                                 const path = context.span.slice(
                                     secondaryItemStart,
-                                    context.i - 1
+                                    context.i - 1,
                                 );
                                 const gmodPath = gmod.tryParsePath(
                                     path,
-                                    locations
+                                    locations,
                                 );
                                 if (gmodPath === undefined) {
                                     // Displays the full GmodPath when first part of SecondaryItem is invalid
@@ -430,7 +430,7 @@ export class LocalIdParser {
                                         endOfNextStateIndex,
                                     } = this.getNextStateIndexes(
                                         context.span,
-                                        context.state
+                                        context.state,
                                     );
                                     context.i = endOfNextStateIndex;
                                     this.advanceParser(
@@ -438,7 +438,7 @@ export class LocalIdParser {
                                         undefined,
                                         undefined,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                     break;
                                 }
@@ -450,7 +450,7 @@ export class LocalIdParser {
                                         undefined,
                                         undefined,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
                                 else
                                     this.advanceParser(
@@ -458,7 +458,7 @@ export class LocalIdParser {
                                         context.i,
                                         context.segment,
                                         context.state,
-                                        nextState
+                                        nextState,
                                     );
 
                                 break;
@@ -474,7 +474,7 @@ export class LocalIdParser {
                                 const { nextStateIndex, endOfNextStateIndex } =
                                     this.getNextStateIndexes(
                                         context.span,
-                                        context.state
+                                        context.state,
                                     );
                                 if (nextStateIndex === -1) {
                                     errorBuilder?.push({
@@ -486,7 +486,7 @@ export class LocalIdParser {
                                 }
 
                                 const nextSegment = context.span.slice(
-                                    nextStateIndex + 1
+                                    nextStateIndex + 1,
                                 );
                                 const [meta, tilde] = [
                                     nextSegment.startsWith("meta"),
@@ -506,7 +506,7 @@ export class LocalIdParser {
                                 const invalidSecondaryItemPath =
                                     context.span.slice(
                                         context.i,
-                                        nextStateIndex
+                                        nextStateIndex,
                                     );
                                 errorBuilder?.push({
                                     type: ParsingState.SecondaryItem,
@@ -522,14 +522,14 @@ export class LocalIdParser {
                                     undefined,
                                     undefined,
                                     context.state,
-                                    nextState
+                                    nextState,
                                 );
                                 break;
                             }
                             this.advanceParser(
                                 context,
                                 context.i,
-                                context.segment
+                                context.segment,
                             );
                         }
                     }
@@ -553,13 +553,13 @@ export class LocalIdParser {
 
                     context.segment = context.span.slice(
                         context.i,
-                        metaIndex + metaStr.length
+                        metaIndex + metaStr.length,
                     );
                     this.advanceParser(
                         context,
                         context.i,
                         context.segment,
-                        context.state
+                        context.state,
                     );
                     break;
                 case ParsingState.MetaQuantity:
@@ -578,7 +578,7 @@ export class LocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            qty
+                            qty,
                         );
                         if (!res) continue;
                         qty = res;
@@ -599,7 +599,7 @@ export class LocalIdParser {
                             context.segment,
                             codebooks,
                             errorBuilder,
-                            cnt
+                            cnt,
                         );
                         if (!res) continue;
                         cnt = res;
@@ -621,7 +621,7 @@ export class LocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            calc
+                            calc,
                         );
                         if (!res) continue;
                         calc = res;
@@ -643,7 +643,7 @@ export class LocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            stateTag
+                            stateTag,
                         );
                         if (!res) continue;
                         stateTag = res;
@@ -665,7 +665,7 @@ export class LocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            cmd
+                            cmd,
                         );
                         if (!res) continue;
                         cmd = res;
@@ -687,7 +687,7 @@ export class LocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            type
+                            type,
                         );
                         if (!res) continue;
                         type = res;
@@ -709,7 +709,7 @@ export class LocalIdParser {
                             codebooks,
 
                             errorBuilder,
-                            pos
+                            pos,
                         );
                         if (!res) continue;
                         pos = res;
@@ -731,7 +731,7 @@ export class LocalIdParser {
                             codebooks,
                             errorBuilder,
 
-                            detail
+                            detail,
                         );
                         if (!res) continue;
                         detail = res;
@@ -742,7 +742,7 @@ export class LocalIdParser {
                         context,
                         context.i,
                         context.segment,
-                        context.state
+                        context.state,
                     );
                     break;
             }
@@ -776,10 +776,10 @@ export class LocalIdParser {
 
     public static async tryParseAsync(
         localIdStr: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): Promise<LocalIdBuilder | undefined> {
         const version = parseVisVersion(localIdStr, errorBuilder);
-        if (!version) return;
+        if (version === undefined) return;
 
         const gmod = await VIS.instance.getGmod(version);
         const codebooks = await VIS.instance.getCodebooks(version);
@@ -790,7 +790,7 @@ export class LocalIdParser {
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 
@@ -802,7 +802,7 @@ export class LocalIdParser {
         segment: string,
         codebooks: Codebooks,
         errorBuilder?: LocalIdParsingErrorBuilder,
-        tag?: MetadataTag
+        tag?: MetadataTag,
     ): MetadataTag | undefined {
         if (!codebooks) return;
 
@@ -840,7 +840,7 @@ export class LocalIdParser {
                 undefined,
                 undefined,
                 state,
-                actualState
+                actualState,
             );
             return;
         }
@@ -924,7 +924,7 @@ export class LocalIdParser {
     static nextParsingState(prev: ParsingState): ParsingState | undefined {
         switch (prev) {
             case ParsingState.MetaQuantity:
-                return ParsingState.MetaQuantity;
+                return ParsingState.MetaContent;
             case ParsingState.MetaContent:
                 return ParsingState.MetaCalculation;
             case ParsingState.MetaCalculation:
@@ -944,7 +944,7 @@ export class LocalIdParser {
 
     static getNextStateIndexes(
         span: string,
-        state: ParsingState
+        state: ParsingState,
     ): NextStateIndexTuple {
         const customIndex = span.indexOf("~");
         const endOfCustomIndex = customIndex + "~".length + 1;
@@ -999,7 +999,7 @@ export class LocalIdParser {
         i?: number,
         segment?: string,
         state?: ParsingState,
-        to?: ParsingState
+        to?: ParsingState,
     ) {
         if (i !== undefined && segment !== undefined) {
             context.i += segment.length + 1;

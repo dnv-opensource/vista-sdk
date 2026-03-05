@@ -13,7 +13,7 @@ abstract class IExtension {
 
 export class Extensions implements IExtension {
     public static toJsonDto(
-        domain: DataList.DataListPackage
+        domain: DataList.DataListPackage,
     ): DataListDto.DataListPackage {
         const p = domain.package;
         const h = domain.package.header;
@@ -47,7 +47,7 @@ export class Extensions implements IExtension {
     }
 
     public static async toDomainModel(
-        dto: DataListDto.DataListPackage
+        dto: DataListDto.DataListPackage,
     ): Promise<DataList.DataListPackage> {
         const p = dto.Package;
         const h = dto.Package.Header;
@@ -61,7 +61,7 @@ export class Extensions implements IExtension {
                 async (v) => {
                     await VIS.instance.getGmod(v);
                 },
-                (_) => Promise.resolve()
+                (_) => Promise.resolve(),
             );
         }
 
@@ -183,7 +183,7 @@ export class DataExtension {
     }
 
     public static async toDomainModel(
-        c: DataListDto.Data
+        c: DataListDto.Data,
     ): Promise<DataList.Data> {
         const dataId = await DataId.parseAsync(c.DataID.LocalID);
 
@@ -271,9 +271,9 @@ export class DataExtension {
                     (p) => p,
                     (s) => {
                         throw new Error(
-                            `DataPackage local ID not a valid LocalId: ${s}`
+                            `DataPackage local ID not a valid LocalId: ${s}`,
                         );
-                    }
+                    },
                 ),
                 shortId: c.DataID.ShortID,
                 nameObject,

@@ -5,7 +5,7 @@ import { LocalIdParsingErrorBuilder } from "./LocalIdParsingErrorBuilder";
 
 export function parseVisVersion(
     str?: string,
-    errorBuilder?: LocalIdParsingErrorBuilder
+    errorBuilder?: LocalIdParsingErrorBuilder,
 ): VisVersion | undefined {
     if (isNullOrWhiteSpace(str)) {
         errorBuilder?.push(ParsingState.EmptyState);
@@ -31,12 +31,12 @@ export function parseVisVersion(
 
     const segment = str.slice(
         versionSegmentStart,
-        versionSegmentStart + versionSegmentEnd
+        versionSegmentStart + versionSegmentEnd,
     );
 
     const version = VisVersions.tryParse(segment.replace("vis-", ""));
 
-    if (!version) {
+    if (version === undefined) {
         errorBuilder?.push({
             message:
                 "Failed to parse VisVersion from segment found: " + segment,

@@ -16,7 +16,7 @@ export class EmbeddedResource {
             (r) =>
                 r.endsWith(".gz") &&
                 r.includes("gmod") &&
-                !r.includes("versioning")
+                !r.includes("versioning"),
         );
 
         if (resources.length === 0)
@@ -26,7 +26,7 @@ export class EmbeddedResource {
 
         for (const resource of resources) {
             const gmod = await this.readJsonGzip<GmodDto>(
-                EmbeddedResource.RESOURCE_DIR + "/" + resource
+                EmbeddedResource.RESOURCE_DIR + "/" + resource,
             );
 
             versions.push(gmod.visRelease);

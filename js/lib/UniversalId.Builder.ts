@@ -33,7 +33,7 @@ export class UniversalIdBuilder {
 
     public static create(visVersion: VisVersion) {
         return new UniversalIdBuilder().withLocalId(
-            LocalIdBuilder.create(visVersion)
+            LocalIdBuilder.create(visVersion),
         );
     }
 
@@ -50,7 +50,7 @@ export class UniversalIdBuilder {
     }
 
     public validate(
-        errorBuilder = new LocalIdParsingErrorBuilder()
+        errorBuilder = new LocalIdParsingErrorBuilder(),
     ): LocalIdParsingErrorBuilder {
         if (!this.imoNumber?.isValid) {
             errorBuilder.push({
@@ -67,20 +67,20 @@ export class UniversalIdBuilder {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return UniversalIdParser.parse(
             universalId,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 
     public static async parseAsync(
         universalIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return UniversalIdParser.parseAsync(universalIdString, errorBuilder);
     }
@@ -90,20 +90,20 @@ export class UniversalIdBuilder {
         gmod: Gmod,
         codebooks: Codebooks,
         locations: Locations,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ): UniversalIdBuilder | undefined {
         return UniversalIdParser.tryParse(
             universalId,
             gmod,
             codebooks,
             locations,
-            errorBuilder
+            errorBuilder,
         );
     }
 
     public static async tryParseAsync(
         universalIdString: string | undefined,
-        errorBuilder?: LocalIdParsingErrorBuilder
+        errorBuilder?: LocalIdParsingErrorBuilder,
     ) {
         return UniversalIdParser.tryParseAsync(universalIdString, errorBuilder);
     }
