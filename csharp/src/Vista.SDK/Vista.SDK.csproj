@@ -29,6 +29,7 @@
     <InternalsVisibleTo Include="$(AssemblyName).Benchmarks" />
     <InternalsVisibleTo Include="$(AssemblyName).SmokeTests" />
     <InternalsVisibleTo Include="$(AssemblyName).Mqtt" />
+    <InternalsVisibleTo Include="$(AssemblyName).Experimental" />
   </ItemGroup>
 
   <ItemGroup>

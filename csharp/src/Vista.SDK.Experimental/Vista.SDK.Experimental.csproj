@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net9.0;net8.0;netstandard2.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>Vista.SDK.Experimental</AssemblyName>
+    <RootNamespace>Vista.SDK.Experimental</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <PackageId>DNV.Vista.SDK.Experimental</PackageId>
+    <Description>Experimental extensions for the Vista SDK, including PMS Local ID support and
+      experimental transport packages (DataList, TimeSeriesData).
+      This package contains features under active development and may introduce breaking changes.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Vista.SDK.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextDotNetVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vista.SDK\Vista.SDK.csproj" />
+  </ItemGroup>
+
+  <ItemGroup
+    Condition="'$(TargetFramework)' != 'net8.0' and '$(TargetFramework)' != 'net9.0' and '$(TargetFramework)' != 'net10.0'">
+    <PackageReference Include="PolySharp" Version="1.14.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

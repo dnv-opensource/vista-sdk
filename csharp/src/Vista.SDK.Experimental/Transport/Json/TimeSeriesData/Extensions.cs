@@ -1,4 +1,4 @@
-using Vista.SDK.Transport;
+using Vista.SDK.Experimental.Transport;
 using Domain = Vista.SDK.Experimental.Transport.TimeSeries;
 
 namespace Vista.SDK.Experimental.Transport.Json.TimeSeriesData;
