@@ -1,0 +1,11 @@
+node_modules
+# Test suite cache
+tests/setup/.vis-cache
+# Build-time only
+lib/source-generator
+lib/resources
+prebuild.ts
+tests
+tsconfig.json
+tsconfig.build.json
+jest.config.js

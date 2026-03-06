@@ -1,0 +1,45 @@
+{
+    "name": "dnv-vista-sdk-experimental",
+    "version": "0.2.0-preview",
+    "description": "Experimental extensions for the DNV Vista SDK – PMS Local IDs and ISO19848/19847 inspired transport models.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dnv-opensource/vista-sdk",
+        "directory": "js/packages/vista-sdk-experimental"
+    },
+    "keywords": [
+        "dnv",
+        "dnvgl",
+        "vis",
+        "maritime",
+        "iso-19847",
+        "iso-19848",
+        "experimental"
+    ],
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "rimraf dist && tsc -p tsconfig.build.json",
+        "test": "jest --silent=false --logHeapUsage"
+    },
+    "author": "",
+    "license": "MIT",
+    "peerDependencies": {
+        "dnv-vista-sdk": ">=0.2.0-preview"
+    },
+    "devDependencies": {
+        "@types/jest": "^30.0.0",
+        "@types/node": "^22.0.0",
+        "jest": "^30.0.0",
+        "rimraf": "^6.0.1",
+        "ts-jest": "^29.4.6",
+        "ts-node": "^10.8.1",
+        "typescript": "^5.9.3"
+    },
+    "engines": {
+        "node": ">=20"
+    }
+}

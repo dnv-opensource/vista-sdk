@@ -1,47 +1,15 @@
 {
-    "name": "dnv-vista-sdk",
-    "version": "0.2.0-preview",
-    "description": "The Vista SDK packages codify the rules and principles of DNV Vessel Information Structure (VIS) and ISO19848/19847 standards to enable and support users and implementers.",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/dnv-opensource/vista-sdk"
-    },
-    "keywords": [
-        "dnv",
-        "dnvgl",
-        "vis",
-        "maritime",
-        "iso-19847",
-        "iso-19848"
+    "private": true,
+    "workspaces": [
+        "packages/*"
     ],
-    "main": "./dist/index.js",
     "scripts": {
-        "test": "jest --silent=false --logHeapUsage",
-        "prebuild": "ts-node ./prebuild.ts",
-        "build": "rimraf dist && tsc -p tsconfig.build.json",
-        "test:debug": "jest --runInBand",
-        "format": "prettier --write \"lib/**/*.ts\" \"tests/**/*.ts\" \"*.ts\" \"*.js\"",
-        "format:check": "prettier --check \"lib/**/*.ts\" \"tests/**/*.ts\" \"*.ts\" \"*.js\""
+        "build": "npm run build --workspaces",
+        "test": "npm run test --workspaces",
+        "format": "prettier --write \"packages/**/*.ts\"",
+        "format:check": "prettier --check \"packages/**/*.ts\""
     },
-    "author": "",
-    "license": "MIT",
     "devDependencies": {
-        "@types/fs-extra": "^11.0.4",
-        "@types/jest": "^30.0.0",
-        "@types/node": "^22.0.0",
-        "fs-extra": "^11.3.3",
-        "jest": "^30.0.0",
-        "json-schema-to-typescript": "^15.0.0",
-        "json5": "^2.2.2",
-        "jsonschema": "^1.4.1",
-        "lru-cache": "^7.10.2",
-        "prettier": "^3.8.1",
-        "rimraf": "^6.0.1",
-        "ts-jest": "^29.4.6",
-        "ts-node": "^10.8.1",
-        "typescript": "^5.9.3"
-    },
-    "engines": {
-        "node": ">=20"
+        "prettier": "^3.8.1"
     }
 }
