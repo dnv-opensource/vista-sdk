@@ -1,6 +1,6 @@
 {
     "name": "dnv-vista-sdk-experimental",
-    "version": "0.2.0-preview",
+    "version": "0.2.0",
     "description": "Experimental extensions for the DNV Vista SDK – PMS Local IDs and ISO19848/19847 inspired transport models.",
     "repository": {
         "type": "git",
@@ -28,7 +28,7 @@
     "author": "",
     "license": "MIT",
     "peerDependencies": {
-        "dnv-vista-sdk": ">=0.2.0-preview"
+        "dnv-vista-sdk": ">=0.2.0"
     },
     "devDependencies": {
         "@types/jest": "^30.0.0",
