@@ -28,7 +28,7 @@
     "author": "",
     "license": "MIT",
     "peerDependencies": {
-        "dnv-vista-sdk": ">=0.2.0"
+        "dnv-vista-sdk": ">=0.2.0 || >=0.3.0-0"
     },
     "devDependencies": {
         "@types/jest": "^30.0.0",
