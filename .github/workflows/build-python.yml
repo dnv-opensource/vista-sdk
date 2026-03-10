@@ -16,7 +16,7 @@ on:
 
 env:
   CI_BUILD: true
-  BASE_VERSION: "0.2.0"
+  BASE_VERSION: "0.3.0-preview"
 
 jobs:
   test:
@@ -117,7 +117,7 @@ jobs:
       # Set version using GitHub run number
       - name: Set package version
         run: |
-          VERSION="${BASE_VERSION}"
+          VERSION="${BASE_VERSION}-${GITHUB_RUN_NUMBER}"
           echo "Setting version to: $VERSION"
           sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" python/src/vista_sdk/__init__.py
           cat python/src/vista_sdk/__init__.py

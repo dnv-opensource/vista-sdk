@@ -50,7 +50,7 @@ jobs:
         run: echo echo "$(pwd)" && find . -path "src/*/*.*sproj"
 
       - name: Pack
-        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.2.0
+        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.3.0-preview-$GITHUB_RUN_NUMBER
 
       - name: NuGet login (OIDC)
         if: ${{ success() && !github.base_ref }}
