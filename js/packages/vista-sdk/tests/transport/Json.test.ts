@@ -1,5 +1,5 @@
 import * as fs from "fs-extra";
-import { JSONExtensions, VistaJSONSerializer } from "../../lib";
+import { JSONExtensions, JSONSerializer } from "../../lib";
 import { Schemas } from "../fixtures";
 
 describe("Transport JSON", () => {
@@ -9,7 +9,7 @@ describe("Transport JSON", () => {
             .readFile(testDataPath)
             .then((res) => res.toString());
 
-        const initDto = VistaJSONSerializer.deserializeDataChannelList(sample);
+        const initDto = JSONSerializer.deserializeDataChannelList(sample);
 
         const domain =
             await JSONExtensions.DataChannelList.toDomainModel(initDto);
@@ -26,7 +26,7 @@ describe("Transport JSON", () => {
             .readFile(testDataPath)
             .then((res) => res.toString());
 
-        const initDto = VistaJSONSerializer.deserializeTimeSeriesData(sample);
+        const initDto = JSONSerializer.deserializeTimeSeriesData(sample);
 
         const domain = await JSONExtensions.TimeSeries.toDomainModel(initDto);
 

@@ -3,8 +3,8 @@ import {
     AssetIdentifier,
     DataId,
     JSONExtensions,
+    JSONSerializer,
     TimeSeries,
-    VistaJSONSerializer,
 } from "../../lib";
 import { DataList } from "../../lib/transport/domain/data-list/DataList";
 
@@ -76,8 +76,8 @@ describe("Transport JSON", () => {
         };
 
         const dto = JSONExtensions.TimeSeries.toJsonDto(p);
-        const jsonStr = VistaJSONSerializer.serializeTimeSeriesData(dto);
-        const json = VistaJSONSerializer.deserializeTimeSeriesData(jsonStr);
+        const jsonStr = JSONSerializer.serializeTimeSeriesData(dto);
+        const json = JSONSerializer.deserializeTimeSeriesData(jsonStr);
         const domain = await JSONExtensions.TimeSeries.toDomainModel(json);
 
         expect(domain.package.header!.assetId.imoNumber!.value).toEqual(

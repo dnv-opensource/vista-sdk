@@ -7,8 +7,8 @@ import { TimeSeries } from "./transport/domain/time-series-data/TimeSeriesData";
 import {
     DataListDto,
     JSONExtensions,
+    JSONSerializer,
     TimeSeriesDto,
-    VistaJSONSerializer,
 } from "./transport/json";
 
 export type { DataList, DataListDto, TimeSeries, TimeSeriesDto };
@@ -17,7 +17,7 @@ export {
     AssetIdentifier,
     DataId,
     JSONExtensions,
+    JSONSerializer,
     PMSLocalId,
     PMSLocalIdBuilder,
-    VistaJSONSerializer,
 };

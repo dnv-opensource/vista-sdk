@@ -1031,14 +1031,12 @@ describe("LocalIdQuery", () => {
 
     describe("DataChannelList filter", () => {
         it("filters data channels with five queries", async () => {
-            const { VistaJSONSerializer, JSONExtensions } =
-                await import("../lib");
+            const { JSONSerializer, JSONExtensions } = await import("../lib");
 
             const testDataPath = Schemas.DataChannelListSample;
             const sample = fs.readFileSync(testDataPath).toString();
 
-            const initDto =
-                VistaJSONSerializer.deserializeDataChannelList(sample);
+            const initDto = JSONSerializer.deserializeDataChannelList(sample);
             const domain =
                 await JSONExtensions.DataChannelList.toDomainModel(initDto);
 

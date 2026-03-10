@@ -1,11 +1,11 @@
 import {
-    Extensions as DataChannelListExtensions,
-    DataChannelListDto,
     DataChannelExtension,
+    DataChannelListDto,
+    Extensions as DataChannelListExtensions,
 } from "./data-channel";
 import {
-    Extensions as TimeSeriesExtensions,
     TimeSeriesDto,
+    Extensions as TimeSeriesExtensions,
 } from "./time-series-data";
 
 class JSONExtensions {
@@ -16,5 +16,5 @@ class JSONExtensions {
 
 export { JSONExtensions };
 
-export { TimeSeriesDto, DataChannelListDto };
-export { Serializer as VistaJSONSerializer } from "./Serializer";
+export { Serializer as JSONSerializer } from "./Serializer";
+export { DataChannelListDto, TimeSeriesDto };

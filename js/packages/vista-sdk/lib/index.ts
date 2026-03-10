@@ -15,8 +15,11 @@ import { GmodVersioning } from "./GmodVersioning";
 import { ILocalId, ILocalIdGeneric } from "./ILocalId";
 import { ILocalIdBuilder, ILocalIdBuilderGeneric } from "./ILocalIdBuilder";
 import { ImoNumber } from "./ImoNumber";
+import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
+import { parseVisVersion } from "./internal/Parsing";
 import { LocalId } from "./LocalId";
 import { LocalIdBuilder } from "./LocalId.Builder";
+import { LocalIdItems } from "./LocalId.Items";
 import { LocalIdParser } from "./LocalId.Parsing";
 import {
     LocalIdQuery,
@@ -33,14 +36,6 @@ import {
 } from "./MetadataTagsQuery";
 import { Pmod } from "./Pmod";
 import { PmodNode } from "./PmodNode";
-import { UniversalId } from "./UniversalId";
-import { UniversalIdBuilder } from "./UniversalId.Builder";
-import { UniversalIdParser } from "./UniversalId.Parsing";
-import { VIS } from "./VIS";
-import { VisVersion, VisVersionExtension, VisVersions } from "./VisVersion";
-import { LocalIdParsingErrorBuilder } from "./internal/LocalIdParsingErrorBuilder";
-import { parseVisVersion } from "./internal/Parsing";
-import { LocalIdItems } from "./LocalId.Items";
 import {
     DataChannelId,
     DataChannelList,
@@ -51,10 +46,10 @@ import {
 import {
     DataChannelListDto,
     JSONExtensions,
+    JSONSerializer,
     TimeSeriesDto,
-    VistaJSONSerializer,
 } from "./transport/json";
-import { isNullOrWhiteSpace } from "./util/util";
+import { TraversalHandlerResult } from "./types/Gmod";
 import { GmodNodeMetadata } from "./types/GmodNode";
 import {
     ConversionType,
@@ -66,6 +61,12 @@ import { ParsingState } from "./types/LocalId";
 import { NotRelevant, PmodInfo } from "./types/Pmod";
 import { Err, Ok, Result } from "./types/Result";
 import { TreeNode } from "./types/Tree";
+import { UniversalId } from "./UniversalId";
+import { UniversalIdBuilder } from "./UniversalId.Builder";
+import { UniversalIdParser } from "./UniversalId.Parsing";
+import { isNullOrWhiteSpace } from "./util/util";
+import { VIS } from "./VIS";
+import { VisVersion, VisVersionExtension, VisVersions } from "./VisVersion";
 
 // Types
 export type { GmodNodeMetadata, PmodInfo, TreeNode };
@@ -120,6 +121,7 @@ export {
     GmodPathQuery,
     GmodPathQueryBuilder,
     GmodVersioning,
+    TraversalHandlerResult,
 };
 export type { GmodNodeConversion, GmodNodeConversionDto, GmodVersioningDto };
 // Pmod
@@ -136,11 +138,11 @@ export {
     DataChannelList,
     DataChannelListDto,
     JSONExtensions,
+    JSONSerializer,
     ShipId,
     TimeSeries,
     TimeSeriesDto,
     Version,
-    VistaJSONSerializer,
 };
 
 // Internal utilities (exported for experimental SDK)
