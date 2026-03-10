@@ -1,13 +1,7 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+/** @type {import('jest').Config} */
 module.exports = {
-    preset: "ts-jest",
-    testEnvironment: "node",
-    transform: {
-        "^.+\\.ts?$": "ts-jest",
-    },
-    transformIgnorePatterns: ["<rootDir>/node_modules/"],
-    testTimeout: 100000,
-    globalSetup: "<rootDir>/tests/setup/globalSetup.ts",
-    globalTeardown: "<rootDir>/tests/setup/globalTeardown.ts",
-    setupFilesAfterEnv: ["<rootDir>/tests/setup/setupTests.ts"],
+    projects: [
+        "<rootDir>/packages/vista-sdk",
+        "<rootDir>/packages/vista-sdk-experimental",
+    ],
 };

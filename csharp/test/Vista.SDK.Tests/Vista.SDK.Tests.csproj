@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Vista.SDK.Experimental\Vista.SDK.Experimental.csproj" />
     <ProjectReference Include="..\..\src\Vista.SDK.Mqtt\Vista.SDK.Mqtt.csproj" />
     <ProjectReference
       Include="..\..\src\Vista.SDK.System.Text.Json\Vista.SDK.System.Text.Json.csproj" />

@@ -33,11 +33,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npm run test
-
       - name: Build
         run: npm run build
+
+      - name: Run tests
+        run: npm run test
 
   publish:
     name: Publish
@@ -65,5 +65,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish
-        run: cp ../README.md ./README.md; npm version $(node -p "require('./package.json').version").$(node -p "${{ github.run_number }}"); npm publish --access public --tag preview;
+      - name: Publish vista-sdk
+        run: cp ./README.md ./packages/vista-sdk/README.md; cd packages/vista-sdk; npm version $(node -p "require('./package.json').version").$(node -p "${{ github.run_number }}"); npm publish --access public --tag preview;
+
+      - name: Publish vista-sdk-experimental
+        run: cd packages/vista-sdk-experimental; npm version $(node -p "require('./package.json').version").$(node -p "${{ github.run_number }}"); npm publish --access public --tag preview;
