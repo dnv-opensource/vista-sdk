@@ -24,6 +24,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Full history needed for revision count
+
+      - name: Get revision number
+        id: rev
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            echo "count=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
+          else
+            echo "count=$(git rev-list --count ${LATEST_TAG}..HEAD)" >> $GITHUB_OUTPUT
+          fi
+          echo "Revision: $(cat $GITHUB_OUTPUT)"
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
@@ -50,7 +63,7 @@ jobs:
         run: echo echo "$(pwd)" && find . -path "src/*/*.*sproj"
 
       - name: Pack
-        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.3.0-preview-$GITHUB_RUN_NUMBER
+        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.3.1-preview-${{ steps.rev.outputs.count }}
 
       - name: NuGet login (OIDC)
         if: ${{ success() && !github.base_ref }}

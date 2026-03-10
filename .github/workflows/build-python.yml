@@ -16,7 +16,7 @@ on:
 
 env:
   CI_BUILD: true
-  BASE_VERSION: "0.3.0-preview"
+  BASE_VERSION: "0.3.1-preview"
 
 jobs:
   test:
@@ -81,6 +81,19 @@ jobs:
       # Get the source code from the repository
       - name: Checkout entire repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history needed for revision count
+
+      - name: Get revision number
+        id: rev
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            echo "count=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
+          else
+            echo "count=$(git rev-list --count ${LATEST_TAG}..HEAD)" >> $GITHUB_OUTPUT
+          fi
+          echo "Revision: $(cat $GITHUB_OUTPUT)"
 
       # Set up Python 3.13 for building (latest supported version)
       - name: Set up Python
@@ -116,8 +129,10 @@ jobs:
 
       # Set version using GitHub run number
       - name: Set package version
+        env:
+          REV: ${{ steps.rev.outputs.count }}
         run: |
-          VERSION="${BASE_VERSION}-${GITHUB_RUN_NUMBER}"
+          VERSION="${BASE_VERSION}-${REV}"
           echo "Setting version to: $VERSION"
           sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" python/src/vista_sdk/__init__.py
           cat python/src/vista_sdk/__init__.py

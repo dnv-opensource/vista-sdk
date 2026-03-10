@@ -53,11 +53,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history needed for revision count
 
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
+
+      - name: Get revision number
+        id: rev
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            echo "count=$(git rev-list --count HEAD)" >> $GITHUB_OUTPUT
+          else
+            echo "count=$(git rev-list --count ${LATEST_TAG}..HEAD)" >> $GITHUB_OUTPUT
+          fi
+          echo "Revision: $(cat $GITHUB_OUTPUT)"
 
       - name: Install dependencies
         run: npm ci
@@ -66,7 +79,7 @@ jobs:
         run: npm run build
 
       - name: Publish vista-sdk
-        run: cp ./README.md ./packages/vista-sdk/README.md; cd packages/vista-sdk; npm version $(node -p "require('./package.json').version").$(node -p "${{ github.run_number }}"); npm publish --access public --tag preview;
+        run: cp ./README.md ./packages/vista-sdk/README.md; cd packages/vista-sdk; npm version $(node -p "require('./package.json').version").${{ steps.rev.outputs.count }}; npm publish --access public --tag preview;
 
       - name: Publish vista-sdk-experimental
-        run: cd packages/vista-sdk-experimental; npm version $(node -p "require('./package.json').version").$(node -p "${{ github.run_number }}"); npm publish --access public --tag preview;
+        run: cd packages/vista-sdk-experimental; npm version $(node -p "require('./package.json').version").${{ steps.rev.outputs.count }}; npm publish --access public --tag preview;
