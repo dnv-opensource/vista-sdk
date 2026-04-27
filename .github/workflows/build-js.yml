@@ -80,10 +80,6 @@ jobs:
 
       - name: Publish vista-sdk
         run: cp ./README.md ./packages/vista-sdk/README.md; cd packages/vista-sdk; npm version $(node -p "require('./package.json').version").${{ steps.rev.outputs.count }}; npm publish --access public --tag preview --provenance;
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish vista-sdk-experimental
         run: cd packages/vista-sdk-experimental; npm version $(node -p "require('./package.json').version").${{ steps.rev.outputs.count }}; npm publish --access public --tag preview --provenance;
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
