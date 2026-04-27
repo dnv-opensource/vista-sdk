@@ -14,16 +14,16 @@ env:
 
 jobs:
   build:
-    name: Build, test and publish
+    name: Build and test
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Enable GitHub OIDC token issuance for trusted publishing
+      contents: read
     defaults:
       run:
         working-directory: csharp/
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0 # Full history needed for revision count
 
@@ -39,7 +39,7 @@ jobs:
           echo "Revision: $(cat $GITHUB_OUTPUT)"
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: |
             6.0.x
@@ -65,13 +65,37 @@ jobs:
       - name: Pack
         run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.3.1-preview-${{ steps.rev.outputs.count }}
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: nuget-packages
+          path: csharp/artifacts/
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: ${{ success() && !github.base_ref }}
+    permissions:
+      id-token: write # Enable GitHub OIDC token issuance for trusted publishing
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: nuget-packages
+          path: artifacts/
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: 8.0.x
+
       - name: NuGet login (OIDC)
-        if: ${{ success() && !github.base_ref }}
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
         id: nuget-login
         with:
           user: ${{ secrets.NUGET_USER }}
 
       - name: Push
-        if: ${{ success() && !github.base_ref }}
         run: dotnet nuget push artifacts/**.nupkg -s https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
