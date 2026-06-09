@@ -120,7 +120,7 @@ class VIS(IVIS):
     instance exists.
     """
 
-    latest_vis_version = VisVersion.v3_10a
+    latest_vis_version = VisVersion.v3_11a
     _locations_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)  # TTL is in seconds
     _locations_dto_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)
     _gmod_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)

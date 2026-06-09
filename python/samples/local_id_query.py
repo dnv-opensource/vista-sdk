@@ -236,9 +236,11 @@ def main() -> None:  # noqa: C901
         LocalIdQueryBuilder.empty()
         .with_primary_item(
             NodesConfig(
-                lambda nodes: nodes.with_node(gmod["411.1"], match_all_locations=True)
-                .with_node(gmod["S206"], match_all_locations=True)
-                .build()
+                lambda nodes: (
+                    nodes.with_node(gmod["411.1"], match_all_locations=True)
+                    .with_node(gmod["S206"], match_all_locations=True)
+                    .build()
+                )
             )
         )
         .build()
@@ -274,9 +276,11 @@ def main() -> None:  # noqa: C901
         .with_primary_item(
             sensor_path,
             PathConfig(
-                lambda path: path.without_locations()
-                .with_any_node_before(lambda nodes: nodes["S206"])
-                .build()
+                lambda path: (
+                    path.without_locations()
+                    .with_any_node_before(lambda nodes: nodes["S206"])
+                    .build()
+                )
             ),
         )
         .build()
@@ -295,9 +299,11 @@ def main() -> None:  # noqa: C901
         .with_primary_item(
             prefix_path,
             PathConfig(
-                lambda path: path.without_locations()
-                .with_any_node_after(lambda nodes: nodes["411.1"])
-                .build()
+                lambda path: (
+                    path.without_locations()
+                    .with_any_node_after(lambda nodes: nodes["411.1"])
+                    .build()
+                )
             ),
         )
         .build()
@@ -360,9 +366,11 @@ def main() -> None:  # noqa: C901
         .with_primary_item(
             me_path,
             PathConfig(
-                lambda path: path.with_any_node_after(lambda nodes: nodes["C101"])
-                .without_locations()
-                .build()
+                lambda path: (
+                    path.with_any_node_after(lambda nodes: nodes["C101"])
+                    .without_locations()
+                    .build()
+                )
             ),
         )
         .with_tags(
@@ -384,10 +392,12 @@ def main() -> None:  # noqa: C901
     fuel_oil_query = (
         LocalIdQueryBuilder.empty()
         .with_tags(
-            lambda tags: tags.with_tag(CodebookName.Quantity, "pressure")
-            .with_tag(CodebookName.Content, "fuel.oil")
-            .with_allow_other_tags(True)
-            .build()
+            lambda tags: (
+                tags.with_tag(CodebookName.Quantity, "pressure")
+                .with_tag(CodebookName.Content, "fuel.oil")
+                .with_allow_other_tags(True)
+                .build()
+            )
         )
         .build()
     )
@@ -396,10 +406,12 @@ def main() -> None:  # noqa: C901
     lube_oil_query = (
         LocalIdQueryBuilder.empty()
         .with_tags(
-            lambda tags: tags.with_tag(CodebookName.Quantity, "pressure")
-            .with_tag(CodebookName.Content, "lubricating.oil")
-            .with_allow_other_tags(True)
-            .build()
+            lambda tags: (
+                tags.with_tag(CodebookName.Quantity, "pressure")
+                .with_tag(CodebookName.Content, "lubricating.oil")
+                .with_allow_other_tags(True)
+                .build()
+            )
         )
         .build()
     )

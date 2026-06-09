@@ -33,7 +33,8 @@ class TestVisVersions:
         assert VisVersion.v3_8a in versions
         assert VisVersion.v3_9a in versions
         assert VisVersion.v3_10a in versions
-        assert len(VisVersions.all_versions()) == 7, "There should be 7 versions"
+        assert VisVersion.v3_11a in versions
+        assert len(VisVersions.all_versions()) == 8, "There should be 8 versions"
 
     def test_try_parse(self) -> None:
         """Test the try_parse method of VisVersions."""
@@ -70,3 +71,4 @@ class TestVisVersions:
         assert VisVersion.v3_7a.value < VisVersion.v3_8a.value
         assert VisVersion.v3_9a.value <= VisVersion.v3_9a.value
         assert VisVersion.v3_10a.value > VisVersion.v3_8a.value
+        assert VisVersion.v3_11a.value > VisVersion.v3_10a.value

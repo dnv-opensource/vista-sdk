@@ -18,7 +18,7 @@ import { LocationsDto } from "./types/LocationDto";
 export class VIS {
     public static readonly instance = new VIS();
 
-    public static readonly latestVisVersion: VisVersion = VisVersion.v3_10a;
+    public static readonly latestVisVersion: VisVersion = VisVersion.v3_11a;
 
     private readonly _gmodDtoCache: LRUCache<VisVersion, Promise<GmodDto>>;
     private readonly _gmodCache: LRUCache<VisVersion, Gmod>;

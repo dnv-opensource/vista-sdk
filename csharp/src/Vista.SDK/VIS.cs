@@ -30,7 +30,7 @@ public static partial class VisVersionExtensions { }
 
 public sealed class VIS : IVIS
 {
-    public static readonly VisVersion LatestVisVersion = VisVersion.v3_10a;
+    public static readonly VisVersion LatestVisVersion = VisVersion.v3_11a;
 
     private readonly MemoryCache _gmodDtoCache;
     private readonly MemoryCache _gmodCache;

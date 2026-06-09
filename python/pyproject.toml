@@ -9,7 +9,7 @@ requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2",
     "cachetools>=5",
-    "python-dotenv>=1",
+    "python-dotenv>=1.2.2",
     "pydantic>=2.10.5",
     "pydantic-settings>=2.7.1",
     "pandera>=0.22.1",
@@ -17,7 +17,8 @@ dependencies = [
     "types-cachetools>=6.0.0.20250525",
     "types-psutil>=7.0.0.20250601",
     "pytest-cov>=6.1.1",
-    "pytest>=8.4.0",
+    "pytest>=9.0.3",
+    "pygments>=2.20.0",
     "pytest-benchmark>=5.1.0",
     "psutil>=7.0.0",
     "brotli>=1.2.0",
@@ -27,7 +28,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=1.0.0",
-    "pytest>=7.4.0",
+    "pytest>=9.0.3",
     "pytest-asyncio>=0.21.0",
     "pytest-benchmark>=4.0.0",
     "pytest-cov>=4.1.0",
