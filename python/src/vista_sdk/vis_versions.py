@@ -33,6 +33,7 @@ class VisVersion(enum.Enum):
     v3_8a = 4
     v3_9a = 5
     v3_10a = 6
+    v3_11a = 7
 
     def __str__(self) -> str:
         """Return the version string representation."""
@@ -47,6 +48,7 @@ _VERSION_TO_STRING: dict[VisVersion, str] = {
     VisVersion.v3_8a: "3-8a",
     VisVersion.v3_9a: "3-9a",
     VisVersion.v3_10a: "3-10a",
+    VisVersion.v3_11a: "3-11a",
 }
 
 
@@ -78,6 +80,7 @@ class VisVersions:
             "3-8a": VisVersion.v3_8a,
             "3-9a": VisVersion.v3_9a,
             "3-10a": VisVersion.v3_10a,
+            "3-11a": VisVersion.v3_11a,
         }
         if version_str not in version_map:
             raise ValueError(f"Invalid VisVersion string: {version_str}")

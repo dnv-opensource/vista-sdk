@@ -61,6 +61,7 @@ const expectedMaxes = new Map<VisVersion, { max: string; count: number }>([
     [VisVersion.v3_8a, { max: "H346.11113", count: 6335 }],
     [VisVersion.v3_9a, { max: "H346.11113", count: 6553 }],
     [VisVersion.v3_10a, { max: "H346.11113", count: 6555 }],
+    [VisVersion.v3_11a, { max: "H346.11113", count: 6593 }],
 ]);
 
 it.each(testVersions)("Test gmod properties %s", async (visVersion) => {

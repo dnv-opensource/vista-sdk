@@ -51,6 +51,6 @@ describe("VIS", () => {
 
     it("latestVisVersion is set", () => {
         expect(VIS.latestVisVersion).toBeDefined();
-        expect(VIS.latestVisVersion).toBe(VisVersion.v3_10a);
+        expect(VIS.latestVisVersion).toBe(VisVersion.v3_11a);
     });
 });

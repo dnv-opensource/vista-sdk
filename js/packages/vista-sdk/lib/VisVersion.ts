@@ -6,6 +6,7 @@ export enum VisVersion {
     v3_8a = "3-8a",
     v3_9a = "3-9a",
     v3_10a = "3-10a",
+    v3_11a = "3-11a",
 }
 
 export const allVisVersions: VisVersion[] = [
@@ -16,6 +17,7 @@ export const allVisVersions: VisVersion[] = [
     VisVersion.v3_8a,
     VisVersion.v3_9a,
     VisVersion.v3_10a,
+    VisVersion.v3_11a,
 ];
 
 const versionToIndex = new Map<VisVersion, number>(
