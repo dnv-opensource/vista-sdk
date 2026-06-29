@@ -144,61 +144,55 @@ public sealed record TimeSeriesData
                     }
                 }
             }
+        }
 
-            // Validate event data
-            if (EventData is not null)
+        // Validate event data
+        if (EventData is not null)
+        {
+            foreach (var eventData in EventData.DataSet ?? [])
             {
-                foreach (var eventData in EventData.DataSet ?? [])
-                {
-                    DataChannel.DataChannel? dataChannel = eventData
-                        .DataChannelId
-                        .Match(
-                            onLocalId: id =>
+                DataChannel.DataChannel? dataChannel = eventData
+                    .DataChannelId
+                    .Match(
+                        onLocalId: id =>
+                        {
+                            if (!dcPackage.Package.DataChannelList.TryGetByLocalId(id, out var dc) || dc is null)
                             {
-                                if (!dcPackage.Package.DataChannelList.TryGetByLocalId(id, out var dc) || dc is null)
-                                {
-                                    errorneousDataChannels.Add(
-                                        (eventData.DataChannelId, $"Data channel with localId '{id}' not found")
-                                    );
-                                    return null;
-                                }
-                                return dc;
-                            },
-                            onShortId: shortId =>
-                            {
-                                if (
-                                    !dcPackage.Package.DataChannelList.TryGetByShortId(shortId, out var dc)
-                                    || dc is null
-                                )
-                                {
-                                    errorneousDataChannels.Add(
-                                        (eventData.DataChannelId, $"Data channel with short id '{shortId}' not found")
-                                    );
-                                    return null;
-                                }
-                                return dc;
+                                errorneousDataChannels.Add(
+                                    (eventData.DataChannelId, $"Data channel with localId '{id}' not found")
+                                );
+                                return null;
                             }
-                        );
-                    if (dataChannel is null)
-                        continue;
+                            return dc;
+                        },
+                        onShortId: shortId =>
+                        {
+                            if (!dcPackage.Package.DataChannelList.TryGetByShortId(shortId, out var dc) || dc is null)
+                            {
+                                errorneousDataChannels.Add(
+                                    (eventData.DataChannelId, $"Data channel with short id '{shortId}' not found")
+                                );
+                                return null;
+                            }
+                            return dc;
+                        }
+                    );
+                if (dataChannel is null)
+                    continue;
 
-                    var typeValidation = dataChannel
-                        .Property
-                        .Format
-                        .ValidateValue(eventData.Value, out var parsedValue);
-                    if (typeValidation is ValidateResult.Invalid invalid)
-                    {
-                        errorneousDataChannels.Add((eventData.DataChannelId, string.Join(", ", invalid.Messages)));
-                        continue;
-                    }
+                var typeValidation = dataChannel.Property.Format.ValidateValue(eventData.Value, out var parsedValue);
+                if (typeValidation is ValidateResult.Invalid invalid)
+                {
+                    errorneousDataChannels.Add((eventData.DataChannelId, string.Join(", ", invalid.Messages)));
+                    continue;
+                }
 
-                    result = onEventData(eventData.TimeStamp, dataChannel, parsedValue, eventData.Quality);
+                var result = onEventData(eventData.TimeStamp, dataChannel, parsedValue, eventData.Quality);
 
-                    if (result is not ValidateResult.Ok)
-                    {
-                        errorneousDataChannels.Add((eventData.DataChannelId, result.ToString()));
-                        continue;
-                    }
+                if (result is not ValidateResult.Ok)
+                {
+                    errorneousDataChannels.Add((eventData.DataChannelId, result.ToString()));
+                    continue;
                 }
             }
         }
