@@ -495,7 +495,19 @@ class Restriction:
             decimal_places = self._count_decimal_places(str(dec))
             if decimal_places > self.fraction_digits:
                 return Invalid(["Value has more decimal places than allowed"])
-        return self._validate_number(float(dec))
+        number_result = self._validate_number(float(dec))
+        if isinstance(number_result, Invalid):
+            return number_result
+        if self.total_digits is not None:
+            num_digits = self._count_total_digits(dec)
+            if num_digits != self.total_digits:
+                return Invalid(
+                    [
+                        f"Value {dec} has {num_digits} digits "
+                        f"but should be {self.total_digits}"
+                    ]
+                )
+        return Ok()
 
     def _validate_integer_value(self, i: int) -> ValidateResult:
         """Validate integer value against restrictions."""
@@ -520,18 +532,18 @@ class Restriction:
             return Invalid(
                 [f"Value {value} has length {length} but should be {self.length}"]
             )
-        if self.max_length is not None and length >= self.max_length:
+        if self.max_length is not None and length > self.max_length:
             return Invalid(
                 [
                     f"Value {value} has length {length} "
-                    f"but should be less than {self.max_length}"
+                    f"but should be at most {self.max_length}"
                 ]
             )
-        if self.min_length is not None and length <= self.min_length:
+        if self.min_length is not None and length < self.min_length:
             return Invalid(
                 [
                     f"Value {value} has length {length} "
-                    f"but should be greater than {self.min_length}"
+                    f"but should be at least {self.min_length}"
                 ]
             )
         if self.pattern is not None and not re.match(self.pattern, value):
@@ -560,6 +572,20 @@ class Restriction:
         if "." not in value:
             return 0
         return len(value.split(".")[1])
+
+    def _count_total_digits(self, value: float) -> int:
+        """Count the total number of significant digits in a numeric value.
+
+        Mirrors XSD totalDigits semantics: leading zeros and trailing
+        fractional zeros are not counted, trailing integer zeros are.
+        """
+        s = repr(abs(value))
+        if "e" in s or "E" in s:
+            s = f"{abs(value):.20f}"
+        if "." in s:
+            s = s.rstrip("0").rstrip(".")
+        s = s.replace(".", "").lstrip("0")
+        return len(s) if s else 1
 
 
 class WhiteSpace(Enum):
