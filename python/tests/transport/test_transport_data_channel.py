@@ -223,6 +223,80 @@ def test_restriction() -> None:
     assert isinstance(result, Invalid)
 
 
+@pytest.mark.parametrize(
+    ("max_length", "value", "expected_ok"),
+    [
+        (5, "12345", True),  # length == max_length is valid
+        (5, "1234", True),  # below the limit is valid
+        (5, "123456", False),  # above the limit is invalid
+        (0, "", True),  # empty string with max_length 0
+    ],
+)
+def test_restriction_max_length_boundary(
+    max_length: int, value: str, expected_ok: bool
+) -> None:
+    """max_length should accept values exactly at the limit."""
+    restriction = Restriction(max_length=max_length)
+    result = restriction.validate_value(value, Format("String"))
+    assert isinstance(result, Ok if expected_ok else Invalid)
+
+
+@pytest.mark.parametrize(
+    ("min_length", "value", "expected_ok"),
+    [
+        (3, "123", True),  # length == min_length is valid
+        (3, "1234", True),  # above the limit is valid
+        (3, "12", False),  # below the limit is invalid
+    ],
+)
+def test_restriction_min_length_boundary(
+    min_length: int, value: str, expected_ok: bool
+) -> None:
+    """min_length should accept values exactly at the limit."""
+    restriction = Restriction(min_length=min_length)
+    result = restriction.validate_value(value, Format("String"))
+    assert isinstance(result, Ok if expected_ok else Invalid)
+
+
+@pytest.mark.parametrize(
+    ("total_digits", "value", "expected_ok"),
+    [
+        (3, "123", True),  # exact digit count is valid
+        (3, "12", False),  # too few digits is invalid
+        (3, "1234", False),  # too many digits is invalid
+        (3, "100", True),  # trailing zeros in the integer part count
+        (1, "0", True),  # zero counts as a single digit
+    ],
+)
+def test_restriction_total_digits_integer(
+    total_digits: int, value: str, expected_ok: bool
+) -> None:
+    """total_digits should match the exact digit count for integers."""
+    restriction = Restriction(total_digits=total_digits)
+    result = restriction.validate_value(value, Format("Integer"))
+    assert isinstance(result, Ok if expected_ok else Invalid)
+
+
+@pytest.mark.parametrize(
+    ("total_digits", "value", "expected_ok"),
+    [
+        (3, "12.3", True),  # 3 significant digits
+        (3, "1.23", True),  # 3 significant digits
+        (3, "0.045", False),  # only 2 significant digits
+        (2, "0.045", True),  # leading zeros do not count
+        (3, "12.34", False),  # 4 significant digits is invalid
+        (3, "12.30", True),  # trailing fractional zeros do not count
+    ],
+)
+def test_restriction_total_digits_decimal(
+    total_digits: int, value: str, expected_ok: bool
+) -> None:
+    """total_digits should be enforced for decimal values."""
+    restriction = Restriction(total_digits=total_digits)
+    result = restriction.validate_value(value, Format("Decimal"))
+    assert isinstance(result, Ok if expected_ok else Invalid)
+
+
 def test_range() -> None:
     """Test Range creation and validation."""
     # Test valid range
