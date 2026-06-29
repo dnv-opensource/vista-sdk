@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Vista.SDK.Transport.DataChannel;
@@ -330,19 +331,16 @@ public sealed record Restriction
                         return new ValidateResult.Invalid(["Value has more decimal places than allowed"]);
                     if (ValidateNumber((double)dec) is ValidateResult.Invalid invalid)
                         return invalid;
+                    if (ValidateTotalDigits(dec) is ValidateResult.Invalid totalDigitsInvalid)
+                        return totalDigitsInvalid;
                     return new ValidateResult.Ok();
                 },
                 i =>
                 {
                     if (ValidateNumber(i) is ValidateResult.Invalid invalid)
                         return invalid;
-                    if (TotalDigits is not null)
-                    {
-                        var numDigist = Math.Floor(Math.Log10(Math.Abs(i)) + 1) != TotalDigits;
-                        return new ValidateResult.Invalid(
-                            [$"Value {i} has {numDigist} digits but should be {TotalDigits}"]
-                        );
-                    }
+                    if (ValidateTotalDigits(i) is ValidateResult.Invalid totalDigitsInvalid)
+                        return totalDigitsInvalid;
                     return new ValidateResult.Ok();
                 },
                 b => new ValidateResult.Ok(),
@@ -353,14 +351,14 @@ public sealed record Restriction
                     if (Length is not null && length != Length)
                         return new ValidateResult.Invalid([$"Value {str} has length {length} but should be {Length}"]);
                     // check max length
-                    if (MaxLength is not null && length >= MaxLength)
+                    if (MaxLength is not null && length > MaxLength)
                         return new ValidateResult.Invalid(
-                            [$"Value {str} has length {length} but should be less than {MaxLength}"]
+                            [$"Value {str} has length {length} but should be at most {MaxLength}"]
                         );
                     // check min length
-                    if (MinLength is not null && length <= MinLength)
+                    if (MinLength is not null && length < MinLength)
                         return new ValidateResult.Invalid(
-                            [$"Value {str} has length {length} but should be greater than {MinLength}"]
+                            [$"Value {str} has length {length} but should be at least {MinLength}"]
                         );
                     // check pattern
                     if (Pattern is not null && !Regex.IsMatch(str, Pattern))
@@ -389,6 +387,30 @@ public sealed record Restriction
         if (MinInclusive is not null && number < MinInclusive)
             return new ValidateResult.Invalid([$"Value {number} is less than {MinInclusive}"]);
         return new ValidateResult.Ok();
+    }
+
+    private ValidateResult ValidateTotalDigits(decimal value)
+    {
+        if (TotalDigits is null)
+            return new ValidateResult.Ok();
+
+        var digits = CountTotalDigits(value);
+        if (digits != TotalDigits)
+            return new ValidateResult.Invalid([$"Value {value} has {digits} digits but should be {TotalDigits}"]);
+        return new ValidateResult.Ok();
+    }
+
+    private static int CountTotalDigits(decimal value)
+    {
+        value = Math.Abs(value);
+        if (value == 0m)
+            return 1;
+
+        var s = value.ToString(CultureInfo.InvariantCulture);
+        if (s.Contains('.'))
+            s = s.TrimEnd('0').TrimEnd('.');
+        s = s.Replace(".", string.Empty).TrimStart('0');
+        return s.Length == 0 ? 1 : s.Length;
     }
 
     private static decimal CountDecimalPlaces(decimal dec)
