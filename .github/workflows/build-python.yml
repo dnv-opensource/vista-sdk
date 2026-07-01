@@ -16,7 +16,7 @@ on:
 
 env:
   CI_BUILD: true
-  BASE_VERSION: "0.3.1"
+  BASE_VERSION: "0.3.2-preview"
 
 jobs:
   test:
@@ -132,7 +132,7 @@ jobs:
         env:
           REV: ${{ steps.rev.outputs.count }}
         run: |
-          VERSION="${BASE_VERSION}"
+          VERSION="${BASE_VERSION}-${REV}"
           echo "Setting version to: $VERSION"
           sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" python/src/vista_sdk/__init__.py
           cat python/src/vista_sdk/__init__.py

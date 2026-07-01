@@ -63,7 +63,7 @@ jobs:
         run: echo echo "$(pwd)" && find . -path "src/*/*.*sproj"
 
       - name: Pack
-        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.3.1
+        run: find . -path "./src/*/*.*sproj" | xargs -n 1 -t dotnet pack --no-build --verbosity normal -c Release -o artifacts/ /p:Version=0.3.2-preview-${{ steps.rev.outputs.count }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

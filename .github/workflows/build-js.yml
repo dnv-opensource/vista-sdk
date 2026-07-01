@@ -79,7 +79,7 @@ jobs:
         run: npm run build
 
       - name: Publish vista-sdk
-        run: cp ./README.md ./packages/vista-sdk/README.md; cd packages/vista-sdk; npm version $(node -p "require('./package.json').version") --allow-same-version; npm publish --access public --tag latest --provenance;
+        run: cp ./README.md ./packages/vista-sdk/README.md; cd packages/vista-sdk; npm version $(node -p "require('./package.json').version").${{ steps.rev.outputs.count }}; npm publish --access public --tag preview --provenance;
 
       - name: Publish vista-sdk-experimental
-        run: cd packages/vista-sdk-experimental; npm version $(node -p "require('./package.json').version") --allow-same-version; npm publish --access public --tag latest --provenance;
+        run: cd packages/vista-sdk-experimental; npm version $(node -p "require('./package.json').version").${{ steps.rev.outputs.count }}; npm publish --access public --tag preview --provenance;
