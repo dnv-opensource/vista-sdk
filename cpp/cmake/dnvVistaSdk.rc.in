@@ -1,0 +1,30 @@
+#include <winver.h>
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     @DNV_VISTA_SDK_VERSION_MAJOR@,@DNV_VISTA_SDK_VERSION_MINOR@,@DNV_VISTA_SDK_VERSION_PATCH@,0
+PRODUCTVERSION  @DNV_VISTA_SDK_VERSION_MAJOR@,@DNV_VISTA_SDK_VERSION_MINOR@,@DNV_VISTA_SDK_VERSION_PATCH@,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0x0L
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_DLL
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName",      "DNV\0"
+            VALUE "FileDescription",  "Vista SDK C++ library - DNV Vessel Information Structure (VIS) and ISO 19848 standard\0"
+            VALUE "FileVersion",      "@DNV_VISTA_SDK_VERSION@"
+            VALUE "InternalName",     "dnv-vista-sdk\0"
+            VALUE "LegalCopyright",   "Copyright (C) 2026 DNV. Licensed under MIT License.\0"
+            VALUE "OriginalFilename", "dnv-vista-sdk.dll"
+            VALUE "ProductName",      "DNV Vista SDK"
+            VALUE "ProductVersion",   "@DNV_VISTA_SDK_VERSION@"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
