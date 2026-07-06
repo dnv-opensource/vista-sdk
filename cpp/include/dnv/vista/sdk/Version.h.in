@@ -1,0 +1,35 @@
+/**
+ * @file Version.h
+ * @brief Generated version information for dnv-vista-sdk
+ * @details This file is generated from Version.h.in by CMake configure_file()
+ *          Do not edit the generated Version.h directly
+ */
+
+#pragma once
+
+// clang-format off
+#ifndef DNV_VISTA_SDK_VERSION_MAJOR
+#define DNV_VISTA_SDK_VERSION_MAJOR @DNV_VISTA_SDK_VERSION_MAJOR@
+#endif
+#ifndef DNV_VISTA_SDK_VERSION_MINOR
+#define DNV_VISTA_SDK_VERSION_MINOR @DNV_VISTA_SDK_VERSION_MINOR@
+#endif
+#ifndef DNV_VISTA_SDK_VERSION_PATCH
+#define DNV_VISTA_SDK_VERSION_PATCH @DNV_VISTA_SDK_VERSION_PATCH@
+#endif
+#ifndef DNV_VISTA_SDK_VERSION_STRING
+#define DNV_VISTA_SDK_VERSION_STRING "@DNV_VISTA_SDK_VERSION@"
+#endif
+// clang-format on
+
+namespace dnv::vista::sdk
+{
+    /**
+     * @brief Return the dnv-vista-sdk library version as a string
+     * @return Version string, matching DNV_VISTA_SDK_VERSION_STRING
+     */
+    [[nodiscard]] inline constexpr const char* version() noexcept
+    {
+        return DNV_VISTA_SDK_VERSION_STRING;
+    }
+} // namespace dnv::vista::sdk

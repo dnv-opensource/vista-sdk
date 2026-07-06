@@ -61,6 +61,22 @@ target_link_libraries(${PROJECT_NAME}
         dnv::vista::sdk::warnings
 )
 
+if(BUILD_SHARED_LIBS)
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+            WINDOWS_EXPORT_ALL_SYMBOLS ON
+            VERSION                    ${PROJECT_VERSION}
+            SOVERSION                  ${PROJECT_VERSION_MAJOR}
+    )
+
+    if(WIN32)
+        target_sources(${PROJECT_NAME}
+            PRIVATE
+                "${CMAKE_CURRENT_BINARY_DIR}/dnvVistaSdk.rc"
+        )
+    endif()
+endif()
+
 add_library(dnv::vista::sdk ALIAS dnv-vista-sdk)
 
 add_dependencies(${PROJECT_NAME} dnv-vista-sdk-generate-visversions)
