@@ -1,0 +1,92 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# IDEs and editors
+.vs/
+.vscode/
+.clangd/
+*.swp
+*.swo
+*.autosave
+*~
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.VC.db
+*.VC.opendb
+*.sln
+ALL_BUILD.vcxproj*
+ZERO_CHECK.vcxproj*
+RUN_TESTS.vcxproj*
+TESTS_*.vcxproj*
+.qtcreator
+CMakeLists.txt.user
+
+# cpp build directory
+build*/
+out/
+cmake-build-*/
+_build/
+.deps/
+.cache/
+version.rc
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+compile_flags.txt
+CTestTestfile.cmake
+_deps/
+
+# Package managers
+conan.lock
+vcpkg_installed/
+
+# Testing
+*.gcov
+*.gcno
+*.gcda
+*.tlog
+lcov.info
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Project-specific build artifacts
+vista-sdk*/
+lib/
+TMP

@@ -21,5 +21,6 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.organizeImports": "explicit"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/cpp"
 }
