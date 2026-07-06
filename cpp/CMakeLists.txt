@@ -45,7 +45,8 @@ endif()
 # Build options
 #----------------------------------------------
 
-option(DNV_VISTA_SDK_WARNINGS "Enable strict compiler warnings" OFF)
+option(DNV_VISTA_SDK_BUILD_TESTS "Build dnv::vista::sdk tests"     OFF)
+option(DNV_VISTA_SDK_WARNINGS    "Enable strict compiler warnings" OFF)
 
 #----------------------------------------------
 # CMake modules configuration
@@ -75,3 +76,12 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         dnv::vista::sdk::warnings
 )
+
+#----------------------------------------------
+# Tests
+#----------------------------------------------
+
+if(DNV_VISTA_SDK_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
