@@ -35,8 +35,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH VISTA_SDK_ROOT)
 
-set(DNV_VISTA_SDK_DIR         "${PROJECT_SOURCE_DIR}"    CACHE PATH "C++ SDK root directory")
-set(DNV_VISTA_SDK_SOURCE_DIR  "${DNV_VISTA_SDK_DIR}/src" CACHE PATH "C++ source directory")
+set(DNV_VISTA_SDK_DIR         "${PROJECT_SOURCE_DIR}"        CACHE PATH "C++ SDK root directory")
+set(DNV_VISTA_SDK_INCLUDE_DIR "${DNV_VISTA_SDK_DIR}/include" CACHE PATH "C++ include directory")
+set(DNV_VISTA_SDK_SOURCE_DIR  "${DNV_VISTA_SDK_DIR}/src"     CACHE PATH "C++ source directory")
 
 #----------------------------------------------
 # Build type
@@ -47,8 +48,32 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 #----------------------------------------------
+# Versioning
+#----------------------------------------------
+
+set(DNV_VISTA_SDK_VERSION_MAJOR ${PROJECT_VERSION_MAJOR} CACHE INTERNAL "dnv-vista-sdk major version")
+set(DNV_VISTA_SDK_VERSION_MINOR ${PROJECT_VERSION_MINOR} CACHE INTERNAL "dnv-vista-sdk minor version")
+set(DNV_VISTA_SDK_VERSION_PATCH ${PROJECT_VERSION_PATCH} CACHE INTERNAL "dnv-vista-sdk patch version")
+set(DNV_VISTA_SDK_VERSION       ${PROJECT_VERSION}       CACHE INTERNAL "dnv-vista-sdk version")
+
+#----------------------------------------------
+# C++ standard guard
+#----------------------------------------------
+
+if(CMAKE_CXX_STANDARD AND CMAKE_CXX_STANDARD LESS 20)
+    message(FATAL_ERROR
+        "dnv-vista-sdk requires at least C++20. "
+        "CMAKE_CXX_STANDARD is set to ${CMAKE_CXX_STANDARD}."
+    )
+endif()
+
+#----------------------------------------------
 # Build options
 #----------------------------------------------
+
+if(NOT DEFINED BUILD_SHARED_LIBS)
+    set(BUILD_SHARED_LIBS OFF)
+endif()
 
 option(DNV_VISTA_SDK_BUILD_TESTS "Build dnv::vista::sdk tests"     OFF)
 option(DNV_VISTA_SDK_WARNINGS    "Enable strict compiler warnings" OFF)
@@ -60,6 +85,7 @@ option(DNV_VISTA_SDK_WARNINGS    "Enable strict compiler warnings" OFF)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(dnvVistaSdkBlobs)
+include(dnvVistaSdkVisVersionsGenerator)
 include(dnvVistaSdkTargets)
 
 #----------------------------------------------

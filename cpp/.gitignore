@@ -90,3 +90,7 @@ coverage/
 vista-sdk*/
 lib/
 TMP
+
+# Generated files
+VisVersions.h
+VisVersionsExtensions.h
