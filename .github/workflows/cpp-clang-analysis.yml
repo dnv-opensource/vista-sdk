@@ -1,0 +1,70 @@
+name: C++ Clang Analysis
+
+on:
+  push:
+    branches: [ "main", "ci/**", "feat/**", "feature/**", "test/**", "fix/**" ]
+    paths: ["cpp/**", ".github/workflows/cpp-clang-analysis.yml"]
+  pull_request:
+    branches: [ "main" ]
+    paths: ["cpp/**", ".github/workflows/cpp-clang-analysis.yml"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  clang-tidy:
+    name: clang-tidy
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang clang-tidy clang-tools
+
+      - name: Configure (clang-tidy)
+        run: |
+          cmake -S cpp -B build-clang-tidy -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_CXX_CLANG_TIDY=clang-tidy \
+            -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
+            -DDNV_VISTA_SDK_WARNINGS=ON
+
+      - name: Build (runs clang-tidy)
+        run: cmake --build build-clang-tidy --parallel
+
+  scan-build:
+    name: scan-build
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang clang-tidy clang-tools
+
+      - name: Configure (scan-build)
+        run: |
+          cmake -S cpp -B build-scan-build -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
+            -DDNV_VISTA_SDK_WARNINGS=OFF
+
+      - name: Run scan-build
+        run: scan-build --status-bugs cmake --build build-scan-build --parallel $(nproc)
