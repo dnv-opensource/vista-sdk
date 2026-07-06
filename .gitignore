@@ -38,6 +38,8 @@ bower_components
 *.launch
 .settings/
 *.sublime-workspace
+.qtcreator
+CMakeLists.txt.user
 
 # IDE - VSCode
 .vscode/*
@@ -95,3 +97,7 @@ Thumbs.db
 
 # Python test files
 *.pytest_cache/
+
+# C++ build directories
+build*/
+out/
