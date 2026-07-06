@@ -33,6 +33,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH VISTA_SDK_ROOT)
+
+set(DNV_VISTA_SDK_DIR         "${PROJECT_SOURCE_DIR}"    CACHE PATH "C++ SDK root directory")
+set(DNV_VISTA_SDK_SOURCE_DIR  "${DNV_VISTA_SDK_DIR}/src" CACHE PATH "C++ source directory")
+
 #----------------------------------------------
 # Build type
 #----------------------------------------------
@@ -54,28 +59,8 @@ option(DNV_VISTA_SDK_WARNINGS    "Enable strict compiler warnings" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+include(dnvVistaSdkBlobs)
 include(dnvVistaSdkTargets)
-
-#----------------------------------------------
-# Sources
-#----------------------------------------------
-
-set(APP_SOURCES
-    src/main.cpp
-)
-
-#----------------------------------------------
-# Executable target
-#----------------------------------------------
-
-add_executable(${PROJECT_NAME}
-    ${APP_SOURCES}
-)
-
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        dnv::vista::sdk::warnings
-)
 
 #----------------------------------------------
 # Tests
