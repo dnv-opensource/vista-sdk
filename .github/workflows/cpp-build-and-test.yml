@@ -1,0 +1,145 @@
+name: C++ Build & Test
+
+on:
+  push:
+    branches: [ "main", "ci/**", "feat/**", "feature/**", "test/**", "fix/**" ]
+    paths: ["cpp/**", ".github/workflows/cpp-build-and-test.yml"]
+  pull_request:
+    branches: [ "main" ]
+    paths: ["cpp/**", ".github/workflows/cpp-build-and-test.yml"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test (${{ matrix.os }}, ${{ matrix.toolchain }})
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            toolchain: gcc
+          - os: ubuntu-24.04
+            toolchain: clang
+
+          - os: ubuntu-24.04-arm
+            toolchain: gcc
+          - os: ubuntu-24.04-arm
+            toolchain: clang
+
+          - os: windows-2022
+            toolchain: mingw
+          - os: windows-2022
+            toolchain: msvc
+
+          - os: ubuntu-24.04
+            toolchain: gcc
+            link: static
+            build_type: Release
+          - os: windows-2022
+            toolchain: msvc
+            link: static
+            build_type: Release
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Linux deps
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
+
+      - name: Install GCC (Linux)
+        if: runner.os == 'Linux' && matrix.toolchain == 'gcc'
+        run: |
+          sudo apt-get install -y g++
+
+      - name: Install Clang (Linux)
+        if: runner.os == 'Linux' && matrix.toolchain == 'clang'
+        run: |
+          sudo apt-get install -y clang
+
+      # Windows toolchains
+      - name: Setup MSYS2 (MinGW)
+        if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+
+      # Linux (GCC/Clang, x86_64 and ARM64)
+      - name: Configure (Linux) - tests ON
+        if: runner.os == 'Linux'
+        env:
+          CC: ${{ matrix.toolchain }}
+          CXX: ${{ matrix.toolchain == 'gcc' && 'g++' || 'clang++' }}
+        run: |
+          cmake -S cpp -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type || 'Debug' }} \
+            -DDNV_VISTA_SDK_BUILD_TESTS=ON \
+            -DDNV_VISTA_SDK_WARNINGS=OFF
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: cmake --build build --parallel
+
+      - name: Run tests (Linux)
+        if: runner.os == 'Linux'
+        run: ctest --test-dir build --output-on-failure
+
+      # Windows MinGW
+      - name: Configure (Windows MinGW) - tests ON
+        if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
+        shell: msys2 {0}
+        run: |
+          cmake -S cpp -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type || 'Debug' }} \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++ \
+            -DDNV_VISTA_SDK_BUILD_TESTS=ON \
+            -DDNV_VISTA_SDK_WARNINGS=OFF
+
+      - name: Build (Windows MinGW)
+        if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
+        shell: msys2 {0}
+        run: |
+          cmake --build build --parallel
+
+      - name: Run tests (Windows MinGW)
+        if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
+        shell: msys2 {0}
+        run: |
+          ctest --test-dir build --output-on-failure
+
+      # Windows MSVC
+      - name: Configure (Windows MSVC) - tests ON
+        if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
+        shell: pwsh
+        run: >
+          cmake -S cpp -B build
+          -G "Visual Studio 17 2022" -A x64
+          -DDNV_VISTA_SDK_BUILD_TESTS=ON
+          -DDNV_VISTA_SDK_WARNINGS=OFF
+
+      - name: Build (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
+        run: cmake --build build --config ${{ matrix.build_type || 'Debug' }} --parallel
+
+      - name: Run tests (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
+        run: ctest --test-dir build --build-config ${{ matrix.build_type || 'Debug' }} --output-on-failure

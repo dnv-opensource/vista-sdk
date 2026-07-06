@@ -1,0 +1,67 @@
+name: C++ CodeQL
+
+on:
+  push:
+    branches: [ "main", "ci/**", "feat/**", "feature/**", "test/**", "fix/**" ]
+    paths: ["cpp/**", ".github/workflows/cpp-codeql.yml"]
+  pull_request:
+    branches: [ "main" ]
+    paths: ["cpp/**", ".github/workflows/cpp-codeql.yml"]
+  schedule:
+    - cron: '16 3 * * 4'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: actions
+          build-mode: none
+        - language: c-cpp
+          build-mode: manual
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Install dependencies (Linux C/C++)
+      if: matrix.language == 'c-cpp'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build clang
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+    - name: Run manual build steps (C/C++)
+      if: matrix.language == 'c-cpp' && matrix.build-mode == 'manual'
+      shell: bash
+      run: |
+        cmake -S cpp -B build-codeql -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
+          -DDNV_VISTA_SDK_WARNINGS=OFF
+
+        cmake --build build-codeql --parallel
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:${{matrix.language}}"
