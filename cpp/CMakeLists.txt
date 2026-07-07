@@ -78,6 +78,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(dnvVistaSdkVersion)
 include(dnvVistaSdkBlobs)
 include(dnvVistaSdkVisVersionsGenerator)
+include(dnvVistaSdkSources)
 include(dnvVistaSdkTargets)
 
 #----------------------------------------------
