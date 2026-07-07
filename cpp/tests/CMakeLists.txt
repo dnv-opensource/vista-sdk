@@ -26,3 +26,4 @@ include(doctest)
 
 add_subdirectory(blobs)
 add_subdirectory(codegeneration)
+add_subdirectory(core)
