@@ -24,6 +24,35 @@ list(APPEND CMAKE_MODULE_PATH "${doctest_SOURCE_DIR}/scripts/cmake")
 
 include(doctest)
 
+#----------------------------------------------
+# Embed test data
+#----------------------------------------------
+
+dnv_vista_sdk_embed_blobs(
+    TARGET          dnv-vista-sdk-testdata
+    RESOURCE_DIR    "${VISTA_SDK_ROOT}/testdata"
+    OUTPUT_DIR      "${CMAKE_BINARY_DIR}/blobs/testdata"
+    NAMESPACE       dnv::vista::sdk::testdata
+    REGISTRY_NAME   TestdataRegistry
+    PATTERN         "*.json" "*.txt"
+)
+
+target_sources(dnv-vista-sdk-testdata
+    PRIVATE
+        EmbeddedTestData/EmbeddedTestData.cpp
+)
+
+target_include_directories(dnv-vista-sdk-testdata
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/EmbeddedTestData
+)
+
+add_library(dnv::vista::sdk::testdata ALIAS dnv-vista-sdk-testdata)
+
+#----------------------------------------------
+# Tests
+#----------------------------------------------
+
 add_subdirectory(blobs)
 add_subdirectory(codegeneration)
 add_subdirectory(compression)
