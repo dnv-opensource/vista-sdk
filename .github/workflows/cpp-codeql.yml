@@ -57,6 +57,7 @@ jobs:
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
           -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
+          -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
           -DDNV_VISTA_SDK_WARNINGS=OFF
 
         cmake --build build-codeql --parallel
