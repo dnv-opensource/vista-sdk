@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "Codebooks.h"
 #include "VisVersions.h"
 
 #include <span>
@@ -47,5 +48,14 @@ namespace dnv::vista::sdk
          * @return The most recent VIS version
          */
         VisVersion latest() const noexcept;
+
+        /**
+         * @brief Get codebooks for a specific VIS version
+         * @param visVersion The VIS version for which to retrieve codebooks
+         * @return Reference to the Codebooks container for the requested version
+         * @throws std::out_of_range if the requested version is not available
+         * @details The returned reference is stable for the lifetime of the VIS singleton
+         */
+        const Codebooks& codebooks(VisVersion visVersion) const;
     };
 } // namespace dnv::vista::sdk
