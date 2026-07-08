@@ -47,6 +47,8 @@ namespace dnv::vista::sdk
      */
     class Codebook final
     {
+        friend class Codebooks;
+
     private:
         /**
          * @brief Constructs a Codebook from a DTO
