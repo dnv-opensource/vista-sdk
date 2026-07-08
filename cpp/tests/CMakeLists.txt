@@ -26,5 +26,6 @@ include(doctest)
 
 add_subdirectory(blobs)
 add_subdirectory(codegeneration)
+add_subdirectory(compression)
 add_subdirectory(core)
 add_subdirectory(json)
