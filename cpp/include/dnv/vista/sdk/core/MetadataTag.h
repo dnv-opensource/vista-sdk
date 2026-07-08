@@ -23,6 +23,8 @@ namespace dnv::vista::sdk
      */
     class MetadataTag final
     {
+        friend class Codebook;
+
     private:
         /**
          * @brief Constructs a MetadataTag with a codebook name, value, and custom flag
