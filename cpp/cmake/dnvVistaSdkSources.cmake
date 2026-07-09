@@ -15,5 +15,6 @@ list(APPEND dnv_vista_sdk_sources
 
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/Codebook.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/Codebooks.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/ParsingErrors.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/VIS.cpp
 )
