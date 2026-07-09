@@ -50,6 +50,7 @@ namespace dnv::vista::sdk
     class Location final
     {
         friend class Locations;
+        friend class LocationBuilder;
 
     private:
         /**
@@ -147,6 +148,7 @@ namespace dnv::vista::sdk
     class Locations final
     {
         friend class VIS;
+        friend class LocationBuilder;
 
     private:
         /**
@@ -194,11 +196,11 @@ namespace dnv::vista::sdk
         std::optional<Location> fromString(
             std::string_view locationStr, internal::LocationParsingErrorBuilder* errorBuilder) const noexcept;
 
-        std::unordered_map<LocationGroup, std::vector<RelativeLocation>> m_groups; ///< Location groups map
-        std::unordered_map<char, LocationGroup> m_reversedGroups;                  ///< Code to group mapping
-        std::unordered_set<char> m_locationCodes;                                  ///< All valid location codes
-        std::vector<RelativeLocation> m_relativeLocations;                         ///< All relative locations
-        VisVersion m_visVersion;                                                   ///< VIS version
+        std::unordered_map<LocationGroup, std::vector<RelativeLocation>> m_groups;
+        std::unordered_map<char, LocationGroup> m_reversedGroups;
+        std::unordered_set<char> m_locationCodes;
+        std::vector<RelativeLocation> m_relativeLocations;
+        VisVersion m_visVersion;
     };
 } // namespace dnv::vista::sdk
 

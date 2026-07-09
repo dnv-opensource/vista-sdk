@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 
+#include <dnv/vista/sdk/core/LocationBuilder.h>
 #include <dnv/vista/sdk/core/ParsingErrors.h>
 #include <dnv/vista/sdk/core/VIS.h>
 
@@ -181,6 +182,101 @@ namespace dnv::vista::sdk::tests
                     }
                 }
             }
+        }
+    }
+
+    TEST_SUITE("LocationBuilder")
+    {
+        TEST_CASE("fluent build")
+        {
+            const auto& locations = VIS::instance().locations(VisVersion::v3_4a);
+
+            auto builder = LocationBuilder::create(locations)
+                               .withNumber(11)
+                               .withSide('P')
+                               .withTransverse('I')
+                               .withLongitudinal('F')
+                               .withVertical('U');
+
+            CHECK_EQ(builder.toString(), "11FIPU");
+            CHECK_EQ(builder.number(), std::optional<int>{ 11 });
+            CHECK_EQ(builder.side(), std::optional<char>{ 'P' });
+            CHECK_EQ(builder.vertical(), std::optional<char>{ 'U' });
+            CHECK_EQ(builder.transverse(), std::optional<char>{ 'I' });
+            CHECK_EQ(builder.longitudinal(), std::optional<char>{ 'F' });
+
+            CHECK_THROWS_AS((void)LocationBuilder::create(locations).withSide('A'), std::invalid_argument);
+            CHECK_THROWS_AS((void)LocationBuilder::create(locations).withVertical('X'), std::invalid_argument);
+            CHECK_THROWS_AS((void)LocationBuilder::create(locations).withNumber(-1), std::invalid_argument);
+            CHECK_THROWS_AS((void)LocationBuilder::create(locations).withNumber(0), std::invalid_argument);
+
+            CHECK_EQ(builder.build(), locations.fromString("11FIPU").value());
+        }
+
+        TEST_CASE("withLocation parses components")
+        {
+            const auto& locations = VIS::instance().locations(VisVersion::v3_4a);
+
+            auto builder = LocationBuilder::create(locations).withLocation(locations.fromString("11FIPU").value());
+
+            CHECK_EQ(builder.toString(), "11FIPU");
+            CHECK_EQ(builder.number(), std::optional<int>{ 11 });
+            CHECK_EQ(builder.side(), std::optional<char>{ 'P' });
+            CHECK_EQ(builder.vertical(), std::optional<char>{ 'U' });
+            CHECK_EQ(builder.transverse(), std::optional<char>{ 'I' });
+            CHECK_EQ(builder.longitudinal(), std::optional<char>{ 'F' });
+        }
+
+        TEST_CASE("withLocation - single digit")
+        {
+            const auto& locations = VIS::instance().locations(VisVersion::v3_4a);
+
+            for (int n : { 1, 5, 9 })
+            {
+                INFO("n: ", n);
+                auto loc = locations.fromString(std::string(1, static_cast<char>('0' + n)));
+                REQUIRE(loc.has_value());
+                auto builder = LocationBuilder::create(locations).withLocation(*loc);
+                CHECK_EQ(builder.number(), std::optional<int>{ n });
+                CHECK_EQ(builder.toString(), std::string(1, static_cast<char>('0' + n)));
+            }
+        }
+
+        TEST_CASE("multi-digit number is not sorted")
+        {
+            const auto& locations = VIS::instance().locations(VisVersion::v3_4a);
+
+            auto builder =
+                LocationBuilder::create(locations).withNumber(10).withSide('S').withVertical('U').withLongitudinal('F');
+
+            CHECK_EQ(builder.toString(), "10FSU");
+            CHECK_EQ(builder.number(), std::optional<int>{ 10 });
+        }
+
+        TEST_CASE("replace component via withLocation")
+        {
+            const auto& locations = VIS::instance().locations(VisVersion::v3_4a);
+
+            auto builder = LocationBuilder::create(locations)
+                               .withLocation(locations.fromString("11FIPU").value())
+                               .withSide('S')
+                               .withNumber(2);
+
+            CHECK_EQ(builder.toString(), "2FISU");
+            CHECK_EQ(builder.number(), std::optional<int>{ 2 });
+            CHECK_EQ(builder.side(), std::optional<char>{ 'S' });
+        }
+
+        TEST_CASE("equality")
+        {
+            const auto& locations = VIS::instance().locations(VisVersion::v3_4a);
+
+            auto loc1 = locations.fromString("FIPU");
+            auto loc2 = locations.fromString("FIPU");
+
+            REQUIRE(loc1.has_value());
+            REQUIRE(loc2.has_value());
+            CHECK_EQ(*loc1, *loc2);
         }
     }
 } // namespace dnv::vista::sdk::tests
