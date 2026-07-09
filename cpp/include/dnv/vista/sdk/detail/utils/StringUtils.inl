@@ -19,6 +19,17 @@ namespace dnv::vista::sdk::string
         }
     } // namespace
 
+    inline bool iequals(std::string_view lhs, std::string_view rhs) noexcept
+    {
+        if (lhs.size() != rhs.size())
+        {
+            return false;
+        }
+
+        return std::equal(
+            lhs.begin(), lhs.end(), rhs.begin(), [](char a, char b) noexcept { return toLower(a) == toLower(b); });
+    }
+
     inline constexpr bool isWhitespace(char c) noexcept
     {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';

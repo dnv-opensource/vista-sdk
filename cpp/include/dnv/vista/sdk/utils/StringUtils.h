@@ -15,6 +15,14 @@
 namespace dnv::vista::sdk::string
 {
     /**
+     * @brief Fast case-insensitive string comparison
+     * @param lhs First string
+     * @param rhs Second string
+     * @return True if strings are equal (case-insensitive)
+     */
+    inline bool iequals(std::string_view lhs, std::string_view rhs) noexcept;
+
+    /**
      * @brief Check if character is whitespace
      * @param c Character to check
      * @return True if character is space, tab, newline, carriage return, form feed, or vertical tab
