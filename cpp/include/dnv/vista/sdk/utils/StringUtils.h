@@ -23,6 +23,14 @@ namespace dnv::vista::sdk::string
     inline bool iequals(std::string_view lhs, std::string_view rhs) noexcept;
 
     /**
+     * @brief Fast check if string contains substring
+     * @param str String to check
+     * @param substr Substring to find
+     * @return True if str contains substr
+     */
+    inline constexpr bool contains(std::string_view str, std::string_view substr) noexcept;
+
+    /**
      * @brief Check if character is whitespace
      * @param c Character to check
      * @return True if character is space, tab, newline, carriage return, form feed, or vertical tab
