@@ -142,6 +142,8 @@ namespace dnv::vista::sdk
      */
     class GmodNode final
     {
+        friend class Gmod;
+
     private:
         /**
          * @brief Internal constructor - creates GmodNode from DTO

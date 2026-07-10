@@ -4,6 +4,7 @@
 
 #include "internal/VersionedCache.h"
 #include "dto/CodebooksDto.h"
+#include "dto/GmodDto.h"
 #include "dto/LocationsDto.h"
 #include "VisVersionsExtensions.h"
 
@@ -13,6 +14,12 @@ namespace dnv::vista::sdk
     {
         using internal::getOrLoad;
         using internal::VersionedCache;
+
+        VersionedCache<VisVersion, Gmod>& gmodCache()
+        {
+            static VersionedCache<VisVersion, Gmod> cache;
+            return cache;
+        }
 
         VersionedCache<VisVersion, Codebooks>& codebooksCache()
         {
@@ -44,6 +51,21 @@ namespace dnv::vista::sdk
     VisVersion VIS::latest() const noexcept
     {
         return VisVersions::latest();
+    }
+
+    const Gmod& VIS::gmod(VisVersion visVersion) const
+    {
+        return getOrLoad(gmodCache(), visVersion, [](VisVersion version) {
+            auto versionStr = VisVersions::toString(version);
+            auto dto = EmbeddedResources::gmod(versionStr);
+
+            if (!dto.has_value())
+            {
+                throw std::out_of_range{ "Gmod not available for version: " + std::string{ versionStr } };
+            }
+
+            return Gmod{ version, *dto };
+        });
     }
 
     const Codebooks& VIS::codebooks(VisVersion visVersion) const
