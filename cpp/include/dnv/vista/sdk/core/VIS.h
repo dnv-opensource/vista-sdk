@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Codebooks.h"
+#include "Gmod.h"
 #include "Locations.h"
 #include "VisVersions.h"
 
@@ -49,6 +50,15 @@ namespace dnv::vista::sdk
          * @return The most recent VIS version
          */
         VisVersion latest() const noexcept;
+
+        /**
+         * @brief Get Gmod for a specific VIS version
+         * @param visVersion The VIS version for which to retrieve the Gmod
+         * @return Reference to a `Gmod` container for the requested version
+         * @throws std::out_of_range if the requested version is not available
+         * @details The returned reference is stable for the lifetime of the VIS singleton
+         */
+        const Gmod& gmod(VisVersion visVersion) const;
 
         /**
          * @brief Get codebooks for a specific VIS version
