@@ -30,6 +30,11 @@ namespace dnv::vista::sdk::string
             lhs.begin(), lhs.end(), rhs.begin(), [](char a, char b) noexcept { return toLower(a) == toLower(b); });
     }
 
+    inline constexpr bool contains(std::string_view str, std::string_view substr) noexcept
+    {
+        return str.find(substr) != std::string_view::npos;
+    }
+
     inline constexpr bool isWhitespace(char c) noexcept
     {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
