@@ -87,6 +87,39 @@ namespace dnv::vista::sdk::string
         return std::all_of(str.begin(), str.end(), [](char c) { return isUriUnreserved(c); });
     }
 
+    inline constexpr std::string collapseWhitespace(std::string_view str)
+    {
+        std::string result;
+        result.reserve(str.size());
+
+        bool in_whitespace = true; // Start as true to skip leading whitespace
+
+        for (char c : str)
+        {
+            if (isWhitespace(c))
+            {
+                if (!in_whitespace)
+                {
+                    result += ' '; // Replace any whitespace with single space
+                    in_whitespace = true;
+                }
+            }
+            else
+            {
+                result += c;
+                in_whitespace = false;
+            }
+        }
+
+        // Remove trailing space if added
+        if (!result.empty() && result.back() == ' ')
+        {
+            result.pop_back();
+        }
+
+        return result;
+    }
+
     inline constexpr std::string_view trimStart(std::string_view str) noexcept
     {
         std::size_t start = 0;

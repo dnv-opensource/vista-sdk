@@ -90,6 +90,16 @@ namespace dnv::vista::sdk::string
     inline constexpr bool isUriUnreserved(std::string_view str) noexcept;
 
     /**
+     * @brief Collapse consecutive whitespace characters to single space
+     * @param str String to process
+     * @return New string with consecutive whitespace collapsed and trimmed
+     * @details Allocates a new std::string. Trims leading/trailing whitespace and collapses
+     *          consecutive whitespace (spaces, tabs, newlines) to single space
+     *          Example: collapseWhitespace("  hello   world  ") returns "hello world"
+     */
+    inline constexpr std::string collapseWhitespace(std::string_view str);
+
+    /**
      * @brief Remove leading whitespace from string
      * @param str String to trim
      * @return String view with leading whitespace removed
