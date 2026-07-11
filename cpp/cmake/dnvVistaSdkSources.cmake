@@ -13,6 +13,7 @@ list(APPEND dnv_vista_sdk_sources
     ${DNV_VISTA_SDK_SOURCE_DIR}/JSON/Builder.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/JSON/Document.cpp
 
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/internal/parsing/LocalIdParsingErrorBuilder.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/internal/parsing/LocationParsingErrorBuilder.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/Codebook.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/Codebooks.cpp
@@ -20,6 +21,8 @@ list(APPEND dnv_vista_sdk_sources
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/GmodNode.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/GmodPath.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/ImoNumber.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/LocalId.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/LocalIdBuilder.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/Locations.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/LocationBuilder.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/ParsingErrors.cpp
