@@ -197,6 +197,45 @@ namespace dnv::vista::sdk::tests
             CHECK((*nodeOpt)->isProductSelection());
         }
 
+        TEST_CASE("isProductType")
+        {
+            const auto& gmod = VIS::instance().gmod(VisVersion::v3_4a);
+
+            auto nodeOpt = gmod.node("C101");
+            REQUIRE(nodeOpt.has_value());
+            CHECK((*nodeOpt)->isProductType());
+
+            CHECK_FALSE(gmod["VE"].isProductType());
+            CHECK_FALSE(gmod["411.1"].isProductType());
+        }
+
+        TEST_CASE("isProductTypeAssignment")
+        {
+            const auto& gmod = VIS::instance().gmod(VisVersion::v3_4a);
+
+            const GmodNode* parent = *gmod.node("1241.31");
+            const GmodNode* child = *gmod.node("C1013");
+
+            CHECK(Gmod::isProductTypeAssignment(parent, child));
+            CHECK_FALSE(Gmod::isProductTypeAssignment(nullptr, child));
+            CHECK_FALSE(Gmod::isProductTypeAssignment(parent, nullptr));
+            CHECK_FALSE(Gmod::isProductTypeAssignment(child, parent));
+        }
+
+        TEST_CASE("isProductSelectionAssignment")
+        {
+            const auto& gmod = VIS::instance().gmod(VisVersion::v3_4a);
+
+            const GmodNode& cs1 = gmod["CS1"];
+            REQUIRE(!cs1.parents().empty());
+            const GmodNode* funcParent = cs1.parents()[0];
+
+            CHECK(Gmod::isProductSelectionAssignment(funcParent, &cs1));
+            CHECK_FALSE(Gmod::isProductSelectionAssignment(nullptr, &cs1));
+            CHECK_FALSE(Gmod::isProductSelectionAssignment(funcParent, nullptr));
+            CHECK_FALSE(Gmod::isProductSelectionAssignment(&cs1, funcParent));
+        }
+
         TEST_CASE("mappability")
         {
             const auto& gmod = VIS::instance().gmod(VisVersion::v3_4a);
