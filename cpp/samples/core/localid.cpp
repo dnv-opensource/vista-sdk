@@ -397,5 +397,169 @@ int main()
         std::cout << "\n";
     }
 
+    {
+        std::cout << "12. mqtt::LocalId: MQTT-compatible formatting\n";
+        std::cout << "------------------------------------------------\n";
+
+        struct MqttExample
+        {
+            std::string label;
+            std::string localIdStr;
+        };
+
+        std::vector<MqttExample> simple = {
+            { "qty only", "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature" },
+            { "qty + cnt + pos", "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet" },
+            { "with secondary item",
+              "/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet" }
+        };
+
+        for (const auto& ex : simple)
+        {
+            auto localId = LocalId::fromString(ex.localIdStr);
+            if (!localId.has_value())
+            {
+                continue;
+            }
+
+            auto mqttLocalId = mqtt::LocalId{ localId->builder() };
+
+            std::cout << ex.label << ":\n";
+            std::cout << "  Standard : " << localId->toString() << "\n";
+            std::cout << "  MQTT     : " << mqttLocalId.toString() << "\n\n";
+        }
+
+        // All 8 slots filled, including custom tags
+        {
+            auto primaryItem = GmodPath::fromShortPath("411.1/C101.31-2", gmod, locations);
+            auto secondaryItem = GmodPath::fromShortPath("411.1/C101.31-5", gmod, locations);
+            auto qtyTag = codebooks[CodebookName::Quantity].createTag("temperature");
+            auto cntTag = codebooks[CodebookName::Content].createTag("exhaust.gas");
+            auto calcTag = codebooks[CodebookName::Calculation].createTag("average");
+            auto stateTag = codebooks[CodebookName::State].createTag("high");
+            auto cmdTag = codebooks[CodebookName::Command].createTag("start");
+            auto typeTag = codebooks[CodebookName::Type].createTag("instantaneous");
+            auto posTag = codebooks[CodebookName::Position].createTag("inlet");
+            auto detailTag = codebooks[CodebookName::Detail].createTag("my_sensor_42");
+
+            if (primaryItem.has_value() && secondaryItem.has_value() && qtyTag.has_value() && cntTag.has_value() &&
+                calcTag.has_value() && stateTag.has_value() && cmdTag.has_value() && typeTag.has_value() &&
+                posTag.has_value() && detailTag.has_value())
+            {
+                auto builder = LocalIdBuilder::create(vis.latest())
+                                   .withPrimaryItem(*primaryItem)
+                                   .withSecondaryItem(*secondaryItem)
+                                   .withMetadataTag(*qtyTag)
+                                   .withMetadataTag(*cntTag)
+                                   .withMetadataTag(*calcTag)
+                                   .withMetadataTag(*stateTag)
+                                   .withMetadataTag(*cmdTag)
+                                   .withMetadataTag(*typeTag)
+                                   .withMetadataTag(*posTag)
+                                   .withMetadataTag(*detailTag);
+
+                auto standardLocalId = builder.build();
+                auto mqttLocalId = mqtt::LocalId{ builder };
+
+                std::cout << "all 8 slots + secondary + free-form detail:\n";
+                std::cout << "  Standard : " << standardLocalId.toString() << "\n";
+                std::cout << "  MQTT     : " << mqttLocalId.toString() << "\n";
+                std::cout << "  Slots    : qty/cnt/calc/state/cmd/type/pos/detail\n";
+                // Detail accepts any free-form value and is never flagged as custom, unlike other codebooks
+                std::cout << "  Detail   : '" << standardLocalId.detail()->value() << "' (isCustom: " << std::boolalpha
+                          << standardLocalId.detail()->isCustom() << ")\n\n";
+            }
+        }
+
+        // Reading components
+        {
+            auto primaryItem = GmodPath::fromShortPath("411.1/C101.31-2", gmod, locations);
+            auto secondaryItem = GmodPath::fromShortPath("411.1/C101.31-5", gmod, locations);
+            auto qtyTag = codebooks[CodebookName::Quantity].createTag("temperature");
+            auto cntTag = codebooks[CodebookName::Content].createTag("exhaust.gas");
+
+            if (primaryItem.has_value() && secondaryItem.has_value() && qtyTag.has_value() && cntTag.has_value())
+            {
+                auto builder = LocalIdBuilder::create(VisVersion::v3_4a)
+                                   .withPrimaryItem(*primaryItem)
+                                   .withSecondaryItem(*secondaryItem)
+                                   .withMetadataTag(*qtyTag)
+                                   .withMetadataTag(*cntTag);
+
+                auto mqttLocalId = mqtt::LocalId{ builder };
+
+                std::cout << "reading components:\n";
+                std::cout << "  Version        : " << VisVersions::toString(mqttLocalId.version()) << "\n";
+                std::cout << "  Primary item   : " << mqttLocalId.primaryItem().toString() << "\n";
+                std::cout << "  Secondary item : " << mqttLocalId.secondaryItem()->toString() << "\n";
+                std::cout << "  Quantity       : " << mqttLocalId.quantity()->toString() << "\n";
+                std::cout << "  Content        : " << mqttLocalId.content()->toString() << "\n";
+                std::cout << "  Calculation    : "
+                          << (mqttLocalId.calculation().has_value() ? mqttLocalId.calculation()->toString() : "(none)")
+                          << "\n";
+                std::cout << "\n";
+            }
+        }
+
+        // Builder-level state not reflected in the MQTT format
+        {
+            auto primaryItem = GmodPath::fromShortPath("411.1/C101.63/S206", gmod, locations);
+            auto qtyTag = codebooks[CodebookName::Quantity].createTag("temperature");
+
+            if (primaryItem.has_value() && qtyTag.has_value())
+            {
+                auto builder = LocalIdBuilder::create(VisVersion::v3_4a)
+                                   .withVerboseMode(true)
+                                   .withPrimaryItem(*primaryItem)
+                                   .withMetadataTag(*qtyTag);
+
+                auto mqttLocalId = mqtt::LocalId{ builder };
+
+                std::cout << "builder-level state (accessible via .builder()):\n";
+                std::cout << "  isVerboseMode, hasCustomTag and metadataTags are not duplicated on mqtt::LocalId.\n";
+                std::cout << "  isVerboseMode() has no effect on the MQTT format (unlike sdk::LocalId::toString()).\n";
+                std::cout << "  builder().isVerboseMode(): " << std::boolalpha << mqttLocalId.builder().isVerboseMode()
+                          << "\n";
+                std::cout << "  builder().hasCustomTag(): " << mqttLocalId.builder().hasCustomTag() << "\n";
+                std::cout << "  builder().metadataTags(): " << mqttLocalId.builder().metadataTags().size()
+                          << " tag(s)\n";
+                // VerboseMode has no effect: no '~' common-name segments in the MQTT output
+                std::cout << "  MQTT (no '~' despite verboseMode=true): " << mqttLocalId.toString() << "\n";
+                std::cout << "\n";
+            }
+        }
+
+        // Equality
+        {
+            auto primaryItem = GmodPath::fromShortPath("411.1/C101.31-2", gmod, locations);
+            auto qtyTag = codebooks[CodebookName::Quantity].createTag("temperature");
+            auto cntTag = codebooks[CodebookName::Content].createTag("exhaust.gas");
+
+            if (primaryItem.has_value() && qtyTag.has_value() && cntTag.has_value())
+            {
+                auto builder =
+                    LocalIdBuilder::create(VisVersion::v3_4a).withPrimaryItem(*primaryItem).withMetadataTag(*qtyTag);
+
+                auto a = mqtt::LocalId{ builder };
+                auto b = mqtt::LocalId{ builder };
+                auto c = mqtt::LocalId{ builder.withMetadataTag(*cntTag) };
+
+                std::cout << "equality:\n";
+                std::cout << "  a == b (same builder) : " << std::boolalpha << (a == b) << "\n";
+                std::cout << "  a == c (extra tag)    : " << (a == c) << "\n";
+                std::cout << "\n";
+            }
+        }
+
+        std::cout << "MQTT format differences vs standard:\n";
+        std::cout << "  - No leading '/'\n";
+        std::cout << "  - Underscores instead of slashes in paths\n";
+        std::cout << "  - No 'meta/' section\n";
+        std::cout << "  - '_' placeholder for absent metadata slots\n";
+        std::cout << "  - 8 fixed slots: qty/cnt/calc/state/cmd/type/pos/detail\n";
+
+        std::cout << "\n";
+    }
+
     return 0;
 }

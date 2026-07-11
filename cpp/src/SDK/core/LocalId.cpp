@@ -28,4 +28,20 @@ namespace dnv::vista::sdk
     {
         return LocalIdBuilder::fromString(localIdStr, errors);
     }
+
+    namespace mqtt
+    {
+        LocalId::LocalId(const sdk::LocalIdBuilder& builder)
+            : m_builder{ builder }
+        {
+            if (m_builder.isEmpty())
+            {
+                throw std::invalid_argument{ "LocalId cannot be constructed from empty LocalIdBuilder" };
+            }
+            if (!m_builder.isValid())
+            {
+                throw std::invalid_argument{ "LocalId cannot be constructed from invalid LocalIdBuilder" };
+            }
+        }
+    } // namespace mqtt
 } // namespace dnv::vista::sdk

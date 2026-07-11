@@ -10,6 +10,7 @@
 
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace dnv::vista::sdk::tests
@@ -454,6 +455,215 @@ namespace dnv::vista::sdk::tests
                 }
                 FAIL(msg.str());
             }
+        }
+    }
+
+    TEST_SUITE("Mqtt LocalId")
+    {
+        struct MqttLocalIdTestCase
+        {
+            LocalIdInput input;
+            std::string expectedOutput;
+        };
+
+        std::vector<MqttLocalIdTestCase> validMqttTestData()
+        {
+            return {
+                { LocalIdInput{ "411.1/C101.31-2", std::nullopt, "temperature", "exhaust.gas", "inlet" },
+                  "dnv-v2/vis-3-4a/411.1_C101.31-2/_/qty-temperature/cnt-exhaust.gas/_/_/_/_/pos-inlet/_" },
+                { LocalIdInput{ "411.1/C101.63/S206", std::nullopt, "temperature", "exhaust.gas", "inlet" },
+                  "dnv-v2/vis-3-4a/411.1_C101.63_S206/_/qty-temperature/cnt-exhaust.gas/_/_/_/_/pos-inlet/_" },
+                { LocalIdInput{ "411.1/C101.63/S206", "411.1/C101.31-5", "temperature", "exhaust.gas", "inlet" },
+                  "dnv-v2/vis-3-4a/411.1_C101.63_S206/411.1_C101.31-5/qty-temperature/cnt-exhaust.gas/_/_/_/_/"
+                  "pos-inlet/_" },
+            };
+        }
+
+        TEST_CASE("build - mqtt")
+        {
+            const auto& vis = VIS::instance();
+
+            for (const auto& testCase : validMqttTestData())
+            {
+                const auto& input = testCase.input;
+
+                CAPTURE(input.primaryItem);
+
+                const auto& gmod = vis.gmod(input.visVersion);
+                const auto& codebooks = vis.codebooks(input.visVersion);
+
+                ParsingErrors primaryErrors;
+                auto primaryItem =
+                    GmodPath::fromShortPath(input.primaryItem, gmod, vis.locations(input.visVersion), primaryErrors);
+                REQUIRE(primaryItem.has_value());
+
+                std::optional<GmodPath> secondaryItem;
+                if (input.secondaryItem.has_value())
+                {
+                    ParsingErrors secondaryErrors;
+                    secondaryItem = GmodPath::fromShortPath(
+                        *input.secondaryItem, gmod, vis.locations(input.visVersion), secondaryErrors);
+                    REQUIRE(secondaryItem.has_value());
+                }
+
+                auto builder = LocalIdBuilder::create(input.visVersion).withPrimaryItem(*primaryItem);
+
+                if (secondaryItem.has_value())
+                {
+                    builder = builder.withSecondaryItem(*secondaryItem);
+                }
+
+                if (input.quantity.has_value())
+                {
+                    auto tag = codebooks[CodebookName::Quantity].createTag(*input.quantity);
+                    REQUIRE(tag.has_value());
+                    builder = builder.withMetadataTag(*tag);
+                }
+
+                if (input.content.has_value())
+                {
+                    auto tag = codebooks[CodebookName::Content].createTag(*input.content);
+                    REQUIRE(tag.has_value());
+                    builder = builder.withMetadataTag(*tag);
+                }
+
+                if (input.position.has_value())
+                {
+                    auto tag = codebooks[CodebookName::Position].createTag(*input.position);
+                    REQUIRE(tag.has_value());
+                    builder = builder.withMetadataTag(*tag);
+                }
+
+                auto mqttLocalId = mqtt::LocalId{ builder };
+                CHECK_EQ(testCase.expectedOutput, mqttLocalId.toString());
+            }
+        }
+
+        TEST_CASE("mqtt::LocalId is not a sdk::LocalId ")
+        {
+            static_assert(
+                !std::is_base_of_v<sdk::LocalId, mqtt::LocalId>, "mqtt::LocalId must not inherit from sdk::LocalId");
+
+            const auto& vis = VIS::instance();
+            const auto visVersion = VisVersion::v3_4a;
+            const auto& gmod = vis.gmod(visVersion);
+            const auto& codebooks = vis.codebooks(visVersion);
+            const auto& locations = vis.locations(visVersion);
+
+            auto primaryItem = GmodPath::fromShortPath("411.1/C101.31-2", gmod, locations);
+            REQUIRE(primaryItem.has_value());
+
+            auto qtyTag = codebooks[CodebookName::Quantity].createTag("temperature");
+            REQUIRE(qtyTag.has_value());
+
+            auto builder = LocalIdBuilder::create(visVersion).withPrimaryItem(*primaryItem).withMetadataTag(*qtyTag);
+
+            auto mqttLocalId = mqtt::LocalId{ builder };
+
+            CHECK_FALSE(mqttLocalId.toString().starts_with("/dnv-v2/"));
+        }
+
+        TEST_CASE("mqtt::LocalId - getters")
+        {
+            const auto& vis = VIS::instance();
+            const auto visVersion = VisVersion::v3_4a;
+            const auto& gmod = vis.gmod(visVersion);
+            const auto& codebooks = vis.codebooks(visVersion);
+            const auto& locations = vis.locations(visVersion);
+
+            auto primaryItem = GmodPath::fromShortPath("411.1/C101.31-2", gmod, locations);
+            REQUIRE(primaryItem.has_value());
+
+            auto secondaryItem = GmodPath::fromShortPath("411.1/C101.31-5", gmod, locations);
+            REQUIRE(secondaryItem.has_value());
+
+            auto qtyTag = codebooks[CodebookName::Quantity].createTag("temperature");
+            REQUIRE(qtyTag.has_value());
+
+            auto cntTag = codebooks[CodebookName::Content].createTag("exhaust.gas");
+            REQUIRE(cntTag.has_value());
+
+            auto builder = LocalIdBuilder::create(visVersion)
+                               .withPrimaryItem(*primaryItem)
+                               .withSecondaryItem(*secondaryItem)
+                               .withMetadataTag(*qtyTag)
+                               .withMetadataTag(*cntTag);
+
+            auto mqttLocalId = mqtt::LocalId{ builder };
+
+            CHECK_EQ(mqttLocalId.version(), visVersion);
+            CHECK_EQ(mqttLocalId.primaryItem(), *primaryItem);
+            CHECK_EQ(mqttLocalId.secondaryItem(), secondaryItem);
+            CHECK_EQ(mqttLocalId.quantity(), qtyTag);
+            CHECK_EQ(mqttLocalId.content(), cntTag);
+            CHECK_FALSE(mqttLocalId.calculation().has_value());
+            CHECK_FALSE(mqttLocalId.state().has_value());
+            CHECK_FALSE(mqttLocalId.command().has_value());
+            CHECK_FALSE(mqttLocalId.type().has_value());
+            CHECK_FALSE(mqttLocalId.position().has_value());
+            CHECK_FALSE(mqttLocalId.detail().has_value());
+        }
+
+        TEST_CASE("mqtt::LocalId - builder exposes members not reflected in the MQTT format")
+        {
+            const auto& vis = VIS::instance();
+            const auto visVersion = VisVersion::v3_4a;
+            const auto& gmod = vis.gmod(visVersion);
+            const auto& codebooks = vis.codebooks(visVersion);
+            const auto& locations = vis.locations(visVersion);
+
+            auto primaryItem = GmodPath::fromShortPath("411.1/C101.63/S206", gmod, locations);
+            REQUIRE(primaryItem.has_value());
+
+            auto qtyTag = codebooks[CodebookName::Quantity].createTag("temperature");
+            REQUIRE(qtyTag.has_value());
+
+            auto builder = LocalIdBuilder::create(visVersion)
+                               .withVerboseMode(true)
+                               .withPrimaryItem(*primaryItem)
+                               .withMetadataTag(*qtyTag);
+
+            auto mqttLocalId = mqtt::LocalId{ builder };
+
+            CHECK(mqttLocalId.builder().isVerboseMode());
+            CHECK_FALSE(mqttLocalId.builder().hasCustomTag());
+            CHECK_EQ(mqttLocalId.builder().metadataTags().size(), 1u);
+
+            CHECK_EQ(mqttLocalId.toString().find('~'), std::string::npos);
+        }
+
+        TEST_CASE("mqtt::LocalId - equality")
+        {
+            const auto& vis = VIS::instance();
+            const auto visVersion = VisVersion::v3_4a;
+            const auto& gmod = vis.gmod(visVersion);
+            const auto& codebooks = vis.codebooks(visVersion);
+            const auto& locations = vis.locations(visVersion);
+
+            auto primaryItem = GmodPath::fromShortPath("411.1/C101.31-2", gmod, locations);
+            REQUIRE(primaryItem.has_value());
+
+            auto qtyTag = codebooks[CodebookName::Quantity].createTag("temperature");
+            REQUIRE(qtyTag.has_value());
+
+            auto builder = LocalIdBuilder::create(visVersion).withPrimaryItem(*primaryItem).withMetadataTag(*qtyTag);
+
+            auto a = mqtt::LocalId{ builder };
+            auto b = mqtt::LocalId{ builder };
+
+            auto pressureTag = codebooks[CodebookName::Quantity].createTag("pressure");
+            REQUIRE(pressureTag.has_value());
+            auto otherBuilder =
+                LocalIdBuilder::create(visVersion).withPrimaryItem(*primaryItem).withMetadataTag(*pressureTag);
+            auto c = mqtt::LocalId{ otherBuilder };
+
+            CHECK_EQ(a, b);
+            CHECK(a == b);
+            CHECK_FALSE(a != b);
+
+            CHECK_NE(a, c);
+            CHECK_FALSE(a == c);
+            CHECK(a != c);
         }
     }
 } // namespace dnv::vista::sdk::tests
