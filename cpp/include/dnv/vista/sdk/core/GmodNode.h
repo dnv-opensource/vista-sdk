@@ -21,8 +21,42 @@
 
 namespace dnv::vista::sdk
 {
+    class Gmod;
+    class GmodNode;
     enum class VisVersion : std::uint8_t;
+    enum class TraversalHandlerResult : std::uint8_t;
     struct GmodNodeDto;
+
+    using TraversalPath = std::vector<const GmodNode*>;
+
+    namespace internal
+    {
+        class GmodParsePathResult;
+        struct ParseContext;
+
+        class LocationSetsVisitor;
+
+        /**
+         * @brief Parse a short Gmod path string with detailed error reporting
+         * @return GmodParsePathResult containing either the parsed GmodPath or detailed error message
+         */
+        GmodParsePathResult fromShortPath(std::string_view, const Gmod&, const Locations&) noexcept;
+
+        /**
+         * @brief Parse a full Gmod path string with detailed error reporting
+         * @details Parses a full path string starting with root (e.g., "VE/400a/410/411/411i/411.1")
+         * @return GmodParsePathResult containing either the parsed GmodPath or detailed error message
+         */
+        GmodParsePathResult fromFullPath(std::string_view, const Gmod&, const Locations&) noexcept;
+
+        /**
+         * @brief Traversal handler for short path parsing
+         * @return TraversalHandlerResult indicating whether to continue, skip, or stop
+         * @details Searches for matching nodes, builds parent chain, applies locations,
+         *          and constructs the final GmodPath when all parts are found
+         */
+        TraversalHandlerResult parseHandler(ParseContext&, const TraversalPath&, const GmodNode&);
+    } // namespace internal
 
     /**
      * @class GmodNodeMetadata
@@ -143,6 +177,15 @@ namespace dnv::vista::sdk
     class GmodNode final
     {
         friend class Gmod;
+        friend class GmodPath;
+        friend class GmodIndividualizableSet;
+        friend class internal::LocationSetsVisitor;
+        friend internal::GmodParsePathResult internal::fromShortPath(
+            std::string_view, const Gmod&, const Locations&) noexcept;
+        friend internal::GmodParsePathResult internal::fromFullPath(
+            std::string_view, const Gmod&, const Locations&) noexcept;
+        friend TraversalHandlerResult internal::parseHandler(
+            internal::ParseContext&, const TraversalPath&, const GmodNode&);
 
     private:
         /**

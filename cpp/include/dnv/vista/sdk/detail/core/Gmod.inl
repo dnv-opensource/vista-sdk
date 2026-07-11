@@ -52,4 +52,88 @@ namespace dnv::vista::sdk
     {
         return m_nodeMap.cend();
     }
+
+    template <typename TState>
+    bool Gmod::traverse(TState& state, TraverseHandlerWithState<TState> handler, TraversalOptions options) const
+    {
+        return traverse(state, *m_rootNode, handler, options);
+    }
+
+    template <typename TState>
+    bool Gmod::traverse(
+        TState& state,
+        const GmodNode& startNode,
+        TraverseHandlerWithState<TState> handler,
+        TraversalOptions options) const
+    {
+        TraversalParents parents;
+
+        struct Dfs
+        {
+            TState& state;
+            TraverseHandlerWithState<TState>& handler;
+            TraversalParents& parents;
+            const TraversalOptions& options;
+
+            bool visit(const GmodNode& node)
+            {
+                const TraversalHandlerResult result = handler(state, parents.asList(), node);
+
+                if (result == TraversalHandlerResult::Stop)
+                {
+                    return false;
+                }
+
+                if (result == TraversalHandlerResult::SkipSubtree)
+                {
+                    return true;
+                }
+
+                const bool skipOccurrenceCheck = Gmod::isProductSelectionAssignment(parents.lastOrDefault(), &node);
+                if (!skipOccurrenceCheck && parents.occurrences(node) >= options.maxTraversalOccurrence)
+                {
+                    return true;
+                }
+
+                parents.push(&node);
+
+                for (const GmodNode* child : node.children())
+                {
+                    if (!child)
+                    {
+                        continue;
+                    }
+
+                    if (!visit(*child))
+                    {
+                        parents.pop();
+                        return false;
+                    }
+                }
+
+                parents.pop();
+                return true;
+            }
+        };
+
+        return Dfs{ state, handler, parents, options }.visit(startNode);
+    }
+
+    inline bool Gmod::isProductSelectionAssignment(const GmodNode* parent, const GmodNode* child) noexcept
+    {
+        if (!parent || !child)
+        {
+            return false;
+        }
+        if (!parent->isFunctionNode())
+        {
+            return false;
+        }
+        return child->isProductSelection();
+    }
+
+    constexpr bool Gmod::isPotentialParent(std::string_view type) noexcept
+    {
+        return type == "SELECTION" || type == "GROUP" || type == "LEAF";
+    }
 } // namespace dnv::vista::sdk

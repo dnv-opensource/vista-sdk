@@ -12,6 +12,7 @@
 #include "VisVersions.h"
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -21,6 +22,31 @@
 namespace dnv::vista::sdk
 {
     struct GmodDto;
+
+    /**
+     * @brief Result type controlling tree traversal flow
+     */
+    enum class TraversalHandlerResult : std::uint8_t
+    {
+        Stop,        ///< Stop traversal immediately
+        SkipSubtree, ///< Skip children of current node but continue traversal
+        Continue     ///< Continue normal traversal
+    };
+
+    /**
+     * @brief Options for controlling Gmod tree traversal behavior
+     */
+    struct TraversalOptions
+    {
+        /**
+         * @brief Maximum number of times a node can occur in a traversal path
+         * @details The traversal stops when a node occurrence reaches this limit
+         * Example: Path "411.1/C101.63/S206.22/S110.2/C101" with maxTraversalOccurrence=1
+         * stops at the second C101 but includes it in the result
+         * Higher values drastically reduce performance
+         */
+        int maxTraversalOccurrence = 1;
+    };
 
     /**
      * @class Gmod
@@ -35,6 +61,9 @@ namespace dnv::vista::sdk
     class Gmod final
     {
         friend class VIS;
+        friend class internal::LocationSetsVisitor;
+        friend internal::GmodParsePathResult internal::fromShortPath(
+            std::string_view, const Gmod&, const Locations&) noexcept;
 
     private:
         /**
@@ -100,10 +129,130 @@ namespace dnv::vista::sdk
         /** @brief Same as end(), provided for explicit-const-iteration style */
         [[nodiscard]] auto cend() const noexcept;
 
+        /**
+         * @brief Callback function type for tree traversal without state
+         * @param parents Current path of parent node pointers from root to current position
+         * @param node Current node being visited
+         * @return TraversalHandlerResult indicating how to continue traversal
+         */
+        using TraverseHandler =
+            std::function<TraversalHandlerResult(const TraversalPath& parents, const GmodNode& node)>;
+
+        /**
+         * @brief Traverse the Gmod tree from root with a callback handler
+         * @param handler Callback function invoked for each node
+         * @param options Traversal options (pass by value, cheap to copy)
+         * @return True if traversal completed, false if stopped early
+         */
+        bool traverse(TraverseHandler handler, TraversalOptions options = TraversalOptions{}) const;
+
+        /**
+         * @brief Callback function type for tree traversal with custom state
+         * @tparam TState Type of the state object passed to the handler
+         * @param state Reference to mutable state object
+         * @param parents Current path of parent node pointers from root to current position
+         * @param node Current node being visited
+         * @return TraversalHandlerResult indicating how to continue traversal
+         */
+        template <typename TState>
+        using TraverseHandlerWithState =
+            std::function<TraversalHandlerResult(TState& state, const TraversalPath& parents, const GmodNode& node)>;
+
+        /**
+         * @brief Traverse the Gmod tree from root with state and callback handler
+         * @tparam TState Type of state object
+         * @param state State object passed to handler (by reference, can be modified)
+         * @param handler Callback function invoked for each node
+         * @param options Traversal options (pass by value, cheap to copy)
+         * @return True if traversal completed, false if stopped early
+         */
+        template <typename TState>
+        bool traverse(
+            TState& state,
+            TraverseHandlerWithState<TState> handler,
+            TraversalOptions options = TraversalOptions{}) const;
+
+    private:
+        /**
+         * @brief Traverse the Gmod tree from a specific node with a callback handler
+         * @param startNode Starting node for traversal
+         * @param handler Callback function invoked for each node
+         * @param options Traversal options (pass by value, cheap to copy)
+         * @return True if traversal completed, false if stopped early
+         */
+        bool traverse(const GmodNode& startNode, TraverseHandler handler, TraversalOptions options) const;
+
+        /**
+         * @brief Traverse the Gmod tree from a specific node with state and callback handler
+         * @tparam TState Type of state object
+         * @param state State object passed to handler (by reference, can be modified)
+         * @param startNode Starting node for traversal
+         * @param handler Callback function invoked for each node
+         * @param options Traversal options (pass by value, cheap to copy)
+         * @return True if traversal completed, false if stopped early
+         */
+        template <typename TState>
+        bool traverse(
+            TState& state,
+            const GmodNode& startNode,
+            TraverseHandlerWithState<TState> handler,
+            TraversalOptions options) const;
+
+        /**
+         * @brief Check if parent-child relationship is a product selection assignment
+         * @param parent Parent node (can be nullptr)
+         * @param child Child node (can be nullptr)
+         * @return True if parent is a FUNCTION node and child is a PRODUCT SELECTION
+         * @details Product selection assignments link functions to product choice points
+         */
+        [[nodiscard]] static inline bool isProductSelectionAssignment(
+            const GmodNode* parent, const GmodNode* child) noexcept;
+
+        /**
+         * @brief Check if a node type can have child scopes
+         * @param type Node type string (e.g., "SELECTION", "GROUP", "LEAF", "COMPOSITION")
+         * @return True if type is "SELECTION", "GROUP", or "LEAF"
+         * @details Internal helper - these types can have location-based child scopes in the tree hierarchy
+         */
+        [[nodiscard]] static constexpr bool isPotentialParent(std::string_view type) noexcept;
+
     private:
         const VisVersion m_visVersion;
         const GmodNode* m_rootNode;
         std::unordered_map<std::string, GmodNode> m_nodeMap;
+
+        class TraversalParents
+        {
+        public:
+            void push(const GmodNode* parent) { m_parents.push_back(parent); }
+
+            void pop() { m_parents.pop_back(); }
+
+            [[nodiscard]] int occurrences(const GmodNode& node) const
+            {
+                int count = 0;
+                for (const GmodNode* parent : m_parents)
+                {
+                    if (parent == &node)
+                    {
+                        ++count;
+                    }
+                }
+                return count;
+            }
+
+            [[nodiscard]] const GmodNode* lastOrDefault() const noexcept
+            {
+                return m_parents.empty() ? nullptr : m_parents.back();
+            }
+
+            [[nodiscard]] const TraversalPath& asList() const noexcept { return m_parents; }
+
+            [[nodiscard]] bool isEmpty() const noexcept { return m_parents.empty(); }
+
+        private:
+            TraversalPath m_parents;
+        };
     };
 } // namespace dnv::vista::sdk
 
