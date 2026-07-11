@@ -169,6 +169,142 @@ namespace dnv::vista::sdk
     private:
         LocalIdBuilder m_builder;
     };
+
+    namespace mqtt
+    {
+        /**
+         * @brief MQTT-compatible LocalId implementation
+         * @details Provides MQTT-specific formatting over the same validated builder state as
+         *          sdk::LocalId:
+         *          - Underscores instead of slashes in Gmod paths for topic compatibility
+         *          - No leading slash to match MQTT topic conventions
+         *          - No "meta/" prefix section for cleaner IoT topics
+         *          - Placeholder handling for missing components
+         *
+         * @note LocalId follows the MQTT topic format:
+         *       dnv-v2/vis-{version}/{primary-item}[_{secondary-item}][/qty-{value}][/cnt-{value}]...
+         *       Missing components are replaced by underscore placeholders
+         */
+        class LocalId final
+        {
+        public:
+            /**
+             * @brief Constructs MQTT LocalId from validated LocalIdBuilder
+             * @param builder Valid LocalIdBuilder instance
+             * @throws std::invalid_argument If builder is invalid or empty
+             */
+            explicit LocalId(const sdk::LocalIdBuilder& builder);
+
+            LocalId() = delete;
+            LocalId(const LocalId& other) = default;
+            LocalId(LocalId&& other) noexcept = default;
+            ~LocalId() = default;
+
+            LocalId& operator=(const LocalId&) = default;
+            LocalId& operator=(LocalId&& other) noexcept = default;
+
+            [[nodiscard]] inline bool operator==(const LocalId& other) const noexcept;
+
+            /**
+             * @brief Get the VIS version for this LocalId
+             * @return The VisVersion enum value
+             */
+            [[nodiscard]] inline VisVersion version() const noexcept;
+
+            /**
+             * @brief Get the primary item (Gmod path)
+             * @return Reference to the primary GmodPath
+             */
+            [[nodiscard]] inline const GmodPath& primaryItem() const noexcept;
+
+            /**
+             * @brief Get the secondary item (Gmod path)
+             * @return Optional containing the secondary GmodPath if set, nullopt otherwise
+             */
+            [[nodiscard]] inline const std::optional<GmodPath>& secondaryItem() const noexcept;
+
+            /** @brief Get the Quantity metadata tag (nullopt if not set) */
+            [[nodiscard]] inline const std::optional<MetadataTag>& quantity() const noexcept;
+
+            /** @brief Get the Content metadata tag (nullopt if not set) */
+            [[nodiscard]] inline const std::optional<MetadataTag>& content() const noexcept;
+
+            /** @brief Get the Calculation metadata tag (nullopt if not set) */
+            [[nodiscard]] inline const std::optional<MetadataTag>& calculation() const noexcept;
+
+            /** @brief Get the State metadata tag (nullopt if not set) */
+            [[nodiscard]] inline const std::optional<MetadataTag>& state() const noexcept;
+
+            /** @brief Get the Command metadata tag (nullopt if not set) */
+            [[nodiscard]] inline const std::optional<MetadataTag>& command() const noexcept;
+
+            /** @brief Get the Type metadata tag (nullopt if not set) */
+            [[nodiscard]] inline const std::optional<MetadataTag>& type() const noexcept;
+
+            /** @brief Get the Position metadata tag (nullopt if not set) */
+            [[nodiscard]] inline const std::optional<MetadataTag>& position() const noexcept;
+
+            /** @brief Get the Detail metadata tag (nullopt if not set) */
+            [[nodiscard]] inline const std::optional<MetadataTag>& detail() const noexcept;
+
+            /**
+             * @brief Get the builder that created this LocalId
+             * @return Const reference to the internal builder
+             */
+            [[nodiscard]] inline const LocalIdBuilder& builder() const noexcept;
+
+            /**
+             * @brief Converts LocalId to MQTT-compatible topic string
+             * @details Provides MQTT-specific formatting:
+             *          - No leading slash
+             *          - Underscores instead of slashes in paths
+             *          - No "meta/" section
+             *          - Placeholders for missing components
+             * @return MQTT-compatible Local ID topic string
+             */
+            [[nodiscard]] inline std::string toString() const&;
+
+            /**
+             * @brief Append MQTT topic string to a string
+             * @param out String to append the MQTT topic to
+             */
+            inline void toString(std::string& out) const;
+
+        private:
+            /** @brief Internal separator for MQTT paths */
+            static constexpr char m_separator = '_';
+
+            /**
+             * @brief Appends Gmod path to builder with MQTT formatting
+             * @param out String to append the formatted path to
+             * @param path GmodPath to append with underscore separators
+             */
+            inline void appendPath(std::string& out, const GmodPath& path) const;
+
+            /**
+             * @brief Appends primary item to builder in MQTT format
+             * @param out String to append the primary item to
+             */
+            inline void appendPrimaryItem(std::string& out) const;
+
+            /**
+             * @brief Appends secondary item or placeholder to builder in MQTT format
+             * @param out String to append the secondary item to
+             */
+            inline void appendSecondaryItem(std::string& out) const;
+
+            /**
+             * @brief Appends metadata tag or placeholder to builder in MQTT format
+             * @details Appends the metadata tag value if present, otherwise appends an underscore placeholder
+             *          Always appends a trailing forward slash for MQTT topic formatting
+             * @param out String to append the tag (or placeholder) to
+             * @param tag Optional metadata tag to append (or placeholder if empty)
+             */
+            inline void appendMeta(std::string& out, const std::optional<MetadataTag>& tag) const;
+
+            LocalIdBuilder m_builder;
+        };
+    } // namespace mqtt
 } // namespace dnv::vista::sdk
 
 #include "dnv/vista/sdk/detail/core/LocalId.inl"
