@@ -38,6 +38,8 @@ namespace dnv::vista::sdk
     class GmodPathQuery final
     {
         friend class GmodPathQueryBuilder;
+        friend class LocalIdQuery;
+        friend class LocalIdQueryBuilder;
 
     private:
         /**

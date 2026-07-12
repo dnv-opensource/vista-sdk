@@ -32,5 +32,6 @@ list(APPEND dnv_vista_sdk_sources
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/VIS.cpp
 
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/GmodPathQuery.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/LocalIdQuery.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/MetadataTagsQuery.cpp
 )
