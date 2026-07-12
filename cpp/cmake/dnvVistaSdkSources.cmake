@@ -30,4 +30,6 @@ list(APPEND dnv_vista_sdk_sources
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/UniversalId.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/UniversalIdBuilder.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/core/VIS.cpp
+
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/MetadataTagsQuery.cpp
 )
