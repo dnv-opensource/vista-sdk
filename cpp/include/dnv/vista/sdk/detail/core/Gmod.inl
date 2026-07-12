@@ -1,3 +1,4 @@
+#include <limits>
 #include <stdexcept>
 
 namespace dnv::vista::sdk
@@ -135,5 +136,113 @@ namespace dnv::vista::sdk
     constexpr bool Gmod::isPotentialParent(std::string_view type) noexcept
     {
         return type == "SELECTION" || type == "GROUP" || type == "LEAF";
+    }
+
+    inline bool Gmod::pathExistsBetween(
+        const TraversalPath& fromPath, const GmodNode& to, TraversalPath& remainingParents) const
+    {
+        remainingParents.clear();
+
+        const GmodNode* lastAssetFunction = nullptr;
+        size_t assetFunctionIndex = std::numeric_limits<size_t>::max();
+        for (size_t i = fromPath.size(); i > 0; --i)
+        {
+            size_t idx = i - 1;
+            if (fromPath[idx]->isAssetFunctionNode())
+            {
+                lastAssetFunction = fromPath[idx];
+                assetFunctionIndex = idx;
+                break;
+            }
+        }
+
+        const GmodNode& startNode = lastAssetFunction ? *lastAssetFunction : rootNode();
+
+        struct PathExistsState
+        {
+            const GmodNode& targetNode;
+            const TraversalPath& fromPath;
+            TraversalPath& remainingParents;
+            size_t assetFunctionIndex;
+            bool found = false;
+
+            PathExistsState(const GmodNode& target, const TraversalPath& from, TraversalPath& remaining, size_t afIndex)
+                : targetNode{ target },
+                  fromPath{ from },
+                  remainingParents{ remaining },
+                  assetFunctionIndex{ afIndex }
+            {}
+
+            PathExistsState(const PathExistsState&) = delete;
+            PathExistsState(PathExistsState&&) = delete;
+            PathExistsState& operator=(const PathExistsState&) = delete;
+            PathExistsState& operator=(PathExistsState&&) = delete;
+        };
+
+        PathExistsState state(to, fromPath, remainingParents, assetFunctionIndex);
+
+        auto handler =
+            [](PathExistsState& s, const TraversalPath& parents, const GmodNode& node) -> TraversalHandlerResult {
+            if (node.code() != s.targetNode.code())
+            {
+                return TraversalHandlerResult::Continue;
+            }
+
+            TraversalPath completePath;
+            completePath.reserve(parents.size());
+            for (const GmodNode* parent : parents)
+            {
+                if (!parent->isRoot())
+                {
+                    completePath.push_back(parent);
+                }
+            }
+            size_t startIndex = 0;
+
+            if (s.assetFunctionIndex != std::numeric_limits<size_t>::max())
+            {
+                startIndex = s.assetFunctionIndex;
+            }
+
+            size_t requiredNodes = s.fromPath.size() - startIndex;
+            if (completePath.size() < requiredNodes)
+            {
+                return TraversalHandlerResult::Continue;
+            }
+
+            bool match = true;
+            for (size_t i = 0; i < requiredNodes; ++i)
+            {
+                size_t fromPathIdx = startIndex + i;
+                if (fromPathIdx >= s.fromPath.size() || i >= completePath.size())
+                {
+                    match = false;
+                    break;
+                }
+                if (completePath[i]->code() != s.fromPath[fromPathIdx]->code())
+                {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (match)
+            {
+                for (size_t i = requiredNodes; i < completePath.size(); ++i)
+                {
+                    s.remainingParents.push_back(completePath[i]);
+                }
+                s.found = true;
+                return TraversalHandlerResult::Stop;
+            }
+
+            return TraversalHandlerResult::Continue;
+        };
+
+        TraverseHandlerWithState<PathExistsState> wrappedHandler = handler;
+
+        traverse(state, startNode, wrappedHandler, TraversalOptions{});
+
+        return state.found;
     }
 } // namespace dnv::vista::sdk

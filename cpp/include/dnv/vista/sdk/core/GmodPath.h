@@ -23,11 +23,17 @@ namespace dnv::vista::sdk
 
     enum class VisVersion : std::uint8_t;
 
+    namespace internal
+    {
+        class GmodVersioning;
+    } // namespace internal
+
     /** @brief Validated path through a Gmod tree, consisting of parent nodes leading to a target node */
     class GmodPath final
     {
     private:
         friend class GmodIndividualizableSet;
+        friend class internal::GmodVersioning;
         friend TraversalHandlerResult internal::parseHandler(
             internal::ParseContext&, const TraversalPath&, const GmodNode&);
         friend internal::GmodParsePathResult internal::fromFullPath(
