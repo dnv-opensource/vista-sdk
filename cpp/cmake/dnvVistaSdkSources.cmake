@@ -34,4 +34,8 @@ list(APPEND dnv_vista_sdk_sources
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/GmodPathQuery.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/LocalIdQuery.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/MetadataTagsQuery.cpp
+
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/types/datetime/DateTime.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/types/datetime/DateTimeOffset.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/types/datetime/TimeSpan.cpp
 )
