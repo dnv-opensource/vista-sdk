@@ -19,6 +19,11 @@ target_compile_definitions(dnv-vista-sdk-tests-types
         DOCTEST_CONFIG_USE_STD_HEADERS
 )
 
+target_include_directories(dnv-vista-sdk-tests-types
+    PRIVATE
+        ${DNV_VISTA_SDK_SOURCE_DIR}
+)
+
 target_link_libraries(dnv-vista-sdk-tests-types
     PRIVATE
         doctest::doctest_with_main
