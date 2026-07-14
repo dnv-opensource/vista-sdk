@@ -38,4 +38,6 @@ list(APPEND dnv_vista_sdk_sources
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/types/datetime/DateTime.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/types/datetime/DateTimeOffset.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/types/datetime/TimeSpan.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/types/decimal/Decimal.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/types/decimal/Int128.cpp
 )
