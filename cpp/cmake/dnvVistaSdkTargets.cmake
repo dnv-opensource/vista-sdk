@@ -39,6 +39,12 @@ target_link_libraries(dnv-vista-sdk-visversionsgenerator
         dnv::vista::sdk::warnings
 )
 
+target_link_libraries(dnv-vista-sdk-iso19848versionsgenerator
+    PRIVATE
+        dnv::vista::sdk::resources
+        dnv::vista::sdk::warnings
+)
+
 #----------------------------------------------
 # SDK
 #----------------------------------------------
@@ -85,6 +91,7 @@ endif()
 add_library(dnv::vista::sdk ALIAS dnv-vista-sdk)
 
 add_dependencies(${PROJECT_NAME} dnv-vista-sdk-generate-visversions)
+add_dependencies(${PROJECT_NAME} dnv-vista-sdk-generate-iso19848versions)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
