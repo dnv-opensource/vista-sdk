@@ -37,6 +37,15 @@ dnv_vista_sdk_embed_blobs(
     PATTERN         "*.json" "*.txt"
 )
 
+dnv_vista_sdk_embed_blobs(
+    TARGET          dnv-vista-sdk-testdata
+    RESOURCE_DIR    "${CMAKE_CURRENT_SOURCE_DIR}/transport/_files"
+    OUTPUT_DIR      "${CMAKE_BINARY_DIR}/blobs/testdata"
+    NAMESPACE       dnv::vista::sdk::testdata::additional
+    REGISTRY_NAME   TestdataAdditionalRegistry
+    PATTERN         "*.json"
+)
+
 target_sources(dnv-vista-sdk-testdata
     PRIVATE
         EmbeddedTestData/EmbeddedTestData.cpp
