@@ -35,6 +35,7 @@ list(APPEND dnv_vista_sdk_sources
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/LocalIdQuery.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/MetadataTagsQuery.cpp
 
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/transport/serialization/json/SerializableDocument.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/transport/ISO19848.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/transport/ShipId.cpp
 
