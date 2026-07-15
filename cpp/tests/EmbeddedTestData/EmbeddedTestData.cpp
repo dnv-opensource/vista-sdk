@@ -1,12 +1,18 @@
 #include "EmbeddedTestData.h"
 
 #include <TestdataRegistry.h>
+#include <TestdataAdditionalRegistry.h>
 
 namespace dnv::vista::sdk
 {
     std::string EmbeddedTestData::text(std::string_view filename)
     {
         const auto* resource = testdata::find(filename);
+
+        if (!resource || resource->size == 0)
+        {
+            resource = testdata::additional::find(filename);
+        }
 
         if (!resource || resource->size == 0)
         {
