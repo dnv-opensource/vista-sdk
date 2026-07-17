@@ -36,6 +36,7 @@ list(APPEND dnv_vista_sdk_sources
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/query/MetadataTagsQuery.cpp
 
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/transport/serialization/json/datachannel/Extensions.cpp
+    ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/transport/serialization/json/timeseries/Extensions.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/transport/serialization/json/SerializableDocument.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/transport/datachannel/DataChannel.cpp
     ${DNV_VISTA_SDK_SOURCE_DIR}/SDK/transport/timeseries/DataChannelId.cpp
