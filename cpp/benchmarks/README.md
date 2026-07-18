@@ -60,8 +60,8 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 | Benchmark (ns/op) | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ----------------- | ----------: | ------------: | --------------: | -------------: |
-| `StdUnorderedMap` |       33.08 |         27.73 |           37.57 |          34.99 |
-| `Gmod`            |       45.79 |         30.07 |           43.34 |          65.95 |
+| `StdUnorderedMap` |       33.08 |         27.73 |           37.57 |          38.73 |
+| `Gmod`            |        6.51 |          8.19 |            7.13 |          25.91 |
 
 ### Gmod path parsing
 
