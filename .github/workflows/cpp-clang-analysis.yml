@@ -39,6 +39,7 @@ jobs:
             -DCMAKE_CXX_CLANG_TIDY=clang-tidy \
             -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=ON
 
       - name: Build (runs clang-tidy)
@@ -66,6 +67,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF
 
       - name: Run scan-build

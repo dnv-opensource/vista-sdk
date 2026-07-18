@@ -93,6 +93,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type || 'Debug' }} \
             -DDNV_VISTA_SDK_BUILD_TESTS=ON \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF
 
       - name: Build (Linux)
@@ -114,6 +115,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=g++ \
             -DDNV_VISTA_SDK_BUILD_TESTS=ON \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF
 
       - name: Build (Windows MinGW)
@@ -137,6 +139,7 @@ jobs:
           -G "Visual Studio 17 2022" -A x64
           -DDNV_VISTA_SDK_BUILD_TESTS=ON
           -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF
+          -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
           -DDNV_VISTA_SDK_WARNINGS=OFF
 
       - name: Build (Windows MSVC)
@@ -215,6 +218,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF
 
       - name: Build samples (Linux)
@@ -232,6 +236,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=g++ \
             -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF
 
       - name: Build samples (Windows MinGW)
@@ -249,6 +254,7 @@ jobs:
           -G "Visual Studio 17 2022" -A x64
           -DDNV_VISTA_SDK_BUILD_TESTS=OFF
           -DDNV_VISTA_SDK_BUILD_SAMPLES=ON
+          -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
           -DDNV_VISTA_SDK_WARNINGS=OFF
 
       - name: Build samples (Windows MSVC)
