@@ -113,6 +113,17 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 | `Serialize`       |    4,637.55 |      4,351.99 |        7,373.35 |       8,248.88 |
 | `Deserialize`     |   10,363.19 |     10,365.01 |       23,720.85 |      37,877.19 |
 
+### Containers (SDK custom vs STL)
+
+| Benchmark (ns/op)           | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
+| --------------------------- | ----------: | ------------: | --------------: | -------------: |
+| `PerfectHashMap_hit`        |        8.22 |         14.12 |            9.46 |          20.95 |
+| `StdUnorderedMap_hit`       |       32.82 |         33.37 |           40.40 |          59.84 |
+| `PerfectHashMap_miss`       |        6.85 |          7.73 |            7.59 |          19.42 |
+| `StdUnorderedMap_miss`      |       19.18 |         18.52 |           22.09 |          47.16 |
+| `PerfectHashMap_stringview` |       18.23 |         18.72 |           21.12 |          33.01 |
+| `StdUnorderedSet_hit`       |       31.28 |         34.58 |           40.90 |          30.20 |
+
 ---
 
 _Benchmarked on July 18, 2026_

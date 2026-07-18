@@ -1,0 +1,174 @@
+/**
+ * @file containers.cpp
+ * @brief Nanobench performance benchmark for SDK custom containers vs STL
+ */
+
+#define ANKERL_NANOBENCH_IMPLEMENT
+#include <nanobench.h>
+
+#include <dnv/vista/sdk/containers/PerfectHashMap.h>
+
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+namespace dnv::vista::sdk::benchmarks
+{
+    static std::vector<std::string> makeGmodKeys()
+    {
+        std::vector<std::string> keys;
+        keys.reserve(512);
+
+        keys.push_back("VE");
+
+        for (int a = 4; a <= 9; ++a)
+        {
+            for (int b = 0; b <= 9; ++b)
+            {
+                keys.push_back(std::to_string(a * 100 + b * 10));
+            }
+        }
+
+        for (int a = 4; a <= 6; ++a)
+        {
+            for (int b = 1; b <= 9; ++b)
+            {
+                for (int c = 1; c <= 9; ++c)
+                {
+                    keys.push_back(std::to_string(a * 100 + b * 10) + "." + std::to_string(c));
+                }
+            }
+        }
+
+        for (int a = 4; a <= 5; ++a)
+        {
+            for (int b = 1; b <= 5; ++b)
+            {
+                for (int c = 1; c <= 5; ++c)
+                {
+                    for (int d = 1; d <= 4; ++d)
+                    {
+                        keys.push_back(
+                            std::to_string(a * 100 + b * 10) + "." + std::to_string(c) + "." + std::to_string(d));
+                    }
+                }
+            }
+        }
+
+        return keys;
+    }
+
+    static std::vector<std::pair<std::string, int>> makeItems(const std::vector<std::string>& keys)
+    {
+        std::vector<std::pair<std::string, int>> items;
+        items.reserve(keys.size());
+        for (int i = 0; i < static_cast<int>(keys.size()); ++i)
+        {
+            items.emplace_back(keys[i], i);
+        }
+        return items;
+    }
+
+    int run()
+    {
+        const auto keys = makeGmodKeys();
+
+        PerfectHashMap<int> perfectMap{ makeItems(keys) };
+
+        std::unordered_map<std::string, int> stdMap;
+        stdMap.reserve(keys.size());
+        for (int i = 0; i < static_cast<int>(keys.size()); ++i)
+        {
+            stdMap.emplace(keys[i], i);
+        }
+
+        std::unordered_set<std::string> stdSet;
+        stdSet.reserve(keys.size());
+        for (const auto& k : keys)
+        {
+            stdSet.insert(k);
+        }
+
+        ankerl::nanobench::Bench bench;
+        bench.title("Containers").warmup(10000).minEpochIterations(11000000);
+
+        bench.run("PerfectHashMap_hit", [&] {
+            auto a = perfectMap.find("VE");
+            auto b = perfectMap.find("411.1");
+            auto c = perfectMap.find("400");
+            auto d = perfectMap.find("510.2.3");
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        bench.run("StdUnorderedMap_hit", [&] {
+            auto a = stdMap.find("VE");
+            auto b = stdMap.find("411.1");
+            auto c = stdMap.find("400");
+            auto d = stdMap.find("510.2.3");
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        bench.run("PerfectHashMap_miss", [&] {
+            auto a = perfectMap.find("VEX");
+            auto b = perfectMap.find("411.1X");
+            auto c = perfectMap.find("400X");
+            auto d = perfectMap.find("H346.11112");
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        bench.run("StdUnorderedMap_miss", [&] {
+            auto a = stdMap.find("VEX");
+            auto b = stdMap.find("411.1X");
+            auto c = stdMap.find("400X");
+            auto d = stdMap.find("H346.11112");
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        std::string_view svA = "VE";
+        std::string_view svB = "411.1";
+        std::string_view svC = "400";
+        std::string_view svD = "H346.11112";
+
+        bench.run("PerfectHashMap_stringview", [&] {
+            auto a = perfectMap.find(svA);
+            auto b = perfectMap.find(svB);
+            auto c = perfectMap.find(svC);
+            auto d = perfectMap.find(svD);
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        bench.run("StdUnorderedSet_hit", [&] {
+            auto a = stdSet.contains("VE");
+            auto b = stdSet.contains("411.1");
+            auto c = stdSet.contains("400");
+            auto d = stdSet.contains("510.2.3");
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        return 0;
+    }
+} // namespace dnv::vista::sdk::benchmarks
+
+int main()
+{
+    return dnv::vista::sdk::benchmarks::run();
+}
