@@ -29,6 +29,16 @@ dnv_vista_sdk_embed_blobs(
 )
 add_library(dnv::vista::sdk::resources ALIAS dnv-vista-sdk-resources)
 
+dnv_vista_sdk_embed_blobs(
+    TARGET          dnv-vista-sdk-schemas
+    RESOURCE_DIR    "${VISTA_SDK_ROOT}/schemas/json"
+    OUTPUT_DIR      "${CMAKE_BINARY_DIR}/blobs/schemas"
+    NAMESPACE       dnv::vista::sdk::schemas
+    REGISTRY_NAME   SchemasRegistry
+    PATTERN         "*.json"
+)
+add_library(dnv::vista::sdk::schemas ALIAS dnv-vista-sdk-schemas)
+
 #----------------------------------------------
 # Code generation
 #----------------------------------------------
