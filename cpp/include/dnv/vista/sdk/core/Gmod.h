@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/containers/PerfectHashMap.h"
 #include "GmodNode.h"
 #include "VisVersions.h"
 
@@ -230,7 +231,7 @@ namespace dnv::vista::sdk
     private:
         const VisVersion m_visVersion;
         const GmodNode* m_rootNode;
-        std::unordered_map<std::string, GmodNode> m_nodeMap;
+        PerfectHashMap<GmodNode> m_nodeMap;
 
         class TraversalParents
         {
