@@ -79,7 +79,7 @@ namespace dnv::vista::sdk
             // Add to groups set (skip <number> and Number as they're not real groups)
             if (trimmedGroupView != "<number>" && trimmedGroupView != "Number")
             {
-                m_groups.emplace(trimmedGroupView);
+                m_groups.insert(trimmedGroupView);
             }
 
             for (const auto& value : values)
@@ -94,7 +94,7 @@ namespace dnv::vista::sdk
 
                 m_groupMap.emplace(trimmedValueView, trimmedGroupView);
 
-                m_standardValues.emplace(trimmedValueView);
+                m_standardValues.insert(trimmedValueView);
             }
         }
     }

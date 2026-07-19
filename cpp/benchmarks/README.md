@@ -32,14 +32,14 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 | Benchmark (ns/op)                     | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ------------------------------------- | ----------: | ------------: | --------------: | -------------: |
-| `Quantity_hasStandardValue_hit`       |       19.61 |         18.85 |           19.94 |          26.01 |
-| `Quantity_hasStandardValue_miss`      |       27.51 |         27.73 |           53.82 |          58.97 |
-| `Quantity_createTag_standard`         |       30.15 |         37.38 |           30.92 |          42.27 |
-| `Quantity_createTag_custom`           |       32.66 |         42.40 |           91.91 |         116.54 |
-| `State_hasGroup_hit`                  |        8.47 |          9.83 |           11.57 |          18.53 |
-| `State_hasGroup_miss`                 |       13.51 |          5.01 |           15.02 |          17.64 |
-| `Position_validatePosition_simple`    |       17.35 |         17.83 |           20.14 |          24.52 |
-| `Position_validatePosition_composite` |      351.18 |        328.25 |          761.44 |         771.70 |
+| `Quantity_hasStandardValue_hit`       |        1.77 |          1.21 |            2.26 |           9.48 |
+| `Quantity_hasStandardValue_miss`      |        7.30 |          1.06 |            8.08 |           6.38 |
+| `Quantity_createTag_standard`         |       13.93 |         22.75 |           17.96 |          25.11 |
+| `Quantity_createTag_custom`           |       22.97 |         26.57 |           52.81 |          60.84 |
+| `State_hasGroup_hit`                  |        1.77 |          1.88 |            1.95 |           6.31 |
+| `State_hasGroup_miss`                 |        2.04 |          0.63 |            2.17 |           4.42 |
+| `Position_validatePosition_simple`    |       12.96 |         14.63 |           22.69 |          19.80 |
+| `Position_validatePosition_composite` |      333.31 |        291.93 |          735.19 |         670.77 |
 
 ### Codebooks lookup
 
