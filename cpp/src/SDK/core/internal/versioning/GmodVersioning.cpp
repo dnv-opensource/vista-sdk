@@ -8,10 +8,10 @@
 
 namespace dnv::vista::sdk::internal
 {
-    void GmodVersioning::addToPath(const Gmod& gmod, std::vector<GmodNode>& path, const GmodNode& node) const
+    void GmodVersioning::addToPath(const Gmod& gmod, StackVector<GmodNode, 16>& path, const GmodNode& node) const
     {
         // Fast path: if path is empty or last node is parent of new node
-        if (path.empty() || path.back().isChild(node))
+        if (path.isEmpty() || path.back().isChild(node))
         {
             path.emplace_back(node);
             return;
@@ -411,7 +411,7 @@ namespace dnv::vista::sdk::internal
             return GmodPath(std::vector<GmodNode>{}, **rootNodeInGmodOpt);
         }
 
-        std::vector<std::pair<const GmodNode*, GmodNode>> qualifyingNodes;
+        StackVector<std::pair<const GmodNode*, GmodNode>, 16> qualifyingNodes;
         qualifyingNodes.reserve(sourcePath.length());
 
         for (const auto& [depth, node] : sourcePath.fullPath())
@@ -425,8 +425,8 @@ namespace dnv::vista::sdk::internal
             qualifyingNodes.emplace_back(&node, *std::move(convertedNodeOpt));
         }
 
-        std::vector<GmodNode> potentialParents;
-        potentialParents.reserve(qualifyingNodes.size() - 1);
+        StackVector<GmodNode, 16> potentialParents;
+        potentialParents.reserve(qualifyingNodes.size() > 0 ? qualifyingNodes.size() - 1 : 0);
 
         for (size_t i = 0; i < qualifyingNodes.size() - 1; ++i)
         {
@@ -436,7 +436,7 @@ namespace dnv::vista::sdk::internal
         if (GmodPath::isValid(potentialParents, *targetEndNode))
         {
             // Fast path: already validated, skip re-verification
-            std::vector<GmodNode> parentsVec(
+            std::vector parentsVec(
                 std::make_move_iterator(potentialParents.begin()), std::make_move_iterator(potentialParents.end()));
 
             return GmodPath{ std::move(parentsVec), std::move(*targetEndNode), true };
@@ -448,7 +448,9 @@ namespace dnv::vista::sdk::internal
             qualifyingNodes[i].second = std::move(potentialParents[i]);
         }
 
-        std::vector<GmodNode> path;
+        StackVector<GmodNode, 16> path;
+        path.reserve(qualifyingNodes.size());
+
         for (size_t i = 0; i < qualifyingNodes.size(); ++i)
         {
             const auto& qualifyingNode = qualifyingNodes[i];
@@ -573,13 +575,13 @@ namespace dnv::vista::sdk::internal
                 addToPath(targetGmod, path, qualifyingNode.second);
             }
 
-            if (!path.empty() && path.back().code() == targetEndNode->code())
+            if (!path.isEmpty() && path.back().code() == targetEndNode->code())
             {
                 break;
             }
         }
 
-        if (path.empty())
+        if (path.isEmpty())
         {
             throw std::runtime_error{ "Path reconstruction resulted in an empty path" };
         }
@@ -589,7 +591,7 @@ namespace dnv::vista::sdk::internal
             return GmodPath(std::vector<GmodNode>{}, std::move(path[0]));
         }
 
-        std::vector<GmodNode> potentialParentsFromPath;
+        StackVector<GmodNode, 16> potentialParentsFromPath;
         potentialParentsFromPath.reserve(path.size() - 1);
 
         for (size_t i = 0; i < path.size() - 1; ++i)

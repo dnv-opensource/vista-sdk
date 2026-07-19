@@ -82,8 +82,8 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 | Benchmark (ns/op)         | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ------------------------- | ----------: | ------------: | --------------: | -------------: |
-| `ConvertPath`             |    2,067.05 |      2,051.02 |        3,737.92 |       4,255.62 |
-| `ConvertPathWithLocation` |    2,248.06 |      2,223.19 |        3,826.66 |       4,578.12 |
+| `ConvertPath`             |    1,808.80 |      1,818.84 |        2,794.79 |       3,252.25 |
+| `ConvertPathWithLocation` |    1,848.58 |      1,847.33 |        2,541.95 |       3,133.44 |
 
 ### DataChannelList lookup
 
@@ -133,4 +133,4 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 ---
 
-_Benchmarked on July 19, 2026_
+_Benchmarked on July 20, 2026_
