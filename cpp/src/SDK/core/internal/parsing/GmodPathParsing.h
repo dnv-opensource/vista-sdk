@@ -12,8 +12,6 @@
 #include "GmodParsePathResult.h"
 #include "LocationSetsVisitor.h"
 
-#include <vector>
-
 namespace dnv::vista::sdk::internal
 {
     constexpr size_t MAX_LOCATION_SETS = 16;
@@ -41,7 +39,7 @@ namespace dnv::vista::sdk::internal
     /** @brief Mutable state threaded through gmod.traverse() during short path parsing */
     struct ParseContext
     {
-        std::vector<PathNode> parts;
+        StackVector<PathNode, 16> parts;
         size_t currentPartIndex;
         PathNode toFind;
         std::optional<std::unordered_map<std::string, Location>> locations;
@@ -49,7 +47,7 @@ namespace dnv::vista::sdk::internal
         const Gmod* gmod;
 
         ParseContext(
-            std::vector<PathNode>&& pathNodeVector,
+            StackVector<PathNode, 16>&& pathNodeVector,
             PathNode&& t,
             std::optional<std::unordered_map<std::string, Location>>&& l,
             std::optional<GmodPath>&& gmodPath,
@@ -118,7 +116,7 @@ namespace dnv::vista::sdk::internal
 
         // Build list of prefix node pointers (just pointers, no copy yet)
         TraversalPath prefixNodePtrs;
-        std::vector<std::string_view> seenCodes;
+        StackVector<std::string_view, 16> seenCodes;
 
         // Mark existing parents as seen
         for (const GmodNode* parent : parents)
@@ -277,7 +275,7 @@ namespace dnv::vista::sdk::internal
                 item = item.substr(1);
             }
 
-            std::vector<PathNode> parts;
+            StackVector<PathNode, 16> parts;
 
             for (std::string_view remaining = item; !remaining.empty();)
             {
@@ -324,14 +322,17 @@ namespace dnv::vista::sdk::internal
                 }
             }
 
-            if (parts.empty())
+            if (parts.isEmpty())
             {
                 return GmodParsePathResult::error("Failed to find any parts");
             }
 
             PathNode toFind = std::move(parts[0]);
-            std::vector<PathNode> remainingParts(
-                std::make_move_iterator(parts.begin() + 1), std::make_move_iterator(parts.end()));
+            StackVector<PathNode, 16> remainingParts;
+            for (size_t i = 1; i < parts.size(); ++i)
+            {
+                remainingParts.push_back(std::move(parts[i]));
+            }
 
             auto baseNode = gmod.node(toFind.code);
             if (!baseNode.has_value())
@@ -368,6 +369,7 @@ namespace dnv::vista::sdk::internal
      */
     inline GmodParsePathResult fromFullPath(
         std::string_view fullPathStr, const Gmod& gmod, const Locations& locations) noexcept
+    try
     {
         if (fullPathStr.empty())
         {
@@ -575,5 +577,9 @@ namespace dnv::vista::sdk::internal
         }
 
         return GmodParsePathResult::ok(GmodPath{ std::move(nodes), std::move(endNode), true /* skipVerify */ });
+    }
+    catch (const std::bad_alloc&)
+    {
+        return GmodParsePathResult::error("out of memory");
     }
 } // namespace dnv::vista::sdk::internal

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/containers/StackVector.h"
 #include "Locations.h"
 
 #include <cstdint>
@@ -237,13 +238,13 @@ namespace dnv::vista::sdk
          * @brief Get child nodes
          * @return Vector of child node pointers
          */
-        inline const std::vector<GmodNode*>& children() const noexcept;
+        inline const StackVector<GmodNode*, 16>& children() const noexcept;
 
         /**
          * @brief Get parent nodes
          * @return Vector of parent node pointers
          */
-        inline const std::vector<GmodNode*>& parents() const noexcept;
+        inline const StackVector<GmodNode*, 16>& parents() const noexcept;
 
         /**
          * @brief Get product type child if this is a function node
@@ -416,8 +417,8 @@ namespace dnv::vista::sdk
         std::string m_code;
         std::optional<Location> m_location;
         std::shared_ptr<const GmodNodeMetadata> m_metadata;
-        std::vector<GmodNode*> m_children;
-        std::vector<GmodNode*> m_parents;
+        StackVector<GmodNode*, 16> m_children;
+        StackVector<GmodNode*, 16> m_parents;
         std::shared_ptr<std::unordered_set<std::string>> m_childrenSet;
     };
 } // namespace dnv::vista::sdk
