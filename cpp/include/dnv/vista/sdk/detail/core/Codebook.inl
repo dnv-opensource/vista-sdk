@@ -1,8 +1,6 @@
 #include "dnv/vista/sdk/utils/StringUtils.h"
 
-#include <algorithm>
-#include <unordered_set>
-#include <vector>
+#include "dnv/vista/sdk/containers/StackVector.h"
 
 namespace dnv::vista::sdk
 {
@@ -95,8 +93,8 @@ namespace dnv::vista::sdk
         }
 
         // Split and validate each part
-        std::vector<std::string_view> parts;
-        std::vector<PositionValidationResult> validations;
+        StackVector<std::string_view, 8> parts;
+        StackVector<PositionValidationResult, 8> validations;
 
         for (std::string_view remaining = position; !remaining.empty();)
         {
@@ -125,8 +123,8 @@ namespace dnv::vista::sdk
         }
 
         // Check alphabetical sorting of non-number parts
-        std::vector<std::string_view> nonNumbers;
-        nonNumbers.reserve(parts.size());
+        StackVector<std::string_view, 8> nonNumbers;
+
         for (auto part : parts)
         {
             if (!string::isAllDigits(part))
@@ -157,8 +155,7 @@ namespace dnv::vista::sdk
                 return static_cast<int>(v) == static_cast<int>(PositionValidationResult::Valid);
             }))
         {
-            std::vector<std::string_view> groups;
-            groups.reserve(parts.size());
+            StackVector<std::string_view, 8> groups;
 
             for (auto part : parts)
             {
@@ -174,23 +171,19 @@ namespace dnv::vista::sdk
             }
 
             // Check for duplicates, excluding DEFAULT_GROUP entries from the check
-            std::unordered_set<std::string_view> uniqueGroups;
-            bool hasDuplicate = false;
-            for (const auto& g : groups)
+            bool hasDefaultGroup = std::find(groups.begin(), groups.end(), "DEFAULT_GROUP") != groups.end();
+            if (!hasDefaultGroup)
             {
-                if (g == "DEFAULT_GROUP")
+                for (size_t i = 0; i < groups.size(); ++i)
                 {
-                    continue;
+                    for (size_t j = i + 1; j < groups.size(); ++j)
+                    {
+                        if (groups[i] == groups[j])
+                        {
+                            return PositionValidationResult::InvalidGrouping;
+                        }
+                    }
                 }
-                if (!uniqueGroups.insert(g).second)
-                {
-                    hasDuplicate = true;
-                    break;
-                }
-            }
-            if (hasDuplicate)
-            {
-                return PositionValidationResult::InvalidGrouping;
             }
         }
 

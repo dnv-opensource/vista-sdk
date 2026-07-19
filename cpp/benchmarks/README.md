@@ -39,7 +39,7 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 | `State_hasGroup_hit`                  |        1.77 |          1.88 |            1.95 |           6.31 |
 | `State_hasGroup_miss`                 |        2.04 |          0.63 |            2.17 |           4.42 |
 | `Position_validatePosition_simple`    |       12.96 |         14.63 |           22.69 |          19.80 |
-| `Position_validatePosition_composite` |      333.31 |        291.93 |          735.19 |         670.77 |
+| `Position_validatePosition_composite` |      161.44 |        142.78 |          215.70 |         172.80 |
 
 ### Codebooks lookup
 
