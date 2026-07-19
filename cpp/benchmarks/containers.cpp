@@ -6,9 +6,11 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
 
+#include <dnv/vista/sdk/containers/StringSet.h>
 #include <dnv/vista/sdk/containers/PerfectHashMap.h>
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -158,6 +160,51 @@ namespace dnv::vista::sdk::benchmarks
             auto b = stdSet.contains("411.1");
             auto c = stdSet.contains("400");
             auto d = stdSet.contains("510.2.3");
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        StringSet fastSet;
+        fastSet.reserve(keys.size());
+        for (const auto& k : keys)
+        {
+            fastSet.insert(k);
+        }
+
+        bench.run("StringSet_hit", [&] {
+            auto a = fastSet.contains("VE");
+            auto b = fastSet.contains("411.1");
+            auto c = fastSet.contains("400");
+            auto d = fastSet.contains("510.2.3");
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        bench.run("StringSet_miss", [&] {
+            auto a = fastSet.contains("VEX");
+            auto b = fastSet.contains("411.1X");
+            auto c = fastSet.contains("400X");
+            auto d = fastSet.contains("H346.11112");
+            ankerl::nanobench::doNotOptimizeAway(a);
+            ankerl::nanobench::doNotOptimizeAway(b);
+            ankerl::nanobench::doNotOptimizeAway(c);
+            ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        std::string_view fsvA = "VE";
+        std::string_view fsvB = "411.1";
+        std::string_view fsvC = "400";
+        std::string_view fsvD = "H346.11112";
+
+        bench.run("StringSet_stringview", [&] {
+            auto a = fastSet.contains(fsvA);
+            auto b = fastSet.contains(fsvB);
+            auto c = fastSet.contains(fsvC);
+            auto d = fastSet.contains(fsvD);
             ankerl::nanobench::doNotOptimizeAway(a);
             ankerl::nanobench::doNotOptimizeAway(b);
             ankerl::nanobench::doNotOptimizeAway(c);
