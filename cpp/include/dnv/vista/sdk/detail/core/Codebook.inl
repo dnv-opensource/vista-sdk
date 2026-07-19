@@ -1,6 +1,7 @@
 #include "dnv/vista/sdk/utils/StringUtils.h"
 
 #include <algorithm>
+#include <unordered_set>
 #include <vector>
 
 namespace dnv::vista::sdk
@@ -10,19 +11,19 @@ namespace dnv::vista::sdk
         return m_name;
     }
 
-    inline const std::unordered_set<std::string>& Codebook::standardValues() const noexcept
+    inline const StringSet& Codebook::standardValues() const noexcept
     {
         return m_standardValues;
     }
 
-    inline const std::unordered_set<std::string>& Codebook::groups() const noexcept
+    inline const StringSet& Codebook::groups() const noexcept
     {
         return m_groups;
     }
 
     inline bool Codebook::hasGroup(std::string_view group) const noexcept
     {
-        return m_groups.contains(std::string{ group });
+        return m_groups.contains(group);
     }
 
     inline bool Codebook::hasStandardValue(std::string_view value) const noexcept
@@ -32,7 +33,7 @@ namespace dnv::vista::sdk
             return true;
         }
 
-        return m_standardValues.contains(std::string{ value });
+        return m_standardValues.contains(value);
     }
 
     inline std::optional<MetadataTag> Codebook::createTag(std::string_view value) const noexcept
@@ -63,7 +64,7 @@ namespace dnv::vista::sdk
             {
                 return std::nullopt;
             }
-            if (m_name != CodebookName::Detail && !m_standardValues.contains(std::string{ value }))
+            if (m_name != CodebookName::Detail && !m_standardValues.contains(value))
             {
                 isCustom = true;
             }
@@ -79,7 +80,7 @@ namespace dnv::vista::sdk
             return PositionValidationResult::Invalid;
         }
 
-        if (m_standardValues.contains(std::string{ position }))
+        if (m_standardValues.contains(position))
         {
             return PositionValidationResult::Valid;
         }

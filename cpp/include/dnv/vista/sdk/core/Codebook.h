@@ -8,15 +8,16 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/containers/StringSet.h"
 #include "CodebookName.h"
 #include "MetadataTag.h"
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
-#include <unordered_set>
 
 namespace dnv::vista::sdk
 {
@@ -70,10 +71,10 @@ namespace dnv::vista::sdk
         inline CodebookName name() const noexcept;
 
         /** @brief Get the set of standard values */
-        inline const std::unordered_set<std::string>& standardValues() const noexcept;
+        inline const StringSet& standardValues() const noexcept;
 
         /** @brief Get the set of group names */
-        inline const std::unordered_set<std::string>& groups() const noexcept;
+        inline const StringSet& groups() const noexcept;
 
         /**
          * @brief Check if a group exists in this codebook
@@ -117,8 +118,8 @@ namespace dnv::vista::sdk
     private:
         CodebookName m_name;
         std::unordered_map<std::string, std::string> m_groupMap;
-        std::unordered_set<std::string> m_standardValues;
-        std::unordered_set<std::string> m_groups;
+        StringSet m_standardValues;
+        StringSet m_groups;
     };
 } // namespace dnv::vista::sdk
 
