@@ -8,6 +8,7 @@
 
 #include <dnv/vista/sdk/containers/StringSet.h>
 #include <dnv/vista/sdk/containers/PerfectHashMap.h>
+#include <dnv/vista/sdk/containers/StackVector.h>
 
 #include <string>
 #include <string_view>
@@ -209,6 +210,53 @@ namespace dnv::vista::sdk::benchmarks
             ankerl::nanobench::doNotOptimizeAway(b);
             ankerl::nanobench::doNotOptimizeAway(c);
             ankerl::nanobench::doNotOptimizeAway(d);
+        });
+
+        static constexpr std::string_view SHORT_POSITION = "center-fore-2";
+        static constexpr std::string_view LONG_POSITION = "aft-center-fore-lower-port-starboard-upper-2";
+
+        bench.run("StackVector_split_short", [&] {
+            StackVector<std::string_view, 8> parts;
+            for (std::string_view remaining = SHORT_POSITION; !remaining.empty();)
+            {
+                auto sep = remaining.find('-');
+                parts.push_back(remaining.substr(0, sep));
+                remaining = (sep == std::string_view::npos) ? std::string_view{} : remaining.substr(sep + 1);
+            }
+            ankerl::nanobench::doNotOptimizeAway(parts.size());
+        });
+
+        bench.run("StdVector_split_short", [&] {
+            std::vector<std::string_view> parts;
+            for (std::string_view remaining = SHORT_POSITION; !remaining.empty();)
+            {
+                auto sep = remaining.find('-');
+                parts.push_back(remaining.substr(0, sep));
+                remaining = (sep == std::string_view::npos) ? std::string_view{} : remaining.substr(sep + 1);
+            }
+            ankerl::nanobench::doNotOptimizeAway(parts.size());
+        });
+
+        bench.run("StackVector_split_long", [&] {
+            StackVector<std::string_view, 8> parts;
+            for (std::string_view remaining = LONG_POSITION; !remaining.empty();)
+            {
+                auto sep = remaining.find('-');
+                parts.push_back(remaining.substr(0, sep));
+                remaining = (sep == std::string_view::npos) ? std::string_view{} : remaining.substr(sep + 1);
+            }
+            ankerl::nanobench::doNotOptimizeAway(parts.size());
+        });
+
+        bench.run("StdVector_split_long", [&] {
+            std::vector<std::string_view> parts;
+            for (std::string_view remaining = LONG_POSITION; !remaining.empty();)
+            {
+                auto sep = remaining.find('-');
+                parts.push_back(remaining.substr(0, sep));
+                remaining = (sep == std::string_view::npos) ? std::string_view{} : remaining.substr(sep + 1);
+            }
+            ankerl::nanobench::doNotOptimizeAway(parts.size());
         });
 
         return 0;

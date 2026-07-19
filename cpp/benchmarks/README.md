@@ -126,6 +126,10 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 | `StringSet_hit`             |        6.46 |          9.10 |            7.07 |          24.68 |
 | `StringSet_miss`            |        4.91 |          7.30 |            5.27 |          24.15 |
 | `StringSet_stringview`      |       17.22 |         15.29 |           18.78 |          33.27 |
+| `StackVector_split_short`   |       10.99 |         11.19 |           14.63 |          19.37 |
+| `StdVector_split_short`     |       40.20 |         39.09 |          114.22 |         119.11 |
+| `StackVector_split_long`    |       27.26 |         31.39 |           37.83 |          49.36 |
+| `StdVector_split_long`      |       64.19 |         65.16 |          168.14 |         243.40 |
 
 ---
 
