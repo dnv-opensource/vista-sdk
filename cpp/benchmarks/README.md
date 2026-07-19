@@ -123,7 +123,10 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 | `StdUnorderedMap_miss`      |       19.18 |         18.52 |           22.09 |          47.16 |
 | `PerfectHashMap_stringview` |       18.23 |         18.72 |           21.12 |          33.01 |
 | `StdUnorderedSet_hit`       |       31.28 |         34.58 |           40.90 |          30.20 |
+| `StringSet_hit`             |        6.46 |          9.10 |            7.07 |          24.68 |
+| `StringSet_miss`            |        4.91 |          7.30 |            5.27 |          24.15 |
+| `StringSet_stringview`      |       17.22 |         15.29 |           18.78 |          33.27 |
 
 ---
 
-_Benchmarked on July 18, 2026_
+_Benchmarked on July 19, 2026_
