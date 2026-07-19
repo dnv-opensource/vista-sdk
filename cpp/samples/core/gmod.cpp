@@ -80,7 +80,7 @@ int main()
         const auto& node = gmod["411.1"];
 
         // Parents (can have multiple in Gmod graph)
-        if (!node.parents().empty())
+        if (!node.parents().isEmpty())
         {
             std::cout << "Parents of " << node.code() << " (" << node.parents().size() << "):\n";
             for (const auto* parent : node.parents())
@@ -288,7 +288,7 @@ int main()
             std::cout << std::string(depth * 2, ' ') << "- " << current->code();
             std::cout << " (" << current->metadata().name() << ")\n";
 
-            if (!current->parents().empty())
+            if (!current->parents().isEmpty())
             {
                 current = current->parents()[0];
             }

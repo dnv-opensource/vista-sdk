@@ -67,10 +67,10 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 | Benchmark (ns/op)             | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ----------------------------- | ----------: | ------------: | --------------: | -------------: |
-| `FromShortPath`               |      564.34 |        589.54 |        1,045.68 |       1,453.64 |
-| `FromFullPath`                |      633.93 |        679.03 |        1,212.74 |       1,464.30 |
-| `FromShortPathIndividualized` |    1,156.81 |      1,156.83 |        2,013.57 |       3,030.09 |
-| `FromFullPathIndividualized`  |    1,164.68 |      1,129.92 |        1,741.28 |       2,259.49 |
+| `FromShortPath`               |      501.84 |        499.53 |          871.73 |       1,272.05 |
+| `FromFullPath`                |      451.63 |        470.27 |          794.83 |       1,217.13 |
+| `FromShortPathIndividualized` |      887.53 |        889.67 |        1,483.52 |       2,239.81 |
+| `FromFullPathIndividualized`  |      756.62 |        803.49 |        1,185.15 |       1,843.80 |
 
 ### Gmod traversal
 

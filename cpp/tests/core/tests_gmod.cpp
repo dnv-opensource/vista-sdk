@@ -159,7 +159,7 @@ namespace dnv::vista::sdk::tests
         TEST_CASE("root node has children")
         {
             const auto& gmod = VIS::instance().gmod(VisVersion::v3_4a);
-            CHECK_FALSE(gmod.rootNode().children().empty());
+            CHECK_FALSE(gmod.rootNode().children().isEmpty());
         }
 
         TEST_CASE("product type assignment")
@@ -227,7 +227,7 @@ namespace dnv::vista::sdk::tests
             const auto& gmod = VIS::instance().gmod(VisVersion::v3_4a);
 
             const GmodNode& cs1 = gmod["CS1"];
-            REQUIRE(!cs1.parents().empty());
+            REQUIRE(!cs1.parents().isEmpty());
             const GmodNode* funcParent = cs1.parents()[0];
 
             CHECK(Gmod::isProductSelectionAssignment(funcParent, &cs1));

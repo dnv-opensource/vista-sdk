@@ -90,12 +90,12 @@ namespace dnv::vista::sdk
         return *m_metadata;
     }
 
-    inline const std::vector<GmodNode*>& GmodNode::children() const noexcept
+    inline const StackVector<GmodNode*, 16>& GmodNode::children() const noexcept
     {
         return m_children;
     }
 
-    inline const std::vector<GmodNode*>& GmodNode::parents() const noexcept
+    inline const StackVector<GmodNode*, 16>& GmodNode::parents() const noexcept
     {
         return m_parents;
     }
