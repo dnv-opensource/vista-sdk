@@ -250,21 +250,19 @@ namespace dnv::vista::sdk
             return m_code;
         }
 
-        std::string out;
-        out.reserve(m_code.size() + 1 + m_location->value().size());
-        toString(out);
-
-        return out;
+        StringBuilder sb{ m_code.size() + 1 + m_location->value().size() };
+        toString(sb);
+        return sb.toString();
     }
 
-    inline void GmodNode::toString(std::string& out) const noexcept
+    inline void GmodNode::toString(StringBuilder& builder) const noexcept
     {
-        out += m_code;
+        builder += m_code;
 
         if (m_location.has_value())
         {
-            out += '-';
-            out += m_location->value();
+            builder += '-';
+            builder += m_location->value();
         }
     }
 

@@ -21,7 +21,7 @@ namespace dnv::vista::sdk
          * @param name The common name to normalize
          * @param builder String to append the normalized name to
          */
-        inline void appendNormalizedCommonName(std::string_view name, std::string& out)
+        inline void appendNormalizedCommonName(std::string_view name, StringBuilder& builder)
         {
             auto collapsed = string::collapseWhitespace(name);
 
@@ -40,7 +40,7 @@ namespace dnv::vista::sdk
                     continue;
                 }
 
-                out += current;
+                builder += current;
                 prevChar = current;
             }
         }
@@ -129,29 +129,29 @@ namespace dnv::vista::sdk
         return LocalId{ *this };
     }
 
-    void LocalIdBuilder::toString(std::string& out) const
+    void LocalIdBuilder::toString(StringBuilder& builder) const
     {
-        out += '/';
-        out += internal::iso19848::annexC::VersionedNamingRule;
+        builder += '/';
+        builder += internal::iso19848::annexC::VersionedNamingRule;
 
         if (m_visVersion.has_value())
         {
-            out += "/vis-";
-            out += VisVersions::toString(*m_visVersion);
+            builder += "/vis-";
+            builder += VisVersions::toString(*m_visVersion);
         }
 
         if (m_primaryItem.has_value())
         {
-            out += '/';
-            out += m_primaryItem->toString();
-            out += '/';
+            builder += '/';
+            m_primaryItem->toString(builder);
+            builder += '/';
         }
 
         if (m_secondaryItem.has_value())
         {
-            out += "sec/";
-            out += m_secondaryItem->toString();
-            out += '/';
+            builder += "sec/";
+            m_secondaryItem->toString(builder);
+            builder += '/';
         }
 
         if (m_verboseMode)
@@ -161,16 +161,16 @@ namespace dnv::vista::sdk
                 auto commonNamesVec = m_primaryItem->commonNames();
                 for (const auto& [depth, name] : commonNamesVec)
                 {
-                    out += '~';
-                    appendNormalizedCommonName(name, out);
+                    builder += '~';
+                    appendNormalizedCommonName(name, builder);
 
                     const auto& node = (*m_primaryItem)[depth];
                     if (node.location().has_value())
                     {
-                        out += '.';
-                        out += node.location()->value();
+                        builder += '.';
+                        builder += node.location()->value();
                     }
-                    out += '/';
+                    builder += '/';
                 }
             }
 
@@ -180,62 +180,62 @@ namespace dnv::vista::sdk
                 const char* prefix = "~for.";
                 for (const auto& [depth, name] : commonNamesVec)
                 {
-                    out += prefix;
+                    builder += prefix;
                     if (std::string_view(prefix) != "~")
                     {
                         prefix = "~";
                     }
 
-                    appendNormalizedCommonName(name, out);
+                    appendNormalizedCommonName(name, builder);
 
                     const auto& node = (*m_secondaryItem)[depth];
                     if (node.location().has_value())
                     {
-                        out += '.';
-                        out += node.location()->value();
+                        builder += '.';
+                        builder += node.location()->value();
                     }
-                    out += '/';
+                    builder += '/';
                 }
             }
         }
 
-        out += "meta/";
+        builder += "meta/";
         if (m_quantity.has_value())
         {
-            m_quantity->toString(out);
+            m_quantity->toString(builder);
         }
         if (m_content.has_value())
         {
-            m_content->toString(out);
+            m_content->toString(builder);
         }
         if (m_calculation.has_value())
         {
-            m_calculation->toString(out);
+            m_calculation->toString(builder);
         }
         if (m_state.has_value())
         {
-            m_state->toString(out);
+            m_state->toString(builder);
         }
         if (m_command.has_value())
         {
-            m_command->toString(out);
+            m_command->toString(builder);
         }
         if (m_type.has_value())
         {
-            m_type->toString(out);
+            m_type->toString(builder);
         }
         if (m_position.has_value())
         {
-            m_position->toString(out);
+            m_position->toString(builder);
         }
         if (m_detail.has_value())
         {
-            m_detail->toString(out);
+            m_detail->toString(builder);
         }
 
-        if (!out.empty() && out.back() == '/')
+        if (!builder.isEmpty() && builder.back() == '/')
         {
-            out.pop_back();
+            builder.pop_back();
         }
     }
 

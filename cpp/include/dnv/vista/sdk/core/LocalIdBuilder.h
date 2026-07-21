@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "GmodPath.h"
 #include "MetadataTag.h"
 
@@ -343,10 +344,10 @@ namespace dnv::vista::sdk
 
         /**
          * @brief Convert builder state to string representation (in-place)
-         * @param out String to append the LocalId string representation to
+         * @param builder Builder to append the LocalId string representation to
          * @note Format: /dnv-v2/vis-{version}/{primary-item}[/sec/{secondary-item}]/meta[/qty-{value}][/cnt-{value}]..
          */
-        void toString(std::string& out) const;
+        void toString(StringBuilder& builder) const;
 
         /**
          * @brief Create LocalId from string representation

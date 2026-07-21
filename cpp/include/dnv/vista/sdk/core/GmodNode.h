@@ -9,6 +9,7 @@
 #pragma once
 
 #include "dnv/vista/sdk/containers/StackVector.h"
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "Locations.h"
 
 #include <cstdint>
@@ -336,9 +337,9 @@ namespace dnv::vista::sdk
 
         /**
          * @brief Append string representation to an existing string
-         * @param out String to append to
+         * @param builder Builder to append to
          */
-        inline void toString(std::string& out) const noexcept;
+        inline void toString(StringBuilder& builder) const noexcept;
 
     private:
         /**

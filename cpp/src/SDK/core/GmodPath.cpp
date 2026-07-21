@@ -88,9 +88,9 @@ namespace dnv::vista::sdk
 
     std::string GmodPath::toFullPathString() const
     {
-        std::string out;
-        toFullPathString(out);
-        return out;
+        StringBuilder sb;
+        toFullPathString(sb);
+        return sb.toString();
     }
 
     std::vector<GmodIndividualizableSet> GmodPath::individualizableSets() const

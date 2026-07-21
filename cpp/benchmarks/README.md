@@ -96,8 +96,8 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 | Benchmark (ns/op) | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ----------------- | ----------: | ------------: | --------------: | -------------: |
-| `Simple`          |    1,484.73 |      1,525.71 |        3,344.40 |       3,395.65 |
-| `Complex`         |    7,509.31 |      7,612.69 |       13,748.91 |      15,830.47 |
+| `Simple`          |    1,206.49 |      1,274.66 |        2,060.83 |       2,191.61 |
+| `Complex`         |    4,549.31 |      4,529.80 |        7,510.32 |       9,065.00 |
 
 ### DataChannelList serialization
 
@@ -144,4 +144,4 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 ---
 
-_Benchmarked on July 21, 2026_
+_Benchmarked on July 22, 2026_

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "ImoNumber.h"
 #include "LocalId.h"
 #include "UniversalIdBuilder.h"
@@ -85,9 +86,9 @@ namespace dnv::vista::sdk
 
         /**
          * @brief Append string representation to a string
-         * @param out String to append the string representation to
+         * @param builder Builder to append the string representation to
          */
-        inline void toString(std::string& out) const;
+        inline void toString(StringBuilder& builder) const;
 
         /**
          * @brief Create UniversalId from string representation

@@ -40,8 +40,8 @@ namespace dnv::vista::sdk
         return std::move(m_builder).toString();
     }
 
-    inline void UniversalId::toString(std::string& out) const
+    inline void UniversalId::toString(StringBuilder& builder) const
     {
-        m_builder.toString(out);
+        m_builder.toString(builder);
     }
 } // namespace dnv::vista::sdk

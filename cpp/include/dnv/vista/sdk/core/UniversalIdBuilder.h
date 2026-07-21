@@ -172,10 +172,10 @@ namespace dnv::vista::sdk
 
         /**
          * @brief Append string representation to a string
-         * @param out String to append the string representation to
+         * @param builder Builder to append the string representation to
          * @throws std::invalid_argument if IMO number or LocalIdBuilder is missing
          */
-        inline void toString(std::string& out) const;
+        inline void toString(StringBuilder& builder) const;
 
         /**
          * @brief Create UniversalId from string representation

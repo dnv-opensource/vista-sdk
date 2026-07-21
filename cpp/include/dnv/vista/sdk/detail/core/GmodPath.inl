@@ -94,12 +94,12 @@ namespace dnv::vista::sdk
 
     inline std::string GmodPath::toString() const
     {
-        std::string out;
-        this->toString(out);
-        return out;
+        StringBuilder sb;
+        this->toString(sb);
+        return sb.toString();
     }
 
-    inline void GmodPath::toString(std::string& out, char separator) const
+    inline void GmodPath::toString(StringBuilder& builder, char separator) const
     {
         for (const auto& parent : m_parents)
         {
@@ -108,34 +108,34 @@ namespace dnv::vista::sdk
                 continue;
             }
 
-            parent.toString(out);
-            out += separator;
+            parent.toString(builder);
+            builder += separator;
         }
 
-        m_node.toString(out);
+        m_node.toString(builder);
     }
 
-    inline void GmodPath::toFullPathString(std::string& out) const
+    inline void GmodPath::toFullPathString(StringBuilder& builder) const
     {
         for (const auto& [depth, pathNode] : fullPath())
         {
-            pathNode.toString(out);
+            pathNode.toString(builder);
 
             if (depth != (length() - 1))
             {
-                out += '/';
+                builder += '/';
             }
         }
     }
 
     inline std::string GmodPath::toStringDump() const
     {
-        std::string out;
-        toStringDump(out);
-        return out;
+        StringBuilder sb;
+        toStringDump(sb);
+        return sb.toString();
     }
 
-    inline void GmodPath::toStringDump(std::string& out) const
+    inline void GmodPath::toStringDump(StringBuilder& builder) const
     {
         for (const auto& [depth, pathNode] : fullPath())
         {
@@ -146,30 +146,30 @@ namespace dnv::vista::sdk
 
             if (depth != 1)
             {
-                out += " | ";
+                builder += " | ";
             }
 
-            out += pathNode.code();
+            builder += pathNode.code();
 
             const auto& name = pathNode.metadata().name();
             if (!name.empty())
             {
-                out += "/N:";
-                out += name;
+                builder += "/N:";
+                builder += name;
             }
 
             const auto& commonName = pathNode.metadata().commonName();
             if (commonName.has_value() && !commonName->empty())
             {
-                out += "/CN:";
-                out += *commonName;
+                builder += "/CN:";
+                builder += *commonName;
             }
 
             const auto normalAssignmentName = this->normalAssignmentName(depth);
             if (normalAssignmentName.has_value() && !normalAssignmentName->empty())
             {
-                out += "/NAN:";
-                out += *normalAssignmentName;
+                builder += "/NAN:";
+                builder += *normalAssignmentName;
             }
         }
     }
