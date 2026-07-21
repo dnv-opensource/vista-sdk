@@ -131,6 +131,17 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 | `StackVector_split_long`    |       27.26 |         31.39 |           37.83 |          49.36 |
 | `StdVector_split_long`      |       64.19 |         65.16 |          168.14 |         243.40 |
 
+### StringBuilder (SDK custom vs STL)
+
+| Benchmark (ns/op)                 | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
+| --------------------------------- | ----------: | ------------: | --------------: | -------------: |
+| `StringBuilder_jsonish`           |       43.96 |         38.23 |          114.63 |          50.68 |
+| `StdString_jsonish`               |       77.10 |         78.66 |          239.15 |         189.20 |
+| `StringBuilder_largeAccumulation` |    1,659.40 |      1,638.49 |        4,203.39 |       2,073.68 |
+| `StdString_largeAccumulation`     |    2,021.59 |      2,045.68 |        4,681.61 |       2,825.43 |
+| `StringBuilder_indent`            |        1.62 |          1.70 |            1.48 |           2.74 |
+| `StdString_indent`                |        2.39 |          2.95 |            2.25 |          13.42 |
+
 ---
 
-_Benchmarked on July 20, 2026_
+_Benchmarked on July 21, 2026_
