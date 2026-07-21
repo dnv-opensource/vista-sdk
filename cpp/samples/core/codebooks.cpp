@@ -239,21 +239,21 @@ int main()
 
         if (qtyTag && cntTag && posTag && stateTag)
         {
-            std::string path;
+            StringBuilder path;
 
             std::cout << "Building metadata path:\n";
 
             qtyTag->toString(path);
-            std::cout << "  After Quantity: " << path << "\n";
+            std::cout << "  After Quantity: " << path.view() << "\n";
 
             cntTag->toString(path);
-            std::cout << "  After Content : " << path << "\n";
+            std::cout << "  After Content : " << path.view() << "\n";
 
             posTag->toString(path);
-            std::cout << "  After Position: " << path << "\n";
+            std::cout << "  After Position: " << path.view() << "\n";
 
             stateTag->toString(path);
-            std::cout << "  After State   : " << path << "\n";
+            std::cout << "  After State   : " << path.view() << "\n";
         }
 
         std::cout << "\n";

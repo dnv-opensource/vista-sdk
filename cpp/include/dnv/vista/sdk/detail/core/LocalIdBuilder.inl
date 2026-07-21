@@ -440,8 +440,8 @@ namespace dnv::vista::sdk
 
     inline std::string LocalIdBuilder::toString() const
     {
-        std::string out;
-        toString(out);
-        return out;
+        StringBuilder builder;
+        toString(builder);
+        return builder.toString();
     }
 } // namespace dnv::vista::sdk

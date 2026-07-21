@@ -39,17 +39,17 @@ namespace dnv::vista::sdk
 
     inline std::string MetadataTag::toString() const
     {
-        std::string result;
-        toString(result, '\0');
-        result.pop_back();
-        return result;
+        StringBuilder sb;
+        toString(sb, '\0');
+        sb.pop_back();
+        return sb.toString();
     }
 
-    inline void MetadataTag::toString(std::string& out, char separator) const
+    inline void MetadataTag::toString(StringBuilder& builder, char separator) const
     {
-        out += CodebookNames::toPrefix(m_name);
-        out += (m_custom ? '~' : '-');
-        out += m_value;
-        out += separator;
+        builder += CodebookNames::toPrefix(m_name);
+        builder += (m_custom ? '~' : '-');
+        builder += m_value;
+        builder += separator;
     }
 } // namespace dnv::vista::sdk

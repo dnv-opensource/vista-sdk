@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "CodebookName.h"
 #include "GmodPath.h"
 #include "LocalIdBuilder.h"
@@ -142,10 +143,10 @@ namespace dnv::vista::sdk
         [[nodiscard]] inline std::string toString() &&;
 
         /**
-         * @brief Append string representation to a string
-         * @param out String to append the representation to
+         * @brief Append string representation to a buffer
+         * @param builder Builder to append to
          */
-        inline void toString(std::string& out) const;
+        inline void toString(StringBuilder& builder) const;
 
         /**
          * @brief Create LocalId from string representation
@@ -266,9 +267,9 @@ namespace dnv::vista::sdk
 
             /**
              * @brief Append MQTT topic string to a string
-             * @param out String to append the MQTT topic to
+             * @param builder Builder to append the MQTT topic to
              */
-            inline void toString(std::string& out) const;
+            inline void toString(StringBuilder& builder) const;
 
         private:
             /** @brief Internal separator for MQTT paths */
@@ -276,31 +277,31 @@ namespace dnv::vista::sdk
 
             /**
              * @brief Appends Gmod path to builder with MQTT formatting
-             * @param out String to append the formatted path to
+             * @param builder Builder to append the formatted path to
              * @param path GmodPath to append with underscore separators
              */
-            inline void appendPath(std::string& out, const GmodPath& path) const;
+            inline void appendPath(StringBuilder& builder, const GmodPath& path) const;
 
             /**
              * @brief Appends primary item to builder in MQTT format
-             * @param out String to append the primary item to
+             * @param builder Builder to append the primary item to
              */
-            inline void appendPrimaryItem(std::string& out) const;
+            inline void appendPrimaryItem(StringBuilder& builder) const;
 
             /**
              * @brief Appends secondary item or placeholder to builder in MQTT format
-             * @param out String to append the secondary item to
+             * @param builder Builder to append the secondary item to
              */
-            inline void appendSecondaryItem(std::string& out) const;
+            inline void appendSecondaryItem(StringBuilder& builder) const;
 
             /**
              * @brief Appends metadata tag or placeholder to builder in MQTT format
              * @details Appends the metadata tag value if present, otherwise appends an underscore placeholder
              *          Always appends a trailing forward slash for MQTT topic formatting
-             * @param out String to append the tag (or placeholder) to
+             * @param builder Builder to append the tag (or placeholder) to
              * @param tag Optional metadata tag to append (or placeholder if empty)
              */
-            inline void appendMeta(std::string& out, const std::optional<MetadataTag>& tag) const;
+            inline void appendMeta(StringBuilder& builder, const std::optional<MetadataTag>& tag) const;
 
             LocalIdBuilder m_builder;
         };

@@ -121,7 +121,7 @@ namespace dnv::vista::sdk
         return std::move(*this);
     }
 
-    inline void UniversalIdBuilder::toString(std::string& out) const
+    inline void UniversalIdBuilder::toString(StringBuilder& builder) const
     {
         if (!m_imoNumber.has_value())
         {
@@ -132,17 +132,17 @@ namespace dnv::vista::sdk
             throw std::invalid_argument{ "Invalid Universal Id state: Missing LocalId" };
         }
 
-        out += internal::iso19848::annexC::NamingEntity;
-        out += '/';
-        out += m_imoNumber->toString();
+        builder += internal::iso19848::annexC::NamingEntity;
+        builder += '/';
+        builder += m_imoNumber->toString();
 
-        m_localIdBuilder->toString(out);
+        m_localIdBuilder->toString(builder);
     }
 
     inline std::string UniversalIdBuilder::toString() const
     {
-        std::string out;
-        toString(out);
-        return out;
+        StringBuilder sb;
+        toString(sb);
+        return sb.toString();
     }
 } // namespace dnv::vista::sdk

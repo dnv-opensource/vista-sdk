@@ -101,9 +101,9 @@ namespace dnv::vista::sdk
         return std::move(m_builder).toString();
     }
 
-    inline void LocalId::toString(std::string& out) const
+    inline void LocalId::toString(StringBuilder& builder) const
     {
-        m_builder.toString(out);
+        m_builder.toString(builder);
     }
 
     namespace mqtt
@@ -177,69 +177,69 @@ namespace dnv::vista::sdk
 
         inline std::string LocalId::toString() const&
         {
-            std::string s;
+            StringBuilder s;
             toString(s);
-            return s;
+            return s.toString();
         }
 
-        inline void LocalId::toString(std::string& out) const
+        inline void LocalId::toString(StringBuilder& builder) const
         {
-            out += internal::iso19848::annexC::VersionedNamingRule;
-            out += '/';
-            out += "vis-";
-            out += VisVersions::toString(version());
-            out += '/';
+            builder += internal::iso19848::annexC::VersionedNamingRule;
+            builder += '/';
+            builder += "vis-";
+            builder += VisVersions::toString(version());
+            builder += '/';
 
-            appendPrimaryItem(out);
-            appendSecondaryItem(out);
-            appendMeta(out, quantity());
-            appendMeta(out, content());
-            appendMeta(out, calculation());
-            appendMeta(out, state());
-            appendMeta(out, command());
-            appendMeta(out, type());
-            appendMeta(out, position());
-            appendMeta(out, detail());
+            appendPrimaryItem(builder);
+            appendSecondaryItem(builder);
+            appendMeta(builder, quantity());
+            appendMeta(builder, content());
+            appendMeta(builder, calculation());
+            appendMeta(builder, state());
+            appendMeta(builder, command());
+            appendMeta(builder, type());
+            appendMeta(builder, position());
+            appendMeta(builder, detail());
 
-            if (!out.empty() && out.back() == '/')
+            if (!builder.isEmpty() && builder.back() == '/')
             {
-                out.pop_back();
+                builder.pop_back();
             }
         }
 
-        inline void LocalId::appendPath(std::string& out, const GmodPath& path) const
+        inline void LocalId::appendPath(StringBuilder& builder, const GmodPath& path) const
         {
-            path.toString(out, m_separator);
-            out += '/';
+            path.toString(builder, m_separator);
+            builder += '/';
         }
 
-        inline void LocalId::appendPrimaryItem(std::string& out) const
+        inline void LocalId::appendPrimaryItem(StringBuilder& builder) const
         {
             assert(m_builder.primaryItem().has_value());
-            appendPath(out, *m_builder.primaryItem());
+            appendPath(builder, *m_builder.primaryItem());
         }
 
-        inline void LocalId::appendSecondaryItem(std::string& out) const
+        inline void LocalId::appendSecondaryItem(StringBuilder& builder) const
         {
             if (m_builder.secondaryItem().has_value())
             {
-                appendPath(out, m_builder.secondaryItem().value());
+                appendPath(builder, m_builder.secondaryItem().value());
             }
             else
             {
-                out += "_/";
+                builder += "_/";
             }
         }
 
-        inline void LocalId::appendMeta(std::string& out, const std::optional<MetadataTag>& tag) const
+        inline void LocalId::appendMeta(StringBuilder& builder, const std::optional<MetadataTag>& tag) const
         {
             if (!tag.has_value())
             {
-                out += "_/";
+                builder += "_/";
             }
             else
             {
-                tag.value().toString(out);
+                tag.value().toString(builder);
             }
         }
     } // namespace mqtt

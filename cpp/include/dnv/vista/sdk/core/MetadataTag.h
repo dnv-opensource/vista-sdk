@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "CodebookName.h"
 
 #include <string>
@@ -81,11 +82,11 @@ namespace dnv::vista::sdk
 
         /**
          * @brief Appends the formatted tag to a string
-         * @param out String to append the formatted tag to
+         * @param builder Builder to append the formatted tag to
          * @param separator The separator character to append after the value
          * @details Formats the tag as "prefix-value/" or "prefix~value/"
          */
-        inline void toString(std::string& out, char separator = '/') const;
+        inline void toString(StringBuilder& builder, char separator = '/') const;
 
     private:
         CodebookName m_name; ///< The name of the metadata tag, represented by a CodebookName enum value

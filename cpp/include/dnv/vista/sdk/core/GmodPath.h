@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "GmodNode.h"
 
 #include <optional>
@@ -129,25 +130,25 @@ namespace dnv::vista::sdk
 
         /**
          * @brief Append short string representation to an existing string
-         * @param out String to append the path to
+         * @param builder Builder to append the path to
          * @param separator Character to use between nodes (default '/')
          */
-        inline void toString(std::string& out, char separator = '/') const;
+        inline void toString(StringBuilder& builder, char separator = '/') const;
 
         /** @brief Convert path to full string representation (all nodes, separated by '/') */
         std::string toFullPathString() const;
 
         /** @brief Append full string representation to an existing string */
-        inline void toFullPathString(std::string& out) const;
+        inline void toFullPathString(StringBuilder& builder) const;
 
         /** @brief Convert path to diagnostic dump string (codes, names, common names, normal assignments) */
         inline std::string toStringDump() const;
 
         /**
          * @brief Append diagnostic dump to an existing string
-         * @param out String to append the dump to
+         * @param builder Builder to append the dump to
          */
-        inline void toStringDump(std::string& out) const;
+        inline void toStringDump(StringBuilder& builder) const;
 
         /** @brief Range type for depth-indexed full path traversal - yields (depth, node) pairs */
         class FullPathRange final
