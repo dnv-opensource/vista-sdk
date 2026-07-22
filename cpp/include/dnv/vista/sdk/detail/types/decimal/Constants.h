@@ -130,9 +130,6 @@ namespace dnv::vista::sdk::internal::constants
     /** @brief Maximum expected length for decimal string representation */
     inline constexpr size_t DECIMAL_MAX_STRING_LENGTH{ 64UL };
 
-    /** @brief Reserved buffer size for string conversion to avoid reallocation */
-    inline constexpr size_t DECIMAL_STRING_BUFFER_SIZE{ 64UL };
-
     //----------------------------------------------
     // Performance optimization
     //----------------------------------------------
