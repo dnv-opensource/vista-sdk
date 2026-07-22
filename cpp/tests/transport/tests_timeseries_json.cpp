@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/transport/serialization/json/timeseries/Extensions.h>
+#include <dnv/VistaSDK.h>
 
 #include <JSON/Json.h>
 

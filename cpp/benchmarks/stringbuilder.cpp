@@ -6,8 +6,7 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
 
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/utils/StringBuilder.h>
+#include <dnv/VistaSDK.h>
 
 #include <charconv>
 #include <string>

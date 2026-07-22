@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/core/ImoNumber.h>
+#include <dnv/VistaSDK.h>
 
 #include <JSON/Parser.h>
 

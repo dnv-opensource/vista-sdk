@@ -5,7 +5,7 @@
  *          to control traversal flow, collect nodes at a given depth, and stop early
  */
 
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

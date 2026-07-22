@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/core/VisVersions.h>
+#include <dnv/VistaSDK.h>
 
 #include <SDK/core/VisVersionsExtensions.h>
 

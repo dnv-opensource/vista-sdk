@@ -1,9 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/core/LocalIdBuilder.h>
-#include <dnv/vista/sdk/transport/datachannel/DataChannel.h>
-#include <dnv/vista/sdk/transport/timeseries/TimeSeriesData.h>
-#include <dnv/vista/sdk/transport/ShipId.h>
+#include <dnv/VistaSDK.h>
 
 using dnv::vista::sdk::transport::ShipId;
 

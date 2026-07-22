@@ -5,7 +5,7 @@
  *          using both subset matching (at least these tags) and exact matching (only these tags).
  */
 
-#include <dnv/vista/sdk/query/MetadataTagsQuery.h>
+#include <dnv/VistaSDK.h>
 
 #include <iostream>
 #include <string>

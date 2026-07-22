@@ -5,9 +5,7 @@
  *          navigate parsed paths, handle individualization, and work with path errors
  */
 
-#include <dnv/vista/sdk/core/GmodPath.h>
-#include <dnv/vista/sdk/core/ParsingErrors.h>
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

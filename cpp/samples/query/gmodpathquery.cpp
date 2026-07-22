@@ -5,8 +5,7 @@
  *          using both path-based queries (from an existing path) and node-based queries (from scratch).
  */
 
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/query/GmodPathQuery.h>
+#include <dnv/VistaSDK.h>
 
 #include <iostream>
 #include <string>

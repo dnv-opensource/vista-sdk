@@ -1,8 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/core/LocationBuilder.h>
-#include <dnv/vista/sdk/core/ParsingErrors.h>
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <JSON/Parser.h>
 

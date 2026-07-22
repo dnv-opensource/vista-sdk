@@ -5,7 +5,7 @@
  *          navigate nodes, query metadata, and work with product types/selections
  */
 
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

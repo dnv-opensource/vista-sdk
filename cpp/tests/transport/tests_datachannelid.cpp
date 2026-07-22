@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/transport/timeseries/DataChannelId.h>
+#include <dnv/VistaSDK.h>
 
 namespace dnv::vista::sdk::tests
 {

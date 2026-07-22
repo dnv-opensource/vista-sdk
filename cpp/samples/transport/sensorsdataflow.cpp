@@ -6,9 +6,7 @@
  *          readings into TabularData groups based on updateCycle (ISO19848 optimization)
  */
 
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/transport/serialization/json/datachannel/Extensions.h>
-#include <dnv/vista/sdk/transport/serialization/json/timeseries/Extensions.h>
+#include <dnv/VistaSDK.h>
 
 #include <algorithm>
 #include <iomanip>

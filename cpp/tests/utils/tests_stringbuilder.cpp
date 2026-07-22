@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/utils/StringBuilder.h>
+#include <dnv/VistaSDK.h>
 
 #include <sstream>
 #include <string>

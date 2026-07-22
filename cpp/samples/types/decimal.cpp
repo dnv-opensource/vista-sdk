@@ -6,7 +6,7 @@
  *          of ship monitoring systems (propulsion, fuel, navigation, stability).
  */
 
-#include <dnv/vista/sdk/types/decimal/Decimal.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

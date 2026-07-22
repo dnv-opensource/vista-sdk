@@ -5,7 +5,7 @@
  *          validate values, create metadata tags, and work with VIS versions
  */
 
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

@@ -6,8 +6,7 @@
  *          or by an alternative identifier.
  */
 
-#include <dnv/vista/sdk/core/ImoNumber.h>
-#include <dnv/vista/sdk/transport/ShipId.h>
+#include <dnv/VistaSDK.h>
 
 #include <iostream>
 #include <string>
