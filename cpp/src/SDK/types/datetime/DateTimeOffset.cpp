@@ -28,11 +28,11 @@ namespace dnv::vista::sdk
 
         /** @brief Append timezone offset */
         static void appendOffset(
-            std::string& out, std::int32_t offsetMinutes, DateTime::Format format = DateTime::Format::Iso8601) noexcept
+            StringBuilder& sb, std::int32_t offsetMinutes, DateTime::Format format = DateTime::Format::Iso8601) noexcept
         {
             if (offsetMinutes == 0 && format != DateTime::Format::Iso8601Extended)
             {
-                out += 'Z';
+                sb += 'Z';
                 return;
             }
 
@@ -40,31 +40,28 @@ namespace dnv::vista::sdk
             const auto offsetHours{ absMinutes / internal::constants::MINUTES_PER_HOUR };
             const auto offsetMins{ absMinutes % internal::constants::MINUTES_PER_HOUR };
 
-            out += (offsetMinutes >= 0 ? '+' : '-');
-            internal::appendTwoDigits(out, offsetHours);
-            out += ':';
-            internal::appendTwoDigits(out, offsetMins);
+            sb += (offsetMinutes >= 0 ? '+' : '-');
+            internal::appendTwoDigits(sb, offsetHours);
+            sb += ':';
+            internal::appendTwoDigits(sb, offsetMins);
         }
 
         /** @brief Format ISO 8601 basic (compact) format with offset */
-        static std::string formatIso8601Basic(const DateTimeOffset& dto)
+        static void formatIso8601Basic(StringBuilder& sb, const DateTimeOffset& dto)
         {
-            std::string s;
-            s.reserve(20);
-
             const auto ticks{ dto.dateTime().ticks() };
             std::int32_t y, mon, d, h, min, sec, ms;
             internal::dateComponentsFromTicks(ticks, y, mon, d);
             internal::timeComponentsFromTicks(ticks, h, min, sec, ms);
 
             // Compact format without separators: YYYYMMDDTHHMMSS±HHMM
-            internal::appendFourDigits(s, y);
-            internal::appendTwoDigits(s, mon);
-            internal::appendTwoDigits(s, d);
-            s += 'T';
-            internal::appendTwoDigits(s, h);
-            internal::appendTwoDigits(s, min);
-            internal::appendTwoDigits(s, sec);
+            internal::appendFourDigits(sb, y);
+            internal::appendTwoDigits(sb, mon);
+            internal::appendTwoDigits(sb, d);
+            sb += 'T';
+            internal::appendTwoDigits(sb, h);
+            internal::appendTwoDigits(sb, min);
+            internal::appendTwoDigits(sb, sec);
 
             // Offset in compact format (±HHMM)
             const auto offsetMinutes{ dto.totalOffsetMinutes() };
@@ -72,38 +69,33 @@ namespace dnv::vista::sdk
             const auto offsetHours{ absMinutes / internal::constants::MINUTES_PER_HOUR };
             const auto offsetMins{ absMinutes % internal::constants::MINUTES_PER_HOUR };
 
-            s += (offsetMinutes >= 0 ? '+' : '-');
-            internal::appendTwoDigits(s, offsetHours);
-            internal::appendTwoDigits(s, offsetMins);
-
-            return s;
+            sb += (offsetMinutes >= 0 ? '+' : '-');
+            internal::appendTwoDigits(sb, offsetHours);
+            internal::appendTwoDigits(sb, offsetMins);
         }
 
         /** @brief Format ISO 8601 datetime with offset */
-        static std::string formatIso8601(const DateTimeOffset& dto, DateTime::Format format)
+        static void formatIso8601(StringBuilder& sb, const DateTimeOffset& dto, DateTime::Format format)
         {
-            std::string s;
-            s.reserve(35);
-
             const auto ticks{ dto.dateTime().ticks() };
             std::int32_t y, mon, d, h, min, sec, ms;
             internal::dateComponentsFromTicks(ticks, y, mon, d);
             internal::timeComponentsFromTicks(ticks, h, min, sec, ms);
 
             // Date part: YYYY-MM-DD
-            internal::appendFourDigits(s, y);
-            s += '-';
-            internal::appendTwoDigits(s, mon);
-            s += '-';
-            internal::appendTwoDigits(s, d);
-            s += 'T';
+            internal::appendFourDigits(sb, y);
+            sb += '-';
+            internal::appendTwoDigits(sb, mon);
+            sb += '-';
+            internal::appendTwoDigits(sb, d);
+            sb += 'T';
 
             // Time part: HH:mm:ss
-            internal::appendTwoDigits(s, h);
-            s += ':';
-            internal::appendTwoDigits(s, min);
-            s += ':';
-            internal::appendTwoDigits(s, sec);
+            internal::appendTwoDigits(sb, h);
+            sb += ':';
+            internal::appendTwoDigits(sb, min);
+            sb += ':';
+            internal::appendTwoDigits(sb, sec);
 
             // Add fractional seconds for extended formats
             if (format == DateTime::Format::Iso8601Precise)
@@ -124,7 +116,7 @@ namespace dnv::vista::sdk
                     std::memset(fracBuffer + 1, '0', paddingNeeded);
                 }
 
-                s.append(fracBuffer, 8);
+                sb.append(std::string_view{ fracBuffer, 8 });
             }
             else if (format == DateTime::Format::Iso8601PreciseTrimmed)
             {
@@ -154,11 +146,11 @@ namespace dnv::vista::sdk
                         --fracLen;
                     }
 
-                    s.append(fracBuffer, static_cast<std::size_t>(fracLen));
+                    sb.append(std::string_view{ fracBuffer, static_cast<std::size_t>(fracLen) });
                 }
                 else
                 {
-                    s += ".0";
+                    sb.append(".0");
                 }
             }
             else if (format == DateTime::Format::Iso8601Millis)
@@ -182,7 +174,7 @@ namespace dnv::vista::sdk
                     std::memset(fracBuffer + 1, '0', paddingNeeded);
                 }
 
-                s.append(fracBuffer, 4);
+                sb.append(std::string_view{ fracBuffer, 4 });
             }
             else if (format == DateTime::Format::Iso8601Micros)
             {
@@ -205,51 +197,39 @@ namespace dnv::vista::sdk
                     std::memset(fracBuffer + 1, '0', paddingNeeded);
                 }
 
-                s.append(fracBuffer, 7);
+                sb.append(std::string_view{ fracBuffer, 7 });
             }
 
             // Offset part
-            appendOffset(s, dto.totalOffsetMinutes(), format);
-
-            return s;
+            appendOffset(sb, dto.totalOffsetMinutes(), format);
         }
 
         /** @brief Format date only */
-        static std::string formatDateOnly(const DateTimeOffset& dto)
+        static void formatDateOnly(StringBuilder& sb, const DateTimeOffset& dto)
         {
-            std::string s;
-            s.reserve(10);
+            std::int32_t y, mon, d;
+            internal::dateComponentsFromTicks(dto.dateTime().ticks(), y, mon, d);
 
-            std::int32_t h, min, sec, ms;
-            internal::timeComponentsFromTicks(dto.dateTime().ticks(), h, min, sec, ms);
-
-            internal::appendTwoDigits(s, h);
-            s += ':';
-            internal::appendTwoDigits(s, min);
-            s += ':';
-            internal::appendTwoDigits(s, sec);
-
-            return s;
+            internal::appendFourDigits(sb, y);
+            sb += '-';
+            internal::appendTwoDigits(sb, mon);
+            sb += '-';
+            internal::appendTwoDigits(sb, d);
         }
 
         /** @brief Format time only with offset */
-        static std::string formatTimeOnly(const DateTimeOffset& dto)
+        static void formatTimeOnly(StringBuilder& sb, const DateTimeOffset& dto)
         {
-            std::string s;
-            s.reserve(14);
-
             std::int32_t h, min, sec, ms;
             internal::timeComponentsFromTicks(dto.dateTime().ticks(), h, min, sec, ms);
 
-            internal::appendTwoDigits(s, h);
-            s += ':';
-            internal::appendTwoDigits(s, min);
-            s += ':';
-            internal::appendTwoDigits(s, sec);
+            internal::appendTwoDigits(sb, h);
+            sb += ':';
+            internal::appendTwoDigits(sb, min);
+            sb += ':';
+            internal::appendTwoDigits(sb, sec);
 
-            appendOffset(s, dto.totalOffsetMinutes());
-
-            return s;
+            appendOffset(sb, dto.totalOffsetMinutes());
         }
     } // namespace internal
 
@@ -542,6 +522,13 @@ namespace dnv::vista::sdk
 
     std::string DateTimeOffset::toString(DateTime::Format format) const
     {
+        StringBuilder sb;
+        toString(sb, format);
+        return sb.toString();
+    }
+
+    void DateTimeOffset::toString(StringBuilder& builder, DateTime::Format format) const
+    {
         switch (format)
         {
             case DateTime::Format::Iso8601:
@@ -551,31 +538,42 @@ namespace dnv::vista::sdk
             case DateTime::Format::Iso8601Micros:
             case DateTime::Format::Iso8601Extended:
             {
-                return internal::formatIso8601(*this, format);
+                internal::formatIso8601(builder, *this, format);
+                break;
             }
             case DateTime::Format::Iso8601Basic:
             {
-                return internal::formatIso8601Basic(*this);
+                internal::formatIso8601Basic(builder, *this);
+                break;
             }
             case DateTime::Format::Iso8601Date:
             {
-                return internal::formatDateOnly(*this);
+                internal::formatDateOnly(builder, *this);
+                break;
             }
             case DateTime::Format::Iso8601Time:
             {
-                return internal::formatTimeOnly(*this);
+                internal::formatTimeOnly(builder, *this);
+                break;
             }
             case DateTime::Format::UnixSeconds:
             {
-                return std::to_string(toEpochSeconds());
+                char buffer[32];
+                const auto ptr = std::to_chars(buffer, buffer + 32, toEpochSeconds()).ptr;
+                builder.append(std::string_view{ buffer, static_cast<std::size_t>(ptr - buffer) });
+                break;
             }
             case DateTime::Format::UnixMilliseconds:
             {
-                return std::to_string(toEpochMilliseconds());
+                char buffer[32];
+                const auto ptr = std::to_chars(buffer, buffer + 32, toEpochMilliseconds()).ptr;
+                builder.append(std::string_view{ buffer, static_cast<std::size_t>(ptr - buffer) });
+                break;
             }
             default:
             {
-                return toString(DateTime::Format::Iso8601);
+                toString(builder, DateTime::Format::Iso8601);
+                break;
             }
         }
     }

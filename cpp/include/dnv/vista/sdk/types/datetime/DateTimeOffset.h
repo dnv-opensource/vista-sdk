@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "DateTime.h"
 #include "TimeSpan.h"
 
@@ -235,6 +236,13 @@ namespace dnv::vista::sdk
         [[nodiscard]] inline DateTimeOffset subtract(const TimeSpan& value) const noexcept;
 
         [[nodiscard]] std::string toString(DateTime::Format format = DateTime::Format::Iso8601) const;
+
+        /**
+         * @brief Append string representation using specified format to a reusable buffer
+         * @param builder Buffer to append the formatted string to
+         * @param format The format to use for string conversion
+         */
+        void toString(StringBuilder& builder, DateTime::Format format = DateTime::Format::Iso8601) const;
 
         /// @brief True if both represent the same instant in UTC (offsets may differ)
         [[nodiscard]] inline bool equals(const DateTimeOffset& other) const noexcept;
