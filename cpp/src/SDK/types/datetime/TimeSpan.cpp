@@ -117,17 +117,21 @@ namespace dnv::vista::sdk
 
     std::string TimeSpan::toString() const
     {
-        std::string s;
-        s.reserve(64);
+        StringBuilder sb;
+        toString(sb);
+        return sb.toString();
+    }
 
+    void TimeSpan::toString(StringBuilder& sb) const
+    {
         // Handle negative durations
         bool isNegative{ m_ticks < 0 };
         if (isNegative)
         {
-            s += '-';
+            sb += '-';
         }
 
-        s += 'P';
+        sb += 'P';
 
         const std::uint64_t absTicks{ m_ticks < 0 ? 0u - static_cast<std::uint64_t>(m_ticks)
                                                   : static_cast<std::uint64_t>(m_ticks) };
@@ -144,10 +148,7 @@ namespace dnv::vista::sdk
         // Output days if present
         if (days > 0)
         {
-            char buf[16];
-            auto ptr = std::to_chars(buf, buf + sizeof(buf), days).ptr;
-            s.append(buf, ptr);
-            s += 'D';
+            sb.append(static_cast<std::int64_t>(days)).append('D');
         }
 
         // Check if we have any time components
@@ -157,43 +158,26 @@ namespace dnv::vista::sdk
         // Only output time component if present
         if (hasTimeComponent)
         {
-            s += 'T';
+            sb.append('T');
 
             if (hours > 0)
             {
-                char buf[16];
-                auto ptr = std::to_chars(buf, buf + sizeof(buf), hours).ptr;
-                s.append(buf, ptr);
-                s += 'H';
+                sb.append(static_cast<std::int64_t>(hours)).append('H');
             }
 
             if (minutes > 0)
             {
-                char buf[16];
-                auto ptr = std::to_chars(buf, buf + sizeof(buf), minutes).ptr;
-                s.append(buf, ptr);
-                s += 'M';
+                sb.append(static_cast<std::int64_t>(minutes)).append('M');
             }
 
             // Include seconds with or without fractional part
             if (seconds > 0 || fractionalTicks > 0)
             {
-                char buf[16];
-                auto ptr = std::to_chars(buf, buf + sizeof(buf), seconds).ptr;
-                s.append(buf, ptr);
-
                 if (fractionalTicks > 0)
                 {
                     // Format fractional seconds directly to avoid allocations
                     char fracBuffer[8];
-                    const auto fracPtr = std::to_chars(fracBuffer, fracBuffer + 7, fractionalTicks).ptr;
-                    const auto fracWritten = static_cast<std::size_t>(fracPtr - fracBuffer);
-                    const auto paddingNeeded = 7 - fracWritten;
-                    if (paddingNeeded > 0)
-                    {
-                        std::memmove(fracBuffer + paddingNeeded, fracBuffer, fracWritten);
-                        std::memset(fracBuffer, '0', paddingNeeded);
-                    }
+                    std::snprintf(fracBuffer, sizeof(fracBuffer), "%07lld", static_cast<long long>(fractionalTicks));
 
                     // Strip trailing zeros
                     std::size_t fracLen{ 7 };
@@ -202,20 +186,22 @@ namespace dnv::vista::sdk
                         --fracLen;
                     }
 
-                    s += '.';
-                    s.append(fracBuffer, fracLen);
+                    sb.append(static_cast<std::int64_t>(seconds))
+                        .append('.')
+                        .append(std::string_view{ fracBuffer, fracLen })
+                        .append('S');
                 }
-
-                s += 'S';
+                else
+                {
+                    sb.append(static_cast<std::int64_t>(seconds)).append('S');
+                }
             }
         }
         else if (days == 0)
         {
             // No days and no time components: output PT0S for zero duration
-            s += "T0S";
+            sb.append("T0S");
         }
-
-        return s;
     }
 
     bool TimeSpan::fromString(std::string_view iso8601DurationString, TimeSpan& result) noexcept

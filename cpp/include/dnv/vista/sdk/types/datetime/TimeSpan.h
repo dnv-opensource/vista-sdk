@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
+
 #include <chrono>
 #include <compare>
 #include <cstdint>
@@ -79,6 +81,12 @@ namespace dnv::vista::sdk
         [[nodiscard]] inline constexpr std::int64_t ticks() const noexcept; ///< Duration in 100-nanosecond ticks
 
         [[nodiscard]] std::string toString() const; ///< ISO 8601 duration string (e.g., @c "PT1H30M45S")
+
+        /**
+         * @brief Append ISO 8601 duration string to a reusable buffer
+         * @param builder Buffer to append the formatted string to
+         */
+        void toString(StringBuilder& builder) const;
 
         /**
          * @brief Parse a TimeSpan from a string safely without throwing exceptions

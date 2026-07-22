@@ -2,6 +2,7 @@
 
 #include "dnv/vista/sdk/detail/types/datetime/Constants.h"
 #include "dnv/vista/sdk/types/datetime/DateTime.h"
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "dnv/vista/sdk/utils/StringUtils.h"
 
 #include <cstddef>
@@ -11,7 +12,8 @@
 
 namespace dnv::vista::sdk::internal
 {
-    /** @brief Convert ticks to date components */
+
+    /** @brief Convert ticks to date components (year, month, day) */
     constexpr void dateComponentsFromTicks(
         std::int64_t ticks, std::int32_t& year, std::int32_t& month, std::int32_t& day) noexcept
     {
@@ -63,7 +65,7 @@ namespace dnv::vista::sdk::internal
         day = static_cast<std::int32_t>(totalDays) + 1;
     }
 
-    /** @brief Convert ticks to time components */
+    /** @brief Convert ticks to time components (hour, minute, second, millisecond) */
     constexpr void timeComponentsFromTicks(
         std::int64_t ticks,
         std::int32_t& hour,
@@ -71,18 +73,18 @@ namespace dnv::vista::sdk::internal
         std::int32_t& second,
         std::int32_t& millisecond) noexcept
     {
-        std::int64_t timeTicks{ ticks % internal::constants::TICKS_PER_DAY };
+        std::int64_t timeTicks{ ticks % constants::TICKS_PER_DAY };
 
-        hour = static_cast<std::int32_t>(timeTicks / internal::constants::TICKS_PER_HOUR);
-        timeTicks %= internal::constants::TICKS_PER_HOUR;
+        hour = static_cast<std::int32_t>(timeTicks / constants::TICKS_PER_HOUR);
+        timeTicks %= constants::TICKS_PER_HOUR;
 
-        minute = static_cast<std::int32_t>(timeTicks / internal::constants::TICKS_PER_MINUTE);
-        timeTicks %= internal::constants::TICKS_PER_MINUTE;
+        minute = static_cast<std::int32_t>(timeTicks / constants::TICKS_PER_MINUTE);
+        timeTicks %= constants::TICKS_PER_MINUTE;
 
-        second = static_cast<std::int32_t>(timeTicks / internal::constants::TICKS_PER_SECOND);
-        timeTicks %= internal::constants::TICKS_PER_SECOND;
+        second = static_cast<std::int32_t>(timeTicks / constants::TICKS_PER_SECOND);
+        timeTicks %= constants::TICKS_PER_SECOND;
 
-        millisecond = static_cast<std::int32_t>(timeTicks / internal::constants::TICKS_PER_MILLISECOND);
+        millisecond = static_cast<std::int32_t>(timeTicks / constants::TICKS_PER_MILLISECOND);
     }
 
     /** @brief Validate that all positions contain digits */
@@ -111,19 +113,19 @@ namespace dnv::vista::sdk::internal
     }
 
     /** @brief Append two-digit zero-padded integer */
-    inline void appendTwoDigits(std::string& out, std::int32_t value) noexcept
+    inline void appendTwoDigits(StringBuilder& sb, std::int32_t value) noexcept
     {
-        out += static_cast<char>('0' + (value / 10));
-        out += static_cast<char>('0' + (value % 10));
+        sb += static_cast<char>('0' + (value / 10));
+        sb += static_cast<char>('0' + (value % 10));
     }
 
     /** @brief Append four-digit zero-padded integer */
-    inline void appendFourDigits(std::string& out, std::int32_t value) noexcept
+    inline void appendFourDigits(StringBuilder& sb, std::int32_t value) noexcept
     {
-        out += static_cast<char>('0' + (value / 1000));
-        out += static_cast<char>('0' + ((value / 100) % 10));
-        out += static_cast<char>('0' + ((value / 10) % 10));
-        out += static_cast<char>('0' + (value % 10));
+        sb += static_cast<char>('0' + (value / 1000));
+        sb += static_cast<char>('0' + ((value / 100) % 10));
+        sb += static_cast<char>('0' + ((value / 10) % 10));
+        sb += static_cast<char>('0' + (value % 10));
     }
 
     /** @brief Parse integer from string view using fast digit parsing */

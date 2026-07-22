@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "TimeSpan.h"
 
 #include <chrono>
@@ -251,6 +252,13 @@ namespace dnv::vista::sdk
          * @return String representation using the specified format
          */
         [[nodiscard]] std::string toString(Format format = Format::Iso8601) const;
+
+        /**
+         * @brief Append string representation using specified format to a reusable buffer
+         * @param builder Buffer to append the formatted string to
+         * @param format The format to use for string conversion
+         */
+        void toString(StringBuilder& builder, Format format = Format::Iso8601) const;
 
         /**
          * @brief Convert to std::chrono::system_clock::time_point

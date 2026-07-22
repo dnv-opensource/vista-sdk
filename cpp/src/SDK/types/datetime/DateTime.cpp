@@ -467,29 +467,29 @@ namespace dnv::vista::sdk
     {
         /** @brief Append ISO 8601 date part: YYYY-MM-DD */
         inline void appendIso8601Date(
-            std::string& out, std::int32_t year, std::int32_t month, std::int32_t day) noexcept
+            StringBuilder& sb, std::int32_t year, std::int32_t month, std::int32_t day) noexcept
         {
-            internal::appendFourDigits(out, year);
-            out += '-';
-            internal::appendTwoDigits(out, month);
-            out += '-';
-            internal::appendTwoDigits(out, day);
+            internal::appendFourDigits(sb, year);
+            sb += '-';
+            internal::appendTwoDigits(sb, month);
+            sb += '-';
+            internal::appendTwoDigits(sb, day);
         }
 
         /** @brief Append ISO 8601 time part: HH:mm:ss */
         inline void appendIso8601Time(
-            std::string& out, std::int32_t hour, std::int32_t minute, std::int32_t second) noexcept
+            StringBuilder& sb, std::int32_t hour, std::int32_t minute, std::int32_t second) noexcept
         {
-            internal::appendTwoDigits(out, hour);
-            out += ':';
-            internal::appendTwoDigits(out, minute);
-            out += ':';
-            internal::appendTwoDigits(out, second);
+            internal::appendTwoDigits(sb, hour);
+            sb += ':';
+            internal::appendTwoDigits(sb, minute);
+            sb += ':';
+            internal::appendTwoDigits(sb, second);
         }
 
         /** @brief Append ISO 8601 datetime part: YYYY-MM-DDTHH:mm:ss */
         inline void appendIso8601DateTime(
-            std::string& out,
+            StringBuilder& sb,
             std::int32_t year,
             std::int32_t month,
             std::int32_t day,
@@ -497,14 +497,14 @@ namespace dnv::vista::sdk
             std::int32_t minute,
             std::int32_t second) noexcept
         {
-            appendIso8601Date(out, year, month, day);
-            out += 'T';
-            appendIso8601Time(out, hour, minute, second);
+            appendIso8601Date(sb, year, month, day);
+            sb += 'T';
+            appendIso8601Time(sb, hour, minute, second);
         }
 
         /** @brief Append zero-padded fractional seconds with specific precision */
         inline void appendFractionalSeconds(
-            std::string& out, std::int32_t fractionalValue, std::size_t bufferSize) noexcept
+            StringBuilder& sb, std::int32_t fractionalValue, std::size_t bufferSize) noexcept
         {
             char fracBuffer[8];
             fracBuffer[0] = '.';
@@ -519,11 +519,11 @@ namespace dnv::vista::sdk
                 std::memset(fracBuffer + 1, '0', paddingNeeded);
             }
 
-            out.append(fracBuffer, bufferSize);
+            sb.append(std::string_view{ fracBuffer, bufferSize });
         }
 
         /** @brief Append fractional seconds with trimmed trailing zeros */
-        inline void appendFractionalSecondsTrimmed(std::string& out, std::int32_t fractionalTicks) noexcept
+        inline void appendFractionalSecondsTrimmed(StringBuilder& sb, std::int32_t fractionalTicks) noexcept
         {
             if (fractionalTicks > 0)
             {
@@ -545,17 +545,17 @@ namespace dnv::vista::sdk
                     --fracLen;
                 }
 
-                out.append(fracBuffer, static_cast<std::size_t>(fracLen));
+                sb.append(std::string_view{ fracBuffer, static_cast<std::size_t>(fracLen) });
             }
             else
             {
-                out += ".0";
+                sb += ".0";
             }
         }
 
         /** @brief Format ISO 8601 with UTC indicator: YYYY-MM-DDTHH:mm:ssZ */
         inline void formatIso8601(
-            std::string& out,
+            StringBuilder& sb,
             std::int32_t y,
             std::int32_t mon,
             std::int32_t d,
@@ -563,13 +563,13 @@ namespace dnv::vista::sdk
             std::int32_t min,
             std::int32_t s) noexcept
         {
-            appendIso8601DateTime(out, y, mon, d, h, min, s);
-            out += 'Z';
+            appendIso8601DateTime(sb, y, mon, d, h, min, s);
+            sb += 'Z';
         }
 
         /** @brief Format ISO 8601 with precise fractional seconds: YYYY-MM-DDTHH:mm:ss.1234567Z */
         inline void formatIso8601Precise(
-            std::string& out,
+            StringBuilder& sb,
             std::int32_t y,
             std::int32_t mon,
             std::int32_t d,
@@ -580,14 +580,14 @@ namespace dnv::vista::sdk
         {
             const std::int32_t fractionalTicks{ static_cast<std::int32_t>(
                 ticks % internal::constants::TICKS_PER_SECOND) };
-            appendIso8601DateTime(out, y, mon, d, h, min, s);
-            appendFractionalSeconds(out, fractionalTicks, 8);
-            out += 'Z';
+            appendIso8601DateTime(sb, y, mon, d, h, min, s);
+            appendFractionalSeconds(sb, fractionalTicks, 8);
+            sb += 'Z';
         }
 
         /** @brief Format ISO 8601 with trimmed fractional seconds: YYYY-MM-DDTHH:mm:ss.f+Z */
         inline void formatIso8601PreciseTrimmed(
-            std::string& out,
+            StringBuilder& sb,
             std::int32_t y,
             std::int32_t mon,
             std::int32_t d,
@@ -598,14 +598,14 @@ namespace dnv::vista::sdk
         {
             const std::int32_t fractionalTicks{ static_cast<std::int32_t>(
                 ticks % internal::constants::TICKS_PER_SECOND) };
-            appendIso8601DateTime(out, y, mon, d, h, min, s);
-            appendFractionalSecondsTrimmed(out, fractionalTicks);
-            out += 'Z';
+            appendIso8601DateTime(sb, y, mon, d, h, min, s);
+            appendFractionalSecondsTrimmed(sb, fractionalTicks);
+            sb += 'Z';
         }
 
         /** @brief Format ISO 8601 with milliseconds: YYYY-MM-DDTHH:mm:ss.123Z */
         inline void formatIso8601Millis(
-            std::string& out,
+            StringBuilder& sb,
             std::int32_t y,
             std::int32_t mon,
             std::int32_t d,
@@ -618,14 +618,14 @@ namespace dnv::vista::sdk
                 ticks % internal::constants::TICKS_PER_SECOND) };
             const std::int32_t milliseconds{ static_cast<std::int32_t>(
                 fractionalTicks / internal::constants::TICKS_PER_MILLISECOND) };
-            appendIso8601DateTime(out, y, mon, d, h, min, s);
-            appendFractionalSeconds(out, milliseconds, 4);
-            out += 'Z';
+            appendIso8601DateTime(sb, y, mon, d, h, min, s);
+            appendFractionalSeconds(sb, milliseconds, 4);
+            sb += 'Z';
         }
 
         /** @brief Format ISO 8601 with microseconds: YYYY-MM-DDTHH:mm:ss.123456Z */
         inline void formatIso8601Micros(
-            std::string& out,
+            StringBuilder& sb,
             std::int32_t y,
             std::int32_t mon,
             std::int32_t d,
@@ -638,14 +638,14 @@ namespace dnv::vista::sdk
                 ticks % internal::constants::TICKS_PER_SECOND) };
             const std::int32_t microseconds{ static_cast<std::int32_t>(
                 fractionalTicks / internal::constants::TICKS_PER_MICROSECOND) };
-            appendIso8601DateTime(out, y, mon, d, h, min, s);
-            appendFractionalSeconds(out, microseconds, 7);
-            out += 'Z';
+            appendIso8601DateTime(sb, y, mon, d, h, min, s);
+            appendFractionalSeconds(sb, microseconds, 7);
+            sb += 'Z';
         }
 
         /** @brief Format ISO 8601 extended with UTC offset: YYYY-MM-DDTHH:mm:ss+00:00 */
         inline void formatIso8601Extended(
-            std::string& out,
+            StringBuilder& sb,
             std::int32_t y,
             std::int32_t mon,
             std::int32_t d,
@@ -653,13 +653,13 @@ namespace dnv::vista::sdk
             std::int32_t min,
             std::int32_t s) noexcept
         {
-            appendIso8601DateTime(out, y, mon, d, h, min, s);
-            out += "+00:00";
+            appendIso8601DateTime(sb, y, mon, d, h, min, s);
+            sb += "+00:00";
         }
 
         /** @brief Format ISO 8601 basic (compact): YYYYMMDDTHHMMSSZ */
         inline void formatIso8601Basic(
-            std::string& out,
+            StringBuilder& sb,
             std::int32_t y,
             std::int32_t mon,
             std::int32_t d,
@@ -667,69 +667,73 @@ namespace dnv::vista::sdk
             std::int32_t min,
             std::int32_t s) noexcept
         {
-            internal::appendFourDigits(out, y);
-            internal::appendTwoDigits(out, mon);
-            internal::appendTwoDigits(out, d);
-            out += 'T';
-            internal::appendTwoDigits(out, h);
-            internal::appendTwoDigits(out, min);
-            internal::appendTwoDigits(out, s);
-            out += 'Z';
+            internal::appendFourDigits(sb, y);
+            internal::appendTwoDigits(sb, mon);
+            internal::appendTwoDigits(sb, d);
+            sb += 'T';
+            internal::appendTwoDigits(sb, h);
+            internal::appendTwoDigits(sb, min);
+            internal::appendTwoDigits(sb, s);
+            sb += 'Z';
         }
     } // namespace
 
     std::string DateTime::toString(Format format) const
     {
+        StringBuilder sb;
+        toString(sb, format);
+        return sb.toString();
+    }
+
+    void DateTime::toString(StringBuilder& builder, Format format) const
+    {
         std::int32_t y, mon, d, h, min, s, ms;
         internal::dateComponentsFromTicks(m_ticks, y, mon, d);
         internal::timeComponentsFromTicks(m_ticks, h, min, s, ms);
 
-        std::string str;
-        str.reserve(35);
-
         switch (format)
         {
             case Format::Iso8601:
-                formatIso8601(str, y, mon, d, h, min, s);
+                formatIso8601(builder, y, mon, d, h, min, s);
                 break;
 
             case Format::Iso8601Precise:
-                formatIso8601Precise(str, y, mon, d, h, min, s, m_ticks);
+                formatIso8601Precise(builder, y, mon, d, h, min, s, m_ticks);
                 break;
 
             case Format::Iso8601PreciseTrimmed:
-                formatIso8601PreciseTrimmed(str, y, mon, d, h, min, s, m_ticks);
+                formatIso8601PreciseTrimmed(builder, y, mon, d, h, min, s, m_ticks);
                 break;
 
             case Format::Iso8601Millis:
-                formatIso8601Millis(str, y, mon, d, h, min, s, m_ticks);
+                formatIso8601Millis(builder, y, mon, d, h, min, s, m_ticks);
                 break;
 
             case Format::Iso8601Micros:
-                formatIso8601Micros(str, y, mon, d, h, min, s, m_ticks);
+                formatIso8601Micros(builder, y, mon, d, h, min, s, m_ticks);
                 break;
 
             case Format::Iso8601Extended:
-                formatIso8601Extended(str, y, mon, d, h, min, s);
+                formatIso8601Extended(builder, y, mon, d, h, min, s);
                 break;
 
             case Format::Iso8601Basic:
-                formatIso8601Basic(str, y, mon, d, h, min, s);
+                formatIso8601Basic(builder, y, mon, d, h, min, s);
                 break;
 
             case Format::Iso8601Date:
-                appendIso8601Date(str, y, mon, d);
+                appendIso8601Date(builder, y, mon, d);
                 break;
 
             case Format::Iso8601Time:
-                appendIso8601Time(str, h, min, s);
+                appendIso8601Time(builder, h, min, s);
                 break;
 
             case Format::UnixSeconds:
             {
                 char buffer[32];
                 const auto ptr = std::to_chars(buffer, buffer + 32, toEpochSeconds()).ptr;
-                str.append(buffer, ptr);
+                builder.append(std::string_view{ buffer, static_cast<std::size_t>(ptr - buffer) });
                 break;
             }
 
@@ -737,15 +741,14 @@ namespace dnv::vista::sdk
             {
                 char buffer[32];
                 const auto ptr = std::to_chars(buffer, buffer + 32, toEpochMilliseconds()).ptr;
-                str.append(buffer, ptr);
+                builder.append(std::string_view{ buffer, static_cast<std::size_t>(ptr - buffer) });
                 break;
             }
 
             default:
-                return toString(Format::Iso8601);
+                toString(builder, Format::Iso8601);
+                break;
         }
-
-        return str;
     }
 
     bool DateTime::isValid() const noexcept
