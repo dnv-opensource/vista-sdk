@@ -1358,13 +1358,18 @@ namespace dnv::vista::sdk
 
     std::string Decimal::toString() const
     {
+        StringBuilder sb;
+        toString(sb);
+        return sb.toString();
+    }
+
+    void Decimal::toString(StringBuilder& builder) const
+    {
         if (m_layout.mantissa[0] == 0 && m_layout.mantissa[1] == 0 && m_layout.mantissa[2] == 0)
         {
-            return "0";
+            builder += '0';
+            return;
         }
-
-        std::string result;
-        result.reserve(internal::constants::DECIMAL_STRING_BUFFER_SIZE);
 
         Int128 mantissa{ internal::mantissaAsInt128(*this).abs() };
         std::uint8_t currentScale{ scale() };
@@ -1439,7 +1444,7 @@ namespace dnv::vista::sdk
         // Handle sign
         if ((m_layout.flags & internal::constants::DECIMAL_SIGN_MASK) != 0)
         {
-            result.push_back('-');
+            builder += '-';
         }
 
         // Apply decimal point formatting
@@ -1448,19 +1453,19 @@ namespace dnv::vista::sdk
             if (currentScale >= digitCount)
             {
                 // Need leading zeros: "0.00123"
-                result.push_back('0');
-                result.push_back('.');
+                builder += '0';
+                builder += '.';
 
                 // Add leading zeros
                 for (size_t i = 0; i < currentScale - digitCount; ++i)
                 {
-                    result.push_back('0');
+                    builder += '0';
                 }
 
                 // Add digits in reverse order
                 for (size_t i = digitCount; i > 0; --i)
                 {
-                    result.push_back(digits[i - 1]);
+                    builder += digits[i - 1];
                 }
             }
             else
@@ -1468,15 +1473,15 @@ namespace dnv::vista::sdk
                 // Add integer part (reverse order)
                 for (size_t i = digitCount; i > currentScale; --i)
                 {
-                    result.push_back(digits[i - 1]);
+                    builder += digits[i - 1];
                 }
 
-                result.push_back('.');
+                builder += '.';
 
                 // Add fractional part (reverse order)
                 for (size_t i = currentScale; i > 0; --i)
                 {
-                    result.push_back(digits[i - 1]);
+                    builder += digits[i - 1];
                 }
             }
         }
@@ -1485,11 +1490,9 @@ namespace dnv::vista::sdk
             // No decimal point, just add digits in reverse order
             for (size_t i = digitCount; i > 0; --i)
             {
-                result.push_back(digits[i - 1]);
+                builder += digits[i - 1];
             }
         }
-
-        return result;
     }
 
     std::array<std::int32_t, 4> Decimal::toBits() const noexcept

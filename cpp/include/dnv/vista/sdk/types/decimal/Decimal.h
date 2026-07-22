@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
+
 #include <array>
 #include <compare>
 #include <cstdint>
@@ -275,6 +277,12 @@ namespace dnv::vista::sdk
          * @return String representation
          */
         [[nodiscard]] std::string toString() const;
+
+        /**
+         * @brief Append string representation with exact precision to a reusable buffer
+         * @param builder Buffer to append the formatted string to
+         */
+        void toString(StringBuilder& builder) const;
 
         /**
          * @brief Get internal 32-bit representation
