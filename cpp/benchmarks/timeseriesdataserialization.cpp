@@ -36,18 +36,22 @@ namespace dnv::vista::sdk::benchmarks
 
         auto package = jts::toDomain(*dtoOpt);
 
-        auto warmup = jts::toJsonString(package);
-        (void)warmup;
+        StringBuilder warmupBuffer;
+        jts::toJsonString(warmupBuffer, package);
 
         ankerl::nanobench::Bench bench;
         bench.title("TimeSeriesDataSerialization").warmup(1000).minEpochIterations(10000);
 
+        StringBuilder serializeBuffer;
         bench.run("Serialize", [&] {
-            auto result = jts::toJsonString(package);
-            ankerl::nanobench::doNotOptimizeAway(result);
+            serializeBuffer.clear();
+            jts::toJsonString(serializeBuffer, package);
+            ankerl::nanobench::doNotOptimizeAway(serializeBuffer.size());
         });
 
-        auto serialized = jts::toJsonString(package);
+        StringBuilder serializedBuffer;
+        jts::toJsonString(serializedBuffer, package);
+        auto serialized = serializedBuffer.toString();
         bench.run("Deserialize", [&] {
             auto result = jts::fromJsonString(serialized);
             ankerl::nanobench::doNotOptimizeAway(result);

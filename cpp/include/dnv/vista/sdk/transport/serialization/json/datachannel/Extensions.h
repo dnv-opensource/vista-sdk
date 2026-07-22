@@ -7,6 +7,7 @@
 
 #include "DataChannelListPackage.h"
 #include "dnv/vista/sdk/transport/datachannel/DataChannel.h"
+#include "dnv/vista/sdk/utils/StringBuilder.h"
 
 namespace dnv::vista::sdk::transport::serialization::json::datachannel
 {
@@ -27,14 +28,14 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
         const DataChannelListPackageDto& dto);
 
     /**
-     * @brief Serialize a DTO to a JSON string
+     * @brief Serialize a DTO to JSON, writing into the given buffer
+     * @param buffer External buffer to write into. The caller owns it and may reuse it
+     *               across multiple calls to retain its capacity between documents
      * @param dto The DTO to serialize
      * @param prettyPrint If true, output is indented with 2-space indent. If false, compact
-     * @param reserveHint Pre-allocate buffer capacity hint in bytes (0 = default 4096)
-     * @return JSON string
      */
-    [[nodiscard]] std::string toJsonString(
-        const DataChannelListPackageDto& dto, bool prettyPrint = false, size_t reserveHint = 0);
+    void toJsonString(
+        dnv::vista::sdk::StringBuilder& buffer, const DataChannelListPackageDto& dto, bool prettyPrint = false);
 
     /**
      * @brief Deserialize a JSON string into a DTO
@@ -44,18 +45,18 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
     [[nodiscard]] std::optional<DataChannelListPackageDto> fromJsonString(std::string_view json);
 
     /**
-     * @brief Serialize a domain object directly to a JSON string
+     * @brief Serialize a domain object directly to JSON, writing into the given buffer
+     * @param buffer External buffer to write into. The caller owns it and may reuse it
+     *               across multiple calls to retain its capacity between documents
      * @param domain The domain object to serialize
      * @param prettyPrint If true, output is indented with 2-space indent. If false, compact
-     * @param reserveHint Pre-allocate buffer capacity hint in bytes (0 = default 4096)
-     * @return JSON string
      */
-    [[nodiscard]] inline std::string toJsonString(
+    inline void toJsonString(
+        dnv::vista::sdk::StringBuilder& buffer,
         const dnv::vista::sdk::transport::datachannel::DataChannelListPackage& domain,
-        bool prettyPrint = false,
-        size_t reserveHint = 0)
+        bool prettyPrint = false)
     {
-        return toJsonString(toDto(domain), prettyPrint, reserveHint);
+        toJsonString(buffer, toDto(domain), prettyPrint);
     }
 
     /**

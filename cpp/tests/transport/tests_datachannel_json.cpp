@@ -132,8 +132,9 @@ namespace dnv::vista::sdk::tests
             auto domain = jdc::toDomain(*dto);
 
             // domain -> JSON -> domain
-            auto json2 = jdc::toJsonString(domain);
-            auto dto2 = jdc::fromJsonString(json2);
+            StringBuilder sb;
+            jdc::toJsonString(sb, domain);
+            auto dto2 = jdc::fromJsonString(sb.view());
             REQUIRE(dto2.has_value());
             auto domain2 = jdc::toDomain(*dto2);
 
@@ -165,11 +166,12 @@ namespace dnv::vista::sdk::tests
             auto dto = jdc::fromJsonString(originalJson);
             REQUIRE(dto.has_value());
             auto domain = jdc::toDomain(*dto);
-            auto reserializedJson = jdc::toJsonString(domain);
+            StringBuilder reserializedBuffer;
+            jdc::toJsonString(reserializedBuffer, domain);
 
             // Both must parse to equivalent documents
             auto doc1 = dnv::vista::sdk::json::Document::fromString(originalJson);
-            auto doc2 = dnv::vista::sdk::json::Document::fromString(reserializedJson);
+            auto doc2 = dnv::vista::sdk::json::Document::fromString(reserializedBuffer.view());
             REQUIRE(doc1.has_value());
             REQUIRE(doc2.has_value());
 
@@ -206,11 +208,12 @@ namespace dnv::vista::sdk::tests
             REQUIRE(dto.has_value());
             auto domain = jdc::toDomain(*dto);
 
-            auto prettyJson = jdc::toJsonString(domain, true);
+            StringBuilder prettyBuffer;
+            jdc::toJsonString(prettyBuffer, domain, true);
 
-            CHECK(prettyJson.find('\n') != std::string::npos);
+            CHECK(prettyBuffer.view().find('\n') != std::string_view::npos);
 
-            auto dto2 = jdc::fromJsonString(prettyJson);
+            auto dto2 = jdc::fromJsonString(prettyBuffer.view());
             REQUIRE(dto2.has_value());
             auto domain2 = jdc::toDomain(*dto2);
 
