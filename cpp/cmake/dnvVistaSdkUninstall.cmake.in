@@ -1,0 +1,24 @@
+#==============================================================================
+# dnv-vista-sdk - uninstall script, run by the `uninstall` target
+#==============================================================================
+
+if(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
+    message(FATAL_ERROR "Cannot find install manifest: @CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
+endif()
+
+file(READ "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt" files)
+string(REGEX REPLACE "\n" ";" files "${files}")
+
+foreach(file ${files})
+    if(EXISTS "$ENV{DESTDIR}${file}")
+        message(STATUS "Uninstalling: $ENV{DESTDIR}${file}")
+        file(REMOVE "$ENV{DESTDIR}${file}")
+        if(NOT EXISTS "$ENV{DESTDIR}${file}")
+            message(STATUS "Uninstalled: $ENV{DESTDIR}${file}")
+        else()
+            message(WARNING "Failed to uninstall: $ENV{DESTDIR}${file}")
+        endif()
+    else()
+        message(STATUS "File does not exist: $ENV{DESTDIR}${file}")
+    endif()
+endforeach()
