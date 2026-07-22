@@ -67,6 +67,7 @@ set_target_properties(${PROJECT_NAME}
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS        OFF
         DEBUG_POSTFIX         "-d"
+        EXPORT_NAME           vista::sdk
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
@@ -107,6 +108,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${DNV_VISTA_SDK_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE
         ${DNV_VISTA_SDK_SOURCE_DIR}
 )

@@ -77,12 +77,15 @@ option(DNV_VISTA_SDK_WARNINGS         "Enable strict compiler warnings"  OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+include(GNUInstallDirs)
+
 include(dnvVistaSdkVersion)
 include(dnvVistaSdkBlobs)
 include(dnvVistaSdkVisVersionsGenerator)
 include(dnvVistaSdkISO19848VersionsGenerator)
 include(dnvVistaSdkSources)
 include(dnvVistaSdkTargets)
+include(dnvVistaSdkInstall)
 
 #----------------------------------------------
 # Tests

@@ -260,3 +260,69 @@ jobs:
       - name: Build samples (Windows MSVC)
         if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
         run: cmake --build build-samples --config Release --parallel
+
+  install-and-consume:
+    name: Install and consume via find_package()
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++
+
+      - name: Configure SDK
+        run: |
+          cmake -S cpp -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=install \
+            -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
+            -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
+            -DDNV_VISTA_SDK_WARNINGS=OFF
+
+      - name: Build SDK
+        run: cmake --build build --parallel
+
+      - name: Install SDK
+        run: cmake --install build
+
+      - name: Generate consumer project
+        run: |
+          mkdir -p consumer
+          cat > consumer/CMakeLists.txt <<'EOF'
+          cmake_minimum_required(VERSION 3.25)
+          project(dnv_vista_sdk_consumer_smoke_test LANGUAGES CXX)
+
+          find_package(dnv-vista-sdk REQUIRED)
+
+          add_executable(consumer main.cpp)
+          target_link_libraries(consumer PRIVATE dnv::vista::sdk)
+          EOF
+          cat > consumer/main.cpp <<'EOF'
+          #include <dnv/VistaSDK.h>
+
+          #include <iostream>
+
+          int main()
+          {
+              std::cout << "dnv-vista-sdk version: " << dnv::vista::sdk::version() << "\n";
+              return 0;
+          }
+          EOF
+
+      - name: Configure consumer against installed package
+        run: |
+          cmake -S consumer -B consumer/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install"
+
+      - name: Build consumer
+        run: cmake --build consumer/build --parallel
+
+      - name: Run consumer
+        run: ./consumer/build/consumer
