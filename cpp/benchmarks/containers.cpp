@@ -6,9 +6,7 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
 
-#include <dnv/vista/sdk/containers/StringSet.h>
-#include <dnv/vista/sdk/containers/PerfectHashMap.h>
-#include <dnv/vista/sdk/containers/StackVector.h>
+#include <dnv/VistaSDK.h>
 
 #include <string>
 #include <string_view>

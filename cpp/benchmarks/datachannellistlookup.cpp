@@ -7,9 +7,7 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
 
-#include <dnv/vista/sdk/core/LocalId.h>
-#include <dnv/vista/sdk/transport/datachannel/DataChannel.h>
-#include <dnv/vista/sdk/transport/serialization/json/datachannel/Extensions.h>
+#include <dnv/VistaSDK.h>
 
 #include <SchemasRegistry.h>
 

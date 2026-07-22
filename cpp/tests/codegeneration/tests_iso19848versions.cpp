@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/transport/ISO19848Versions.h>
+#include <dnv/VistaSDK.h>
 
 #include <SDK/transport/ISO19848VersionsExtensions.h>
 

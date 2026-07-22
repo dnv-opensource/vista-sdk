@@ -5,9 +5,7 @@
  *          parse UniversalId strings, and work with globally unique sensor identifiers
  */
 
-#include <dnv/vista/sdk/core/UniversalId.h>
-#include <dnv/vista/sdk/core/ParsingErrors.h>
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

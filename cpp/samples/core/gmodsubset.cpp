@@ -7,8 +7,7 @@
  *          visualizations, and generating LocalIds for sensor data.
  */
 
-#include <dnv/vista/sdk/core/LocalId.h>
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <algorithm>
 #include <iostream>

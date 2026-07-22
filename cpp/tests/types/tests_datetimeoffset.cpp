@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/types/datetime/DateTimeOffset.h>
+#include <dnv/VistaSDK.h>
 
 #include <cstdlib>
 #include <ctime>

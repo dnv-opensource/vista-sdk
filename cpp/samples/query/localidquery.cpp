@@ -5,8 +5,7 @@
  *          and metadata tags, using GmodPathQuery and MetadataTagsQuery as building blocks.
  */
 
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/query/LocalIdQuery.h>
+#include <dnv/VistaSDK.h>
 
 #include <iostream>
 #include <string>

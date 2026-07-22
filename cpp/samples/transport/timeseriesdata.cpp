@@ -5,9 +5,7 @@
  *          cross-validation with DataChannelList, and JSON serialization per ISO 19848:2024
  */
 
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/transport/serialization/json/timeseries/Extensions.h>
-#include <dnv/vista/sdk/transport/datachannel/DataChannel.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/query/MetadataTagsQuery.h>
+#include <dnv/VistaSDK.h>
 
 #include <string>
 

@@ -1,7 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/query/LocalIdQuery.h>
+#include <dnv/VistaSDK.h>
 
 namespace dnv::vista::sdk::tests
 {

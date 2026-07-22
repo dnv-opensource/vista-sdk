@@ -5,8 +5,7 @@
  *          between different VIS versions using the VIS singleton API
  */
 
-#include <dnv/vista/sdk/core/LocalId.h>
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

@@ -6,9 +6,7 @@
  *          and reuse across multiple toString() calls.
  */
 
-#include <dnv/vista/sdk/core/LocalId.h>
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/utils/StringBuilder.h>
+#include <dnv/VistaSDK.h>
 
 #include <iostream>
 #include <string>

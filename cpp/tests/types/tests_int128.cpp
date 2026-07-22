@@ -1,7 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/detail/types/decimal/Constants.h>
-#include <dnv/vista/sdk/types/decimal/Decimal.h>
+#include <dnv/VistaSDK.h>
 
 #include <SDK/types/decimal/Int128.h>
 

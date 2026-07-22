@@ -1,7 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/query/GmodPathQuery.h>
+#include <dnv/VistaSDK.h>
 
 #include <string>
 #include <vector>

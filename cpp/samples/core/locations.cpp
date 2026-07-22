@@ -5,9 +5,7 @@
  *          use the LocationBuilder fluent API, and handle location components
  */
 
-#include <dnv/vista/sdk/core/LocationBuilder.h>
-#include <dnv/vista/sdk/core/ParsingErrors.h>
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

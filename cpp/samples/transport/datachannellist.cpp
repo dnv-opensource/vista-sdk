@@ -5,8 +5,7 @@
  *          custom properties, name objects, and JSON serialization per ISO 19848:2024
  */
 
-#include <dnv/vista/sdk/core/VIS.h>
-#include <dnv/vista/sdk/transport/serialization/json/datachannel/Extensions.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

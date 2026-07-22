@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <JSON/Json.h>
 

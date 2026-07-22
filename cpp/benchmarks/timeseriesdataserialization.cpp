@@ -6,8 +6,7 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
 
-#include <dnv/vista/sdk/transport/serialization/json/timeseries/Extensions.h>
-#include <dnv/vista/sdk/transport/timeseries/TimeSeriesData.h>
+#include <dnv/VistaSDK.h>
 
 #include <SchemasRegistry.h>
 

@@ -5,7 +5,7 @@
  *          including data channel type names, format data types, value validation, and pattern matching
  */
 
-#include <dnv/vista/sdk/transport/ISO19848.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

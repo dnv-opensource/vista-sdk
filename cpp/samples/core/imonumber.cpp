@@ -5,7 +5,7 @@
  *          with checksum verification per IMO Resolution A.600(15)
  */
 
-#include <dnv/vista/sdk/core/ImoNumber.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>

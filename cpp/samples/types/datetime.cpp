@@ -5,9 +5,7 @@
  *          temporal operations, ISO 8601 parsing/formatting, and timezone handling
  */
 
-#include <dnv/vista/sdk/types/datetime/DateTime.h>
-#include <dnv/vista/sdk/types/datetime/DateTimeOffset.h>
-#include <dnv/vista/sdk/types/datetime/TimeSpan.h>
+#include <dnv/VistaSDK.h>
 
 #include <iostream>
 #include <string>

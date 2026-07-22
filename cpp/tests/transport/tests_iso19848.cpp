@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/transport/ISO19848.h>
+#include <dnv/VistaSDK.h>
 
 #include <algorithm>
 #include <optional>

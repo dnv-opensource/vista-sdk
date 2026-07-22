@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/transport/serialization/json/SerializableDocument.h>
+#include <dnv/VistaSDK.h>
 
 namespace test_adapters
 {

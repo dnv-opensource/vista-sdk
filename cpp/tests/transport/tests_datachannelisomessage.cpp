@@ -1,7 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <dnv/vista/sdk/transport/datachannel/DataChannel.h>
-#include <dnv/vista/sdk/transport/ShipId.h>
+#include <dnv/VistaSDK.h>
 
 namespace dnv::vista::sdk::tests
 {

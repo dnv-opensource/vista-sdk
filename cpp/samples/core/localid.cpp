@@ -5,9 +5,7 @@
  *          work with metadata tags, use verbose mode, and handle MQTT formatting
  */
 
-#include <dnv/vista/sdk/core/LocalId.h>
-#include <dnv/vista/sdk/core/ParsingErrors.h>
-#include <dnv/vista/sdk/core/VIS.h>
+#include <dnv/VistaSDK.h>
 
 #include <iomanip>
 #include <iostream>
