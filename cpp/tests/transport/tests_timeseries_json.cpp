@@ -163,8 +163,9 @@ namespace dnv::vista::sdk::tests
             REQUIRE(dto.has_value());
             auto domain = jts::toDomain(*dto);
 
-            auto json2 = jts::toJsonString(domain);
-            auto dto2 = jts::fromJsonString(json2);
+            StringBuilder sb;
+            jts::toJsonString(sb, domain);
+            auto dto2 = jts::fromJsonString(sb.view());
             REQUIRE(dto2.has_value());
             auto domain2 = jts::toDomain(*dto2);
 
@@ -213,10 +214,11 @@ namespace dnv::vista::sdk::tests
             auto dto = jts::fromJsonString(originalJson);
             REQUIRE(dto.has_value());
             auto domain = jts::toDomain(*dto);
-            auto reserializedJson = jts::toJsonString(domain);
+            StringBuilder reserializedBuffer;
+            jts::toJsonString(reserializedBuffer, domain);
 
             auto doc1 = JsonDocument::fromString(originalJson);
-            auto doc2 = JsonDocument::fromString(reserializedJson);
+            auto doc2 = JsonDocument::fromString(reserializedBuffer.view());
             REQUIRE(doc1.has_value());
             REQUIRE(doc2.has_value());
 
@@ -290,11 +292,12 @@ namespace dnv::vista::sdk::tests
             REQUIRE(dto.has_value());
             auto domain = jts::toDomain(*dto);
 
-            auto prettyJson = jts::toJsonString(domain, true);
+            StringBuilder prettyBuffer;
+            jts::toJsonString(prettyBuffer, domain, true);
 
-            CHECK(prettyJson.find('\n') != std::string::npos);
+            CHECK(prettyBuffer.view().find('\n') != std::string_view::npos);
 
-            auto dto2 = jts::fromJsonString(prettyJson);
+            auto dto2 = jts::fromJsonString(prettyBuffer.view());
             REQUIRE(dto2.has_value());
             auto domain2 = jts::toDomain(*dto2);
 

@@ -373,35 +373,40 @@ namespace dnv::vista::sdk::tests
     {
         TEST_CASE("compact object")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().write("name", "Alice").write("age", int64_t{ 30 }).writeEndObject();
             CHECK_EQ(b.toString(), R"({"name":"Alice","age":30})");
         }
 
         TEST_CASE("compact array")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartArray().write(int64_t{ 1 }).write(int64_t{ 2 }).write(int64_t{ 3 }).writeEndArray();
             CHECK_EQ(b.toString(), "[1,2,3]");
         }
 
         TEST_CASE("null value")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().write("x", nullptr).writeEndObject();
             CHECK_EQ(b.toString(), R"({"x":null})");
         }
 
         TEST_CASE("boolean values")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().write("t", true).write("f", false).writeEndObject();
             CHECK_EQ(b.toString(), R"({"t":true,"f":false})");
         }
 
         TEST_CASE("double value")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().write("pi", 3.14).writeEndObject();
             auto result = b.toString();
             auto doc = Document::fromString(result);
@@ -411,7 +416,8 @@ namespace dnv::vista::sdk::tests
 
         TEST_CASE("nested object via writeKey")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject()
                 .writeKey("inner")
                 .writeStartObject()
@@ -424,14 +430,16 @@ namespace dnv::vista::sdk::tests
         TEST_CASE("writeArray from container")
         {
             std::vector<int64_t> vals{ 10, 20, 30 };
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().writeArray("items", vals).writeEndObject();
             CHECK_EQ(b.toString(), R"({"items":[10,20,30]})");
         }
 
         TEST_CASE("string escaping")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().write("msg", "line1\nline2\ttab\"quote").writeEndObject();
             auto result = b.toString();
             auto doc = Document::fromString(result);
@@ -443,7 +451,8 @@ namespace dnv::vista::sdk::tests
         {
             auto inner = Document::fromString(R"({"a":1})");
             REQUIRE(inner.has_value());
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().write("data", *inner).writeEndObject();
             auto result = b.toString();
             auto doc = Document::fromString(result);
@@ -453,14 +462,16 @@ namespace dnv::vista::sdk::tests
 
         TEST_CASE("isValid after close")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().writeEndObject();
             CHECK(b.isValid());
         }
 
         TEST_CASE("reset allows reuse")
         {
-            Builder b;
+            StringBuilder sb;
+            Builder b{ sb };
             b.writeStartObject().write("x", int64_t{ 1 }).writeEndObject();
             b.reset();
             b.writeStartArray().write(int64_t{ 2 }).writeEndArray();

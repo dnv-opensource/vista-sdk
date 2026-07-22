@@ -9,13 +9,12 @@
 
 namespace dnv::vista::sdk::json
 {
-    Builder::Builder(Options options)
-        : m_indent{ options.indent },
+    Builder::Builder(StringBuilder& buffer, Options options)
+        : m_buffer{ buffer },
+          m_indent{ options.indent },
           m_currentIndent{ 0 },
           m_escapeNonAscii{ options.escapeNonAscii }
-    {
-        m_buffer.reserve(options.bufferSize);
-    }
+    {}
 
     Builder& Builder::writeStartObject()
     {
@@ -306,8 +305,8 @@ namespace dnv::vista::sdk::json
 
     std::string Builder::toString()
     {
-        std::string result = std::move(m_buffer);
-        m_buffer = {};
+        std::string result = m_buffer.toString();
+        m_buffer.clear();
         m_contextStack.clear();
         m_currentIndent = 0;
         return result;
@@ -328,7 +327,7 @@ namespace dnv::vista::sdk::json
 
     bool Builder::isEmpty() const noexcept
     {
-        return m_buffer.empty();
+        return m_buffer.isEmpty();
     }
 
     Builder& Builder::reserve(size_t cap)
@@ -364,32 +363,17 @@ namespace dnv::vista::sdk::json
 
     void Builder::writeInt(int64_t value)
     {
-        char buf[32];
-        auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
-        if (ec == std::errc{})
-        {
-            m_buffer.append(buf, ptr);
-        }
+        m_buffer.append(value);
     }
 
     void Builder::writeUInt(uint64_t value)
     {
-        char buf[32];
-        auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
-        if (ec == std::errc{})
-        {
-            m_buffer.append(buf, ptr);
-        }
+        m_buffer.append(value);
     }
 
     void Builder::writeDouble(double value)
     {
-        char buf[32];
-        auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
-        if (ec == std::errc{})
-        {
-            m_buffer.append(buf, ptr);
-        }
+        m_buffer.append(value);
     }
 
     void Builder::writeString(std::string_view str)
@@ -541,7 +525,7 @@ namespace dnv::vista::sdk::json
             {
                 if (i > lastPos)
                 {
-                    m_buffer.append(str.data() + lastPos, i - lastPos);
+                    m_buffer.append(std::string_view{ str.data() + lastPos, i - lastPos });
                     lastPos = i;
                 }
                 for (size_t j = 0; j < 16 && i + j < str.size(); ++j)
@@ -550,7 +534,7 @@ namespace dnv::vista::sdk::json
                     {
                         if (i + j > lastPos)
                         {
-                            m_buffer.append(str.data() + lastPos, (i + j) - lastPos);
+                            m_buffer.append(std::string_view{ str.data() + lastPos, (i + j) - lastPos });
                         }
                         unsigned char c = static_cast<unsigned char>(str[i + j]);
                         m_buffer += '\\';
@@ -599,7 +583,7 @@ namespace dnv::vista::sdk::json
             {
                 if (i > lastPos)
                 {
-                    m_buffer.append(str.data() + lastPos, i - lastPos);
+                    m_buffer.append(std::string_view{ str.data() + lastPos, i - lastPos });
                 }
                 m_buffer += '\\';
                 switch (c)
@@ -637,7 +621,7 @@ namespace dnv::vista::sdk::json
 
         if (lastPos < str.size())
         {
-            m_buffer.append(str.data() + lastPos, str.size() - lastPos);
+            m_buffer.append(std::string_view{ str.data() + lastPos, str.size() - lastPos });
         }
 #else
         static constexpr char hex[] = "0123456789abcdef";
@@ -649,7 +633,7 @@ namespace dnv::vista::sdk::json
             {
                 if (i > lastPos)
                 {
-                    m_buffer.append(str.data() + lastPos, i - lastPos);
+                    m_buffer.append(std::string_view{ str.data() + lastPos, i - lastPos });
                 }
                 m_buffer += '\\';
                 switch (c)
@@ -686,7 +670,7 @@ namespace dnv::vista::sdk::json
         }
         if (lastPos < str.size())
         {
-            m_buffer.append(str.data() + lastPos, str.size() - lastPos);
+            m_buffer.append(std::string_view{ str.data() + lastPos, str.size() - lastPos });
         }
 #endif
 
@@ -698,9 +682,7 @@ namespace dnv::vista::sdk::json
         m_buffer += '\n';
         if (m_currentIndent > 0)
         {
-            const size_t oldSize = m_buffer.size();
-            m_buffer.resize(oldSize + static_cast<size_t>(m_currentIndent));
-            std::memset(m_buffer.data() + oldSize, ' ', static_cast<size_t>(m_currentIndent));
+            m_buffer.appendRepeated(' ', static_cast<size_t>(m_currentIndent));
         }
     }
 

@@ -36,18 +36,22 @@ namespace dnv::vista::sdk::benchmarks
 
         auto package = jdc::toDomain(*dtoOpt);
 
-        auto warmup = jdc::toJsonString(package);
-        (void)warmup;
+        StringBuilder warmupBuffer;
+        jdc::toJsonString(warmupBuffer, package);
 
         ankerl::nanobench::Bench bench;
         bench.title("DataChannelListSerialization").warmup(1000).minEpochIterations(10000);
 
+        StringBuilder serializeBuffer;
         bench.run("Serialize", [&] {
-            auto result = jdc::toJsonString(package);
-            ankerl::nanobench::doNotOptimizeAway(result);
+            serializeBuffer.clear();
+            jdc::toJsonString(serializeBuffer, package);
+            ankerl::nanobench::doNotOptimizeAway(serializeBuffer.size());
         });
 
-        auto serialized = jdc::toJsonString(package);
+        StringBuilder serializedBuffer;
+        jdc::toJsonString(serializedBuffer, package);
+        auto serialized = serializedBuffer.toString();
         bench.run("Deserialize", [&] {
             auto result = jdc::fromJsonString(serialized);
             ankerl::nanobench::doNotOptimizeAway(result);

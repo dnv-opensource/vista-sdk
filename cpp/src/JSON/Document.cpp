@@ -547,7 +547,8 @@ namespace dnv::vista::sdk::json
 
     std::string Document::toString(int indent, size_t bufferSize) const
     {
-        Builder builder{ { .indent = indent, .bufferSize = bufferSize > 0 ? bufferSize : 4096 } };
+        StringBuilder sb{ bufferSize > 0 ? bufferSize : 4096 };
+        Builder builder{ sb, { .indent = indent } };
         builder.write(*this);
         return builder.toString();
     }

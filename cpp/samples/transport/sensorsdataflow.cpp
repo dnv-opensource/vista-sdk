@@ -141,9 +141,10 @@ int main()
 
         {
             std::cout << "\n";
-            auto jsonStr = jdc::toJsonString(dclPackage, true);
-            std::cout << "Serialized to JSON: " << jsonStr.size() << " bytes\n";
-            std::cout << "Package:\n" << jsonStr << "\n";
+            StringBuilder sb;
+            jdc::toJsonString(sb, dclPackage, true);
+            std::cout << "Serialized to JSON: " << sb.size() << " bytes\n";
+            std::cout << "Package:\n" << sb.view() << "\n";
         }
         std::cout << "\n";
 
@@ -337,9 +338,10 @@ int main()
         std::cout << "7. Serialization: Convert to ISO19848 JSON format\n";
         std::cout << "----------------------------------------------------\n";
 
-        auto jsonStr = jts::toJsonString(tsPackage, true);
-        std::cout << "Serialized to JSON: " << jsonStr.size() << " bytes\n";
-        std::cout << "Package:\n" << jsonStr << "\n";
+        StringBuilder tsBuffer;
+        jts::toJsonString(tsBuffer, tsPackage, true);
+        std::cout << "Serialized to JSON: " << tsBuffer.size() << " bytes\n";
+        std::cout << "Package:\n" << tsBuffer.view() << "\n";
         std::cout << "\n";
 
         std::cout << "8. Validation: Cross-check TimeSeriesData against DataChannelList\n";

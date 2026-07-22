@@ -103,7 +103,7 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 | Benchmark (ns/op) | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ----------------- | ----------: | ------------: | --------------: | -------------: |
-| `Serialize`       |   11,299.17 |     10,740.45 |       15,949.87 |      18,923.62 |
+| `Serialize`       |   11,299.17 |     10,740.45 |       13,170.98 |      14,597.51 |
 | `Deserialize`     |   24,700.90 |     25,527.97 |       43,907.14 |      47,924.53 |
 
 ### TimeSeriesData serialization

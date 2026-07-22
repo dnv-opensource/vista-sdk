@@ -251,12 +251,13 @@ int main()
         auto originalPackage = timeseries::TimeSeriesDataPackage{ package };
 
         // Serialize to JSON
-        auto jsonStr = jts::toJsonString(originalPackage);
+        StringBuilder sb;
+        jts::toJsonString(sb, originalPackage);
 
-        std::cout << "Serialized to JSON (" << jsonStr.length() << " bytes)\n";
+        std::cout << "Serialized to JSON (" << sb.size() << " bytes)\n";
 
         // Deserialize from JSON
-        auto deserializedPackage = jts::fromJsonString(jsonStr, nullptr);
+        auto deserializedPackage = jts::fromJsonString(sb.view(), nullptr);
         if (deserializedPackage.has_value())
         {
             std::cout << "Deserialized successfully:\n";
@@ -298,10 +299,11 @@ int main()
 
         auto originalPackage = timeseries::TimeSeriesDataPackage{ package };
 
-        auto jsonStr = jts::toJsonString(originalPackage, true);
+        StringBuilder sb;
+        jts::toJsonString(sb, originalPackage, true);
 
-        std::cout << "Serialized to JSON (" << jsonStr.length() << " bytes)\n";
-        std::cout << jsonStr << "\n";
+        std::cout << "Serialized to JSON (" << sb.size() << " bytes):\n";
+        std::cout << sb.view() << "\n";
 
         std::cout << "\n";
     }
@@ -650,10 +652,11 @@ int main()
 
         std::cout << "Created package with custom extension data\n";
 
-        auto jsonStr = jts::toJsonString(tsPackage, true);
+        StringBuilder customDataBuffer;
+        jts::toJsonString(customDataBuffer, tsPackage, true);
 
         std::cout << "\nSerialized JSON with custom data:\n";
-        std::cout << jsonStr << "\n";
+        std::cout << customDataBuffer.view() << "\n";
 
         std::cout << "\n";
     }
@@ -708,10 +711,11 @@ int main()
         }
         dto.package.header->customHeaders->set("exportedBy", std::string{ "vista-sdk-sample" });
 
-        auto patchedJson = jts::toJsonString(dto, true);
+        StringBuilder patchedJsonBuffer;
+        jts::toJsonString(patchedJsonBuffer, dto, true);
 
         std::cout << "DTO patched with author, dateModified and exportedBy custom header:\n";
-        std::cout << patchedJson << "\n";
+        std::cout << patchedJsonBuffer.view() << "\n";
 
         std::cout << "\n";
     }

@@ -131,17 +131,31 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
         {
             HeaderDto hDto;
             hDto.shipId = h->shipId().toString();
+
+            StringBuilder timeStampBuffer;
             if (h->timeSpan())
             {
-                hDto.timeSpan = TimeSpanDto{ h->timeSpan()->start().toString(), h->timeSpan()->end().toString() };
+                h->timeSpan()->start().toString(timeStampBuffer);
+                std::string startStr{ timeStampBuffer.toString() };
+                timeStampBuffer.clear();
+
+                h->timeSpan()->end().toString(timeStampBuffer);
+                std::string endStr{ timeStampBuffer.toString() };
+                timeStampBuffer.clear();
+
+                hDto.timeSpan = TimeSpanDto{ std::move(startStr), std::move(endStr) };
             }
             if (h->dateCreated())
             {
-                hDto.dateCreated = h->dateCreated()->toString();
+                h->dateCreated()->toString(timeStampBuffer);
+                hDto.dateCreated = timeStampBuffer.toString();
+                timeStampBuffer.clear();
             }
             if (h->dateModified())
             {
-                hDto.dateModified = h->dateModified()->toString();
+                h->dateModified()->toString(timeStampBuffer);
+                hDto.dateModified = timeStampBuffer.toString();
+                timeStampBuffer.clear();
             }
             if (h->author())
             {
@@ -150,9 +164,12 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
             if (h->systemConfiguration())
             {
                 std::vector<ConfigurationReferenceDto> sysConf;
+                sysConf.reserve(h->systemConfiguration()->size());
                 for (const auto& c : *h->systemConfiguration())
                 {
-                    sysConf.push_back({ c.id(), c.timeStamp().toString() });
+                    c.timeStamp().toString(timeStampBuffer);
+                    sysConf.push_back({ c.id(), timeStampBuffer.toString() });
+                    timeStampBuffer.clear();
                 }
                 hDto.systemConfiguration = std::move(sysConf);
             }
@@ -163,14 +180,17 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
             p.header = std::move(hDto);
         }
 
+        StringBuilder tsTimeStampBuffer;
         for (const auto& ts : pkg.package().timeSeriesData())
         {
             TimeSeriesDataDto tsDto;
 
             if (ts.dataConfiguration())
             {
-                tsDto.dataConfiguration = ConfigurationReferenceDto{ ts.dataConfiguration()->id(),
-                                                                     ts.dataConfiguration()->timeStamp().toString() };
+                ts.dataConfiguration()->timeStamp().toString(tsTimeStampBuffer);
+                tsDto.dataConfiguration =
+                    ConfigurationReferenceDto{ ts.dataConfiguration()->id(), tsTimeStampBuffer.toString() };
+                tsTimeStampBuffer.clear();
             }
             if (ts.tabularData())
             {
@@ -189,10 +209,14 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
                     tdDto.dataChannelIds = std::move(ids);
 
                     std::vector<TabularDataSetDto> sets;
+                    sets.reserve(td.dataSets().size());
+                    StringBuilder timeStampBuffer;
                     for (const auto& ds : td.dataSets())
                     {
                         TabularDataSetDto dsDto;
-                        dsDto.timeStamp = ds.timeStamp().toString();
+                        ds.timeStamp().toString(timeStampBuffer);
+                        dsDto.timeStamp = timeStampBuffer.toString();
+                        timeStampBuffer.clear();
                         dsDto.value = ds.value();
                         dsDto.quality = ds.quality();
                         sets.push_back(std::move(dsDto));
@@ -210,10 +234,14 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
                 if (ts.eventData()->dataSet())
                 {
                     std::vector<EventDataSetDto> sets;
+                    sets.reserve(ts.eventData()->dataSet()->size());
+                    StringBuilder timeStampBuffer;
                     for (const auto& ed : *ts.eventData()->dataSet())
                     {
                         EventDataSetDto edSetDto;
-                        edSetDto.timeStamp = ed.timeStamp().toString();
+                        ed.timeStamp().toString(timeStampBuffer);
+                        edSetDto.timeStamp = timeStampBuffer.toString();
+                        timeStampBuffer.clear();
                         edSetDto.dataChannelId = ed.dataChannelId().toString();
                         edSetDto.value = ed.value();
                         edSetDto.quality = ed.quality();
@@ -365,9 +393,9 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
     // DTO <-> JSON
     //=========================================================================
 
-    std::string toJsonString(const TimeSeriesDataPackageDto& dto, bool prettyPrint, size_t reserveHint)
+    void toJsonString(dnv::vista::sdk::StringBuilder& buffer, const TimeSeriesDataPackageDto& dto, bool prettyPrint)
     {
-        Builder b{ Builder::Options{ prettyPrint ? 2 : 0, reserveHint > 0 ? reserveHint : 4096 } };
+        Builder b{ buffer, Builder::Options{ prettyPrint ? 2 : 0 } };
         b.writeStartObject();
         b.writeKey("Package");
         b.writeStartObject();
@@ -542,7 +570,6 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
 
         b.writeEndObject(); // Package
         b.writeEndObject(); // root
-        return b.toString();
     }
 
     std::optional<TimeSeriesDataPackageDto> fromJsonString(std::string_view json)

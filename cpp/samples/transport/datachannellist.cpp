@@ -525,11 +525,12 @@ int main()
         auto package = datachannel::Package{ header, dataChannelList };
         auto dataChannelListPackage = datachannel::DataChannelListPackage{ package };
 
-        auto serialized = jdc::toJsonString(dataChannelListPackage, true);
+        StringBuilder sb;
+        jdc::toJsonString(sb, dataChannelListPackage, true);
 
         std::cout << "Serialization result: Success\n";
         std::cout << "\nJSON output (formatted):\n";
-        std::cout << serialized << std::endl;
+        std::cout << sb.view() << std::endl;
 
         std::cout << "\n";
     }
@@ -761,7 +762,8 @@ int main()
         auto dataChannelListPackage = datachannel::DataChannelListPackage{ package };
 
         // Serialize
-        auto engineJson = jdc::toJsonString(dataChannelListPackage, true);
+        StringBuilder engineJsonBuffer;
+        jdc::toJsonString(engineJsonBuffer, dataChannelListPackage, true);
 
         std::cout << "Main Engine Monitoring System:\n";
         std::cout << "  Engine       : MAN Energy Solutions ME-C9.5-175\n";
@@ -780,7 +782,7 @@ int main()
         }
 
         std::cout << "\nEngine Monitoring JSON:\n";
-        std::cout << engineJson << std::endl;
+        std::cout << engineJsonBuffer.view() << std::endl;
 
         std::cout << "\n";
     }
@@ -808,10 +810,11 @@ int main()
         dto.package.header.customHeaders->set("exportedBy", std::string{ "vista-sdk-sample" });
         dto.package.header.customHeaders->set("exportTimestamp", DateTimeOffset::utcNow().toString());
 
-        auto patchedJson = jdc::toJsonString(dto, true);
+        StringBuilder patchedJsonBuffer;
+        jdc::toJsonString(patchedJsonBuffer, dto, true);
 
         std::cout << "DTO patched with author and exportTimestamp custom header:\n";
-        std::cout << patchedJson << std::endl;
+        std::cout << patchedJsonBuffer.view() << std::endl;
 
         std::cout << "\n";
     }

@@ -503,7 +503,10 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
         const auto& h = pkg.package().header();
         p.header.shipId = h.shipId().toString();
         p.header.dataChannelListId.id = h.dataChannelListId().id();
-        p.header.dataChannelListId.timeStamp = h.dataChannelListId().timeStamp().toString();
+
+        StringBuilder timeStampBuffer;
+        h.dataChannelListId().timeStamp().toString(timeStampBuffer);
+        p.header.dataChannelListId.timeStamp = timeStampBuffer.toString();
         if (h.dataChannelListId().version())
         {
             p.header.dataChannelListId.version = *h.dataChannelListId().version();
@@ -525,7 +528,9 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
         }
         if (h.dateCreated())
         {
-            p.header.dateCreated = h.dateCreated()->toString();
+            timeStampBuffer.clear();
+            h.dateCreated()->toString(timeStampBuffer);
+            p.header.dateCreated = timeStampBuffer.toString();
         }
         if (h.customHeaders())
         {
@@ -721,9 +726,9 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
     // DTO <-> JSON
     //=========================================================================
 
-    std::string toJsonString(const DataChannelListPackageDto& dto, bool prettyPrint, size_t reserveHint)
+    void toJsonString(dnv::vista::sdk::StringBuilder& buffer, const DataChannelListPackageDto& dto, bool prettyPrint)
     {
-        Builder b{ Builder::Options{ prettyPrint ? 2 : 0, reserveHint > 0 ? reserveHint : 4096 } };
+        Builder b{ buffer, Builder::Options{ prettyPrint ? 2 : 0 } };
         b.writeStartObject();
         b.writeKey("Package");
         b.writeStartObject();
@@ -786,8 +791,6 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
 
         b.writeEndObject(); // Package
         b.writeEndObject(); // root
-
-        return b.toString();
     }
 
     std::optional<DataChannelListPackageDto> fromJsonString(std::string_view json)

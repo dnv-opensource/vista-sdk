@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/utils/StringBuilder.h"
+
 #include "Document.h"
 
 #include <charconv>
@@ -37,15 +39,16 @@ namespace dnv::vista::sdk::json
         struct Options
         {
             int indent = 0;              ///< Indentation width in spaces (0 = compact)
-            size_t bufferSize = 4096;    ///< Initial buffer capacity hint
             bool escapeNonAscii = false; ///< Escape all non-ASCII characters as \uXXXX
         };
 
         /**
-         * @brief Constructs a Builder with the given options
-         * @param options Construction options (indent, buffer size, escape mode)
+         * @brief Constructs a Builder writing into the given external buffer
+         * @param buffer External buffer to write into. The caller owns it and may reuse it
+         *               across multiple Builder instances/documents to retain its capacity.
+         * @param options Construction options (indent, escape mode)
          */
-        explicit Builder(Options options = { 0, 4096, false });
+        explicit Builder(StringBuilder& buffer, Options options = { 0, false });
 
         /**
          * @brief Writes the opening brace of a JSON object
@@ -270,17 +273,19 @@ namespace dnv::vista::sdk::json
         };
 
         void writeKeyImpl(std::string_view key);
+        void writeTrustedKeyImpl(std::string_view key);
         void writeInt(int64_t value);
         void writeUInt(uint64_t value);
         void writeDouble(double value);
         void writeString(std::string_view str);
+        void writeStringRaw(std::string_view str);
         void writeNewlineAndIndent();
         void writeCommaIfNeeded();
         void writeDocument(const Document& doc);
         void writeDocumentArray(const Array& arr);
         void writeDocumentObject(const Object& obj);
 
-        std::string m_buffer;                     ///< Output buffer
+        StringBuilder& m_buffer;                  ///< Output buffer, owned by the caller
         int m_indent;                             ///< Configured indentation width
         int m_currentIndent;                      ///< Current indentation depth in spaces
         bool m_escapeNonAscii;                    ///< Whether to escape non-ASCII as \uXXXX
