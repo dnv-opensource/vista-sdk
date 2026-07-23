@@ -66,6 +66,7 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS OFF)
 endif()
 
+option(DNV_VISTA_SDK_BUILD_TOOLS      "Build dnv::vista::sdk tools"                              OFF)
 option(DNV_VISTA_SDK_BUILD_TESTS      "Build dnv::vista::sdk tests"                              OFF)
 option(DNV_VISTA_SDK_BUILD_SAMPLES    "Build dnv::vista::sdk samples"                            OFF)
 option(DNV_VISTA_SDK_BUILD_BENCHMARKS "Build dnv::vista::sdk benchmarks"                         OFF)
@@ -87,6 +88,14 @@ include(dnvVistaSdkISO19848VersionsGenerator)
 include(dnvVistaSdkSources)
 include(dnvVistaSdkTargets)
 include(dnvVistaSdkInstall)
+
+#----------------------------------------------
+# Tools
+#----------------------------------------------
+
+if(DNV_VISTA_SDK_BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()
 
 #----------------------------------------------
 # Tests
