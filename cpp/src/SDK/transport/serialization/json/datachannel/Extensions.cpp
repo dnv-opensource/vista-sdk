@@ -143,51 +143,62 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
             b.writeStartObject();
             if (r.fractionDigits)
             {
-                b.write("FractionDigits", static_cast<std::int64_t>(*r.fractionDigits));
+                b.writeTrustedKey("FractionDigits");
+                b.write(static_cast<std::int64_t>(*r.fractionDigits));
             }
             if (r.length)
             {
-                b.write("Length", static_cast<std::int64_t>(*r.length));
+                b.writeTrustedKey("Length");
+                b.write(static_cast<std::int64_t>(*r.length));
             }
             if (r.maxExclusive)
             {
-                b.write("MaxExclusive", *r.maxExclusive);
+                b.writeTrustedKey("MaxExclusive");
+                b.write(*r.maxExclusive);
             }
             if (r.maxInclusive)
             {
-                b.write("MaxInclusive", *r.maxInclusive);
+                b.writeTrustedKey("MaxInclusive");
+                b.write(*r.maxInclusive);
             }
             if (r.maxLength)
             {
-                b.write("MaxLength", static_cast<std::int64_t>(*r.maxLength));
+                b.writeTrustedKey("MaxLength");
+                b.write(static_cast<std::int64_t>(*r.maxLength));
             }
             if (r.minExclusive)
             {
-                b.write("MinExclusive", *r.minExclusive);
+                b.writeTrustedKey("MinExclusive");
+                b.write(*r.minExclusive);
             }
             if (r.minInclusive)
             {
-                b.write("MinInclusive", *r.minInclusive);
+                b.writeTrustedKey("MinInclusive");
+                b.write(*r.minInclusive);
             }
             if (r.minLength)
             {
-                b.write("MinLength", static_cast<std::int64_t>(*r.minLength));
+                b.writeTrustedKey("MinLength");
+                b.write(static_cast<std::int64_t>(*r.minLength));
             }
             if (r.pattern)
             {
-                b.write("Pattern", *r.pattern);
+                b.writeTrustedKey("Pattern");
+                b.write(*r.pattern);
             }
             if (r.totalDigits)
             {
-                b.write("TotalDigits", static_cast<std::int64_t>(*r.totalDigits));
+                b.writeTrustedKey("TotalDigits");
+                b.write(static_cast<std::int64_t>(*r.totalDigits));
             }
             if (r.whiteSpace)
             {
-                b.write("WhiteSpace", *r.whiteSpace);
+                b.writeTrustedKey("WhiteSpace");
+                b.write(*r.whiteSpace);
             }
             if (r.enumeration)
             {
-                b.writeKey("Enumeration");
+                b.writeTrustedKey("Enumeration");
                 b.writeStartArray();
                 for (const auto& v : *r.enumeration)
                 {
@@ -203,18 +214,21 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
             b.writeStartObject();
 
             // DataChannelID
-            b.writeKey("DataChannelID");
+            b.writeTrustedKey("DataChannelID");
             b.writeStartObject();
-            b.write("LocalID", dc.dataChannelId.localId);
+            b.writeTrustedKey("LocalID");
+            b.write(dc.dataChannelId.localId);
             if (dc.dataChannelId.shortId)
             {
-                b.write("ShortID", *dc.dataChannelId.shortId);
+                b.writeTrustedKey("ShortID");
+                b.write(*dc.dataChannelId.shortId);
             }
             if (dc.dataChannelId.nameObject)
             {
-                b.writeKey("NameObject");
+                b.writeTrustedKey("NameObject");
                 b.writeStartObject();
-                b.write("NamingRule", dc.dataChannelId.nameObject->namingRule);
+                b.writeTrustedKey("NamingRule");
+                b.write(dc.dataChannelId.nameObject->namingRule);
                 if (dc.dataChannelId.nameObject->customNameObjects)
                 {
                     for (const auto& [key, val] : dc.dataChannelId.nameObject->customNameObjects->asObject())
@@ -229,48 +243,56 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
 
             // Property
             const auto& p = dc.property;
-            b.writeKey("Property");
+            b.writeTrustedKey("Property");
             b.writeStartObject();
 
-            b.writeKey("DataChannelType");
+            b.writeTrustedKey("DataChannelType");
             b.writeStartObject();
-            b.write("Type", p.dataChannelType.type);
+            b.writeTrustedKey("Type");
+            b.write(p.dataChannelType.type);
             if (p.dataChannelType.updateCycle)
             {
-                b.write("UpdateCycle", *p.dataChannelType.updateCycle);
+                b.writeTrustedKey("UpdateCycle");
+                b.write(*p.dataChannelType.updateCycle);
             }
             if (p.dataChannelType.calculationPeriod)
             {
-                b.write("CalculationPeriod", *p.dataChannelType.calculationPeriod);
+                b.writeTrustedKey("CalculationPeriod");
+                b.write(*p.dataChannelType.calculationPeriod);
             }
             b.writeEndObject();
 
-            b.writeKey("Format");
+            b.writeTrustedKey("Format");
             b.writeStartObject();
-            b.write("Type", p.format.type);
+            b.writeTrustedKey("Type");
+            b.write(p.format.type);
             if (p.format.restriction)
             {
-                b.writeKey("Restriction");
+                b.writeTrustedKey("Restriction");
                 writeRestriction(b, *p.format.restriction);
             }
             b.writeEndObject();
 
             if (p.range)
             {
-                b.writeKey("Range");
+                b.writeTrustedKey("Range");
                 b.writeStartObject();
-                b.write("High", p.range->high);
-                b.write("Low", p.range->low);
+                b.writeTrustedKey("High");
+                b.write(p.range->high);
+                b.writeTrustedKey("Low");
+                b.write(p.range->low);
                 b.writeEndObject();
             }
             if (p.unit)
             {
-                b.writeKey("Unit");
+                b.writeTrustedKey("Unit");
                 b.writeStartObject();
-                b.write("UnitSymbol", p.unit->unitSymbol);
+                b.writeTrustedKey("UnitSymbol");
+                b.write(p.unit->unitSymbol);
                 if (p.unit->quantityName)
                 {
-                    b.write("QuantityName", *p.unit->quantityName);
+                    b.writeTrustedKey("QuantityName");
+                    b.write(*p.unit->quantityName);
                 }
                 if (p.unit->customElements)
                 {
@@ -284,19 +306,23 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
             }
             if (p.qualityCoding)
             {
-                b.write("QualityCoding", *p.qualityCoding);
+                b.writeTrustedKey("QualityCoding");
+                b.write(*p.qualityCoding);
             }
             if (p.alertPriority)
             {
-                b.write("AlertPriority", *p.alertPriority);
+                b.writeTrustedKey("AlertPriority");
+                b.write(*p.alertPriority);
             }
             if (p.name)
             {
-                b.write("Name", *p.name);
+                b.writeTrustedKey("Name");
+                b.write(*p.name);
             }
             if (p.remarks)
             {
-                b.write("Remarks", *p.remarks);
+                b.writeTrustedKey("Remarks");
+                b.write(*p.remarks);
             }
             if (p.customProperties)
             {
@@ -730,42 +756,51 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
     {
         Builder b{ buffer, Builder::Options{ prettyPrint ? 2 : 0 } };
         b.writeStartObject();
-        b.writeKey("Package");
+        b.writeTrustedKey("Package");
         b.writeStartObject();
 
         // Header
         const auto& h = dto.package.header;
-        b.writeKey("Header");
+        b.writeTrustedKey("Header");
         b.writeStartObject();
-        b.write("ShipID", h.shipId);
-        b.writeKey("DataChannelListID");
+        b.writeTrustedKey("ShipID");
+        b.write(h.shipId);
+        b.writeTrustedKey("DataChannelListID");
         b.writeStartObject();
-        b.write("ID", h.dataChannelListId.id);
+        b.writeTrustedKey("ID");
+        b.write(h.dataChannelListId.id);
         if (h.dataChannelListId.version)
         {
-            b.write("Version", *h.dataChannelListId.version);
+            b.writeTrustedKey("Version");
+            b.write(*h.dataChannelListId.version);
         }
-        b.write("TimeStamp", h.dataChannelListId.timeStamp);
+        b.writeTrustedKey("TimeStamp");
+        b.write(h.dataChannelListId.timeStamp);
         b.writeEndObject();
         if (h.versionInformation)
         {
-            b.writeKey("VersionInformation");
+            b.writeTrustedKey("VersionInformation");
             b.writeStartObject();
-            b.write("NamingRule", h.versionInformation->namingRule);
-            b.write("NamingSchemeVersion", h.versionInformation->namingSchemeVersion);
+            b.writeTrustedKey("NamingRule");
+            b.write(h.versionInformation->namingRule);
+            b.writeTrustedKey("NamingSchemeVersion");
+            b.write(h.versionInformation->namingSchemeVersion);
             if (h.versionInformation->referenceUrl)
             {
-                b.write("ReferenceURL", *h.versionInformation->referenceUrl);
+                b.writeTrustedKey("ReferenceURL");
+                b.write(*h.versionInformation->referenceUrl);
             }
             b.writeEndObject();
         }
         if (h.author)
         {
-            b.write("Author", *h.author);
+            b.writeTrustedKey("Author");
+            b.write(*h.author);
         }
         if (h.dateCreated)
         {
-            b.write("DateCreated", *h.dateCreated);
+            b.writeTrustedKey("DateCreated");
+            b.write(*h.dateCreated);
         }
         if (h.customHeaders)
         {
@@ -778,9 +813,9 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
         b.writeEndObject(); // Header
 
         // DataChannelList
-        b.writeKey("DataChannelList");
+        b.writeTrustedKey("DataChannelList");
         b.writeStartObject();
-        b.writeKey("DataChannel");
+        b.writeTrustedKey("DataChannel");
         b.writeStartArray();
         for (const auto& dc : dto.package.dataChannelList.dataChannels)
         {

@@ -82,6 +82,17 @@ namespace dnv::vista::sdk::json
          */
         Builder& writeKey(std::string_view key);
 
+        /**
+         * @brief Writes an object key followed by a colon, without JSON-escaping it
+         * @details Must be called inside an open object context, before the corresponding value.
+         *          The caller must guarantee @p key needs no escaping (e.g. a fixed schema field
+         *          name known at compile time).
+         * @note Never use this for keys sourced from external or user-controlled data.
+         * @param key The key string. Must not require JSON escaping
+         * @return Reference to this for chaining
+         */
+        Builder& writeTrustedKey(std::string_view key);
+
         Builder& write(std::string_view key, std::nullptr_t value);     ///< Write @p key + null
         Builder& write(std::string_view key, bool value);               ///< Write @p key + bool
         Builder& write(std::string_view key, int value);                ///< Write @p key + int

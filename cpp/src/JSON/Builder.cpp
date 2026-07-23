@@ -98,6 +98,17 @@ namespace dnv::vista::sdk::json
         return *this;
     }
 
+    Builder& Builder::writeTrustedKey(std::string_view key)
+    {
+        if (m_contextStack.empty() || !m_contextStack.back().isObject)
+        {
+            throw std::runtime_error{ "writeTrustedKey can only be called inside an object" };
+        }
+        writeCommaIfNeeded();
+        writeTrustedKeyImpl(key);
+        return *this;
+    }
+
     Builder& Builder::write(std::string_view key, std::nullptr_t)
     {
         if (m_contextStack.empty() || !m_contextStack.back().isObject)
@@ -359,6 +370,27 @@ namespace dnv::vista::sdk::json
             m_buffer += ':';
         }
         m_contextStack.back().expectingValue = true;
+    }
+
+    void Builder::writeTrustedKeyImpl(std::string_view key)
+    {
+        writeStringRaw(key);
+        if (m_indent > 0)
+        {
+            m_buffer += ": ";
+        }
+        else
+        {
+            m_buffer += ':';
+        }
+        m_contextStack.back().expectingValue = true;
+    }
+
+    void Builder::writeStringRaw(std::string_view str)
+    {
+        m_buffer += '"';
+        m_buffer += str;
+        m_buffer += '"';
     }
 
     void Builder::writeInt(int64_t value)

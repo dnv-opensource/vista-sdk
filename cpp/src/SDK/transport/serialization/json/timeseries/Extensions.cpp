@@ -397,45 +397,53 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
     {
         Builder b{ buffer, Builder::Options{ prettyPrint ? 2 : 0 } };
         b.writeStartObject();
-        b.writeKey("Package");
+        b.writeTrustedKey("Package");
         b.writeStartObject();
 
         // Header
         if (dto.package.header)
         {
             const auto& h = *dto.package.header;
-            b.writeKey("Header");
+            b.writeTrustedKey("Header");
             b.writeStartObject();
-            b.write("ShipID", h.shipId);
+            b.writeTrustedKey("ShipID");
+            b.write(h.shipId);
             if (h.timeSpan)
             {
-                b.writeKey("TimeSpan");
+                b.writeTrustedKey("TimeSpan");
                 b.writeStartObject();
-                b.write("Start", h.timeSpan->start);
-                b.write("End", h.timeSpan->end);
+                b.writeTrustedKey("Start");
+                b.write(h.timeSpan->start);
+                b.writeTrustedKey("End");
+                b.write(h.timeSpan->end);
                 b.writeEndObject();
             }
             if (h.dateCreated)
             {
-                b.write("DateCreated", *h.dateCreated);
+                b.writeTrustedKey("DateCreated");
+                b.write(*h.dateCreated);
             }
             if (h.dateModified)
             {
-                b.write("DateModified", *h.dateModified);
+                b.writeTrustedKey("DateModified");
+                b.write(*h.dateModified);
             }
             if (h.author)
             {
-                b.write("Author", *h.author);
+                b.writeTrustedKey("Author");
+                b.write(*h.author);
             }
             if (h.systemConfiguration)
             {
-                b.writeKey("SystemConfiguration");
+                b.writeTrustedKey("SystemConfiguration");
                 b.writeStartArray();
                 for (const auto& c : *h.systemConfiguration)
                 {
                     b.writeStartObject();
-                    b.write("ID", c.id);
-                    b.write("TimeStamp", c.timeStamp);
+                    b.writeTrustedKey("ID");
+                    b.write(c.id);
+                    b.writeTrustedKey("TimeStamp");
+                    b.write(c.timeStamp);
                     b.writeEndObject();
                 }
                 b.writeEndArray();
@@ -452,7 +460,7 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
         }
 
         // TimeSeriesData
-        b.writeKey("TimeSeriesData");
+        b.writeTrustedKey("TimeSeriesData");
         b.writeStartArray();
         for (const auto& ts : dto.package.timeSeriesData)
         {
@@ -460,31 +468,35 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
 
             if (ts.dataConfiguration)
             {
-                b.writeKey("DataConfiguration");
+                b.writeTrustedKey("DataConfiguration");
                 b.writeStartObject();
-                b.write("ID", ts.dataConfiguration->id);
-                b.write("TimeStamp", ts.dataConfiguration->timeStamp);
+                b.writeTrustedKey("ID");
+                b.write(ts.dataConfiguration->id);
+                b.writeTrustedKey("TimeStamp");
+                b.write(ts.dataConfiguration->timeStamp);
                 b.writeEndObject();
             }
 
             if (ts.tabularData)
             {
-                b.writeKey("TabularData");
+                b.writeTrustedKey("TabularData");
                 b.writeStartArray();
                 for (const auto& td : *ts.tabularData)
                 {
                     b.writeStartObject();
                     if (td.numberOfDataSet)
                     {
-                        b.write("NumberOfDataSet", static_cast<std::int64_t>(*td.numberOfDataSet));
+                        b.writeTrustedKey("NumberOfDataSet");
+                        b.write(static_cast<std::int64_t>(*td.numberOfDataSet));
                     }
                     if (td.numberOfDataChannel)
                     {
-                        b.write("NumberOfDataChannel", static_cast<std::int64_t>(*td.numberOfDataChannel));
+                        b.writeTrustedKey("NumberOfDataChannel");
+                        b.write(static_cast<std::int64_t>(*td.numberOfDataChannel));
                     }
                     if (td.dataChannelIds)
                     {
-                        b.writeKey("DataChannelID");
+                        b.writeTrustedKey("DataChannelID");
                         b.writeStartArray();
                         for (const auto& id : *td.dataChannelIds)
                         {
@@ -494,13 +506,14 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
                     }
                     if (td.dataSets)
                     {
-                        b.writeKey("DataSet");
+                        b.writeTrustedKey("DataSet");
                         b.writeStartArray();
                         for (const auto& ds : *td.dataSets)
                         {
                             b.writeStartObject();
-                            b.write("TimeStamp", ds.timeStamp);
-                            b.writeKey("Value");
+                            b.writeTrustedKey("TimeStamp");
+                            b.write(ds.timeStamp);
+                            b.writeTrustedKey("Value");
                             b.writeStartArray();
                             for (const auto& v : ds.value)
                             {
@@ -509,7 +522,7 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
                             b.writeEndArray();
                             if (ds.quality)
                             {
-                                b.writeKey("Quality");
+                                b.writeTrustedKey("Quality");
                                 b.writeStartArray();
                                 for (const auto& q : *ds.quality)
                                 {
@@ -528,25 +541,30 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
 
             if (ts.eventData)
             {
-                b.writeKey("EventData");
+                b.writeTrustedKey("EventData");
                 b.writeStartObject();
                 if (ts.eventData->numberOfDataSet)
                 {
-                    b.write("NumberOfDataSet", static_cast<std::int64_t>(*ts.eventData->numberOfDataSet));
+                    b.writeTrustedKey("NumberOfDataSet");
+                    b.write(static_cast<std::int64_t>(*ts.eventData->numberOfDataSet));
                 }
                 if (ts.eventData->dataSet)
                 {
-                    b.writeKey("DataSet");
+                    b.writeTrustedKey("DataSet");
                     b.writeStartArray();
                     for (const auto& ed : *ts.eventData->dataSet)
                     {
                         b.writeStartObject();
-                        b.write("TimeStamp", ed.timeStamp);
-                        b.write("DataChannelID", ed.dataChannelId);
-                        b.write("Value", ed.value);
+                        b.writeTrustedKey("TimeStamp");
+                        b.write(ed.timeStamp);
+                        b.writeTrustedKey("DataChannelID");
+                        b.write(ed.dataChannelId);
+                        b.writeTrustedKey("Value");
+                        b.write(ed.value);
                         if (ed.quality)
                         {
-                            b.write("Quality", *ed.quality);
+                            b.writeTrustedKey("Quality");
+                            b.write(*ed.quality);
                         }
                         b.writeEndObject();
                     }
