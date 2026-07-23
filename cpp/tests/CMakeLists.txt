@@ -72,3 +72,5 @@ add_subdirectory(query)
 add_subdirectory(transport)
 add_subdirectory(types)
 add_subdirectory(utils)
+
+add_subdirectory(tools)

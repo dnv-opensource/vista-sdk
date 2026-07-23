@@ -116,6 +116,7 @@ jobs:
           cmake -S cpp -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type || 'Debug' }} \
             -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }} \
+            -DDNV_VISTA_SDK_BUILD_TOOLS=ON \
             -DDNV_VISTA_SDK_BUILD_TESTS=ON \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
@@ -140,6 +141,7 @@ jobs:
             -DCMAKE_C_COMPILER=gcc \
             -DCMAKE_CXX_COMPILER=g++ \
             -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }} \
+            -DDNV_VISTA_SDK_BUILD_TOOLS=ON \
             -DDNV_VISTA_SDK_BUILD_TESTS=ON \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
@@ -164,6 +166,7 @@ jobs:
           cmake -S cpp -B build
           -G "Visual Studio 17 2022" -A x64
           -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }}
+          -DDNV_VISTA_SDK_BUILD_TOOLS=ON
           -DDNV_VISTA_SDK_BUILD_TESTS=ON
           -DDNV_VISTA_SDK_BUILD_SAMPLES=ON
           -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
@@ -235,6 +238,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=install \
             -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }} \
+            -DDNV_VISTA_SDK_BUILD_TOOLS=OFF \
             -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
@@ -275,6 +279,7 @@ jobs:
           -G "Visual Studio 17 2022" -A x64
           -DCMAKE_INSTALL_PREFIX=install
           -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }}
+          -DDNV_VISTA_SDK_BUILD_TOOLS=OFF
           -DDNV_VISTA_SDK_BUILD_TESTS=OFF
           -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF
           -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF

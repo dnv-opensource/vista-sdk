@@ -56,6 +56,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Debug \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
+          -DDNV_VISTA_SDK_BUILD_TOOLS=ON \
           -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
           -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
           -DDNV_VISTA_SDK_BUILD_BENCHMARKS=ON \
