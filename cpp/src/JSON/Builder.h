@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 
 #include "Document.h"
@@ -48,31 +50,31 @@ namespace dnv::vista::sdk::json
          *               across multiple Builder instances/documents to retain its capacity.
          * @param options Construction options (indent, escape mode)
          */
-        explicit Builder(StringBuilder& buffer, Options options = { 0, false });
+        DNV_VISTA_SDK_CPP_API explicit Builder(StringBuilder& buffer, Options options = { 0, false });
 
         /**
          * @brief Writes the opening brace of a JSON object
          * @return Reference to this for chaining
          */
-        Builder& writeStartObject();
+        DNV_VISTA_SDK_CPP_API Builder& writeStartObject();
 
         /**
          * @brief Writes the closing brace of a JSON object
          * @return Reference to this for chaining
          */
-        Builder& writeEndObject();
+        DNV_VISTA_SDK_CPP_API Builder& writeEndObject();
 
         /**
          * @brief Writes the opening bracket of a JSON array
          * @return Reference to this for chaining
          */
-        Builder& writeStartArray();
+        DNV_VISTA_SDK_CPP_API Builder& writeStartArray();
 
         /**
          * @brief Writes the closing bracket of a JSON array
          * @return Reference to this for chaining
          */
-        Builder& writeEndArray();
+        DNV_VISTA_SDK_CPP_API Builder& writeEndArray();
 
         /**
          * @brief Writes an object key followed by a colon
@@ -80,7 +82,7 @@ namespace dnv::vista::sdk::json
          * @param key The key string
          * @return Reference to this for chaining
          */
-        Builder& writeKey(std::string_view key);
+        DNV_VISTA_SDK_CPP_API Builder& writeKey(std::string_view key);
 
         /**
          * @brief Writes an object key followed by a colon, without JSON-escaping it
@@ -91,19 +93,19 @@ namespace dnv::vista::sdk::json
          * @param key The key string. Must not require JSON escaping
          * @return Reference to this for chaining
          */
-        Builder& writeTrustedKey(std::string_view key);
+        DNV_VISTA_SDK_CPP_API Builder& writeTrustedKey(std::string_view key);
 
-        Builder& write(std::string_view key, std::nullptr_t value);     ///< Write @p key + null
-        Builder& write(std::string_view key, bool value);               ///< Write @p key + bool
-        Builder& write(std::string_view key, int value);                ///< Write @p key + int
-        Builder& write(std::string_view key, unsigned int value);       ///< Write @p key + unsigned int
-        Builder& write(std::string_view key, int64_t value);            ///< Write @p key + int64
-        Builder& write(std::string_view key, uint64_t value);           ///< Write @p key + uint64
-        Builder& write(std::string_view key, float value);              ///< Write @p key + float
-        Builder& write(std::string_view key, double value);             ///< Write @p key + double
-        Builder& write(std::string_view key, std::string_view value);   ///< Write @p key + string
-        Builder& write(std::string_view key, const char* value);        ///< Write @p key + C string
-        Builder& write(std::string_view key, const std::string& value); ///< Write @p key + string
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, std::nullptr_t value); ///< Write @p key + null
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, bool value);           ///< Write @p key + bool
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, int value);            ///< Write @p key + int
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, unsigned int value); ///< Write @p key + unsigned int
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, int64_t value);      ///< Write @p key + int64
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, uint64_t value);     ///< Write @p key + uint64
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, float value);        ///< Write @p key + float
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, double value);       ///< Write @p key + double
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, std::string_view value); ///< Write @p key + string
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, const char* value);      ///< Write @p key + C string
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, const std::string& value); ///< Write @p key + string
 
         /**
          * @brief Serializes a DOM Document as the value for key
@@ -111,26 +113,26 @@ namespace dnv::vista::sdk::json
          * @param value The Document to serialize
          * @return Reference to this
          */
-        Builder& write(std::string_view key, const Document& value);
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view key, const Document& value);
 
-        Builder& write(std::nullptr_t value);     ///< Write null
-        Builder& write(bool value);               ///< Write bool
-        Builder& write(int value);                ///< Write int
-        Builder& write(unsigned int value);       ///< Write unsigned int
-        Builder& write(int64_t value);            ///< Write int64
-        Builder& write(uint64_t value);           ///< Write uint64
-        Builder& write(float value);              ///< Write float
-        Builder& write(double value);             ///< Write double
-        Builder& write(std::string_view value);   ///< Write string
-        Builder& write(const char* value);        ///< Write C string
-        Builder& write(const std::string& value); ///< Write string
+        DNV_VISTA_SDK_CPP_API Builder& write(std::nullptr_t value);     ///< Write null
+        DNV_VISTA_SDK_CPP_API Builder& write(bool value);               ///< Write bool
+        DNV_VISTA_SDK_CPP_API Builder& write(int value);                ///< Write int
+        DNV_VISTA_SDK_CPP_API Builder& write(unsigned int value);       ///< Write unsigned int
+        DNV_VISTA_SDK_CPP_API Builder& write(int64_t value);            ///< Write int64
+        DNV_VISTA_SDK_CPP_API Builder& write(uint64_t value);           ///< Write uint64
+        DNV_VISTA_SDK_CPP_API Builder& write(float value);              ///< Write float
+        DNV_VISTA_SDK_CPP_API Builder& write(double value);             ///< Write double
+        DNV_VISTA_SDK_CPP_API Builder& write(std::string_view value);   ///< Write string
+        DNV_VISTA_SDK_CPP_API Builder& write(const char* value);        ///< Write C string
+        DNV_VISTA_SDK_CPP_API Builder& write(const std::string& value); ///< Write string
 
         /**
          * @brief Serializes a DOM Document value
          * @param value The Document to serialize
          * @return Reference to this
          */
-        Builder& write(const Document& value);
+        DNV_VISTA_SDK_CPP_API Builder& write(const Document& value);
 
         template <typename T>
         inline std::enable_if_t<
@@ -236,44 +238,44 @@ namespace dnv::vista::sdk::json
          * @brief Extracts the built JSON string and resets the builder
          * @return The complete JSON string
          */
-        std::string toString();
+        DNV_VISTA_SDK_CPP_API std::string toString();
 
         /**
          * @brief Resets the builder to its initial empty state, preserving options
          * @return Reference to this
          */
-        Builder& reset();
+        DNV_VISTA_SDK_CPP_API Builder& reset();
 
         /**
          * @brief Returns the current byte length of the buffer
          * @return Number of bytes written so far
          */
-        [[nodiscard]] size_t size() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API size_t size() const noexcept;
 
         /**
          * @brief Checks whether the buffer is empty
          * @return true if no bytes have been written
          */
-        [[nodiscard]] bool isEmpty() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isEmpty() const noexcept;
 
         /**
          * @brief Reserves buffer capacity to avoid reallocations
          * @param capacity Minimum capacity to reserve
          * @return Reference to this
          */
-        Builder& reserve(size_t capacity);
+        DNV_VISTA_SDK_CPP_API Builder& reserve(size_t capacity);
 
         /**
          * @brief Returns the current allocated buffer capacity
          * @return Capacity in bytes
          */
-        [[nodiscard]] size_t capacity() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API size_t capacity() const noexcept;
 
         /**
          * @brief Checks whether the output is a valid, fully closed JSON document
          * @return true if all opened objects/arrays have been closed and the buffer is non-empty
          */
-        [[nodiscard]] bool isValid() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isValid() const noexcept;
 
     private:
         struct ContextFrame

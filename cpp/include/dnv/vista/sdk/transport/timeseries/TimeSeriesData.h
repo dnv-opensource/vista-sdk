@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/transport/serialization/json/SerializableDocument.h"
 #include "dnv/vista/sdk/transport/ISO19848.h"
 #include "dnv/vista/sdk/transport/Results.h"
@@ -696,7 +698,7 @@ namespace dnv::vista::sdk::transport::timeseries
          *          - All data channel identifiers exist in the data channel list
          *          - All values conform to their data channel format specifications
          */
-        [[nodiscard]] ValidateResult<> validate(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ValidateResult<> validate(
             const datachannel::DataChannelListPackage& dcPackage,
             std::function<ValidateResult<>(
                 const DateTimeOffset&,

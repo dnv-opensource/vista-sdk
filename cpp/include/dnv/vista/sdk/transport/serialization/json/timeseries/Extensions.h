@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "TimeSeriesDataPackage.h"
 #include "dnv/vista/sdk/transport/timeseries/TimeSeriesData.h"
 #include "dnv/vista/sdk/utils/StringBuilder.h"
@@ -14,13 +16,13 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
     /**
      * @brief Convert a TimeSeriesDataPackage domain object to its JSON DTO representation
      */
-    [[nodiscard]] TimeSeriesDataPackageDto toDto(
-        const dnv::vista::sdk::transport::timeseries::TimeSeriesDataPackage& domain);
+    [[nodiscard]] DNV_VISTA_SDK_CPP_API TimeSeriesDataPackageDto
+    toDto(const dnv::vista::sdk::transport::timeseries::TimeSeriesDataPackage& domain);
 
     /**
      * @brief Convert a JSON DTO to its TimeSeriesDataPackage domain representation
      */
-    [[nodiscard]] dnv::vista::sdk::transport::timeseries::TimeSeriesDataPackage toDomain(
+    [[nodiscard]] DNV_VISTA_SDK_CPP_API dnv::vista::sdk::transport::timeseries::TimeSeriesDataPackage toDomain(
         const TimeSeriesDataPackageDto& dto);
 
     /**
@@ -30,13 +32,13 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
      * @param dto The DTO to serialize
      * @param prettyPrint If true, output is indented with 2-space indent. If false, compact
      */
-    void toJsonString(
+    DNV_VISTA_SDK_CPP_API void toJsonString(
         dnv::vista::sdk::StringBuilder& buffer, const TimeSeriesDataPackageDto& dto, bool prettyPrint = false);
 
     /**
      * @brief Deserialize a JSON string into a DTO
      */
-    [[nodiscard]] std::optional<TimeSeriesDataPackageDto> fromJsonString(std::string_view json);
+    [[nodiscard]] DNV_VISTA_SDK_CPP_API std::optional<TimeSeriesDataPackageDto> fromJsonString(std::string_view json);
 
     /**
      * @brief Serialize a domain object directly to JSON, writing into the given buffer

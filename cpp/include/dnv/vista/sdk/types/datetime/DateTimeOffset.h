@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "DateTime.h"
 #include "TimeSpan.h"
@@ -49,7 +51,7 @@ namespace dnv::vista::sdk
          * @brief Construct from DateTime (assumes local timezone offset)
          * @param dateTime The DateTime to use (local timezone offset will be determined automatically)
          */
-        explicit DateTimeOffset(const DateTime& dateTime) noexcept;
+        DNV_VISTA_SDK_CPP_API explicit DateTimeOffset(const DateTime& dateTime) noexcept;
 
         /**
          * @brief Construct from tick count and offset
@@ -159,12 +161,12 @@ namespace dnv::vista::sdk
         inline constexpr DateTimeOffset& operator+=(const TimeSpan& duration) noexcept;
         inline constexpr DateTimeOffset& operator-=(const TimeSpan& duration) noexcept;
 
-        [[nodiscard]] inline constexpr const DateTime& dateTime() const noexcept; ///< Local DateTime component
-        [[nodiscard]] inline constexpr const TimeSpan& offset() const noexcept;   ///< UTC offset
-        [[nodiscard]] DateTime utcDateTime() const noexcept;                      ///< Equivalent UTC DateTime
-        [[nodiscard]] DateTime localDateTime() const noexcept;                    ///< Equivalent local DateTime
-        [[nodiscard]] inline constexpr std::int64_t ticks() const noexcept;       ///< Local time as 100ns ticks
-        [[nodiscard]] inline constexpr std::int64_t utcTicks() const noexcept;    ///< UTC time as 100ns ticks
+        [[nodiscard]] inline constexpr const DateTime& dateTime() const noexcept;    ///< Local DateTime component
+        [[nodiscard]] inline constexpr const TimeSpan& offset() const noexcept;      ///< UTC offset
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTime utcDateTime() const noexcept;   ///< Equivalent UTC DateTime
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTime localDateTime() const noexcept; ///< Equivalent local DateTime
+        [[nodiscard]] inline constexpr std::int64_t ticks() const noexcept;          ///< Local time as 100ns ticks
+        [[nodiscard]] inline constexpr std::int64_t utcTicks() const noexcept;       ///< UTC time as 100ns ticks
 
         [[nodiscard]] inline std::int32_t year() const noexcept;        ///< Year component (1-9999)
         [[nodiscard]] inline std::int32_t month() const noexcept;       ///< Month component (1-12)
@@ -192,7 +194,8 @@ namespace dnv::vista::sdk
 
         [[nodiscard]] inline std::int64_t toEpochSeconds() const noexcept;      ///< Seconds since Unix epoch
         [[nodiscard]] inline std::int64_t toEpochMilliseconds() const noexcept; ///< Milliseconds since Unix epoch
-        [[nodiscard]] DateTimeOffset date() const noexcept;       ///< Date component with time set to 00:00:00
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset
+        date() const noexcept;                                    ///< Date component with time set to 00:00:00
         [[nodiscard]] inline TimeSpan timeOfDay() const noexcept; ///< Elapsed time since midnight
 
         /**
@@ -200,19 +203,19 @@ namespace dnv::vista::sdk
          * @param newOffset The new timezone offset to convert to
          * @return DateTimeOffset representing the same instant in time with the specified offset
          */
-        [[nodiscard]] DateTimeOffset toOffset(const TimeSpan& newOffset) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset toOffset(const TimeSpan& newOffset) const noexcept;
 
         /**
          * @brief Convert to UTC (offset = 00:00:00)
          * @return DateTimeOffset representing the same instant in UTC (offset = 00:00:00)
          */
-        [[nodiscard]] DateTimeOffset toUniversalTime() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset toUniversalTime() const noexcept;
 
         /**
          * @brief Convert to local time (system timezone)
          * @return DateTimeOffset representing the same instant in local timezone
          */
-        [[nodiscard]] DateTimeOffset toLocalTime() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset toLocalTime() const noexcept;
 
         /**
          * @brief Convert to Windows FILETIME format
@@ -220,29 +223,31 @@ namespace dnv::vista::sdk
          *          Useful for interoperability with Windows-originated data on any system
          * @return 100-nanosecond intervals since January 1, 1601 UTC
          */
-        [[nodiscard]] std::int64_t toFILETIME() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::int64_t toFILETIME() const noexcept;
 
         [[nodiscard]] inline DateTimeOffset add(const TimeSpan& value) const noexcept;
-        [[nodiscard]] DateTimeOffset addDays(double days) const noexcept;
-        [[nodiscard]] DateTimeOffset addHours(double hours) const noexcept;
-        [[nodiscard]] DateTimeOffset addMilliseconds(double milliseconds) const noexcept;
-        [[nodiscard]] DateTimeOffset addMinutes(double minutes) const noexcept;
-        [[nodiscard]] DateTimeOffset addMonths(std::int32_t months) const noexcept;
-        [[nodiscard]] DateTimeOffset addSeconds(double seconds) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset addDays(double days) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset addHours(double hours) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset addMilliseconds(double milliseconds) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset addMinutes(double minutes) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset addMonths(std::int32_t months) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset addSeconds(double seconds) const noexcept;
         [[nodiscard]] inline DateTimeOffset addTicks(std::int64_t ticks) const noexcept;
-        [[nodiscard]] DateTimeOffset addYears(std::int32_t years) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API DateTimeOffset addYears(std::int32_t years) const noexcept;
 
         [[nodiscard]] inline TimeSpan subtract(const DateTimeOffset& value) const noexcept;
         [[nodiscard]] inline DateTimeOffset subtract(const TimeSpan& value) const noexcept;
 
-        [[nodiscard]] std::string toString(DateTime::Format format = DateTime::Format::Iso8601) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString(
+            DateTime::Format format = DateTime::Format::Iso8601) const;
 
         /**
          * @brief Append string representation using specified format to a reusable buffer
          * @param builder Buffer to append the formatted string to
          * @param format The format to use for string conversion
          */
-        void toString(StringBuilder& builder, DateTime::Format format = DateTime::Format::Iso8601) const;
+        DNV_VISTA_SDK_CPP_API void toString(
+            StringBuilder& builder, DateTime::Format format = DateTime::Format::Iso8601) const;
 
         /// @brief True if both represent the same instant in UTC (offsets may differ)
         [[nodiscard]] inline bool equals(const DateTimeOffset& other) const noexcept;
@@ -250,14 +255,20 @@ namespace dnv::vista::sdk
         /// @brief True if both have the same local time AND the same offset
         [[nodiscard]] inline bool equalsExact(const DateTimeOffset& other) const noexcept;
 
-        [[nodiscard]] bool isValid() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isValid() const noexcept;
 
-        [[nodiscard]] static DateTimeOffset now() noexcept;    ///< Current local time with system timezone offset
-        [[nodiscard]] static DateTimeOffset utcNow() noexcept; ///< Current UTC time (offset = 00:00:00)
-        [[nodiscard]] static DateTimeOffset today() noexcept;  ///< Current local date with time set to 00:00:00
-        [[nodiscard]] static DateTimeOffset min() noexcept;    ///< January 1, 0001 00:00:00.0000000, zero offset
-        [[nodiscard]] static DateTimeOffset max() noexcept;    ///< December 31, 9999 23:59:59.9999999, zero offset
-        [[nodiscard]] static DateTimeOffset epoch() noexcept;  ///< January 1, 1970 00:00:00 UTC, zero offset
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset
+        now() noexcept; ///< Current local time with system timezone offset
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset
+        utcNow() noexcept; ///< Current UTC time (offset = 00:00:00)
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset
+        today() noexcept; ///< Current local date with time set to 00:00:00
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset
+        min() noexcept; ///< January 1, 0001 00:00:00.0000000, zero offset
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset
+        max() noexcept; ///< December 31, 9999 23:59:59.9999999, zero offset
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset
+        epoch() noexcept; ///< January 1, 1970 00:00:00 UTC, zero offset
 
         /**
          * @brief Parse ISO 8601 string with timezone offset safely without throwing exceptions
@@ -265,16 +276,19 @@ namespace dnv::vista::sdk
          * @param result Reference to store the parsed DateTimeOffset if successful
          * @return true if parsing succeeded, false otherwise
          */
-        [[nodiscard]] static bool fromString(std::string_view iso8601String, DateTimeOffset& result) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API bool fromString(
+            std::string_view iso8601String, DateTimeOffset& result) noexcept;
 
         /**
          * @brief Parse ISO 8601 string with timezone offset, returning @c std::nullopt on failure
          * @note For error details, use the two-parameter overload
          */
-        [[nodiscard]] static std::optional<DateTimeOffset> fromString(std::string_view iso8601String) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<DateTimeOffset> fromString(
+            std::string_view iso8601String) noexcept;
 
-        [[nodiscard]] static DateTimeOffset fromEpochSeconds(std::int64_t seconds) noexcept;
-        [[nodiscard]] static DateTimeOffset fromEpochMilliseconds(std::int64_t milliseconds) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset fromEpochSeconds(std::int64_t seconds) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset
+        fromEpochMilliseconds(std::int64_t milliseconds) noexcept;
 
         /**
          * @brief Create DateTimeOffset from Windows FILETIME format
@@ -283,7 +297,7 @@ namespace dnv::vista::sdk
          * @param FILETIME 100-nanosecond intervals since January 1, 1601 UTC
          * @return DateTimeOffset representing the same instant in UTC (offset = 00:00:00)
          */
-        [[nodiscard]] static DateTimeOffset fromFILETIME(std::int64_t FILETIME) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset fromFILETIME(std::int64_t FILETIME) noexcept;
 
         /**
          * @brief Construct from std::chrono::system_clock::time_point and optional UTC offset
@@ -298,14 +312,14 @@ namespace dnv::vista::sdk
          * @brief Convert to std::chrono::system_clock::time_point (UTC)
          * @details Returns the UTC instant. The offset is not preserved.
          */
-        [[nodiscard]] std::chrono::system_clock::time_point toChrono() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::chrono::system_clock::time_point toChrono() const noexcept;
 
         /**
          * @brief Create DateTimeOffset from std::chrono::system_clock::time_point and optional UTC offset
          * @param timePoint The UTC time point
          * @param offset The timezone offset from UTC (default: zero)
          */
-        [[nodiscard]] static DateTimeOffset fromChrono(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API DateTimeOffset fromChrono(
             const std::chrono::system_clock::time_point& timePoint,
             std::chrono::seconds offset = std::chrono::seconds{ 0 }) noexcept;
 
@@ -314,8 +328,8 @@ namespace dnv::vista::sdk
         TimeSpan m_offset;   ///< Offset from UTC
     };
 
-    std::ostream& operator<<(std::ostream& os, const DateTimeOffset& dateTimeOffset);
-    std::istream& operator>>(std::istream& is, DateTimeOffset& dateTimeOffset);
+    DNV_VISTA_SDK_CPP_API std::ostream& operator<<(std::ostream& os, const DateTimeOffset& dateTimeOffset);
+    DNV_VISTA_SDK_CPP_API std::istream& operator>>(std::istream& is, DateTimeOffset& dateTimeOffset);
 } // namespace dnv::vista::sdk
 
 namespace std

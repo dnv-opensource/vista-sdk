@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "CodebookName.h"
 #include "GmodPath.h"
@@ -45,7 +47,7 @@ namespace dnv::vista::sdk
          * @param builder LocalIdBuilder with validated state
          * @throws std::invalid_argument if builder is invalid (missing primary item)
          */
-        explicit LocalId(const LocalIdBuilder& builder);
+        DNV_VISTA_SDK_CPP_API explicit LocalId(const LocalIdBuilder& builder);
 
     public:
         LocalId() = delete;
@@ -155,7 +157,8 @@ namespace dnv::vista::sdk
          * @note This method silently fails on parse errors. Use the overload with ParsingErrors for diagnostics
          * @note VIS version is extracted from the localIdStr (e.g., /dnv-v2/vis-3-4a/...)
          */
-        [[nodiscard]] static std::optional<LocalId> fromString(std::string_view localIdStr) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<LocalId> fromString(
+            std::string_view localIdStr) noexcept;
 
         /**
          * @brief Create LocalId from string representation with error reporting
@@ -164,7 +167,7 @@ namespace dnv::vista::sdk
          * @return Optional containing LocalId if parsing succeeded, nullopt otherwise
          * @note VIS version is extracted from the localIdStr (e.g., /dnv-v2/vis-3-4a/...)
          */
-        [[nodiscard]] static std::optional<LocalId> fromString(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<LocalId> fromString(
             std::string_view localIdStr, ParsingErrors& errors) noexcept;
 
     private:
@@ -194,7 +197,7 @@ namespace dnv::vista::sdk
              * @param builder Valid LocalIdBuilder instance
              * @throws std::invalid_argument If builder is invalid or empty
              */
-            explicit LocalId(const sdk::LocalIdBuilder& builder);
+            DNV_VISTA_SDK_CPP_API explicit LocalId(const sdk::LocalIdBuilder& builder);
 
             LocalId() = delete;
             LocalId(const LocalId& other) = default;

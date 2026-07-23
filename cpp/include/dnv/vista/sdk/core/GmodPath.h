@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "GmodNode.h"
 
@@ -61,7 +63,7 @@ namespace dnv::vista::sdk
          * @param node Target node at the end of the path
          * @throws std::invalid_argument If path validation fails
          */
-        explicit GmodPath(std::vector<GmodNode>&& parents, GmodNode node);
+        DNV_VISTA_SDK_CPP_API explicit GmodPath(std::vector<GmodNode>&& parents, GmodNode node);
 
         GmodPath() = delete;
         GmodPath(const GmodPath&) = default;
@@ -93,20 +95,20 @@ namespace dnv::vista::sdk
         inline size_t length() const noexcept;
 
         /** @brief Get all individualizable sets in this path */
-        std::vector<GmodIndividualizableSet> individualizableSets() const;
+        DNV_VISTA_SDK_CPP_API std::vector<GmodIndividualizableSet> individualizableSets() const;
 
         /**
          * @brief Get the normal assignment name for a node at specified depth
          * @param nodeDepth Depth of the node to query (0-based)
          * @return Normal assignment name if found, nullopt otherwise
          */
-        std::optional<std::string> normalAssignmentName(size_t nodeDepth) const;
+        DNV_VISTA_SDK_CPP_API std::optional<std::string> normalAssignmentName(size_t nodeDepth) const;
 
         /**
          * @brief Get common names for all function nodes in the path
          * @return Vector of (depth, name) pairs for each function node
          */
-        std::vector<std::pair<size_t, std::string>> commonNames() const;
+        DNV_VISTA_SDK_CPP_API std::vector<std::pair<size_t, std::string>> commonNames() const;
 
         /**
          * @brief Validate a parent-child node sequence
@@ -120,10 +122,10 @@ namespace dnv::vista::sdk
         inline bool isMappable() const noexcept;
 
         /** @brief Check if the path contains any individualizable nodes */
-        [[nodiscard]] bool isIndividualizable() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isIndividualizable() const;
 
         /** @brief Create a copy of this path with all locations removed */
-        [[nodiscard]] GmodPath withoutLocations() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API GmodPath withoutLocations() const;
 
         /** @brief Convert path to short string representation (leaf nodes only, separated by '/') */
         inline std::string toString() const;
@@ -136,10 +138,10 @@ namespace dnv::vista::sdk
         inline void toString(StringBuilder& builder, char separator = '/') const;
 
         /** @brief Convert path to full string representation (all nodes, separated by '/') */
-        std::string toFullPathString() const;
+        DNV_VISTA_SDK_CPP_API std::string toFullPathString() const;
 
         /** @brief Append full string representation to an existing string */
-        inline void toFullPathString(StringBuilder& builder) const;
+        inline void toFullPathString(StringBuilder& out) const;
 
         /** @brief Convert path to diagnostic dump string (codes, names, common names, normal assignments) */
         inline std::string toStringDump() const;
@@ -227,7 +229,7 @@ namespace dnv::vista::sdk
          * @param visVersion VIS version to use for Gmod and Locations lookup
          * @return Parsed GmodPath, or nullopt if parsing failed
          */
-        [[nodiscard]] static std::optional<GmodPath> fromShortPath(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<GmodPath> fromShortPath(
             std::string_view item, VisVersion visVersion) noexcept;
 
         /**
@@ -237,7 +239,7 @@ namespace dnv::vista::sdk
          * @param locations Locations instance to parse location suffixes
          * @return Parsed GmodPath, or nullopt if parsing failed
          */
-        [[nodiscard]] static std::optional<GmodPath> fromShortPath(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<GmodPath> fromShortPath(
             std::string_view item, const Gmod& gmod, const Locations& locations) noexcept;
 
         /**
@@ -248,7 +250,7 @@ namespace dnv::vista::sdk
          * @param errors Output parameter populated with parsing errors on failure
          * @return Parsed GmodPath, or nullopt if parsing failed
          */
-        [[nodiscard]] static std::optional<GmodPath> fromShortPath(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<GmodPath> fromShortPath(
             std::string_view item, const Gmod& gmod, const Locations& locations, ParsingErrors& errors) noexcept;
 
         /**
@@ -258,7 +260,7 @@ namespace dnv::vista::sdk
          * @param locations Locations instance to parse location suffixes
          * @return Parsed GmodPath, or nullopt if parsing failed
          */
-        [[nodiscard]] static std::optional<GmodPath> fromFullPath(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<GmodPath> fromFullPath(
             std::string_view fullPathStr, const Gmod& gmod, const Locations& locations) noexcept;
 
         /**
@@ -269,7 +271,7 @@ namespace dnv::vista::sdk
          * @param errors Output parameter populated with parsing errors on failure
          * @return Parsed GmodPath, or nullopt if parsing failed
          */
-        [[nodiscard]] static std::optional<GmodPath> fromFullPath(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<GmodPath> fromFullPath(
             std::string_view fullPathStr, const Gmod& gmod, const Locations& locations, ParsingErrors& errors) noexcept;
 
     private:
@@ -288,7 +290,8 @@ namespace dnv::vista::sdk
          * @param sourcePath Source path containing the nodes (will be copied)
          * @throws std::runtime_error If set validation fails
          */
-        explicit GmodIndividualizableSet(const std::vector<int>& nodeIndices, const GmodPath& sourcePath);
+        DNV_VISTA_SDK_CPP_API explicit GmodIndividualizableSet(
+            const std::vector<int>& nodeIndices, const GmodPath& sourcePath);
 
         GmodIndividualizableSet() = delete;
         GmodIndividualizableSet(const GmodIndividualizableSet&) = default;
@@ -303,14 +306,14 @@ namespace dnv::vista::sdk
          * @return GmodPath with modified locations
          * @throws std::runtime_error If already built
          */
-        GmodPath build();
+        DNV_VISTA_SDK_CPP_API GmodPath build();
 
         /**
          * @brief Get the nodes in this individualizable set
          * @return Vector of node copies
          * @throws std::runtime_error If already built
          */
-        std::vector<GmodNode> nodes() const;
+        DNV_VISTA_SDK_CPP_API std::vector<GmodNode> nodes() const;
 
         /** @brief Get the indices of nodes in this set */
         inline const std::vector<int>& nodeIndices() const noexcept;
@@ -326,7 +329,7 @@ namespace dnv::vista::sdk
          * @brief Convert set to string representation (leaf nodes separated by '/')
          * @throws std::runtime_error If already built
          */
-        [[nodiscard]] std::string toString() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString() const;
 
     private:
         std::vector<int> m_nodeIndices;

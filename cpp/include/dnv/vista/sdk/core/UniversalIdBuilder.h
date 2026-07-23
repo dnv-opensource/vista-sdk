@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "ImoNumber.h"
 #include "LocalIdBuilder.h"
 
@@ -161,7 +163,7 @@ namespace dnv::vista::sdk
          * @return UniversalId instance constructed from current builder state
          * @throws std::invalid_argument if builder state is invalid (missing IMO number or LocalIdBuilder)
          */
-        [[nodiscard]] UniversalId build() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API UniversalId build() const;
 
         /**
          * @brief Convert builder state to string representation
@@ -183,7 +185,8 @@ namespace dnv::vista::sdk
          * "data.dnv.com/IMO1234567/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet")
          * @return Optional containing UniversalId if parsing succeeded, nullopt otherwise
          */
-        [[nodiscard]] static std::optional<UniversalId> fromString(std::string_view universalIdStr);
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<UniversalId> fromString(
+            std::string_view universalIdStr);
 
         /**
          * @brief Create UniversalId from string representation with error reporting
@@ -191,7 +194,7 @@ namespace dnv::vista::sdk
          * @param errors Output parameter filled with parsing errors if parsing fails
          * @return Optional containing UniversalId if parsing succeeded, nullopt otherwise
          */
-        [[nodiscard]] static std::optional<UniversalId> fromString(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<UniversalId> fromString(
             std::string_view universalIdStr, ParsingErrors& errors);
 
     private:

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include <optional>
 #include <string>
 #include <string_view>
@@ -40,14 +42,14 @@ namespace dnv::vista::sdk
          * @param value Seven-digit IMO number (e.g., 9074729)
          * @throws std::invalid_argument if value fails checksum validation
          */
-        explicit ImoNumber(int value);
+        DNV_VISTA_SDK_CPP_API explicit ImoNumber(int value);
 
         /**
          * @brief Construct IMO number from string with validation
          * @param value IMO number string with or without "IMO" prefix (e.g., "IMO9074729" or "9074729")
          * @throws std::invalid_argument if string format is invalid or checksum fails
          */
-        explicit ImoNumber(std::string_view value);
+        DNV_VISTA_SDK_CPP_API explicit ImoNumber(std::string_view value);
 
         ImoNumber(const ImoNumber&) = default;
         ImoNumber(ImoNumber&&) noexcept = default;
@@ -79,13 +81,13 @@ namespace dnv::vista::sdk
          * @return Optional ImoNumber if valid, nullopt otherwise
          * @details Accepts strings with or without "IMO" prefix and validates checksum
          */
-        [[nodiscard]] static std::optional<ImoNumber> fromString(std::string_view value) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<ImoNumber> fromString(std::string_view value) noexcept;
 
         /**
          * @brief Convert to string with "IMO" prefix
          * @return String in format "IMO" followed by 7 digits (e.g., "IMO9074729")
          */
-        [[nodiscard]] std::string toString() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString() const;
 
     private:
         int m_value;

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "Codebooks.h"
 #include "Gmod.h"
 #include "GmodPath.h"
@@ -39,19 +41,19 @@ namespace dnv::vista::sdk
          * @brief Get the singleton instance
          * @return Reference to the singleton VIS instance
          */
-        static const VIS& instance();
+        static DNV_VISTA_SDK_CPP_API const VIS& instance();
 
         /**
          * @brief Get all available VIS versions
          * @return Span over all supported VIS versions, in ascending order
          */
-        std::span<const VisVersion> versions() const noexcept;
+        DNV_VISTA_SDK_CPP_API std::span<const VisVersion> versions() const noexcept;
 
         /**
          * @brief Get the latest VIS version
          * @return The most recent VIS version
          */
-        VisVersion latest() const noexcept;
+        DNV_VISTA_SDK_CPP_API VisVersion latest() const noexcept;
 
         /**
          * @brief Get Gmod for a specific VIS version
@@ -60,7 +62,7 @@ namespace dnv::vista::sdk
          * @throws std::out_of_range if the requested version is not available
          * @details The returned reference is stable for the lifetime of the VIS singleton
          */
-        const Gmod& gmod(VisVersion visVersion) const;
+        DNV_VISTA_SDK_CPP_API const Gmod& gmod(VisVersion visVersion) const;
 
         /**
          * @brief Get codebooks for a specific VIS version
@@ -69,7 +71,7 @@ namespace dnv::vista::sdk
          * @throws std::out_of_range if the requested version is not available
          * @details The returned reference is stable for the lifetime of the VIS singleton
          */
-        const Codebooks& codebooks(VisVersion visVersion) const;
+        DNV_VISTA_SDK_CPP_API const Codebooks& codebooks(VisVersion visVersion) const;
 
         /**
          * @brief Get locations for a specific VIS version
@@ -78,7 +80,7 @@ namespace dnv::vista::sdk
          * @throws std::out_of_range if the requested version is not available
          * @details The returned reference is stable for the lifetime of the VIS singleton
          */
-        const Locations& locations(VisVersion visVersion) const;
+        DNV_VISTA_SDK_CPP_API const Locations& locations(VisVersion visVersion) const;
 
         /**
          * @brief Convert a Gmod node from one VIS version to another
@@ -90,7 +92,7 @@ namespace dnv::vista::sdk
          *          step-by-step from source to target version. The location information is preserved
          *          during conversion when possible
          */
-        std::optional<GmodNode> convertNode(
+        DNV_VISTA_SDK_CPP_API std::optional<GmodNode> convertNode(
             VisVersion sourceVersion, const GmodNode& sourceNode, VisVersion targetVersion) const;
 
         /**
@@ -102,7 +104,7 @@ namespace dnv::vista::sdk
          * @details Convenience method that extracts the source version from the node and delegates
          *          to the full convertNode() method
          */
-        std::optional<GmodNode> convertNode(
+        DNV_VISTA_SDK_CPP_API std::optional<GmodNode> convertNode(
             const GmodNode& sourceNode, VisVersion targetVersion, const GmodNode* sourceParent = nullptr) const;
 
         /**
@@ -115,7 +117,7 @@ namespace dnv::vista::sdk
          *          element in the path. If any node in the path cannot be converted, the entire
          *          conversion fails
          */
-        std::optional<GmodPath> convertPath(
+        DNV_VISTA_SDK_CPP_API std::optional<GmodPath> convertPath(
             VisVersion sourceVersion, const GmodPath& sourcePath, VisVersion targetVersion) const;
 
         /**
@@ -126,7 +128,8 @@ namespace dnv::vista::sdk
          * @details Convenience method that extracts the source version from the path and delegates
          *          to the full convertPath() method
          */
-        std::optional<GmodPath> convertPath(const GmodPath& sourcePath, VisVersion targetVersion) const;
+        DNV_VISTA_SDK_CPP_API std::optional<GmodPath> convertPath(
+            const GmodPath& sourcePath, VisVersion targetVersion) const;
 
         /**
          * @brief Convert a LocalIdBuilder from one VIS version to another
@@ -137,7 +140,7 @@ namespace dnv::vista::sdk
          *          target version. If either path conversion fails, the entire conversion fails
          * @throws std::invalid_argument if the source LocalIdBuilder doesn't have a VIS version
          */
-        std::optional<LocalIdBuilder> convertLocalId(
+        DNV_VISTA_SDK_CPP_API std::optional<LocalIdBuilder> convertLocalId(
             const LocalIdBuilder& sourceLocalId, VisVersion targetVersion) const;
 
         /**
@@ -149,7 +152,8 @@ namespace dnv::vista::sdk
          *          conversion, and then building the final LocalId. Preserves all metadata and quantity
          *          information during conversion
          */
-        std::optional<LocalId> convertLocalId(const LocalId& sourceLocalId, VisVersion targetVersion) const;
+        DNV_VISTA_SDK_CPP_API std::optional<LocalId> convertLocalId(
+            const LocalId& sourceLocalId, VisVersion targetVersion) const;
 
         /**
          * @brief Get multiple Gmod instances for specified VIS versions
@@ -161,7 +165,8 @@ namespace dnv::vista::sdk
          *          such as cross-version comparison or batch conversion operations
          *          Each returned reference points to an internal cached object owned by the VIS singleton
          */
-        std::unordered_map<VisVersion, const Gmod&> gmodsMap(const std::span<const VisVersion>& visVersions) const;
+        DNV_VISTA_SDK_CPP_API std::unordered_map<VisVersion, const Gmod&> gmodsMap(
+            const std::span<const VisVersion>& visVersions) const;
 
         /**
          * @brief Get multiple Codebooks instances for specified VIS versions
@@ -172,7 +177,7 @@ namespace dnv::vista::sdk
          *          operations that need to work with multiple VIS versions simultaneously
          *          Each returned reference points to an internal cached object owned by the VIS singleton
          */
-        std::unordered_map<VisVersion, const Codebooks&> codebooksMap(
+        DNV_VISTA_SDK_CPP_API std::unordered_map<VisVersion, const Codebooks&> codebooksMap(
             const std::span<const VisVersion>& visVersions) const;
 
         /**
@@ -184,7 +189,7 @@ namespace dnv::vista::sdk
          *          operations that need to work with multiple VIS versions simultaneously
          *          Each returned reference points to an internal cached object owned by the VIS singleton
          */
-        std::unordered_map<VisVersion, const Locations&> locationsMap(
+        DNV_VISTA_SDK_CPP_API std::unordered_map<VisVersion, const Locations&> locationsMap(
             const std::span<const VisVersion>& visVersions) const;
     };
 } // namespace dnv::vista::sdk

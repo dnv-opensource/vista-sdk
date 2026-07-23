@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 
 #include <chrono>
@@ -45,7 +47,7 @@ namespace dnv::vista::sdk
          * @brief Parse from ISO 8601 string
          * @param iso8601String ISO 8601 formatted string to parse
          */
-        explicit TimeSpan(std::string_view iso8601String);
+        DNV_VISTA_SDK_CPP_API explicit TimeSpan(std::string_view iso8601String);
 
         TimeSpan(const TimeSpan&) = default;
         TimeSpan(TimeSpan&&) noexcept = default;
@@ -80,13 +82,14 @@ namespace dnv::vista::sdk
         [[nodiscard]] inline double nanoseconds() const noexcept;           ///< Total nanoseconds (fractional)
         [[nodiscard]] inline constexpr std::int64_t ticks() const noexcept; ///< Duration in 100-nanosecond ticks
 
-        [[nodiscard]] std::string toString() const; ///< ISO 8601 duration string (e.g., @c "PT1H30M45S")
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString()
+            const; ///< ISO 8601 duration string (e.g., @c "PT1H30M45S")
 
         /**
          * @brief Append ISO 8601 duration string to a reusable buffer
          * @param builder Buffer to append the formatted string to
          */
-        void toString(StringBuilder& builder) const;
+        DNV_VISTA_SDK_CPP_API void toString(StringBuilder& builder) const;
 
         /**
          * @brief Parse a TimeSpan from a string safely without throwing exceptions
@@ -102,13 +105,15 @@ namespace dnv::vista::sdk
          * Numeric format accepts only digits, decimal point, and optional leading minus sign
          * Empty strings and invalid formats return false
          */
-        [[nodiscard]] static bool fromString(std::string_view iso8601DurationString, TimeSpan& result) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API bool fromString(
+            std::string_view iso8601DurationString, TimeSpan& result) noexcept;
 
         /**
          * @brief Parse ISO 8601 duration string and return optional TimeSpan
          * @note For error details, use the two-parameter overload
          */
-        [[nodiscard]] static std::optional<TimeSpan> fromString(std::string_view iso8601DurationString) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<TimeSpan> fromString(
+            std::string_view iso8601DurationString) noexcept;
 
         /**
          * @brief Convert to std::chrono::system_clock::duration
@@ -117,7 +122,7 @@ namespace dnv::vista::sdk
          *          will be clamped to the nearest representable value
          * @return A system_clock::duration representing this TimeSpan
          */
-        [[nodiscard]] std::chrono::system_clock::duration toChrono() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::chrono::system_clock::duration toChrono() const noexcept;
 
         /**
          * @brief Create TimeSpan from std::chrono::system_clock::duration
@@ -127,7 +132,8 @@ namespace dnv::vista::sdk
          * @param duration The system_clock duration to convert
          * @return A TimeSpan representing the same time duration
          */
-        [[nodiscard]] static TimeSpan fromChrono(const std::chrono::system_clock::duration& duration) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API TimeSpan
+        fromChrono(const std::chrono::system_clock::duration& duration) noexcept;
 
         [[nodiscard]] inline static constexpr TimeSpan fromDays(double days) noexcept;
         [[nodiscard]] inline static constexpr TimeSpan fromHours(double hours) noexcept;
@@ -141,8 +147,8 @@ namespace dnv::vista::sdk
         std::int64_t m_ticks; ///< Duration in 100-nanosecond ticks
     };
 
-    std::ostream& operator<<(std::ostream& os, const TimeSpan& timeSpan);
-    std::istream& operator>>(std::istream& is, TimeSpan& timeSpan);
+    DNV_VISTA_SDK_CPP_API std::ostream& operator<<(std::ostream& os, const TimeSpan& timeSpan);
+    DNV_VISTA_SDK_CPP_API std::istream& operator>>(std::istream& is, TimeSpan& timeSpan);
 } // namespace dnv::vista::sdk
 
 namespace std

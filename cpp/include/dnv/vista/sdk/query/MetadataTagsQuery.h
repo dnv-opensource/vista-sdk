@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/core/CodebookName.h"
 #include "dnv/vista/sdk/core/LocalId.h"
 #include "dnv/vista/sdk/core/MetadataTag.h"
@@ -45,7 +47,7 @@ namespace dnv::vista::sdk
          * @brief Create empty builder (matches any LocalId by default)
          * @return New empty builder
          */
-        [[nodiscard]] static MetadataTagsQueryBuilder create();
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API MetadataTagsQueryBuilder create();
 
         /**
          * @brief Create builder from existing LocalId
@@ -53,7 +55,8 @@ namespace dnv::vista::sdk
          * @param allowOtherTags If true, allow additional tags. If false, exact match only
          * @return Builder initialized with localId's tags
          */
-        [[nodiscard]] static MetadataTagsQueryBuilder from(const LocalId& localId, bool allowOtherTags = true);
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API MetadataTagsQueryBuilder
+        from(const LocalId& localId, bool allowOtherTags = true);
 
         /**
          * @brief Add a metadata tag to match
@@ -130,7 +133,7 @@ namespace dnv::vista::sdk
          * @brief Construct from a builder
          * @param builder Builder this query is created from
          */
-        explicit MetadataTagsQuery(MetadataTagsQueryBuilder builder);
+        DNV_VISTA_SDK_CPP_API explicit MetadataTagsQuery(MetadataTagsQueryBuilder builder);
 
     public:
         MetadataTagsQuery(const MetadataTagsQuery&) = default;
@@ -145,7 +148,7 @@ namespace dnv::vista::sdk
          * @param localId LocalId to test
          * @return true if localId matches the query criteria
          */
-        [[nodiscard]] bool match(const LocalId& localId) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool match(const LocalId& localId) const;
 
         /**
          * @brief Get the builder this query was created from
@@ -153,7 +156,7 @@ namespace dnv::vista::sdk
          * @note Used to reconfigure/extend an existing query (e.g. adding more tags) without
          *       losing previously set state
          */
-        [[nodiscard]] const MetadataTagsQueryBuilder& builder() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const MetadataTagsQueryBuilder& builder() const noexcept;
 
     private:
         MetadataTagsQueryBuilder m_builder;

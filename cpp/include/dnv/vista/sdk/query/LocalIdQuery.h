@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/core/LocalId.h"
 #include "GmodPathQuery.h"
 #include "MetadataTagsQuery.h"
@@ -41,7 +43,7 @@ namespace dnv::vista::sdk
          * @brief Construct from builder
          * @param builder Builder containing query configuration
          */
-        explicit LocalIdQuery(const LocalIdQueryBuilder& builder);
+        DNV_VISTA_SDK_CPP_API explicit LocalIdQuery(const LocalIdQueryBuilder& builder);
 
     public:
         LocalIdQuery() = delete;
@@ -58,7 +60,7 @@ namespace dnv::vista::sdk
          * @return True if localId matches all query criteria, false otherwise
          * @note If localId version < latest VIS version, automatic version conversion is attempted
          */
-        [[nodiscard]] bool match(const LocalId& localId) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool match(const LocalId& localId) const;
 
         /**
          * @brief Match a LocalId string against this query
@@ -299,26 +301,26 @@ namespace dnv::vista::sdk
          * @return New builder with locations cleared
          * @note Only affects items configured as GmodPathQueryBuilder::Path (not Nodes)
          */
-        [[nodiscard]] LocalIdQueryBuilder withoutLocations() const&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API LocalIdQueryBuilder withoutLocations() const&;
 
         /**
          * @brief Remove all location requirements from primary and secondary items
          * @return This builder with locations cleared
          * @note Only affects items configured as GmodPathQueryBuilder::Path (not Nodes)
          */
-        [[nodiscard]] LocalIdQueryBuilder withoutLocations() &&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API LocalIdQueryBuilder withoutLocations() &&;
 
         /**
          * @brief Get the primary item path (if configured as Path query)
          * @return Pointer to GmodPath if primary item is a Path query, nullptr otherwise
          */
-        [[nodiscard]] const GmodPath* primaryItem() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const GmodPath* primaryItem() const noexcept;
 
         /**
          * @brief Get the secondary item path (if configured as Path query)
          * @return Pointer to GmodPath if secondary item is a Path query, nullptr otherwise
          */
-        [[nodiscard]] const GmodPath* secondaryItem() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const GmodPath* secondaryItem() const noexcept;
 
         /**
          * @brief Build immutable LocalIdQuery

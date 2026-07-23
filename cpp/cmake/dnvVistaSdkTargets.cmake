@@ -83,12 +83,20 @@ target_link_libraries(${PROJECT_NAME}
         dnv::vista::sdk::warnings
 )
 
+include(GenerateExportHeader)
+
+generate_export_header(${PROJECT_NAME}
+    EXPORT_MACRO_NAME     DNV_VISTA_SDK_CPP_API
+    EXPORT_FILE_NAME      "${CMAKE_CURRENT_BINARY_DIR}/include/dnv/vista/sdk/Export.h"
+)
+
 if(BUILD_SHARED_LIBS)
     set_target_properties(${PROJECT_NAME}
         PROPERTIES
-            WINDOWS_EXPORT_ALL_SYMBOLS ON
-            VERSION                    ${PROJECT_VERSION}
-            SOVERSION                  ${PROJECT_VERSION_MAJOR}
+            CXX_VISIBILITY_PRESET        hidden
+            VISIBILITY_INLINES_HIDDEN    ON
+            VERSION                      ${PROJECT_VERSION}
+            SOVERSION                    ${PROJECT_VERSION_MAJOR}
     )
 
     if(WIN32)

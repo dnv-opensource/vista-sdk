@@ -12,6 +12,13 @@ namespace dnv::vista::sdk
           locations{ locs }
     {}
 
+    GmodPathQueryBuilder::GmodPathQueryBuilder(const GmodPathQueryBuilder&) = default;
+    GmodPathQueryBuilder::GmodPathQueryBuilder(GmodPathQueryBuilder&&) noexcept = default;
+    GmodPathQueryBuilder::~GmodPathQueryBuilder() = default;
+
+    GmodPathQueryBuilder& GmodPathQueryBuilder::operator=(const GmodPathQueryBuilder&) = default;
+    GmodPathQueryBuilder& GmodPathQueryBuilder::operator=(GmodPathQueryBuilder&&) noexcept = default;
+
     bool GmodPathQueryBuilder::matchFilterAgainstTarget(
         const std::unordered_map<std::string, NodeItem>& filter, const GmodPath& target, bool checkIgnoreFlag)
     {
@@ -185,6 +192,11 @@ namespace dnv::vista::sdk
             ++idx;
         }
     }
+
+    GmodPathQueryBuilder::Path::Path(const Path&) = default;
+    GmodPathQueryBuilder::Path::Path(Path&&) noexcept = default;
+    GmodPathQueryBuilder::Path& GmodPathQueryBuilder::Path::operator=(const Path&) = default;
+    GmodPathQueryBuilder::Path& GmodPathQueryBuilder::Path::operator=(Path&&) noexcept = default;
 
     const GmodPath& GmodPathQueryBuilder::Path::path() const noexcept
     {
@@ -415,6 +427,8 @@ namespace dnv::vista::sdk
         return matchFilterAgainstTarget(m_filter, *target, true);
     }
 
+    GmodPathQueryBuilder::Path::~Path() = default;
+
     std::unique_ptr<GmodPathQueryBuilder> GmodPathQueryBuilder::Path::clone() const
     {
         return std::make_unique<Path>(*this);
@@ -513,6 +527,13 @@ namespace dnv::vista::sdk
 
         return matchFilterAgainstTarget(m_filter, target, false);
     }
+
+    GmodPathQueryBuilder::Nodes::Nodes(const Nodes&) = default;
+    GmodPathQueryBuilder::Nodes::Nodes(Nodes&&) noexcept = default;
+    GmodPathQueryBuilder::Nodes::~Nodes() = default;
+
+    GmodPathQueryBuilder::Nodes& GmodPathQueryBuilder::Nodes::operator=(const Nodes&) = default;
+    GmodPathQueryBuilder::Nodes& GmodPathQueryBuilder::Nodes::operator=(Nodes&&) noexcept = default;
 
     std::unique_ptr<GmodPathQueryBuilder> GmodPathQueryBuilder::Nodes::clone() const
     {

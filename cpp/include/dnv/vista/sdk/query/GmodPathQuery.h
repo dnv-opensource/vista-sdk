@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/core/GmodPath.h"
 #include "dnv/vista/sdk/core/Locations.h"
 
@@ -49,19 +51,19 @@ namespace dnv::vista::sdk
         explicit GmodPathQuery(const GmodPathQueryBuilder* builder);
 
     public:
-        GmodPathQuery(const GmodPathQuery& other);
-        GmodPathQuery(GmodPathQuery&&) noexcept;
+        DNV_VISTA_SDK_CPP_API GmodPathQuery(const GmodPathQuery& other);
+        DNV_VISTA_SDK_CPP_API GmodPathQuery(GmodPathQuery&&) noexcept;
         ~GmodPathQuery() = default;
 
-        GmodPathQuery& operator=(const GmodPathQuery& other);
-        GmodPathQuery& operator=(GmodPathQuery&&) noexcept;
+        DNV_VISTA_SDK_CPP_API GmodPathQuery& operator=(const GmodPathQuery& other);
+        DNV_VISTA_SDK_CPP_API GmodPathQuery& operator=(GmodPathQuery&&) noexcept;
 
         /**
          * @brief Match against a GmodPath
          * @param other The GmodPath to test
          * @return true if other matches the query criteria
          */
-        [[nodiscard]] bool match(const GmodPath& other) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool match(const GmodPath& other) const;
 
     private:
         /**
@@ -108,31 +110,31 @@ namespace dnv::vista::sdk
         GmodPathQueryBuilder() = default;
 
     public:
-        GmodPathQueryBuilder(const GmodPathQueryBuilder&) = default;
-        GmodPathQueryBuilder(GmodPathQueryBuilder&&) noexcept = default;
-        virtual ~GmodPathQueryBuilder() = default;
+        DNV_VISTA_SDK_CPP_API GmodPathQueryBuilder(const GmodPathQueryBuilder&);
+        DNV_VISTA_SDK_CPP_API GmodPathQueryBuilder(GmodPathQueryBuilder&&) noexcept;
+        DNV_VISTA_SDK_CPP_API virtual ~GmodPathQueryBuilder();
 
-        GmodPathQueryBuilder& operator=(const GmodPathQueryBuilder&) = default;
-        GmodPathQueryBuilder& operator=(GmodPathQueryBuilder&&) noexcept = default;
+        DNV_VISTA_SDK_CPP_API GmodPathQueryBuilder& operator=(const GmodPathQueryBuilder&);
+        DNV_VISTA_SDK_CPP_API GmodPathQueryBuilder& operator=(GmodPathQueryBuilder&&) noexcept;
 
         /**
          * @brief Create empty Nodes builder
          * @return New Nodes builder
          */
-        [[nodiscard]] static Nodes create();
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API Nodes create();
 
         /**
          * @brief Create Path builder from existing GmodPath
          * @param path GmodPath to use as base
          * @return New Path builder
          */
-        [[nodiscard]] static Path from(const GmodPath& path);
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API Path from(const GmodPath& path);
 
         /**
          * @brief Build immutable query
          * @return GmodPathQuery instance
          */
-        [[nodiscard]] GmodPathQuery build() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API GmodPathQuery build() const;
 
         /**
          * @brief Internal match implementation
@@ -165,19 +167,19 @@ namespace dnv::vista::sdk
     {
     public:
         Path() = delete;
-        explicit Path(const GmodPath& path);
-        Path(const Path&) = default;
-        Path(Path&&) noexcept = default;
-        virtual ~Path() override = default;
+        DNV_VISTA_SDK_CPP_API explicit Path(const GmodPath& path);
+        DNV_VISTA_SDK_CPP_API Path(const Path&);
+        DNV_VISTA_SDK_CPP_API Path(Path&&) noexcept;
+        DNV_VISTA_SDK_CPP_API virtual ~Path() override;
 
-        Path& operator=(const Path&) = default;
-        Path& operator=(Path&&) noexcept = default;
+        DNV_VISTA_SDK_CPP_API Path& operator=(const Path&);
+        DNV_VISTA_SDK_CPP_API Path& operator=(Path&&) noexcept;
 
         /**
          * @brief Get the base GmodPath
          * @return Reference to the GmodPath
          */
-        [[nodiscard]] const GmodPath& path() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const GmodPath& path() const noexcept;
 
         /**
          * @brief Configure node to match all locations
@@ -185,7 +187,7 @@ namespace dnv::vista::sdk
          * @param matchAllLocations If true, match any location individualization
          * @return New Path builder with node configured
          */
-        [[nodiscard]] Path withNode(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withNode(
             std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
             bool matchAllLocations = false) const&;
 
@@ -195,7 +197,7 @@ namespace dnv::vista::sdk
          * @param matchAllLocations If true, match any location individualization
          * @return New Path builder with node configured
          */
-        [[nodiscard]] Path withNode(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withNode(
             std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
             bool matchAllLocations = false) &&;
 
@@ -205,7 +207,7 @@ namespace dnv::vista::sdk
          * @param locations Locations to match (empty = no locations)
          * @return New Path builder with node configured
          */
-        [[nodiscard]] Path withNode(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withNode(
             std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
             const std::vector<Location>& locations) const&;
 
@@ -215,7 +217,7 @@ namespace dnv::vista::sdk
          * @param locations Locations to match (empty = no locations)
          * @return New Path builder with node configured
          */
-        [[nodiscard]] Path withNode(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withNode(
             std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
             const std::vector<Location>& locations) &&;
 
@@ -225,7 +227,7 @@ namespace dnv::vista::sdk
          * @return New Path builder with nodes ignored
          * @throws std::invalid_argument if node not in path
          */
-        [[nodiscard]] Path withAnyNodeBefore(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withAnyNodeBefore(
             std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) const&;
 
         /**
@@ -234,7 +236,7 @@ namespace dnv::vista::sdk
          * @return New Path builder with nodes ignored
          * @throws std::invalid_argument if node not in path
          */
-        [[nodiscard]] Path withAnyNodeBefore(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withAnyNodeBefore(
             std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) &&;
 
         /**
@@ -243,7 +245,7 @@ namespace dnv::vista::sdk
          * @return New Path builder with nodes ignored
          * @throws std::invalid_argument if node not in path
          */
-        [[nodiscard]] Path withAnyNodeAfter(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withAnyNodeAfter(
             std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) const&;
 
         /**
@@ -252,20 +254,20 @@ namespace dnv::vista::sdk
          * @return New Path builder with nodes ignored
          * @throws std::invalid_argument if node not in path
          */
-        [[nodiscard]] Path withAnyNodeAfter(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withAnyNodeAfter(
             std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) &&;
 
         /**
          * @brief Ignore all location individualizations
          * @return New Path builder with locations ignored
          */
-        [[nodiscard]] Path withoutLocations() const&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withoutLocations() const&;
 
         /**
          * @brief Ignore all location individualizations
          * @return New Path builder with locations ignored
          */
-        [[nodiscard]] Path withoutLocations() &&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withoutLocations() &&;
 
         /**
          * @brief Internal match implementation
@@ -296,20 +298,12 @@ namespace dnv::vista::sdk
         Nodes() = default;
 
     public:
-        Nodes(const Nodes&) = default;
-        Nodes(Nodes&&) noexcept = default;
-        virtual ~Nodes() override = default;
+        DNV_VISTA_SDK_CPP_API Nodes(const Nodes&);
+        DNV_VISTA_SDK_CPP_API Nodes(Nodes&&) noexcept;
+        DNV_VISTA_SDK_CPP_API virtual ~Nodes() override;
 
-        Nodes& operator=(const Nodes&) = default;
-        Nodes& operator=(Nodes&&) noexcept = default;
-
-        /**
-         * @brief Add node to match with location settings
-         * @param node Node to match
-         * @param matchAllLocations If true, match any location individualization
-         * @return New Nodes builder with node added
-         */
-        [[nodiscard]] Nodes withNode(const GmodNode& node, bool matchAllLocations = false) const&;
+        DNV_VISTA_SDK_CPP_API Nodes& operator=(const Nodes&);
+        DNV_VISTA_SDK_CPP_API Nodes& operator=(Nodes&&) noexcept;
 
         /**
          * @brief Add node to match with location settings
@@ -317,7 +311,15 @@ namespace dnv::vista::sdk
          * @param matchAllLocations If true, match any location individualization
          * @return New Nodes builder with node added
          */
-        [[nodiscard]] Nodes withNode(const GmodNode& node, bool matchAllLocations = false) &&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Nodes withNode(const GmodNode& node, bool matchAllLocations = false) const&;
+
+        /**
+         * @brief Add node to match with location settings
+         * @param node Node to match
+         * @param matchAllLocations If true, match any location individualization
+         * @return New Nodes builder with node added
+         */
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Nodes withNode(const GmodNode& node, bool matchAllLocations = false) &&;
 
         /**
          * @brief Add node to match with specific locations
@@ -325,7 +327,8 @@ namespace dnv::vista::sdk
          * @param locations Locations to match (empty = no locations)
          * @return New Nodes builder with node added
          */
-        [[nodiscard]] Nodes withNode(const GmodNode& node, const std::vector<Location>& locations) const&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Nodes
+        withNode(const GmodNode& node, const std::vector<Location>& locations) const&;
 
         /**
          * @brief Add node to match with specific locations
@@ -333,7 +336,8 @@ namespace dnv::vista::sdk
          * @param locations Locations to match (empty = no locations)
          * @return New Nodes builder with node added
          */
-        [[nodiscard]] Nodes withNode(const GmodNode& node, const std::vector<Location>& locations) &&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Nodes
+        withNode(const GmodNode& node, const std::vector<Location>& locations) &&;
 
         /**
          * @brief Internal match implementation

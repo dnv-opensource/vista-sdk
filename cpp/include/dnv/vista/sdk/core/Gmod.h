@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/containers/PerfectHashMap.h"
 #include "GmodNode.h"
 #include "VisVersions.h"
@@ -146,7 +148,8 @@ namespace dnv::vista::sdk
          * @param options Traversal options (pass by value, cheap to copy)
          * @return True if traversal completed, false if stopped early
          */
-        bool traverse(TraverseHandler handler, TraversalOptions options = TraversalOptions{}) const;
+        DNV_VISTA_SDK_CPP_API bool traverse(
+            TraverseHandler handler, TraversalOptions options = TraversalOptions{}) const;
 
         /**
          * @brief Callback function type for tree traversal with custom state

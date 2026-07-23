@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "DataChannelListPackage.h"
 #include "dnv/vista/sdk/transport/datachannel/DataChannel.h"
 #include "dnv/vista/sdk/utils/StringBuilder.h"
@@ -16,15 +18,15 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
      * @param domain The domain object to convert
      * @return Equivalent DTO with all fields mapped
      */
-    [[nodiscard]] DataChannelListPackageDto toDto(
-        const dnv::vista::sdk::transport::datachannel::DataChannelListPackage& domain);
+    [[nodiscard]] DNV_VISTA_SDK_CPP_API DataChannelListPackageDto
+    toDto(const dnv::vista::sdk::transport::datachannel::DataChannelListPackage& domain);
 
     /**
      * @brief Convert a JSON DTO to its DataChannelListPackage domain representation
      * @param dto The DTO to convert
      * @return Equivalent domain object
      */
-    [[nodiscard]] dnv::vista::sdk::transport::datachannel::DataChannelListPackage toDomain(
+    [[nodiscard]] DNV_VISTA_SDK_CPP_API dnv::vista::sdk::transport::datachannel::DataChannelListPackage toDomain(
         const DataChannelListPackageDto& dto);
 
     /**
@@ -34,7 +36,7 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
      * @param dto The DTO to serialize
      * @param prettyPrint If true, output is indented with 2-space indent. If false, compact
      */
-    void toJsonString(
+    DNV_VISTA_SDK_CPP_API void toJsonString(
         dnv::vista::sdk::StringBuilder& buffer, const DataChannelListPackageDto& dto, bool prettyPrint = false);
 
     /**
@@ -42,7 +44,7 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
      * @param json The JSON string to parse
      * @return Parsed DTO, or nullopt if parsing fails
      */
-    [[nodiscard]] std::optional<DataChannelListPackageDto> fromJsonString(std::string_view json);
+    [[nodiscard]] DNV_VISTA_SDK_CPP_API std::optional<DataChannelListPackageDto> fromJsonString(std::string_view json);
 
     /**
      * @brief Serialize a domain object directly to JSON, writing into the given buffer

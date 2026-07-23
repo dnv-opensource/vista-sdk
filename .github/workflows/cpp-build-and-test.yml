@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build-and-test:
-    name: Build and test (${{ matrix.os }}, ${{ matrix.toolchain }})
+    name: Build and test (${{ matrix.os }}, ${{ matrix.toolchain }}, ${{ matrix.link }})
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -25,18 +25,42 @@ jobs:
         include:
           - os: ubuntu-24.04
             toolchain: gcc
+            link: static
+          - os: ubuntu-24.04
+            toolchain: gcc
+            link: shared
           - os: ubuntu-24.04
             toolchain: clang
+            link: static
+          - os: ubuntu-24.04
+            toolchain: clang
+            link: shared
 
           - os: ubuntu-24.04-arm
             toolchain: gcc
+            link: static
+          - os: ubuntu-24.04-arm
+            toolchain: gcc
+            link: shared
           - os: ubuntu-24.04-arm
             toolchain: clang
+            link: static
+          - os: ubuntu-24.04-arm
+            toolchain: clang
+            link: shared
 
           - os: windows-2022
             toolchain: mingw
+            link: static
+          - os: windows-2022
+            toolchain: mingw
+            link: shared
           - os: windows-2022
             toolchain: msvc
+            link: static
+          - os: windows-2022
+            toolchain: msvc
+            link: shared
 
           - os: ubuntu-24.04
             toolchain: gcc
@@ -83,7 +107,7 @@ jobs:
             mingw-w64-x86_64-ninja
 
       # Linux (GCC/Clang, x86_64 and ARM64)
-      - name: Configure (Linux) - tests ON
+      - name: Configure (Linux)
         if: runner.os == 'Linux'
         env:
           CC: ${{ matrix.toolchain }}
@@ -91,8 +115,9 @@ jobs:
         run: |
           cmake -S cpp -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type || 'Debug' }} \
+            -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }} \
             -DDNV_VISTA_SDK_BUILD_TESTS=ON \
-            -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
+            -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF
 
@@ -105,7 +130,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
       # Windows MinGW
-      - name: Configure (Windows MinGW) - tests ON
+      - name: Configure (Windows MinGW)
         if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
         shell: msys2 {0}
         run: |
@@ -113,32 +138,32 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type || 'Debug' }} \
             -DCMAKE_C_COMPILER=gcc \
             -DCMAKE_CXX_COMPILER=g++ \
+            -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }} \
             -DDNV_VISTA_SDK_BUILD_TESTS=ON \
-            -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
+            -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF
 
       - name: Build (Windows MinGW)
         if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
         shell: msys2 {0}
-        run: |
-          cmake --build build --parallel
+        run: cmake --build build --parallel
 
       - name: Run tests (Windows MinGW)
         if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
         shell: msys2 {0}
-        run: |
-          ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --output-on-failure
 
       # Windows MSVC
-      - name: Configure (Windows MSVC) - tests ON
+      - name: Configure (Windows MSVC)
         if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
         shell: pwsh
         run: >
           cmake -S cpp -B build
           -G "Visual Studio 17 2022" -A x64
+          -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }}
           -DDNV_VISTA_SDK_BUILD_TESTS=ON
-          -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF
+          -DDNV_VISTA_SDK_BUILD_SAMPLES=ON
           -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
           -DDNV_VISTA_SDK_WARNINGS=OFF
 
@@ -150,27 +175,14 @@ jobs:
         if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
         run: ctest --test-dir build --build-config ${{ matrix.build_type || 'Debug' }} --output-on-failure
 
-  build-samples:
-    name: Build samples (${{ matrix.os }}, ${{ matrix.toolchain }})
+  install-and-consume:
+    name: Install and consume via find_package() (${{ matrix.os }}, ${{ matrix.link }})
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-24.04
-            toolchain: gcc
-          - os: ubuntu-24.04
-            toolchain: clang
-
-          - os: ubuntu-24.04-arm
-            toolchain: gcc
-          - os: ubuntu-24.04-arm
-            toolchain: clang
-
-          - os: windows-2022
-            toolchain: mingw
-          - os: windows-2022
-            toolchain: msvc
+        os: [ubuntu-24.04, windows-2022]
+        link: [static, shared]
 
     runs-on: ${{ matrix.os }}
 
@@ -178,120 +190,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # Linux deps
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build
-
-      - name: Install GCC (Linux)
-        if: runner.os == 'Linux' && matrix.toolchain == 'gcc'
-        run: |
-          sudo apt-get install -y g++
-
-      - name: Install Clang (Linux)
-        if: runner.os == 'Linux' && matrix.toolchain == 'clang'
-        run: |
-          sudo apt-get install -y clang
-
-      # Windows toolchains
-      - name: Setup MSYS2 (MinGW)
-        if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-
-      # Linux (GCC/Clang, x86_64 and ARM64) samples
-      - name: Configure (Linux) - samples ON
-        if: runner.os == 'Linux'
-        env:
-          CC: ${{ matrix.toolchain }}
-          CXX: ${{ matrix.toolchain == 'gcc' && 'g++' || 'clang++' }}
-        run: |
-          cmake -S cpp -B build-samples -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
-            -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
-            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
-            -DDNV_VISTA_SDK_WARNINGS=OFF
-
-      - name: Build samples (Linux)
-        if: runner.os == 'Linux'
-        run: cmake --build build-samples --parallel
-
-      # Windows MinGW samples
-      - name: Configure (Windows MinGW) - samples ON
-        if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
-        shell: msys2 {0}
-        run: |
-          cmake -S cpp -B build-samples -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_COMPILER=gcc \
-            -DCMAKE_CXX_COMPILER=g++ \
-            -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
-            -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
-            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
-            -DDNV_VISTA_SDK_WARNINGS=OFF
-
-      - name: Build samples (Windows MinGW)
-        if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
-        shell: msys2 {0}
-        run: |
-          cmake --build build-samples --parallel
-
-      # Windows MSVC samples
-      - name: Configure (Windows MSVC) - samples ON
-        if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
-        shell: pwsh
-        run: >
-          cmake -S cpp -B build-samples
-          -G "Visual Studio 17 2022" -A x64
-          -DDNV_VISTA_SDK_BUILD_TESTS=OFF
-          -DDNV_VISTA_SDK_BUILD_SAMPLES=ON
-          -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
-          -DDNV_VISTA_SDK_WARNINGS=OFF
-
-      - name: Build samples (Windows MSVC)
-        if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
-        run: cmake --build build-samples --config Release --parallel
-
-  install-and-consume:
-    name: Install and consume via find_package()
-    timeout-minutes: 30
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
           sudo apt-get install -y cmake ninja-build g++
 
-      - name: Configure SDK
-        run: |
-          cmake -S cpp -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=install \
-            -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
-            -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
-            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
-            -DDNV_VISTA_SDK_WARNINGS=OFF
-
-      - name: Build SDK
-        run: cmake --build build --parallel
-
-      - name: Install SDK
-        run: cmake --install build
-
-      - name: Generate consumer project
+      - name: Generate consumer project sources
+        shell: bash
         run: |
           mkdir -p consumer
           cat > consumer/CMakeLists.txt <<'EOF'
@@ -311,18 +217,88 @@ jobs:
           int main()
           {
               std::cout << "dnv-vista-sdk version: " << dnv::vista::sdk::version() << "\n";
+
+              const auto& vis = dnv::vista::sdk::VIS::instance();
+              std::cout << "Latest VIS version    : " << static_cast<int>(vis.latest()) << "\n";
               return 0;
           }
           EOF
 
-      - name: Configure consumer against installed package
+      # Linux (GCC, Ninja)
+      - name: Configure SDK (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cmake -S cpp -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=install \
+            -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }} \
+            -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
+            -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
+            -DDNV_VISTA_SDK_WARNINGS=OFF
+
+      - name: Build SDK (Linux)
+        if: runner.os == 'Linux'
+        run: cmake --build build --parallel
+
+      - name: Install SDK (Linux)
+        if: runner.os == 'Linux'
+        run: cmake --install build
+
+      - name: Configure consumer against installed package (Linux)
+        if: runner.os == 'Linux'
         run: |
           cmake -S consumer -B consumer/build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install"
 
-      - name: Build consumer
+      - name: Build consumer (Linux)
+        if: runner.os == 'Linux'
         run: cmake --build consumer/build --parallel
 
-      - name: Run consumer
+      - name: Run consumer (Linux)
+        if: runner.os == 'Linux'
+        env:
+          LD_LIBRARY_PATH: ${{ github.workspace }}/install/lib
         run: ./consumer/build/consumer
+
+      # Windows (MSVC, Visual Studio generator)
+      - name: Configure SDK (Windows MSVC)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: >
+          cmake -S cpp -B build
+          -G "Visual Studio 17 2022" -A x64
+          -DCMAKE_INSTALL_PREFIX=install
+          -DBUILD_SHARED_LIBS=${{ matrix.link == 'shared' && 'ON' || 'OFF' }}
+          -DDNV_VISTA_SDK_BUILD_TESTS=OFF
+          -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF
+          -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
+          -DDNV_VISTA_SDK_WARNINGS=OFF
+
+      - name: Build SDK (Windows MSVC)
+        if: runner.os == 'Windows'
+        run: cmake --build build --config Release --parallel
+
+      - name: Install SDK (Windows MSVC)
+        if: runner.os == 'Windows'
+        run: cmake --install build --config Release
+
+      - name: Configure consumer against installed package (Windows MSVC)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: >
+          cmake -S consumer -B consumer/build
+          -G "Visual Studio 17 2022" -A x64
+          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install"
+
+      - name: Build consumer (Windows MSVC)
+        if: runner.os == 'Windows'
+        run: cmake --build consumer/build --config Release --parallel
+
+      - name: Run consumer (Windows MSVC)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:PATH = "${{ github.workspace }}\install\bin;$env:PATH"
+          & "consumer\build\Release\consumer.exe"
