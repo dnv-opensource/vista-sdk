@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/core/LocalId.h"
 
 #include <functional>
@@ -88,7 +90,8 @@ namespace dnv::vista::sdk::transport::timeseries
          * @note Only an empty value returns nullopt. Any other failure to parse as LocalId
          *       silently falls back to ShortId rather than failing outright
          */
-        [[nodiscard]] static std::optional<DataChannelId> fromString(std::string_view value) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<DataChannelId> fromString(
+            std::string_view value) noexcept;
 
         /**
          * @brief Pattern matching visitor for DataChannelId

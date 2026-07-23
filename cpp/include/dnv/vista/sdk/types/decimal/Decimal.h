@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 
 #include <array>
@@ -111,14 +113,14 @@ namespace dnv::vista::sdk
          * @param value Float value to convert
          * @note Limited to ~6-7 significant digits. Use string constructor for exact fractional values
          */
-        explicit Decimal(float value) noexcept;
+        DNV_VISTA_SDK_CPP_API explicit Decimal(float value) noexcept;
 
         /**
          * @brief Construct from @c double. NaN/Infinity become zero
          * @param value Double value to convert
          * @note Limited to ~15-17 significant digits. Use string constructor for exact fractional values
          */
-        explicit Decimal(double value) noexcept;
+        DNV_VISTA_SDK_CPP_API explicit Decimal(double value) noexcept;
 
         inline explicit Decimal(std::int32_t value) noexcept;
         inline explicit Decimal(std::int64_t value) noexcept;
@@ -147,8 +149,8 @@ namespace dnv::vista::sdk
 
         Decimal& operator=(const Decimal& other) noexcept = default;
         Decimal& operator=(Decimal&& other) noexcept = default;
-        std::strong_ordering operator<=>(const Decimal& other) const noexcept;
-        bool operator==(const Decimal& other) const noexcept;
+        DNV_VISTA_SDK_CPP_API std::strong_ordering operator<=>(const Decimal& other) const noexcept;
+        DNV_VISTA_SDK_CPP_API bool operator==(const Decimal& other) const noexcept;
 
         /// @note Comparisons with @c float are subject to ~6-7 digit precision limitations
         inline bool operator==(float val) const noexcept;
@@ -182,9 +184,9 @@ namespace dnv::vista::sdk
         inline bool operator>(std::int32_t val) const noexcept;
         inline bool operator>=(std::int32_t val) const noexcept;
 
-        Decimal operator+(const Decimal& other) const;
+        DNV_VISTA_SDK_CPP_API Decimal operator+(const Decimal& other) const;
         inline Decimal operator-(const Decimal& other) const;
-        Decimal operator*(const Decimal& other) const;
+        DNV_VISTA_SDK_CPP_API Decimal operator*(const Decimal& other) const;
 
         /**
          * @brief Division operator
@@ -192,7 +194,7 @@ namespace dnv::vista::sdk
          * @return Result of division
          * @throws std::overflow_error if divisor is zero (no NaN/Infinity representation)
          */
-        Decimal operator/(const Decimal& other) const;
+        DNV_VISTA_SDK_CPP_API Decimal operator/(const Decimal& other) const;
 
         inline Decimal& operator+=(const Decimal& other);
         inline Decimal& operator-=(const Decimal& other);
@@ -228,14 +230,14 @@ namespace dnv::vista::sdk
          * @param mode Rounding mode to apply (default: RoundingMode::ToNearest for banker's rounding)
          * @return Decimal value rounded to the specified precision
          */
-        [[nodiscard]] Decimal round(
-            std::int32_t decimalsPlacesCount = 0, RoundingMode mode = RoundingMode::ToNearest) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Decimal
+        round(std::int32_t decimalsPlacesCount = 0, RoundingMode mode = RoundingMode::ToNearest) const noexcept;
 
         /**
          * @brief Compute square root
          * @throws std::domain_error if called on a negative value
          */
-        [[nodiscard]] Decimal sqrt() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Decimal sqrt() const;
 
         [[nodiscard]] inline Decimal trunc() const noexcept;
 
@@ -255,14 +257,14 @@ namespace dnv::vista::sdk
          * @note Range: ±79,228,162,514,264,337,593,543,950,335 with up to 28 decimal places
          * @note For convenience wrapper with std::optional return, use the single-parameter overload
          */
-        [[nodiscard]] static bool fromString(std::string_view str, Decimal& result) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API bool fromString(std::string_view str, Decimal& result) noexcept;
 
         /**
          * @brief Parse string to decimal, returning @c std::nullopt on failure
          * @param str String to parse
          * @note For error details, use the two-parameter overload
          */
-        [[nodiscard]] static std::optional<Decimal> fromString(std::string_view str) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<Decimal> fromString(std::string_view str) noexcept;
 
         /**
          * @brief Convert to double (may lose precision)
@@ -270,25 +272,25 @@ namespace dnv::vista::sdk
          * @note Conversion may lose precision beyond ~15-17 significant digits
          * @note For exact precision, use toString() method instead
          */
-        [[nodiscard]] double toDouble() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API double toDouble() const noexcept;
 
         /**
          * @brief Convert to string with exact precision
          * @return String representation
          */
-        [[nodiscard]] std::string toString() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString() const;
 
         /**
          * @brief Append string representation with exact precision to a reusable buffer
          * @param builder Buffer to append the formatted string to
          */
-        void toString(StringBuilder& builder) const;
+        DNV_VISTA_SDK_CPP_API void toString(StringBuilder& builder) const;
 
         /**
          * @brief Get internal 32-bit representation
          * @return Array of 4 32-bit integers representing the decimal
          */
-        [[nodiscard]] std::array<std::int32_t, 4> toBits() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::array<std::int32_t, 4> toBits() const noexcept;
 
         /**
          * @brief Count actual decimal places (excluding trailing zeros)
@@ -298,7 +300,7 @@ namespace dnv::vista::sdk
          *          - Decimal("123.000") returns 0 (integer value)
          *          - Decimal("0.001") returns 3
          */
-        [[nodiscard]] std::uint8_t decimalPlacesCount() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::uint8_t decimalPlacesCount() const noexcept;
 
         /**
          * @brief Count total significant decimal digits (excluding sign and decimal point)
@@ -311,7 +313,7 @@ namespace dnv::vista::sdk
          *          - Decimal("0") returns 1
          *          - Decimal("-123.45") returns 5
          */
-        [[nodiscard]] std::uint32_t totalDigitsCount() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::uint32_t totalDigitsCount() const;
 
     private:
         /** @brief Internal storage layout for 128-bit decimal representation */
@@ -363,8 +365,8 @@ namespace dnv::vista::sdk
         return value.round(decimalsPlacesCount, mode);
     }
 
-    std::ostream& operator<<(std::ostream& os, const Decimal& decimal);
-    std::istream& operator>>(std::istream& is, Decimal& decimal);
+    DNV_VISTA_SDK_CPP_API std::ostream& operator<<(std::ostream& os, const Decimal& decimal);
+    DNV_VISTA_SDK_CPP_API std::istream& operator>>(std::istream& is, Decimal& decimal);
 } // namespace dnv::vista::sdk
 
 namespace std

@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include <string>
 #include <string_view>
 #include <vector>
@@ -87,7 +89,7 @@ namespace dnv::vista::sdk
          * @brief Format errors as a human-readable string
          * @return Tab-indented error list, or "Success" if empty
          */
-        [[nodiscard]] std::string toString() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString() const;
 
         /**
          * @brief Get iterator to the first error entry

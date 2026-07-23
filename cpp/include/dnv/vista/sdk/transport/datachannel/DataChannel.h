@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/core/LocalId.h"
 #include "dnv/vista/sdk/transport/serialization/json/SerializableDocument.h"
 #include "dnv/vista/sdk/transport/ISO19848.h"
@@ -58,7 +60,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * and Time)
          * @param version Optional version string (ISO 19848 Table 11, Version element - Version of DataChannelList)
          */
-        explicit ConfigurationReference(
+        DNV_VISTA_SDK_CPP_API explicit ConfigurationReference(
             std::string id, DateTimeOffset timeStamp, std::optional<std::string> version = std::nullopt);
 
         ConfigurationReference() = default;
@@ -128,7 +130,7 @@ namespace dnv::vista::sdk::transport::datachannel
     {
     public:
         /** @brief Construct VersionInformation with default Annex C naming rule, scheme version, and reference URL */
-        VersionInformation();
+        DNV_VISTA_SDK_CPP_API VersionInformation();
 
         /**
          * @brief Construct VersionInformation with all fields
@@ -138,7 +140,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param referenceUrl Optional reference URL (ISO 19848 Table 12, ReferenceURL element - Definition of Local
          * Data Name structure)
          */
-        VersionInformation(
+        DNV_VISTA_SDK_CPP_API VersionInformation(
             std::string namingRule,
             std::string namingSchemeVersion,
             std::optional<std::string> referenceUrl = std::nullopt);
@@ -211,7 +213,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param low Lower bound (Mandatory, ISO 19848 Table 20, Low element - Lower limit of measuring range)
          * @param high Upper bound (Mandatory, ISO 19848 Table 20, High element - Upper limit of measuring range)
          */
-        Range(double low, double high);
+        DNV_VISTA_SDK_CPP_API Range(double low, double high);
 
         Range() = default;
         Range(const Range&) = default;
@@ -457,7 +459,8 @@ namespace dnv::vista::sdk::transport::datachannel
          * @return Validation result indicating success or error messages
          * @details Validates the value against enumeration, numeric bounds, length, pattern, etc.
          */
-        [[nodiscard]] ValidateResult<> validateValue(std::string_view value, const Format& format) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ValidateResult<> validateValue(
+            std::string_view value, const Format& format) const;
 
     private:
         /**
@@ -465,7 +468,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param number The number to validate
          * @return Validation result indicating success or error messages
          */
-        [[nodiscard]] inline ValidateResult<> validateNumber(double number) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ValidateResult<> validateNumber(double number) const;
 
         std::optional<std::vector<std::string>> m_enumeration;
         std::optional<std::uint32_t> m_fractionDigits;
@@ -501,7 +504,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param type Format type string (ISO 19848 Table 18, Type element)
          * @param restriction Optional restriction constraints (ISO 19848 Table 18, Restriction element)
          */
-        explicit Format(std::string type, std::optional<Restriction> restriction = std::nullopt);
+        DNV_VISTA_SDK_CPP_API explicit Format(std::string type, std::optional<Restriction> restriction = std::nullopt);
 
         Format(const Format&) = default;
         Format(Format&&) noexcept = default;
@@ -527,7 +530,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param type Format type string (ISO 19848 Table 18, Type element)
          * @throws std::invalid_argument if type is not a recognized ISO 19848 format type
          */
-        void setType(std::string_view type);
+        DNV_VISTA_SDK_CPP_API void setType(std::string_view type);
 
         /**
          * @brief Set optional restriction
@@ -542,7 +545,8 @@ namespace dnv::vista::sdk::transport::datachannel
          * @return Validation result indicating success or error messages
          * @details Validates the value against the format type and optional restriction
          */
-        [[nodiscard]] ValidateResult<> validateValue(std::string_view value, Value& parsedValue) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ValidateResult<> validateValue(
+            std::string_view value, Value& parsedValue) const;
 
     private:
         std::string m_type;
@@ -571,7 +575,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param calculationPeriod Optional calculation period in seconds (ISO 19848 Table 17, CalculationPeriod
          * element)
          */
-        explicit DataChannelType(
+        DNV_VISTA_SDK_CPP_API explicit DataChannelType(
             std::string type,
             std::optional<double> updateCycle = std::nullopt,
             std::optional<double> calculationPeriod = std::nullopt);
@@ -613,7 +617,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param type Data channel type string (ISO 19848 Table 17, Type element)
          * @throws std::invalid_argument if type is not a recognized ISO 19848 data channel type
          */
-        void setType(std::string_view type);
+        DNV_VISTA_SDK_CPP_API void setType(std::string_view type);
 
         /**
          * @brief Set optional update cycle
@@ -650,14 +654,15 @@ namespace dnv::vista::sdk::transport::datachannel
         /**
          * @brief Construct NameObject with default Annex C naming rule ("/dnv-v2")
          */
-        NameObject();
+        DNV_VISTA_SDK_CPP_API NameObject();
 
         /**
          * @brief Construct NameObject with explicit naming rule
          * @param namingRule Naming rule identifier (ISO 19848 Table 22, NamingRule element)
          * @param customNameObjects Optional custom name objects (extension point)
          */
-        explicit NameObject(std::string namingRule, std::optional<CustomNameObjects> customNameObjects = std::nullopt);
+        DNV_VISTA_SDK_CPP_API explicit NameObject(
+            std::string namingRule, std::optional<CustomNameObjects> customNameObjects = std::nullopt);
 
         NameObject(const NameObject&) = default;
         NameObject(NameObject&&) noexcept = default;
@@ -719,7 +724,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * element)
          * @param customElements Optional custom elements (extension point)
          */
-        explicit Unit(
+        DNV_VISTA_SDK_CPP_API explicit Unit(
             std::string unitSymbol,
             std::optional<std::string> quantityName = std::nullopt,
             std::optional<CustomElements> customElements = std::nullopt);
@@ -802,7 +807,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param dateCreated Optional creation timestamp (ISO 19848 Table 10, DateCreated element)
          * @param customHeaders Optional custom headers (extension point)
          */
-        Header(
+        DNV_VISTA_SDK_CPP_API Header(
             ShipId shipId,
             ConfigurationReference dataChannelListId,
             std::optional<VersionInformation> versionInformation = std::nullopt,
@@ -943,7 +948,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param remarks Optional remarks (ISO 19848 Table 16, Remarks element)
          * @param customProperties Optional custom properties (extension point)
          */
-        Property(
+        DNV_VISTA_SDK_CPP_API Property(
             DataChannelType dataChannelType,
             Format format,
             std::optional<Range> range = std::nullopt,
@@ -1119,7 +1124,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param shortId Optional short identifier (ISO 19848 Table 15, ShortID element)
          * @param nameObject Optional name object (ISO 19848 Table 15, NameObject element)
          */
-        explicit DataChannelId(
+        DNV_VISTA_SDK_CPP_API explicit DataChannelId(
             LocalId localId,
             std::optional<std::string> shortId = std::nullopt,
             std::optional<NameObject> nameObject = std::nullopt);
@@ -1193,7 +1198,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param property Property specification (ISO 19848 Table 14, Property element)
          * @throws std::invalid_argument if property validation fails
          */
-        DataChannel(DataChannelId dataChannelId, Property property);
+        DNV_VISTA_SDK_CPP_API DataChannel(DataChannelId dataChannelId, Property property);
 
         DataChannel() = delete;
         DataChannel(const DataChannel&) = default;
@@ -1255,7 +1260,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @brief Construct DataChannelList with initial data channels
          * @param dataChannels Vector of data channels to add (ISO 19848 Table 13, DataChannel element)
          */
-        explicit DataChannelList(const std::vector<DataChannel>& dataChannels);
+        DNV_VISTA_SDK_CPP_API explicit DataChannelList(const std::vector<DataChannel>& dataChannels);
 
         DataChannelList() = default;
         DataChannelList(const DataChannelList&) = default;
@@ -1388,7 +1393,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @param header Package header (ISO 19848 Table 9, Header element)
          * @param dataChannelList Data channel list (ISO 19848 Table 9, DataChannelList element)
          */
-        Package(Header header, DataChannelList dataChannelList);
+        DNV_VISTA_SDK_CPP_API Package(Header header, DataChannelList dataChannelList);
 
         Package() = delete;
         Package(const Package&) = default;
@@ -1451,7 +1456,7 @@ namespace dnv::vista::sdk::transport::datachannel
          * @brief Construct DataChannelListPackage with package
          * @param package Package containing header and data channel list (ISO 19848 Table 9)
          */
-        explicit DataChannelListPackage(Package package);
+        DNV_VISTA_SDK_CPP_API explicit DataChannelListPackage(Package package);
 
         DataChannelListPackage() = delete;
         DataChannelListPackage(const DataChannelListPackage&) = default;

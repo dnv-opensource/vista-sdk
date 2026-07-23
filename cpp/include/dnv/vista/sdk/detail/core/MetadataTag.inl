@@ -39,10 +39,10 @@ namespace dnv::vista::sdk
 
     inline std::string MetadataTag::toString() const
     {
-        StringBuilder sb;
-        toString(sb, '\0');
-        sb.pop_back();
-        return sb.toString();
+        StringBuilder result;
+        toString(result, '\0');
+        result.pop_back();
+        return result.toString();
     }
 
     inline void MetadataTag::toString(StringBuilder& builder, char separator) const

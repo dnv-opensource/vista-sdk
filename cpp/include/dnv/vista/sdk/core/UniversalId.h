@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "ImoNumber.h"
 #include "LocalId.h"
@@ -96,7 +98,8 @@ namespace dnv::vista::sdk
          * @return Optional containing UniversalId if parsing succeeded, nullopt otherwise
          * @note This method silently fails on parse errors. Use the overload with ParsingErrors for diagnostics
          */
-        [[nodiscard]] static std::optional<UniversalId> fromString(std::string_view universalIdStr) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<UniversalId> fromString(
+            std::string_view universalIdStr) noexcept;
 
         /**
          * @brief Create UniversalId from string representation with error reporting
@@ -104,7 +107,7 @@ namespace dnv::vista::sdk
          * @param errors Output parameter filled with parsing errors if parsing fails
          * @return Optional containing UniversalId if parsing succeeded, nullopt otherwise
          */
-        [[nodiscard]] static std::optional<UniversalId> fromString(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<UniversalId> fromString(
             std::string_view universalIdStr, ParsingErrors& errors) noexcept;
 
     private:

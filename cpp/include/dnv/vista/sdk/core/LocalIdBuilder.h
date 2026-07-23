@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "GmodPath.h"
 #include "MetadataTag.h"
@@ -333,7 +335,7 @@ namespace dnv::vista::sdk
          * @return LocalId instance constructed from current builder state
          * @throws std::invalid_argument if builder state is invalid (no primary item)
          */
-        [[nodiscard]] LocalId build() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API LocalId build() const;
 
         /**
          * @brief Convert builder state to string representation
@@ -347,7 +349,7 @@ namespace dnv::vista::sdk
          * @param builder Builder to append the LocalId string representation to
          * @note Format: /dnv-v2/vis-{version}/{primary-item}[/sec/{secondary-item}]/meta[/qty-{value}][/cnt-{value}]..
          */
-        void toString(StringBuilder& builder) const;
+        DNV_VISTA_SDK_CPP_API void toString(StringBuilder& builder) const;
 
         /**
          * @brief Create LocalId from string representation
@@ -356,7 +358,8 @@ namespace dnv::vista::sdk
          * @return Optional containing LocalId if parsing succeeded, nullopt otherwise
          * @note This method does not throw exceptions. Use the overload with ParsingErrors for diagnostics
          */
-        [[nodiscard]] static std::optional<LocalId> fromString(std::string_view localIdStr) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<LocalId> fromString(
+            std::string_view localIdStr) noexcept;
 
         /**
          * @brief Create LocalId from string representation with error reporting
@@ -365,7 +368,7 @@ namespace dnv::vista::sdk
          * @return Optional containing LocalId if parsing succeeded, nullopt otherwise
          * @note This method does not throw exceptions. Check the errors parameter for failure details
          */
-        [[nodiscard]] static std::optional<LocalId> fromString(
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<LocalId> fromString(
             std::string_view localIdStr, ParsingErrors& errors) noexcept;
 
     private:

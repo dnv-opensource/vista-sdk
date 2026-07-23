@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "VisVersions.h"
 
 #include <optional>
@@ -181,7 +183,8 @@ namespace dnv::vista::sdk
          * @param locationStr Location string to parse
          * @return Optional Location if valid, nullopt otherwise
          */
-        [[nodiscard]] std::optional<Location> fromString(std::string_view locationStr) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::optional<Location> fromString(
+            std::string_view locationStr) const noexcept;
 
         /**
          * @brief Parse location string with error details
@@ -189,7 +192,7 @@ namespace dnv::vista::sdk
          * @param errors Output ParsingErrors containing detailed error information
          * @return Optional Location if valid, nullopt otherwise
          */
-        [[nodiscard]] std::optional<Location> fromString(
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::optional<Location> fromString(
             std::string_view locationStr, ParsingErrors& errors) const noexcept;
 
     private:

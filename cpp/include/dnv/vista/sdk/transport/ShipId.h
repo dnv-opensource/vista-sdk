@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/core/ImoNumber.h"
 
 #include <optional>
@@ -32,14 +34,14 @@ namespace dnv::vista::sdk::transport
          * @brief Construct ShipId from IMO number
          * @param imoNumber Valid IMO number
          */
-        explicit ShipId(const ImoNumber& imoNumber);
+        DNV_VISTA_SDK_CPP_API explicit ShipId(const ImoNumber& imoNumber);
 
         /**
          * @brief Construct ShipId from alternative identifier
          * @param otherId Alternative ship identifier string
          * @throws std::invalid_argument if otherId is empty
          */
-        explicit ShipId(std::string otherId);
+        DNV_VISTA_SDK_CPP_API explicit ShipId(std::string otherId);
 
         ShipId() = delete;
         ShipId(const ShipId&) = default;
@@ -49,31 +51,31 @@ namespace dnv::vista::sdk::transport
         ShipId& operator=(const ShipId&) = default;
         ShipId& operator=(ShipId&&) noexcept = default;
 
-        [[nodiscard]] bool operator==(const ShipId& other) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool operator==(const ShipId& other) const noexcept;
 
         /**
          * @brief Check if ShipId contains an IMO number
          * @return true if this ShipId holds an IMO number
          */
-        [[nodiscard]] bool isImoNumber() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isImoNumber() const noexcept;
 
         /**
          * @brief Check if ShipId contains an alternative identifier
          * @return true if this ShipId holds an alternative identifier
          */
-        [[nodiscard]] bool isOtherId() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isOtherId() const noexcept;
 
         /**
          * @brief Get IMO number if available
          * @return Optional containing IMO number, or nullopt if ShipId holds alternative ID
          */
-        [[nodiscard]] std::optional<ImoNumber> imoNumber() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::optional<ImoNumber> imoNumber() const noexcept;
 
         /**
          * @brief Get alternative identifier if available
          * @return Optional containing alternative ID, or nullopt if ShipId holds IMO number
          */
-        [[nodiscard]] std::optional<std::string_view> otherId() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::optional<std::string_view> otherId() const noexcept;
 
         /**
          * @brief Pattern matching visitor for ShipId
@@ -90,7 +92,7 @@ namespace dnv::vista::sdk::transport
          * @brief Convert ShipId to string representation
          * @return String representation (IMO number with "IMO" prefix, or alternative ID)
          */
-        [[nodiscard]] std::string toString() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString() const;
 
         /**
          * @brief Create ShipId from string representation
@@ -100,7 +102,7 @@ namespace dnv::vista::sdk::transport
          *          IMO number, creates a ShipId with ImoNumber. Otherwise, creates a ShipId with
          *          the alternative identifier. Returns nullopt if value is empty
          */
-        [[nodiscard]] static std::optional<ShipId> fromString(std::string_view value) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<ShipId> fromString(std::string_view value) noexcept;
 
     private:
         std::variant<ImoNumber, std::string> m_value;

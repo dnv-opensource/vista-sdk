@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "Concepts.h"
 
 #include <algorithm>
@@ -74,26 +76,26 @@ namespace dnv::vista::sdk::json
     {
     public:
         /** @brief Constructs an empty JSON object (default) */
-        Document();
+        DNV_VISTA_SDK_CPP_API Document();
 
-        explicit Document(bool value) noexcept;         ///< Construct JSON boolean
-        explicit Document(int value) noexcept;          ///< Construct JSON integer
-        explicit Document(unsigned int value) noexcept; ///< Construct JSON unsigned integer
-        explicit Document(int64_t value) noexcept;      ///< Construct JSON integer
-        explicit Document(uint64_t value) noexcept;     ///< Construct JSON unsigned integer
-        explicit Document(double value) noexcept;       ///< Construct JSON double
-        explicit Document(std::string value);           ///< Construct JSON string
-        explicit Document(std::string_view value);      ///< Construct JSON string
-        explicit Document(const char* value);           ///< Construct JSON string
+        DNV_VISTA_SDK_CPP_API explicit Document(bool value) noexcept;         ///< Construct JSON boolean
+        DNV_VISTA_SDK_CPP_API explicit Document(int value) noexcept;          ///< Construct JSON integer
+        DNV_VISTA_SDK_CPP_API explicit Document(unsigned int value) noexcept; ///< Construct JSON unsigned integer
+        DNV_VISTA_SDK_CPP_API explicit Document(int64_t value) noexcept;      ///< Construct JSON integer
+        DNV_VISTA_SDK_CPP_API explicit Document(uint64_t value) noexcept;     ///< Construct JSON unsigned integer
+        DNV_VISTA_SDK_CPP_API explicit Document(double value) noexcept;       ///< Construct JSON double
+        DNV_VISTA_SDK_CPP_API explicit Document(std::string value);           ///< Construct JSON string
+        DNV_VISTA_SDK_CPP_API explicit Document(std::string_view value);      ///< Construct JSON string
+        DNV_VISTA_SDK_CPP_API explicit Document(const char* value);           ///< Construct JSON string
 
         template <size_t N>
         inline Document(const char (&value)[N])
             : m_data{ std::string{ value } }
         {}
 
-        Document(std::nullptr_t) noexcept; ///< Construct JSON null
-        explicit Document(Array value);    ///< Construct JSON array
-        explicit Document(Object value);   ///< Construct JSON object
+        DNV_VISTA_SDK_CPP_API Document(std::nullptr_t) noexcept; ///< Construct JSON null
+        DNV_VISTA_SDK_CPP_API explicit Document(Array value);    ///< Construct JSON array
+        DNV_VISTA_SDK_CPP_API explicit Document(Object value);   ///< Construct JSON object
 
         template <typename T>
         inline Document(
@@ -139,12 +141,12 @@ namespace dnv::vista::sdk::json
         Document& operator=(const Document& other) = default;
         Document& operator=(Document&& other) noexcept = default;
 
-        Document& operator=(std::string value);       ///< Assign string
-        Document& operator=(bool value) noexcept;     ///< Assign bool
-        Document& operator=(int64_t value) noexcept;  ///< Assign int64
-        Document& operator=(uint64_t value) noexcept; ///< Assign uint64
-        Document& operator=(double value) noexcept;   ///< Assign double
-        Document& operator=(std::nullptr_t) noexcept; ///< Assign null
+        DNV_VISTA_SDK_CPP_API Document& operator=(std::string value);       ///< Assign string
+        DNV_VISTA_SDK_CPP_API Document& operator=(bool value) noexcept;     ///< Assign bool
+        DNV_VISTA_SDK_CPP_API Document& operator=(int64_t value) noexcept;  ///< Assign int64
+        DNV_VISTA_SDK_CPP_API Document& operator=(uint64_t value) noexcept; ///< Assign uint64
+        DNV_VISTA_SDK_CPP_API Document& operator=(double value) noexcept;   ///< Assign double
+        DNV_VISTA_SDK_CPP_API Document& operator=(std::nullptr_t) noexcept; ///< Assign null
 
         /**
          * @brief Compares two Documents by type and value.
@@ -154,26 +156,26 @@ namespace dnv::vista::sdk::json
          *       asymmetry only surfaces when Document{uint64_t} is constructed manually with
          *       a value <= INT64_MAX.
          */
-        bool operator==(const Document& other) const noexcept;
-        std::strong_ordering operator<=>(const Document& other) const noexcept;
+        DNV_VISTA_SDK_CPP_API bool operator==(const Document& other) const noexcept;
+        DNV_VISTA_SDK_CPP_API std::strong_ordering operator<=>(const Document& other) const noexcept;
 
         /**
          * @brief Creates an empty JSON object
          * @return A Document holding an empty Object
          */
-        [[nodiscard]] static Document object();
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API Document object();
 
         /**
          * @brief Creates an empty JSON array
          * @return A Document holding an empty Array
          */
-        [[nodiscard]] static Document array();
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API Document array();
 
         /**
          * @brief Returns the type of the stored value
          * @return The Type enum value corresponding to the held alternative
          */
-        [[nodiscard]] Type type() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Type type() const noexcept;
 
         /**
          * @brief Returns the stored value as type T, if the type matches
@@ -278,28 +280,28 @@ namespace dnv::vista::sdk::json
          * @param key The key to look up
          * @return Pointer to the found Document, or nullptr if not found or not an object
          */
-        [[nodiscard]] Document* find(std::string_view key) noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Document* find(std::string_view key) noexcept;
 
         /**
          * @brief Finds a value by key in a JSON object (const overload)
          * @param key The key to look up
          * @return Const pointer to the found Document, or nullptr if not found or not an object
          */
-        [[nodiscard]] const Document* find(std::string_view key) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const Document* find(std::string_view key) const noexcept;
 
         /**
          * @brief Inserts or replaces a key/value pair in a JSON object
          * @param key The key to insert or update
          * @param value The value to associate with the key
          */
-        void set(std::string key, Document value);
+        DNV_VISTA_SDK_CPP_API void set(std::string key, Document value);
 
         /**
          * @brief Checks whether a key exists in a JSON object
          * @param key The key to look up
          * @return true if the key exists, false otherwise
          */
-        [[nodiscard]] bool contains(std::string_view key) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool contains(std::string_view key) const noexcept;
 
         /**
          * @brief Returns a reference to the value for key, throws if missing
@@ -307,7 +309,7 @@ namespace dnv::vista::sdk::json
          * @return Reference to the found Document
          * @throws std::out_of_range if the key does not exist or this is not an object
          */
-        Document& at(std::string_view key);
+        DNV_VISTA_SDK_CPP_API Document& at(std::string_view key);
 
         /**
          * @brief Returns a const reference to the value for key, throws if missing
@@ -315,7 +317,7 @@ namespace dnv::vista::sdk::json
          * @return Const reference to the found Document
          * @throws std::out_of_range if the key does not exist or this is not an object
          */
-        const Document& at(std::string_view key) const;
+        DNV_VISTA_SDK_CPP_API const Document& at(std::string_view key) const;
 
         /**
          * @brief Returns a reference to the element at index, throws if out of range
@@ -323,7 +325,7 @@ namespace dnv::vista::sdk::json
          * @return Reference to the element
          * @throws std::out_of_range if index is out of bounds or this is not an array
          */
-        Document& at(size_t index);
+        DNV_VISTA_SDK_CPP_API Document& at(size_t index);
 
         /**
          * @brief Returns a const reference to the element at index, throws if out of range
@@ -331,57 +333,57 @@ namespace dnv::vista::sdk::json
          * @return Const reference to the element
          * @throws std::out_of_range if index is out of bounds or this is not an array
          */
-        const Document& at(size_t index) const;
+        DNV_VISTA_SDK_CPP_API const Document& at(size_t index) const;
 
         /**
          * @brief Returns a reference to the value for key, inserts null if missing
          * @param key The key to look up or insert
          * @return Reference to the existing or newly inserted Document
          */
-        Document& operator[](std::string_view key);
+        DNV_VISTA_SDK_CPP_API Document& operator[](std::string_view key);
 
         /**
          * @brief Returns a const reference to the value for key, returns a static null Document if missing
          * @param key The key to look up
          * @return Const reference to the found Document, or a static null Document
          */
-        [[nodiscard]] const Document& operator[](std::string_view key) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const Document& operator[](std::string_view key) const;
 
         /**
          * @brief Returns a reference to the element at index (no bounds check)
          * @param index Zero-based index
          * @return Reference to the element
          */
-        [[nodiscard]] Document& operator[](size_t index);
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Document& operator[](size_t index);
 
         /**
          * @brief Returns a const reference to the element at index (no bounds check)
          * @param index Zero-based index
          * @return Const reference to the element
          */
-        [[nodiscard]] const Document& operator[](size_t index) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const Document& operator[](size_t index) const;
 
         /**
          * @brief Removes all elements from an object or array
          */
-        void clear();
+        DNV_VISTA_SDK_CPP_API void clear();
 
         /**
          * @brief Removes the key/value pair with the given key from an object
          * @param key The key to remove
          * @return 1 if the key was found and removed, 0 otherwise
          */
-        size_t erase(std::string_view key);
+        DNV_VISTA_SDK_CPP_API size_t erase(std::string_view key);
 
         /** @brief Removes by C string key, delegates to erase(std::string_view)
          *  @param key The key to remove
          *  @return 1 if removed, 0 otherwise */
-        size_t erase(const char* key);
+        DNV_VISTA_SDK_CPP_API size_t erase(const char* key);
 
         /** @brief Removes by std::string key, delegates to erase(std::string_view)
          *  @param key The key to remove
          *  @return 1 if removed, 0 otherwise */
-        size_t erase(const std::string& key);
+        DNV_VISTA_SDK_CPP_API size_t erase(const std::string& key);
 
         /**
          * @brief Removes the element pointed to by an iterator
@@ -420,61 +422,64 @@ namespace dnv::vista::sdk::json
          * @brief Returns the number of elements in an array or object
          * @return Element count, or 0 if not a container
          */
-        [[nodiscard]] size_t size() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API size_t size() const noexcept;
 
         /**
          * @brief Checks whether the array or object contains no elements
          * @return true if size() == 0
          */
-        [[nodiscard]] bool isEmpty() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isEmpty() const noexcept;
 
         /**
          * @brief Appends an element to a JSON array
          * @param value The Document to append
          */
-        void push_back(Document value);
+        DNV_VISTA_SDK_CPP_API void push_back(Document value);
 
         /**
          * @brief Reserves storage in the underlying array or object vector
          * @param capacity The minimum capacity to reserve
          */
-        void reserve(size_t capacity);
+        DNV_VISTA_SDK_CPP_API void reserve(size_t capacity);
 
         /**
          * @brief Returns the current reserved capacity
          * @return Capacity of the underlying vector
          */
-        [[nodiscard]] size_t capacity() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API size_t capacity() const noexcept;
 
         /**
          * @brief Returns a reference to the first element of a JSON array
          * @return Reference to the first element
          * @throws std::out_of_range if the array is empty
          */
-        [[nodiscard]] Document& front();
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Document& front();
 
         /**
          * @brief Const overload of front()
          * @return Const reference to the first element
          * @throws std::out_of_range if the array is empty
          * */
-        [[nodiscard]] const Document& front() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const Document& front() const;
 
         /**
          * @brief Returns a reference to the last element of a JSON array
          * @return Reference to the last element
          * @throws std::out_of_range if the array is empty
          */
-        [[nodiscard]] Document& back();
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Document& back();
 
-        /** @brief Const overload of back() @return Const reference to the last element
-         *  @throws std::out_of_range if the array is empty */
-        [[nodiscard]] const Document& back() const;
+        /**
+         *  @brief Const overload of back()
+         *  @return Const reference to the last element
+         *  @throws std::out_of_range if the array is empty
+         */
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const Document& back() const;
 
-        [[nodiscard]] Array::iterator begin();
-        [[nodiscard]] Array::iterator end();
-        [[nodiscard]] Array::const_iterator begin() const;
-        [[nodiscard]] Array::const_iterator end() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Array::iterator begin();
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Array::iterator end();
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Array::const_iterator begin() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Array::const_iterator end() const;
 
         /**
          * @brief Forward iterator over the key/value pairs of a JSON object
@@ -492,34 +497,34 @@ namespace dnv::vista::sdk::json
 
             MapIterator it; ///< Underlying iterator into the Object vector
 
-            explicit ObjectIterator(MapIterator iter);
+            DNV_VISTA_SDK_CPP_API explicit ObjectIterator(MapIterator iter);
 
             ObjectIterator(const ObjectIterator&) = default;
             ObjectIterator(ObjectIterator&&) noexcept = default;
             ObjectIterator& operator=(const ObjectIterator&) = default;
             ObjectIterator& operator=(ObjectIterator&&) noexcept = default;
 
-            const std::string& key() const; ///< Key of the current pair
-            const Document& value() const;  ///< Value of the current pair (const)
-            Document& value();              ///< Value of the current pair (mutable)
+            DNV_VISTA_SDK_CPP_API const std::string& key() const; ///< Key of the current pair
+            DNV_VISTA_SDK_CPP_API const Document& value() const;  ///< Value of the current pair (const)
+            DNV_VISTA_SDK_CPP_API Document& value();              ///< Value of the current pair (mutable)
 
-            const Document& operator*() const;
-            Document& operator*();
-            ObjectIterator& operator++();
-            bool operator==(const ObjectIterator& other) const;
+            DNV_VISTA_SDK_CPP_API const Document& operator*() const;
+            DNV_VISTA_SDK_CPP_API Document& operator*();
+            DNV_VISTA_SDK_CPP_API ObjectIterator& operator++();
+            DNV_VISTA_SDK_CPP_API bool operator==(const ObjectIterator& other) const;
         };
 
         /**
          * @brief Returns an iterator to the first key/value pair of the object
          * @return ObjectIterator pointing to the first pair, or end() if not an object
          */
-        [[nodiscard]] ObjectIterator objectBegin() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ObjectIterator objectBegin() const;
 
         /**
          * @brief Returns an iterator past the last key/value pair of the object
          * @return ObjectIterator past the last pair
          */
-        [[nodiscard]] ObjectIterator objectEnd() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ObjectIterator objectEnd() const;
 
         /**
          * @brief Serializes the Document to a JSON string
@@ -527,14 +532,14 @@ namespace dnv::vista::sdk::json
          * @param bufferSize Initial buffer size hint (0 = use default)
          * @return The JSON string representation
          */
-        [[nodiscard]] std::string toString(int indent = 0, size_t bufferSize = 0) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString(int indent = 0, size_t bufferSize = 0) const;
 
         /**
          * @brief Parses a JSON string and returns a Document
          * @param jsonStr The JSON string to parse
          * @return The parsed Document, or std::nullopt on parse failure
          */
-        [[nodiscard]] static std::optional<Document> fromString(std::string_view jsonStr);
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<Document> fromString(std::string_view jsonStr);
 
         /**
          * @brief Parses a JSON string into an existing Document
@@ -542,14 +547,14 @@ namespace dnv::vista::sdk::json
          * @param value Output Document to populate
          * @return true on success, false on parse failure
          */
-        [[nodiscard]] static bool fromString(std::string_view jsonStr, Document& value);
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API bool fromString(std::string_view jsonStr, Document& value);
 
         /**
          * @brief Parses a UTF-8 byte vector as JSON and returns a Document
          * @param bytes The byte vector to parse
          * @return The parsed Document, or std::nullopt on parse failure
          */
-        [[nodiscard]] static std::optional<Document> fromBytes(const std::vector<uint8_t>& bytes);
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<Document> fromBytes(const std::vector<uint8_t>& bytes);
 
         /**
          * @brief Parses a UTF-8 byte vector into an existing Document
@@ -557,7 +562,7 @@ namespace dnv::vista::sdk::json
          * @param value Output Document to populate
          * @return true on success, false on parse failure
          */
-        [[nodiscard]] static bool fromBytes(const std::vector<uint8_t>& bytes, Document& value);
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API bool fromBytes(const std::vector<uint8_t>& bytes, Document& value);
 
     private:
         template <typename T>

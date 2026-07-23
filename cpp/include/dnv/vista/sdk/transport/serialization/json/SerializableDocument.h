@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -107,15 +109,15 @@ namespace dnv::vista::sdk::transport::serialization::json
         };
 
         /** @brief Constructs a JSON null */
-        SerializableDocument() noexcept;
+        DNV_VISTA_SDK_CPP_API SerializableDocument() noexcept;
 
         /** @brief Constructs a JSON boolean
          *  @param value The boolean value */
-        SerializableDocument(bool value) noexcept;
+        DNV_VISTA_SDK_CPP_API SerializableDocument(bool value) noexcept;
 
         /** @brief Constructs a JSON integer from any integral type
          *  @param value The integer value */
-        SerializableDocument(std::int64_t value) noexcept;
+        DNV_VISTA_SDK_CPP_API SerializableDocument(std::int64_t value) noexcept;
 
         template <std::integral T>
             requires(!std::is_same_v<T, bool> && !std::is_same_v<T, std::int64_t>)
@@ -125,15 +127,15 @@ namespace dnv::vista::sdk::transport::serialization::json
 
         /** @brief Constructs a JSON floating point number
          *  @param value The double value */
-        SerializableDocument(double value) noexcept;
+        DNV_VISTA_SDK_CPP_API SerializableDocument(double value) noexcept;
 
         /** @brief Constructs a JSON string
          *  @param value The string value */
-        SerializableDocument(std::string value);
+        DNV_VISTA_SDK_CPP_API SerializableDocument(std::string value);
 
         /** @brief Constructs a JSON string
          *  @param value The string value */
-        SerializableDocument(std::string_view value);
+        DNV_VISTA_SDK_CPP_API SerializableDocument(std::string_view value);
 
         /** @brief Constructs a JSON string from any type with a toString() method (e.g. Decimal, DateTimeOffset) */
         template <typename T>
@@ -146,11 +148,11 @@ namespace dnv::vista::sdk::transport::serialization::json
 
         /** @brief Constructs a JSON array
          *  @param value The array elements */
-        SerializableDocument(Array value);
+        DNV_VISTA_SDK_CPP_API SerializableDocument(Array value);
 
         /** @brief Constructs a JSON object
          *  @param value The object key/value pairs, in insertion order */
-        SerializableDocument(Object value);
+        DNV_VISTA_SDK_CPP_API SerializableDocument(Object value);
 
         SerializableDocument(const SerializableDocument&) = default;
         SerializableDocument(SerializableDocument&&) noexcept = default;
@@ -159,13 +161,13 @@ namespace dnv::vista::sdk::transport::serialization::json
         SerializableDocument& operator=(const SerializableDocument&) = default;
         SerializableDocument& operator=(SerializableDocument&&) noexcept = default;
 
-        [[nodiscard]] bool operator==(const SerializableDocument& other) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool operator==(const SerializableDocument& other) const noexcept;
 
         /** @brief Constructs an empty JSON object */
-        [[nodiscard]] static SerializableDocument object() noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API SerializableDocument object() noexcept;
 
         /** @brief Constructs an empty JSON array */
-        [[nodiscard]] static SerializableDocument array() noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API SerializableDocument array() noexcept;
 
         /**
          * @brief Constructs a SerializableDocument from a user-provided JSON-like value
@@ -186,60 +188,60 @@ namespace dnv::vista::sdk::transport::serialization::json
         [[nodiscard]] T to() const;
 
         /** @brief Gets the value kind held by this document */
-        [[nodiscard]] Kind kind() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Kind kind() const noexcept;
 
-        [[nodiscard]] bool isNull() const noexcept;
-        [[nodiscard]] bool isBoolean() const noexcept;
-        [[nodiscard]] bool isInteger() const noexcept;
-        [[nodiscard]] bool isDouble() const noexcept;
-        [[nodiscard]] bool isString() const noexcept;
-        [[nodiscard]] bool isArray() const noexcept;
-        [[nodiscard]] bool isObject() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isNull() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isBoolean() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isInteger() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isDouble() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isString() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isArray() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool isObject() const noexcept;
 
         /** @brief Get boolean value. @throws std::bad_variant_access if not a boolean */
-        [[nodiscard]] bool asBoolean() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool asBoolean() const;
 
         /** @brief Get integer value. @throws std::bad_variant_access if not an integer */
-        [[nodiscard]] std::int64_t asInteger() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::int64_t asInteger() const;
 
         /** @brief Get double value. @throws std::bad_variant_access if not a double */
-        [[nodiscard]] double asDouble() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API double asDouble() const;
 
         /** @brief Get string value. @throws std::bad_variant_access if not a string */
-        [[nodiscard]] const std::string& asString() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const std::string& asString() const;
 
         /** @brief Get array elements. @throws std::bad_variant_access if not an array */
-        [[nodiscard]] const Array& asArray() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const Array& asArray() const;
 
         /** @brief Get object key/value pairs. @throws std::bad_variant_access if not an object */
-        [[nodiscard]] const Object& asObject() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const Object& asObject() const;
 
         /** @brief Get mutable array elements. @throws std::bad_variant_access if not an array */
-        [[nodiscard]] Array& asArray();
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Array& asArray();
 
         /** @brief Get mutable object key/value pairs. @throws std::bad_variant_access if not an object */
-        [[nodiscard]] Object& asObject();
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Object& asObject();
 
         /**
          * @brief Looks up a key in this object
          * @param key The key to look up
          * @return Pointer to the value if this is an object and the key exists, nullptr otherwise
          */
-        [[nodiscard]] const SerializableDocument* find(std::string_view key) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const SerializableDocument* find(std::string_view key) const noexcept;
 
         /**
          * @brief Looks up a key in this object, returning a mutable pointer
          * @param key The key to look up
          * @return Mutable pointer to the value if this is an object and the key exists, nullptr otherwise
          */
-        [[nodiscard]] SerializableDocument* find(std::string_view key) noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API SerializableDocument* find(std::string_view key) noexcept;
 
         /**
          * @brief Checks whether this object contains a key
          * @param key The key to look up
          * @return true if this is an object and contains key
          */
-        [[nodiscard]] bool contains(std::string_view key) const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API bool contains(std::string_view key) const noexcept;
 
         /**
          * @brief Sets a key/value pair on this object, preserving insertion order
@@ -248,14 +250,14 @@ namespace dnv::vista::sdk::transport::serialization::json
          * @param key The key to set
          * @param value The value to associate with key
          */
-        void set(std::string_view key, SerializableDocument value);
+        DNV_VISTA_SDK_CPP_API void set(std::string_view key, SerializableDocument value);
 
         /**
          * @brief Appends a value to this array
          * @details If this document is not yet an array, it is reset to an empty array first
          * @param value The value to append
          */
-        void push_back(SerializableDocument value);
+        DNV_VISTA_SDK_CPP_API void push_back(SerializableDocument value);
 
     private:
         std::variant<std::nullptr_t, bool, std::int64_t, double, std::string, Array, Object> m_value;

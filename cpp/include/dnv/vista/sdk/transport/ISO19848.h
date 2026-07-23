@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "dnv/vista/sdk/types/datetime/DateTimeOffset.h"
 #include "dnv/vista/sdk/types/decimal/Decimal.h"
 #include "ISO19848Versions.h"
@@ -75,7 +77,8 @@ namespace dnv::vista::sdk::transport
          * @param dataChannelTypeName The type identifier to look up
          * @return ParseResult containing the type name if found
          */
-        [[nodiscard]] ParseResult<DataChannelTypeName> fromString(std::string_view dataChannelTypeName) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ParseResult<DataChannelTypeName> fromString(
+            std::string_view dataChannelTypeName) const;
 
         /** @brief Get iterator to the first DataChannelTypeName */
         [[nodiscard]] inline ConstIterator begin() const noexcept;
@@ -347,7 +350,7 @@ namespace dnv::vista::sdk::transport
          * @param value The string value to validate
          * @return Validation result with parsed value if successful
          */
-        [[nodiscard]] ValidateResult<Value> validate(std::string_view value) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ValidateResult<Value> validate(std::string_view value) const;
 
         /**
          * @brief Pattern matching over validated value with type checking
@@ -404,7 +407,8 @@ namespace dnv::vista::sdk::transport
          * @param formatDataType The type identifier to look up
          * @return ParseResult containing the type name if found
          */
-        [[nodiscard]] ParseResult<FormatDataType> fromString(std::string_view formatDataType) const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ParseResult<FormatDataType> fromString(
+            std::string_view formatDataType) const;
 
         /** @brief Get iterator to the first FormatDataType */
         [[nodiscard]] inline ConstIterator begin() const noexcept;
@@ -447,33 +451,33 @@ namespace dnv::vista::sdk::transport
          * @brief Get the singleton instance
          * @return Reference to the global ISO19848 instance
          */
-        [[nodiscard]] static ISO19848& instance();
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API ISO19848& instance();
 
         /**
          * @brief Get all available ISO 19848 versions
          * @return Vector containing all supported ISO 19848 versions in lexicographical order
          */
-        [[nodiscard]] const std::vector<ISO19848Version>& versions() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const std::vector<ISO19848Version>& versions() const noexcept;
 
         /**
          * @brief Get the latest ISO 19848 version
          * @return The most recent ISO 19848 version
          */
-        [[nodiscard]] ISO19848Version latest() const noexcept;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API ISO19848Version latest() const noexcept;
 
         /**
          * @brief Get data channel type names for a specific version
          * @param version The ISO 19848 version
          * @return DataChannelTypeNames collection for the specified version
          */
-        [[nodiscard]] const DataChannelTypeNames& dataChannelTypeNames(ISO19848Version version);
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const DataChannelTypeNames& dataChannelTypeNames(ISO19848Version version);
 
         /**
          * @brief Get format data types for a specific version
          * @param version The ISO 19848 version
          * @return FormatDataTypes collection
          */
-        [[nodiscard]] const FormatDataTypes& formatDataTypes(ISO19848Version version);
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API const FormatDataTypes& formatDataTypes(ISO19848Version version);
     };
 } // namespace dnv::vista::sdk::transport
 

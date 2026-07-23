@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include "Locations.h"
 
 #include <cstdint>
@@ -79,14 +81,14 @@ namespace dnv::vista::sdk
          * @param location Location to parse and extract components from
          * @return New LocationBuilder with components from the parsed location
          */
-        [[nodiscard]] LocationBuilder withLocation(const Location& location) const&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API LocationBuilder withLocation(const Location& location) const&;
 
         /**
          * @brief Parse and set location components from existing Location
          * @param location Location to parse and extract components from
          * @return New LocationBuilder with components from the parsed location
          */
-        [[nodiscard]] LocationBuilder withLocation(const Location& location) &&;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API LocationBuilder withLocation(const Location& location) &&;
 
         /**
          * @brief Parse and set location components from optional Location

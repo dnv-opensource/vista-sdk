@@ -43,6 +43,8 @@
 
 #pragma once
 
+#include <dnv/vista/sdk/Export.h>
+
 #include <array>
 #include <compare>
 #include <cstdint>
@@ -130,7 +132,7 @@ namespace dnv::vista::sdk::internal
          *          - Uses string conversion to preserve full double precision (53-bit mantissa)
          * @note This matches the behavior of static_cast<int>(double) for consistency
          */
-        explicit Int128(double val);
+        DNV_VISTA_SDK_CPP_API explicit Int128(double val);
 
         /**
          * @brief Construct from Decimal value
@@ -143,7 +145,7 @@ namespace dnv::vista::sdk::internal
          * @note This matches the behavior of static_cast<int>(double) for consistency,
          *       rather than throwing exceptions for fractional parts
          */
-        explicit Int128(const Decimal& decimal);
+        DNV_VISTA_SDK_CPP_API explicit Int128(const Decimal& decimal);
 
         constexpr Int128(const Int128& other) noexcept = default;
         constexpr Int128(Int128&& other) noexcept = default;
@@ -178,10 +180,10 @@ namespace dnv::vista::sdk::internal
 
         /// @note Comparisons with @c double are subject to ~15-17 digit precision limitations.
 #if !DNV_VISTA_SDK_HAS_NATIVE_INT128
-        bool operator==(double val) const noexcept;
-        bool operator<(double val) const noexcept;
+        DNV_VISTA_SDK_CPP_API bool operator==(double val) const noexcept;
+        DNV_VISTA_SDK_CPP_API bool operator<(double val) const noexcept;
         inline bool operator<=(double val) const noexcept;
-        bool operator>(double val) const noexcept;
+        DNV_VISTA_SDK_CPP_API bool operator>(double val) const noexcept;
         inline bool operator>=(double val) const noexcept;
 #else
         inline bool operator==(double val) const noexcept;
@@ -192,19 +194,19 @@ namespace dnv::vista::sdk::internal
 #endif
 
         /// @note Decimal must have no fractional part to compare equal.
-        bool operator==(const Decimal& val) const noexcept;
-        bool operator<(const Decimal& val) const noexcept;
+        DNV_VISTA_SDK_CPP_API bool operator==(const Decimal& val) const noexcept;
+        DNV_VISTA_SDK_CPP_API bool operator<(const Decimal& val) const noexcept;
         inline bool operator<=(const Decimal& val) const noexcept { return *this < val || *this == val; }
         inline bool operator>(const Decimal& val) const noexcept { return !(*this <= val); }
         inline bool operator>=(const Decimal& val) const noexcept { return !(*this < val); }
 
         inline Int128 operator+(const Int128& other) const noexcept;
         inline Int128 operator-(const Int128& other) const noexcept;
-        Int128 operator*(const Int128& other) const noexcept;
+        DNV_VISTA_SDK_CPP_API Int128 operator*(const Int128& other) const noexcept;
         inline Int128 operator-() const noexcept;
 
         /// @throws std::overflow_error if divisor is zero.
-        Int128 operator/(const Int128& other) const;
+        DNV_VISTA_SDK_CPP_API Int128 operator/(const Int128& other) const;
 
         inline Int128& operator+=(const Int128& other) noexcept;
         inline Int128& operator-=(const Int128& other) noexcept;
@@ -219,8 +221,8 @@ namespace dnv::vista::sdk::internal
         /// @throws std::overflow_error if divisor is zero.
         inline Int128 operator%(const Int128& other) const;
 
-        [[nodiscard]] std::uint64_t toLow() const noexcept;  ///< Lower 64 bits
-        [[nodiscard]] std::uint64_t toHigh() const noexcept; ///< Upper 64 bits
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::uint64_t toLow() const noexcept;  ///< Lower 64 bits
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::uint64_t toHigh() const noexcept; ///< Upper 64 bits
 
 #if DNV_VISTA_SDK_HAS_NATIVE_INT128
         /**
@@ -228,7 +230,7 @@ namespace dnv::vista::sdk::internal
          * @details Provides access to the underlying native 128-bit integer for interfacing
          *          with APIs that expect @c __int128 or for compiler intrinsics.
          */
-        DNV_VISTA_SDK_NATIVE_INT128 toNative() const noexcept;
+        DNV_VISTA_SDK_CPP_API DNV_VISTA_SDK_NATIVE_INT128 toNative() const noexcept;
 #endif
 
         /**
@@ -245,7 +247,7 @@ namespace dnv::vista::sdk::internal
          * @note Returns floor(sqrt(this)) - always rounds down
          * @note For exact precision, convert to Decimal and use Decimal::sqrt()
          */
-        [[nodiscard]] Int128 isqrt() const;
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API Int128 isqrt() const;
 
         /**
          * @brief Parse 128-bit integer from string without throwing.
@@ -253,16 +255,17 @@ namespace dnv::vista::sdk::internal
          *          no scientific notation. Range: -2^127 to 2^127-1.
          * @note For @c std::optional return, use the single-parameter overload.
          */
-        [[nodiscard]] static bool fromString(std::string_view str, Int128& result) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API bool fromString(std::string_view str, Int128& result) noexcept;
 
         /**
          * @brief Parse 128-bit integer from string, returning @c std::nullopt on failure.
          * @note For error details, use the two-parameter overload.
          */
-        [[nodiscard]] static std::optional<Int128> fromString(std::string_view str) noexcept;
+        [[nodiscard]] static DNV_VISTA_SDK_CPP_API std::optional<Int128> fromString(std::string_view str) noexcept;
 
-        [[nodiscard]] std::string toString() const;                        ///< Decimal string representation
-        [[nodiscard]] std::array<std::int32_t, 4> toBits() const noexcept; ///< Internal 32-bit representation
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::string toString() const; ///< Decimal string representation
+        [[nodiscard]] DNV_VISTA_SDK_CPP_API std::array<std::int32_t, 4> toBits()
+            const noexcept; ///< Internal 32-bit representation
 
     private:
 #if DNV_VISTA_SDK_HAS_NATIVE_INT128
@@ -306,7 +309,7 @@ namespace dnv::vista::sdk::internal
      * @note For integer-only results, use @c isqrt().
      * @see Int128::isqrt(), Decimal::sqrt()
      */
-    [[nodiscard]] Decimal sqrt(const Int128& value);
+    [[nodiscard]] DNV_VISTA_SDK_CPP_API Decimal sqrt(const Int128& value);
 } // namespace dnv::vista::sdk::internal
 
 #include "Int128.inl"
