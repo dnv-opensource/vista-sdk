@@ -66,10 +66,11 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS OFF)
 endif()
 
-option(DNV_VISTA_SDK_BUILD_TESTS      "Build dnv::vista::sdk tests"      OFF)
-option(DNV_VISTA_SDK_BUILD_SAMPLES    "Build dnv::vista::sdk samples"    OFF)
-option(DNV_VISTA_SDK_BUILD_BENCHMARKS "Build dnv::vista::sdk benchmarks" OFF)
-option(DNV_VISTA_SDK_WARNINGS         "Enable strict compiler warnings"  OFF)
+option(DNV_VISTA_SDK_BUILD_TESTS      "Build dnv::vista::sdk tests"                              OFF)
+option(DNV_VISTA_SDK_BUILD_SAMPLES    "Build dnv::vista::sdk samples"                            OFF)
+option(DNV_VISTA_SDK_BUILD_BENCHMARKS "Build dnv::vista::sdk benchmarks"                         OFF)
+option(DNV_VISTA_SDK_WARNINGS         "Enable strict compiler warnings"                          OFF)
+option(DNV_VISTA_SDK_ENABLE_SIMD      "Enable hardware SIMD acceleration (non-portable, opt-in)" OFF)
 
 #----------------------------------------------
 # CMake modules configuration

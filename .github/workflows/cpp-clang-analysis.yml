@@ -40,7 +40,8 @@ jobs:
             -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
-            -DDNV_VISTA_SDK_WARNINGS=ON
+            -DDNV_VISTA_SDK_WARNINGS=ON \
+            -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
 
       - name: Build (runs clang-tidy)
         run: cmake --build build-clang-tidy --parallel
@@ -68,7 +69,8 @@ jobs:
             -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
-            -DDNV_VISTA_SDK_WARNINGS=OFF
+            -DDNV_VISTA_SDK_WARNINGS=OFF \
+            -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
 
       - name: Run scan-build
         run: scan-build --status-bugs cmake --build build-scan-build --parallel $(nproc)

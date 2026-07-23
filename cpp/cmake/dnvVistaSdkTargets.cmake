@@ -120,3 +120,15 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${DNV_VISTA_SDK_SOURCE_DIR}
 )
+
+#----------------------------------------------
+# SIMD acceleration (opt-in)
+#----------------------------------------------
+
+if(DNV_VISTA_SDK_ENABLE_SIMD)
+    target_compile_options(${PROJECT_NAME}
+        PRIVATE
+            $<$<CXX_COMPILER_ID:GNU,Clang>:-march=native>
+            $<$<CXX_COMPILER_ID:MSVC>:/arch:AVX2>
+    )
+endif()
