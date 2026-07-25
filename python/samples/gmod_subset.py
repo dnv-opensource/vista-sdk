@@ -279,21 +279,21 @@ def example_dual_engine_vessel() -> None:
     # Each path is a "leaf" item e.g. ISO19848 Annex C short path - the full hierarchy is implicit  # noqa: E501
     asset_paths = [
         # === Port Main Engine (411.1-P) with 6 cylinders ===
-        "411.1-P/C101/C101.31-1",  # Port engine, cylinder 1
-        "411.1-P/C101/C101.31-2",  # Port engine, cylinder 2
-        "411.1-P/C101/C101.31-3",  # Port engine, cylinder 3
-        "411.1-P/C101/C101.31-4",  # Port engine, cylinder 4
-        "411.1-P/C101/C101.31-5",  # Port engine, cylinder 5
-        "411.1-P/C101/C101.31-6",  # Port engine, cylinder 6
-        "411.1-P/C101/C101.63/S206",  # Port engine, cooling system
+        "411.1-P/C101.31-1",  # Port engine, cylinder 1
+        "411.1-P/C101.31-2",  # Port engine, cylinder 2
+        "411.1-P/C101.31-3",  # Port engine, cylinder 3
+        "411.1-P/C101.31-4",  # Port engine, cylinder 4
+        "411.1-P/C101.31-5",  # Port engine, cylinder 5
+        "411.1-P/C101.31-6",  # Port engine, cylinder 6
+        "411.1-P/C101.63/S206",  # Port engine, cooling system
         # === Starboard Main Engine (411.1-S) with 6 cylinders ===
-        "411.1-S/C101/C101.31-1",  # Starboard engine, cylinder 1
-        "411.1-S/C101/C101.31-2",  # Starboard engine, cylinder 2
-        "411.1-S/C101/C101.31-3",  # Starboard engine, cylinder 3
-        "411.1-S/C101/C101.31-4",  # Starboard engine, cylinder 4
-        "411.1-S/C101/C101.31-5",  # Starboard engine, cylinder 5
-        "411.1-S/C101/C101.31-6",  # Starboard engine, cylinder 6
-        "411.1-S/C101/C101.63/S206",  # Starboard engine, cooling system
+        "411.1-S/C101.31-1",  # Starboard engine, cylinder 1
+        "411.1-S/C101.31-2",  # Starboard engine, cylinder 2
+        "411.1-S/C101.31-3",  # Starboard engine, cylinder 3
+        "411.1-S/C101.31-4",  # Starboard engine, cylinder 4
+        "411.1-S/C101.31-5",  # Starboard engine, cylinder 5
+        "411.1-S/C101.31-6",  # Starboard engine, cylinder 6
+        "411.1-S/C101.63/S206",  # Starboard engine, cooling system
         # === Generator Sets ===
         "511.11-1/C101",  # Generator 1, diesel engine
         "511.11-2/C101",  # Generator 2, diesel engine
@@ -351,8 +351,8 @@ def example_json_export() -> None:
 
     # Small example for readable JSON
     asset_paths = [
-        "411.1/C101/C101.31-1",
-        "411.1/C101/C101.31-2",
+        "411.1/C101.31-1",
+        "411.1/C101.31-2",
     ]
 
     model = AssetModel.from_path_strings(vis_version, asset_paths)
@@ -435,3 +435,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
