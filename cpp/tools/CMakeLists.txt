@@ -2,4 +2,5 @@
 # dnv-vista-sdk - Tools
 #==============================================================================
 
+add_subdirectory(core)
 add_subdirectory(json-validator)
