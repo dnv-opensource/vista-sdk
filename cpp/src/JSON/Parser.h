@@ -13,6 +13,7 @@
 
 #include <charconv>
 #include <cmath>
+#include <cstdlib>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -393,11 +394,21 @@ namespace dnv::vista::sdk::json
             {
                 double value = 0.0;
 
+#if defined(__EMSCRIPTEN__)
+                char* endPtr = nullptr;
+                std::string numStrZ{ numStr };
+                value = std::strtod(numStrZ.c_str(), &endPtr);
+                if (endPtr != numStrZ.c_str() + numStrZ.size())
+                {
+                    throw std::runtime_error{ "Invalid number format" };
+                }
+#else
                 auto ec = std::from_chars(numStr.data(), numStr.data() + numStr.size(), value).ec;
                 if (ec != std::errc{})
                 {
                     throw std::runtime_error{ "Invalid number format" };
                 }
+#endif
                 return Document{ value };
             }
             else

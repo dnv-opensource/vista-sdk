@@ -45,17 +45,19 @@ add_library(dnv::vista::sdk::schemas ALIAS dnv-vista-sdk-schemas)
 # Code generation
 #----------------------------------------------
 
-target_link_libraries(dnv-vista-sdk-visversionsgenerator
-    PRIVATE
-        dnv::vista::sdk::resources
-        dnv::vista::sdk::warnings
-)
+if(NOT CMAKE_CROSSCOMPILING)
+    target_link_libraries(dnv-vista-sdk-visversionsgenerator
+        PRIVATE
+            dnv::vista::sdk::resources
+            dnv::vista::sdk::warnings
+    )
 
-target_link_libraries(dnv-vista-sdk-iso19848versionsgenerator
-    PRIVATE
-        dnv::vista::sdk::resources
-        dnv::vista::sdk::warnings
-)
+    target_link_libraries(dnv-vista-sdk-iso19848versionsgenerator
+        PRIVATE
+            dnv::vista::sdk::resources
+            dnv::vista::sdk::warnings
+    )
+endif()
 
 #----------------------------------------------
 # SDK
