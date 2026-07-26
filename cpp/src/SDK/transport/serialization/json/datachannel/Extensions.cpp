@@ -337,6 +337,206 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
             b.writeEndObject(); // DataChannel
         }
 
+        void writeRestrictionDomain(Builder& b, const domain::Restriction& r)
+        {
+            b.writeStartObject();
+            if (r.fractionDigits())
+            {
+                b.writeTrustedKey("FractionDigits");
+                b.write(static_cast<std::int64_t>(*r.fractionDigits()));
+            }
+            if (r.length())
+            {
+                b.writeTrustedKey("Length");
+                b.write(static_cast<std::int64_t>(*r.length()));
+            }
+            if (r.maxExclusive())
+            {
+                b.writeTrustedKey("MaxExclusive");
+                b.write(*r.maxExclusive());
+            }
+            if (r.maxInclusive())
+            {
+                b.writeTrustedKey("MaxInclusive");
+                b.write(*r.maxInclusive());
+            }
+            if (r.maxLength())
+            {
+                b.writeTrustedKey("MaxLength");
+                b.write(static_cast<std::int64_t>(*r.maxLength()));
+            }
+            if (r.minExclusive())
+            {
+                b.writeTrustedKey("MinExclusive");
+                b.write(*r.minExclusive());
+            }
+            if (r.minInclusive())
+            {
+                b.writeTrustedKey("MinInclusive");
+                b.write(*r.minInclusive());
+            }
+            if (r.minLength())
+            {
+                b.writeTrustedKey("MinLength");
+                b.write(static_cast<std::int64_t>(*r.minLength()));
+            }
+            if (r.pattern())
+            {
+                b.writeTrustedKey("Pattern");
+                b.write(*r.pattern());
+            }
+            if (r.totalDigits())
+            {
+                b.writeTrustedKey("TotalDigits");
+                b.write(static_cast<std::int64_t>(*r.totalDigits()));
+            }
+            if (r.whiteSpace())
+            {
+                b.writeTrustedKey("WhiteSpace");
+                b.write(whiteSpaceToString(*r.whiteSpace()));
+            }
+            if (r.enumeration())
+            {
+                b.writeTrustedKey("Enumeration");
+                b.writeStartArray();
+                for (const auto& v : *r.enumeration())
+                {
+                    b.write(v);
+                }
+                b.writeEndArray();
+            }
+            b.writeEndObject();
+        }
+
+        void writeDataChannelDomain(Builder& b, const domain::DataChannel& dc)
+        {
+            b.writeStartObject();
+
+            // DataChannelID
+            const auto& id = dc.dataChannelId();
+            b.writeTrustedKey("DataChannelID");
+            b.writeStartObject();
+            b.writeTrustedKey("LocalID");
+            b.write(id.localId().toString());
+            if (id.shortId())
+            {
+                b.writeTrustedKey("ShortID");
+                b.write(*id.shortId());
+            }
+            if (id.nameObject())
+            {
+                b.writeTrustedKey("NameObject");
+                b.writeStartObject();
+                b.writeTrustedKey("NamingRule");
+                b.write(id.nameObject()->namingRule());
+                if (id.nameObject()->customNameObjects())
+                {
+                    for (const auto& [key, val] : id.nameObject()->customNameObjects()->asObject())
+                    {
+                        b.writeKey(key);
+                        serializableToBuilder(b, val);
+                    }
+                }
+                b.writeEndObject();
+            }
+            b.writeEndObject();
+
+            // Property
+            const auto& p = dc.property();
+            b.writeTrustedKey("Property");
+            b.writeStartObject();
+
+            b.writeTrustedKey("DataChannelType");
+            b.writeStartObject();
+            b.writeTrustedKey("Type");
+            b.write(p.dataChannelType().type());
+            if (p.dataChannelType().updateCycle())
+            {
+                b.writeTrustedKey("UpdateCycle");
+                b.write(*p.dataChannelType().updateCycle());
+            }
+            if (p.dataChannelType().calculationPeriod())
+            {
+                b.writeTrustedKey("CalculationPeriod");
+                b.write(*p.dataChannelType().calculationPeriod());
+            }
+            b.writeEndObject();
+
+            b.writeTrustedKey("Format");
+            b.writeStartObject();
+            b.writeTrustedKey("Type");
+            b.write(p.format().type());
+            if (p.format().restriction())
+            {
+                b.writeTrustedKey("Restriction");
+                writeRestrictionDomain(b, *p.format().restriction());
+            }
+            b.writeEndObject();
+
+            if (p.range())
+            {
+                b.writeTrustedKey("Range");
+                b.writeStartObject();
+                b.writeTrustedKey("High");
+                b.write(p.range()->high());
+                b.writeTrustedKey("Low");
+                b.write(p.range()->low());
+                b.writeEndObject();
+            }
+            if (p.unit())
+            {
+                b.writeTrustedKey("Unit");
+                b.writeStartObject();
+                b.writeTrustedKey("UnitSymbol");
+                b.write(p.unit()->unitSymbol());
+                if (p.unit()->quantityName())
+                {
+                    b.writeTrustedKey("QuantityName");
+                    b.write(*p.unit()->quantityName());
+                }
+                if (p.unit()->customElements())
+                {
+                    for (const auto& [key, val] : p.unit()->customElements()->asObject())
+                    {
+                        b.writeKey(key);
+                        serializableToBuilder(b, val);
+                    }
+                }
+                b.writeEndObject();
+            }
+            if (p.qualityCoding())
+            {
+                b.writeTrustedKey("QualityCoding");
+                b.write(*p.qualityCoding());
+            }
+            if (p.alertPriority())
+            {
+                b.writeTrustedKey("AlertPriority");
+                b.write(*p.alertPriority());
+            }
+            if (p.name())
+            {
+                b.writeTrustedKey("Name");
+                b.write(*p.name());
+            }
+            if (p.remarks())
+            {
+                b.writeTrustedKey("Remarks");
+                b.write(*p.remarks());
+            }
+            if (p.customProperties())
+            {
+                for (const auto& [key, val] : p.customProperties()->asObject())
+                {
+                    b.writeKey(key);
+                    serializableToBuilder(b, val);
+                }
+            }
+            b.writeEndObject(); // Property
+
+            b.writeEndObject(); // DataChannel
+        }
+
         RestrictionDto restrictionDtoFromJson(const Document& doc)
         {
             RestrictionDto r;
@@ -820,6 +1020,89 @@ namespace dnv::vista::sdk::transport::serialization::json::datachannel
         for (const auto& dc : dto.package.dataChannelList.dataChannels)
         {
             writeDataChannelDto(b, dc);
+        }
+        b.writeEndArray();
+        b.writeEndObject(); // DataChannelList
+
+        b.writeEndObject(); // Package
+        b.writeEndObject(); // root
+    }
+
+    void toJsonString(
+        dnv::vista::sdk::StringBuilder& buffer, const domain::DataChannelListPackage& pkg, bool prettyPrint)
+    {
+        Builder b{ buffer, Builder::Options{ prettyPrint ? 2 : 0 } };
+        b.writeStartObject();
+        b.writeTrustedKey("Package");
+        b.writeStartObject();
+
+        StringBuilder timeStampBuffer;
+
+        // Header
+        const auto& h = pkg.package().header();
+        b.writeTrustedKey("Header");
+        b.writeStartObject();
+        b.writeTrustedKey("ShipID");
+        b.write(h.shipId().toString());
+        b.writeTrustedKey("DataChannelListID");
+        b.writeStartObject();
+        b.writeTrustedKey("ID");
+        b.write(h.dataChannelListId().id());
+        if (h.dataChannelListId().version())
+        {
+            b.writeTrustedKey("Version");
+            b.write(*h.dataChannelListId().version());
+        }
+        b.writeTrustedKey("TimeStamp");
+        h.dataChannelListId().timeStamp().toString(timeStampBuffer);
+        b.write(timeStampBuffer.view());
+        timeStampBuffer.clear();
+        b.writeEndObject();
+        if (h.versionInformation())
+        {
+            b.writeTrustedKey("VersionInformation");
+            b.writeStartObject();
+            b.writeTrustedKey("NamingRule");
+            b.write(h.versionInformation()->namingRule());
+            b.writeTrustedKey("NamingSchemeVersion");
+            b.write(h.versionInformation()->namingSchemeVersion());
+            if (h.versionInformation()->referenceUrl())
+            {
+                b.writeTrustedKey("ReferenceURL");
+                b.write(*h.versionInformation()->referenceUrl());
+            }
+            b.writeEndObject();
+        }
+        if (h.author())
+        {
+            b.writeTrustedKey("Author");
+            b.write(*h.author());
+        }
+        if (h.dateCreated())
+        {
+            b.writeTrustedKey("DateCreated");
+            h.dateCreated()->toString(timeStampBuffer);
+            b.write(timeStampBuffer.view());
+            timeStampBuffer.clear();
+        }
+        if (h.customHeaders())
+        {
+            for (const auto& [key, val] : h.customHeaders()->asObject())
+            {
+                b.writeKey(key);
+                serializableToBuilder(b, val);
+            }
+        }
+        b.writeEndObject(); // Header
+
+        // DataChannelList
+        b.writeTrustedKey("DataChannelList");
+        b.writeStartObject();
+        b.writeTrustedKey("DataChannel");
+        b.writeStartArray();
+        for (const auto& dc : pkg.package().dataChannelList().dataChannels())
+        {
+            writeDataChannelDomain(b, dc);
         }
         b.writeEndArray();
         b.writeEndObject(); // DataChannelList

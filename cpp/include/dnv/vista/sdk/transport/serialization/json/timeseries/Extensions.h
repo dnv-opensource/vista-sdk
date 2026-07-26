@@ -36,6 +36,20 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
         dnv::vista::sdk::StringBuilder& buffer, const TimeSeriesDataPackageDto& dto, bool prettyPrint = false);
 
     /**
+     * @brief Serialize a DTO to JSON, returning a new string
+     * @details Convenience overload for one-off serialization. Prefer the StringBuilder& overload
+     *          when serializing repeatedly (e.g. in a loop), to reuse the buffer's capacity
+     * @param dto The DTO to serialize
+     * @param prettyPrint If true, output is indented with 2-space indent. If false, compact
+     */
+    [[nodiscard]] inline std::string toJsonString(const TimeSeriesDataPackageDto& dto, bool prettyPrint = false)
+    {
+        dnv::vista::sdk::StringBuilder buffer;
+        toJsonString(buffer, dto, prettyPrint);
+        return buffer.toString();
+    }
+
+    /**
      * @brief Deserialize a JSON string into a DTO
      */
     [[nodiscard]] DNV_VISTA_SDK_CPP_API std::optional<TimeSeriesDataPackageDto> fromJsonString(std::string_view json);
@@ -47,12 +61,24 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
      * @param domain The domain object to serialize
      * @param prettyPrint If true, output is indented with 2-space indent. If false, compact
      */
-    inline void toJsonString(
+    DNV_VISTA_SDK_CPP_API void toJsonString(
         dnv::vista::sdk::StringBuilder& buffer,
         const dnv::vista::sdk::transport::timeseries::TimeSeriesDataPackage& domain,
-        bool prettyPrint = false)
+        bool prettyPrint = false);
+
+    /**
+     * @brief Serialize a domain object directly to JSON, returning a new string
+     * @details Convenience overload for one-off serialization. Prefer the StringBuilder& overload
+     *          when serializing repeatedly (e.g. in a loop), to reuse the buffer's capacity
+     * @param domain The domain object to serialize
+     * @param prettyPrint If true, output is indented with 2-space indent. If false, compact
+     */
+    [[nodiscard]] inline std::string toJsonString(
+        const dnv::vista::sdk::transport::timeseries::TimeSeriesDataPackage& domain, bool prettyPrint = false)
     {
-        toJsonString(buffer, toDto(domain), prettyPrint);
+        dnv::vista::sdk::StringBuilder buffer;
+        toJsonString(buffer, domain, prettyPrint);
+        return buffer.toString();
     }
 
     /**

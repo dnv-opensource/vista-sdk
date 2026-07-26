@@ -590,6 +590,207 @@ namespace dnv::vista::sdk::transport::serialization::json::timeseries
         b.writeEndObject(); // root
     }
 
+    void toJsonString(
+        dnv::vista::sdk::StringBuilder& buffer, const domain::TimeSeriesDataPackage& pkg, bool prettyPrint)
+    {
+        Builder b{ buffer, Builder::Options{ prettyPrint ? 2 : 0 } };
+        b.writeStartObject();
+        b.writeTrustedKey("Package");
+        b.writeStartObject();
+
+        StringBuilder timeStampBuffer;
+
+        // Header
+        const auto& h = pkg.package().header();
+        if (h)
+        {
+            b.writeTrustedKey("Header");
+            b.writeStartObject();
+            b.writeTrustedKey("ShipID");
+            b.write(h->shipId().toString());
+            if (h->timeSpan())
+            {
+                b.writeTrustedKey("TimeSpan");
+                b.writeStartObject();
+                b.writeTrustedKey("Start");
+                h->timeSpan()->start().toString(timeStampBuffer);
+                b.write(timeStampBuffer.view());
+                timeStampBuffer.clear();
+                b.writeTrustedKey("End");
+                h->timeSpan()->end().toString(timeStampBuffer);
+                b.write(timeStampBuffer.view());
+                timeStampBuffer.clear();
+                b.writeEndObject();
+            }
+            if (h->dateCreated())
+            {
+                b.writeTrustedKey("DateCreated");
+                h->dateCreated()->toString(timeStampBuffer);
+                b.write(timeStampBuffer.view());
+                timeStampBuffer.clear();
+            }
+            if (h->dateModified())
+            {
+                b.writeTrustedKey("DateModified");
+                h->dateModified()->toString(timeStampBuffer);
+                b.write(timeStampBuffer.view());
+                timeStampBuffer.clear();
+            }
+            if (h->author())
+            {
+                b.writeTrustedKey("Author");
+                b.write(*h->author());
+            }
+            if (h->systemConfiguration())
+            {
+                b.writeTrustedKey("SystemConfiguration");
+                b.writeStartArray();
+                for (const auto& c : *h->systemConfiguration())
+                {
+                    b.writeStartObject();
+                    b.writeTrustedKey("ID");
+                    b.write(c.id());
+                    b.writeTrustedKey("TimeStamp");
+                    c.timeStamp().toString(timeStampBuffer);
+                    b.write(timeStampBuffer.view());
+                    timeStampBuffer.clear();
+                    b.writeEndObject();
+                }
+                b.writeEndArray();
+            }
+            if (h->customHeaders())
+            {
+                for (const auto& [key, val] : h->customHeaders()->asObject())
+                {
+                    b.writeKey(key);
+                    serializableToBuilder(b, val);
+                }
+            }
+            b.writeEndObject(); // Header
+        }
+
+        // TimeSeriesData
+        b.writeTrustedKey("TimeSeriesData");
+        b.writeStartArray();
+        for (const auto& ts : pkg.package().timeSeriesData())
+        {
+            b.writeStartObject();
+
+            if (ts.dataConfiguration())
+            {
+                b.writeTrustedKey("DataConfiguration");
+                b.writeStartObject();
+                b.writeTrustedKey("ID");
+                b.write(ts.dataConfiguration()->id());
+                b.writeTrustedKey("TimeStamp");
+                ts.dataConfiguration()->timeStamp().toString(timeStampBuffer);
+                b.write(timeStampBuffer.view());
+                timeStampBuffer.clear();
+                b.writeEndObject();
+            }
+
+            if (ts.tabularData())
+            {
+                b.writeTrustedKey("TabularData");
+                b.writeStartArray();
+                for (const auto& td : *ts.tabularData())
+                {
+                    b.writeStartObject();
+                    b.writeTrustedKey("NumberOfDataSet");
+                    b.write(static_cast<std::int64_t>(td.numberOfDataSets()));
+                    b.writeTrustedKey("NumberOfDataChannel");
+                    b.write(static_cast<std::int64_t>(td.numberOfDataChannels()));
+                    b.writeTrustedKey("DataChannelID");
+                    b.writeStartArray();
+                    for (const auto& id : td.dataChannelIds())
+                    {
+                        b.write(id.toString());
+                    }
+                    b.writeEndArray();
+                    b.writeTrustedKey("DataSet");
+                    b.writeStartArray();
+                    for (const auto& ds : td.dataSets())
+                    {
+                        b.writeStartObject();
+                        b.writeTrustedKey("TimeStamp");
+                        ds.timeStamp().toString(timeStampBuffer);
+                        b.write(timeStampBuffer.view());
+                        timeStampBuffer.clear();
+                        b.writeTrustedKey("Value");
+                        b.writeStartArray();
+                        for (const auto& v : ds.value())
+                        {
+                            b.write(v);
+                        }
+                        b.writeEndArray();
+                        if (ds.quality())
+                        {
+                            b.writeTrustedKey("Quality");
+                            b.writeStartArray();
+                            for (const auto& q : *ds.quality())
+                            {
+                                b.write(q);
+                            }
+                            b.writeEndArray();
+                        }
+                        b.writeEndObject();
+                    }
+                    b.writeEndArray();
+                    b.writeEndObject();
+                }
+                b.writeEndArray();
+            }
+
+            if (ts.eventData())
+            {
+                b.writeTrustedKey("EventData");
+                b.writeStartObject();
+                b.writeTrustedKey("NumberOfDataSet");
+                b.write(static_cast<std::int64_t>(ts.eventData()->numberOfDataSet()));
+                if (ts.eventData()->dataSet())
+                {
+                    b.writeTrustedKey("DataSet");
+                    b.writeStartArray();
+                    for (const auto& ed : *ts.eventData()->dataSet())
+                    {
+                        b.writeStartObject();
+                        b.writeTrustedKey("TimeStamp");
+                        ed.timeStamp().toString(timeStampBuffer);
+                        b.write(timeStampBuffer.view());
+                        timeStampBuffer.clear();
+                        b.writeTrustedKey("DataChannelID");
+                        b.write(ed.dataChannelId().toString());
+                        b.writeTrustedKey("Value");
+                        b.write(ed.value());
+                        if (ed.quality())
+                        {
+                            b.writeTrustedKey("Quality");
+                            b.write(*ed.quality());
+                        }
+                        b.writeEndObject();
+                    }
+                    b.writeEndArray();
+                }
+                b.writeEndObject(); // EventData
+            }
+
+            if (ts.customDataKinds())
+            {
+                for (const auto& [key, val] : ts.customDataKinds()->asObject())
+                {
+                    b.writeKey(key);
+                    serializableToBuilder(b, val);
+                }
+            }
+
+            b.writeEndObject(); // TimeSeriesData entry
+        }
+        b.writeEndArray(); // TimeSeriesData
+
+        b.writeEndObject(); // Package
+        b.writeEndObject(); // root
+    }
+
     std::optional<TimeSeriesDataPackageDto> fromJsonString(std::string_view json)
     {
         auto docOpt = Document::fromString(json);
