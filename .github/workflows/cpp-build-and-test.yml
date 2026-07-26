@@ -120,6 +120,7 @@ jobs:
             -DDNV_VISTA_SDK_BUILD_TESTS=ON \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
+            -DDNV_VISTA_SDK_BUILD_DOCS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF \
             -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF \
             -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
@@ -146,6 +147,7 @@ jobs:
             -DDNV_VISTA_SDK_BUILD_TESTS=ON \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
+            -DDNV_VISTA_SDK_BUILD_DOCS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF \
             -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF \
             -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
@@ -172,6 +174,7 @@ jobs:
           -DDNV_VISTA_SDK_BUILD_TESTS=ON
           -DDNV_VISTA_SDK_BUILD_SAMPLES=ON
           -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
+          -DDNV_VISTA_SDK_BUILD_DOCS=OFF
           -DDNV_VISTA_SDK_WARNINGS=OFF
           -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF
           -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
@@ -245,6 +248,7 @@ jobs:
             -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
             -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
+            -DDNV_VISTA_SDK_BUILD_DOCS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF \
             -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF \
             -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
@@ -287,6 +291,7 @@ jobs:
           -DDNV_VISTA_SDK_BUILD_TESTS=OFF
           -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF
           -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
+          -DDNV_VISTA_SDK_BUILD_DOCS=OFF
           -DDNV_VISTA_SDK_WARNINGS=OFF
           -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF
           -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
@@ -317,3 +322,31 @@ jobs:
         run: |
           $env:PATH = "${{ github.workspace }}\install\bin;$env:PATH"
           & "consumer\build\Release\consumer.exe"
+
+  docs:
+    name: Build API documentation
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ doxygen graphviz
+
+      - name: Configure
+        run: |
+          cmake -S cpp -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDNV_VISTA_SDK_BUILD_TESTS=OFF \
+            -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
+            -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
+            -DDNV_VISTA_SDK_BUILD_DOCS=ON \
+            -DDNV_VISTA_SDK_WARNINGS=OFF \
+            -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
+
+      - name: Generate documentation
+        run: cmake --build build --target dnv-vista-sdk-docs
