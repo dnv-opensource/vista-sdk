@@ -103,14 +103,14 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 | Benchmark (ns/op) | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ----------------- | ----------: | ------------: | --------------: | -------------: |
-| `Serialize`       |   11,299.17 |     10,740.45 |       11,553.49 |      13,070.55 |
+| `Serialize`       |    5,366.96 |      5,980.71 |        7,774.88 |       8,362.39 |
 | `Deserialize`     |   24,700.90 |     25,527.97 |       43,907.14 |      47,924.53 |
 
 ### TimeSeriesData serialization
 
 | Benchmark (ns/op) | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ----------------- | ----------: | ------------: | --------------: | -------------: |
-| `Serialize`       |    4,637.55 |      4,351.99 |        7,103.53 |       7,743.90 |
+| `Serialize`       |    2,029.06 |      2,377.73 |        2,692.99 |       3,434.15 |
 | `Deserialize`     |   10,363.19 |     10,365.01 |       23,720.85 |      37,877.19 |
 
 ### Containers (SDK custom vs STL)
@@ -144,4 +144,4 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 ---
 
-_Benchmarked on July 23, 2026_
+_Benchmarked on July 26, 2026_
