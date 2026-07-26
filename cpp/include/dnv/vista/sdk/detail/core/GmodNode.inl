@@ -50,7 +50,8 @@ namespace dnv::vista::sdk
         return m_installSubstructure;
     }
 
-    inline const std::unordered_map<std::string, std::string>& GmodNodeMetadata::normalAssignmentNames() const noexcept
+    inline const std::unordered_map<std::string, std::string, StringHash, std::equal_to<>>& GmodNodeMetadata::
+        normalAssignmentNames() const noexcept
     {
         return m_normalAssignmentNames;
     }
@@ -240,7 +241,7 @@ namespace dnv::vista::sdk
         {
             return false;
         }
-        return m_childrenSet->contains(std::string{ code });
+        return m_childrenSet->contains(code);
     }
 
     inline std::string GmodNode::toString() const noexcept

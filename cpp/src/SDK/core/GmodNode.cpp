@@ -13,7 +13,7 @@ namespace dnv::vista::sdk
         std::optional<std::string> definition,
         std::optional<std::string> commonDefinition,
         std::optional<bool> installSubstructure,
-        std::unordered_map<std::string, std::string> normalAssignmentNames) noexcept
+        std::unordered_map<std::string, std::string, StringHash, std::equal_to<>> normalAssignmentNames) noexcept
         : m_category{ category },
           m_type{ type },
           m_name{ name },
@@ -38,9 +38,11 @@ namespace dnv::vista::sdk
               dto.commonDefinition,
               dto.installSubstructure,
               dto.normalAssignmentNames
-                  ? std::unordered_map<std::string, std::string>{ dto.normalAssignmentNames->begin(),
-                                                                  dto.normalAssignmentNames->end() }
-                  : std::unordered_map<std::string, std::string>{}) },
+                  ? std::unordered_map<std::string, std::string, StringHash, std::equal_to<>>{ dto.normalAssignmentNames
+                                                                                                   ->begin(),
+                                                                                               dto.normalAssignmentNames
+                                                                                                   ->end() }
+                  : std::unordered_map<std::string, std::string, StringHash, std::equal_to<>>{}) },
           m_children{},
           m_parents{},
           m_childrenSet{ nullptr }
@@ -100,7 +102,7 @@ namespace dnv::vista::sdk
     {
         if (!m_childrenSet)
         {
-            m_childrenSet = std::make_shared<std::unordered_set<std::string>>();
+            m_childrenSet = std::make_shared<std::unordered_set<std::string, StringHash, std::equal_to<>>>();
             m_childrenSet->reserve(m_children.size());
 
             for (const auto* child : m_children)

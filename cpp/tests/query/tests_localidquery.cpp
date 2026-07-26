@@ -186,9 +186,11 @@ namespace dnv::vista::sdk::tests
                                      [pNode433](GmodPathQueryBuilder::Path builder) {
                                          return builder
                                              .withNode(
-                                                 [pNode433](const std::unordered_map<std::string, const GmodNode*>&) {
-                                                     return pNode433;
-                                                 },
+                                                 [pNode433](const std::unordered_map<
+                                                            std::string,
+                                                            const GmodNode*,
+                                                            StringHash,
+                                                            std::equal_to<>>&) { return pNode433; },
                                                  true)
                                              .build();
                                      })
@@ -359,10 +361,11 @@ namespace dnv::vista::sdk::tests
                             baseLocalId->primaryItem(),
                             [pNodeC101](GmodPathQueryBuilder::Path path) {
                                 return path
-                                    .withAnyNodeBefore(
-                                        [pNodeC101](const std::unordered_map<std::string, const GmodNode*>&) {
-                                            return pNodeC101;
-                                        })
+                                    .withAnyNodeBefore([pNodeC101](const std::unordered_map<
+                                                                   std::string,
+                                                                   const GmodNode*,
+                                                                   StringHash,
+                                                                   std::equal_to<>>&) { return pNodeC101; })
                                     .build();
                             })
                         .build();
@@ -376,10 +379,11 @@ namespace dnv::vista::sdk::tests
                             *basePath,
                             [pNodeC101](GmodPathQueryBuilder::Path path) {
                                 return path
-                                    .withAnyNodeBefore(
-                                        [pNodeC101](const std::unordered_map<std::string, const GmodNode*>&) {
-                                            return pNodeC101;
-                                        })
+                                    .withAnyNodeBefore([pNodeC101](const std::unordered_map<
+                                                                   std::string,
+                                                                   const GmodNode*,
+                                                                   StringHash,
+                                                                   std::equal_to<>>&) { return pNodeC101; })
                                     .build();
                             })
                         .withTags([&qtyPowerTag](MetadataTagsQueryBuilder& tags) {
@@ -442,10 +446,11 @@ namespace dnv::vista::sdk::tests
                                      *basePath,
                                      [pNodeC101](GmodPathQueryBuilder::Path builder) {
                                          return builder
-                                             .withAnyNodeBefore(
-                                                 [pNodeC101](const std::unordered_map<std::string, const GmodNode*>&) {
-                                                     return pNodeC101;
-                                                 })
+                                             .withAnyNodeBefore([pNodeC101](const std::unordered_map<
+                                                                            std::string,
+                                                                            const GmodNode*,
+                                                                            StringHash,
+                                                                            std::equal_to<>>&) { return pNodeC101; })
                                              .build();
                                      })
                                  .withoutLocations()
@@ -526,9 +531,11 @@ namespace dnv::vista::sdk::tests
                                      [pNode433, &locs](GmodPathQueryBuilder::Path builder) {
                                          return builder
                                              .withNode(
-                                                 [pNode433](const std::unordered_map<std::string, const GmodNode*>&) {
-                                                     return pNode433;
-                                                 },
+                                                 [pNode433](const std::unordered_map<
+                                                            std::string,
+                                                            const GmodNode*,
+                                                            StringHash,
+                                                            std::equal_to<>>&) { return pNode433; },
                                                  locs)
                                              .build();
                                      })

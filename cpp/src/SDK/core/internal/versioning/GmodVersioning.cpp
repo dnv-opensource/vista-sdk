@@ -118,7 +118,7 @@ namespace dnv::vista::sdk::internal
 
     std::optional<const GmodNodeConversion*> GmodVersioningNode::codeChanges(std::string_view code) const noexcept
     {
-        auto it = versioningNodeChanges.find(std::string{ code });
+        auto it = versioningNodeChanges.find(code);
         if (it != versioningNodeChanges.end())
         {
             return &it->second;

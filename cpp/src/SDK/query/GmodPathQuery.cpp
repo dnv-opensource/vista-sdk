@@ -20,13 +20,15 @@ namespace dnv::vista::sdk
     GmodPathQueryBuilder& GmodPathQueryBuilder::operator=(GmodPathQueryBuilder&&) noexcept = default;
 
     bool GmodPathQueryBuilder::matchFilterAgainstTarget(
-        const std::unordered_map<std::string, NodeItem>& filter, const GmodPath& target, bool checkIgnoreFlag)
+        const std::unordered_map<std::string, NodeItem, StringHash, std::equal_to<>>& filter,
+        const GmodPath& target,
+        bool checkIgnoreFlag)
     {
         const auto& vis = VIS::instance();
         auto latestVisVersion = vis.latest();
 
         // Build target nodes with locations
-        std::unordered_map<std::string, std::vector<Location>> targetNodes;
+        std::unordered_map<std::string, std::vector<Location>, StringHash, std::equal_to<>> targetNodes;
         for (const auto& [depth, node] : target.fullPath())
         {
             const std::string codeStr(node.code());
@@ -60,8 +62,7 @@ namespace dnv::vista::sdk
             }
 
             // Check node exists in target
-            const std::string nodeCodeStr(node->code());
-            auto it = targetNodes.find(nodeCodeStr);
+            auto it = targetNodes.find(node->code());
             if (it == targetNodes.end())
             {
                 return false;
@@ -204,7 +205,8 @@ namespace dnv::vista::sdk
     }
 
     GmodPathQueryBuilder::Path GmodPathQueryBuilder::Path::withNode(
-        std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
+        std::function<const GmodNode*(
+            const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select,
         bool matchAllLocations) const&
     {
         Path copy{ *this };
@@ -212,7 +214,8 @@ namespace dnv::vista::sdk
     }
 
     GmodPathQueryBuilder::Path GmodPathQueryBuilder::Path::withNode(
-        std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
+        std::function<const GmodNode*(
+            const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select,
         bool matchAllLocations) &&
     {
         const GmodNode* node = select(resolveSetNodes());
@@ -221,8 +224,7 @@ namespace dnv::vista::sdk
             throw std::invalid_argument{ "Selected node is null" };
         }
 
-        const std::string codeStr(node->code());
-        auto it = m_filter.find(codeStr);
+        auto it = m_filter.find(node->code());
         if (it == m_filter.end())
         {
             throw std::invalid_argument{ "Expected to find a filter on the node in the path" };
@@ -234,7 +236,8 @@ namespace dnv::vista::sdk
     }
 
     GmodPathQueryBuilder::Path GmodPathQueryBuilder::Path::withNode(
-        std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
+        std::function<const GmodNode*(
+            const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select,
         const std::vector<Location>& locations) const&
     {
         Path copy{ *this };
@@ -242,7 +245,8 @@ namespace dnv::vista::sdk
     }
 
     GmodPathQueryBuilder::Path GmodPathQueryBuilder::Path::withNode(
-        std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
+        std::function<const GmodNode*(
+            const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select,
         const std::vector<Location>& locations) &&
     {
         const GmodNode* node = select(resolveSetNodes());
@@ -251,8 +255,7 @@ namespace dnv::vista::sdk
             throw std::invalid_argument{ "Selected node is null" };
         }
 
-        const std::string codeStr(node->code());
-        auto it = m_filter.find(codeStr);
+        auto it = m_filter.find(node->code());
         if (it == m_filter.end())
         {
             throw std::invalid_argument{ "Expected to find a filter on the node in the path" };
@@ -269,14 +272,16 @@ namespace dnv::vista::sdk
     }
 
     GmodPathQueryBuilder::Path GmodPathQueryBuilder::Path::withAnyNodeBefore(
-        std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) const&
+        std::function<const GmodNode*(
+            const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select) const&
     {
         Path copy{ *this };
         return std::move(copy).withAnyNodeBefore(select);
     }
 
     GmodPathQueryBuilder::Path GmodPathQueryBuilder::Path::withAnyNodeBefore(
-        std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) &&
+        std::function<const GmodNode*(
+            const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select) &&
     {
         const GmodNode* node = select(resolveNodes());
         if (!node)
@@ -285,7 +290,7 @@ namespace dnv::vista::sdk
         }
 
         // Check node is in path
-        const std::string targetCode(node->code());
+        const std::string_view targetCode = node->code();
         bool found = false;
         for (const auto& [depth, pathNode] : m_gmodPath.fullPath())
         {
@@ -309,15 +314,14 @@ namespace dnv::vista::sdk
                 break;
             }
 
-            const std::string codeStr(pathNode.code());
-            auto it = m_filter.find(codeStr);
+            auto it = m_filter.find(pathNode.code());
             if (it != m_filter.end())
             {
                 it->second.ignoreInMatching = true;
             }
         }
 
-        auto [it, inserted] = m_filter.try_emplace(targetCode, NodeItem(*node, {}));
+        auto [it, inserted] = m_filter.try_emplace(std::string{ targetCode }, NodeItem(*node, {}));
         if (inserted)
         {
             it->second.matchAllLocations = true;
@@ -327,14 +331,16 @@ namespace dnv::vista::sdk
     }
 
     GmodPathQueryBuilder::Path GmodPathQueryBuilder::Path::withAnyNodeAfter(
-        std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) const&
+        std::function<const GmodNode*(
+            const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select) const&
     {
         Path copy{ *this };
         return std::move(copy).withAnyNodeAfter(select);
     }
 
     GmodPathQueryBuilder::Path GmodPathQueryBuilder::Path::withAnyNodeAfter(
-        std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) &&
+        std::function<const GmodNode*(
+            const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select) &&
     {
         const GmodNode* node = select(resolveNodes());
         if (!node)
@@ -342,7 +348,7 @@ namespace dnv::vista::sdk
             throw std::invalid_argument{ "Selected node is null" };
         }
 
-        const std::string targetCode(node->code());
+        const std::string_view targetCode = node->code();
         bool found = false;
         for (const auto& [depth, pathNode] : m_gmodPath.fullPath())
         {
@@ -368,8 +374,7 @@ namespace dnv::vista::sdk
             }
             if (pastTarget)
             {
-                const std::string codeStr(pathNode.code());
-                auto it = m_filter.find(codeStr);
+                auto it = m_filter.find(pathNode.code());
                 if (it != m_filter.end())
                 {
                     it->second.ignoreInMatching = true;
@@ -378,7 +383,7 @@ namespace dnv::vista::sdk
         }
 
         // Ensure target node is in the filter
-        auto [it, inserted] = m_filter.try_emplace(targetCode, NodeItem(*node, {}));
+        auto [it, inserted] = m_filter.try_emplace(std::string{ targetCode }, NodeItem(*node, {}));
         if (inserted)
         {
             it->second.matchAllLocations = true;
@@ -434,9 +439,10 @@ namespace dnv::vista::sdk
         return std::make_unique<Path>(*this);
     }
 
-    std::unordered_map<std::string, const GmodNode*> GmodPathQueryBuilder::Path::resolveSetNodes() const
+    std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>> GmodPathQueryBuilder::Path::
+        resolveSetNodes() const
     {
-        std::unordered_map<std::string, const GmodNode*> result;
+        std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>> result;
         result.reserve(m_setNodeIndices.size());
         for (const auto& [code, idx] : m_setNodeIndices)
         {
@@ -445,9 +451,10 @@ namespace dnv::vista::sdk
         return result;
     }
 
-    std::unordered_map<std::string, const GmodNode*> GmodPathQueryBuilder::Path::resolveNodes() const
+    std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>> GmodPathQueryBuilder::Path::
+        resolveNodes() const
     {
-        std::unordered_map<std::string, const GmodNode*> result;
+        std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>> result;
         result.reserve(m_nodeIndices.size());
         for (const auto& [code, idx] : m_nodeIndices)
         {
@@ -465,8 +472,7 @@ namespace dnv::vista::sdk
 
     GmodPathQueryBuilder::Nodes GmodPathQueryBuilder::Nodes::withNode(const GmodNode& node, bool matchAllLocations) &&
     {
-        const std::string codeStr(node.code());
-        auto it = m_filter.find(codeStr);
+        auto it = m_filter.find(node.code());
         if (it != m_filter.end())
         {
             it->second.locations.clear();
@@ -476,7 +482,7 @@ namespace dnv::vista::sdk
         {
             NodeItem item(node, {});
             item.matchAllLocations = matchAllLocations;
-            m_filter.emplace(codeStr, item);
+            m_filter.emplace(std::string{ node.code() }, item);
         }
         return std::move(*this);
     }
@@ -491,8 +497,7 @@ namespace dnv::vista::sdk
     GmodPathQueryBuilder::Nodes GmodPathQueryBuilder::Nodes::withNode(
         const GmodNode& node, const std::vector<Location>& locations) &&
     {
-        const std::string codeStr(node.code());
-        auto it = m_filter.find(codeStr);
+        auto it = m_filter.find(node.code());
         if (it != m_filter.end())
         {
             it->second.locations = locations;
@@ -500,7 +505,7 @@ namespace dnv::vista::sdk
         }
         else
         {
-            m_filter.emplace(codeStr, NodeItem(node, locations));
+            m_filter.emplace(std::string{ node.code() }, NodeItem(node, locations));
         }
         return std::move(*this);
     }

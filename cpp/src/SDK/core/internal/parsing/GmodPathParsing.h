@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/containers/StringHash.h"
 #include "dnv/vista/sdk/core/Gmod.h"
 #include "dnv/vista/sdk/core/GmodPath.h"
 #include "dnv/vista/sdk/core/Locations.h"
@@ -42,14 +43,14 @@ namespace dnv::vista::sdk::internal
         StackVector<PathNode, 16> parts;
         size_t currentPartIndex;
         PathNode toFind;
-        std::optional<std::unordered_map<std::string, Location>> locations;
+        std::optional<std::unordered_map<std::string, Location, StringHash, std::equal_to<>>> locations;
         std::optional<GmodPath> path;
         const Gmod* gmod;
 
         ParseContext(
             StackVector<PathNode, 16>&& pathNodeVector,
             PathNode&& t,
-            std::optional<std::unordered_map<std::string, Location>>&& l,
+            std::optional<std::unordered_map<std::string, Location, StringHash, std::equal_to<>>>&& l,
             std::optional<GmodPath>&& gmodPath,
             const Gmod& g)
             : parts{ std::move(pathNodeVector) },
@@ -85,7 +86,7 @@ namespace dnv::vista::sdk::internal
         {
             if (!context.locations.has_value())
             {
-                context.locations = std::unordered_map<std::string, Location>{};
+                context.locations = std::unordered_map<std::string, Location, StringHash, std::equal_to<>>{};
                 context.locations->reserve(8);
             }
             context.locations->insert_or_assign(std::string{ toFind.code }, toFind.location.value());
@@ -180,7 +181,7 @@ namespace dnv::vista::sdk::internal
             pathParents.emplace_back(*parent);
             if (context.locations.has_value())
             {
-                auto locIt = context.locations->find(std::string{ parent->code() });
+                auto locIt = context.locations->find(parent->code());
                 if (locIt != context.locations->end())
                 {
                     pathParents.back().setLocation(locIt->second);

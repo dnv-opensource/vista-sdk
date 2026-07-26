@@ -39,7 +39,7 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 | `State_hasGroup_hit`                  |        1.77 |          1.88 |            1.95 |           6.31 |
 | `State_hasGroup_miss`                 |        2.04 |          0.63 |            2.17 |           4.42 |
 | `Position_validatePosition_simple`    |       12.96 |         14.63 |           22.69 |          19.80 |
-| `Position_validatePosition_composite` |      161.44 |        142.78 |          215.70 |         172.80 |
+| `Position_validatePosition_composite` |      155.31 |        136.51 |          178.59 |         145.29 |
 
 ### Codebooks lookup
 
@@ -67,23 +67,23 @@ Benchmark framework: [nanobench](https://github.com/martinus/nanobench) v4.3.11
 
 | Benchmark (ns/op)             | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ----------------------------- | ----------: | ------------: | --------------: | -------------: |
-| `FromShortPath`               |      501.84 |        499.53 |          871.73 |       1,272.05 |
-| `FromFullPath`                |      451.63 |        470.27 |          794.83 |       1,217.13 |
-| `FromShortPathIndividualized` |      887.53 |        889.67 |        1,483.52 |       2,239.81 |
-| `FromFullPathIndividualized`  |      756.62 |        803.49 |        1,185.15 |       1,843.80 |
+| `FromShortPath`               |      503.34 |        461.59 |          696.58 |         978.68 |
+| `FromFullPath`                |      376.53 |        396.93 |          608.91 |         682.37 |
+| `FromShortPathIndividualized` |      897.27 |        849.43 |        1,274.23 |       1,840.43 |
+| `FromFullPathIndividualized`  |      667.34 |        658.63 |          879.81 |       1,053.55 |
 
 ### Gmod traversal
 
 | Benchmark (ns/op) |   `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ----------------- | ------------: | ------------: | --------------: | -------------: |
-| `FullTraversal`   | 34,886,852.00 | 36,897,152.00 |   36,423,666.67 |  54,102,250.00 |
+| `FullTraversal`   | 30,709,411.83 | 34,474,440.20 |   32,160,000.00 |  58,343,400.00 |
 
 ### Gmod versioning - path conversion
 
 | Benchmark (ns/op)         | `Linux GCC` | `Linux Clang` | `Windows MinGW` | `Windows MSVC` |
 | ------------------------- | ----------: | ------------: | --------------: | -------------: |
-| `ConvertPath`             |    1,808.80 |      1,818.84 |        2,794.79 |       3,252.25 |
-| `ConvertPathWithLocation` |    1,848.58 |      1,847.33 |        2,541.95 |       3,133.44 |
+| `ConvertPath`             |    1,594.07 |      1,498.04 |        2,131.63 |       2,241.61 |
+| `ConvertPathWithLocation` |    1,585.83 |      1,456.88 |        1,908.77 |       2,171.78 |
 
 ### DataChannelList lookup
 

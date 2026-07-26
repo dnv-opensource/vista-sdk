@@ -154,9 +154,11 @@ namespace dnv::vista::sdk
          * @return true if target matches all filter criteria
          */
         [[nodiscard]] static bool matchFilterAgainstTarget(
-            const std::unordered_map<std::string, NodeItem>& filter, const GmodPath& target, bool checkIgnoreFlag);
+            const std::unordered_map<std::string, NodeItem, StringHash, std::equal_to<>>& filter,
+            const GmodPath& target,
+            bool checkIgnoreFlag);
 
-        std::unordered_map<std::string, NodeItem> m_filter;
+        std::unordered_map<std::string, NodeItem, StringHash, std::equal_to<>> m_filter;
     };
 
     /**
@@ -188,7 +190,8 @@ namespace dnv::vista::sdk
          * @return New Path builder with node configured
          */
         [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withNode(
-            std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
+            std::function<const GmodNode*(
+                const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select,
             bool matchAllLocations = false) const&;
 
         /**
@@ -198,7 +201,8 @@ namespace dnv::vista::sdk
          * @return New Path builder with node configured
          */
         [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withNode(
-            std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
+            std::function<const GmodNode*(
+                const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select,
             bool matchAllLocations = false) &&;
 
         /**
@@ -208,7 +212,8 @@ namespace dnv::vista::sdk
          * @return New Path builder with node configured
          */
         [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withNode(
-            std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
+            std::function<const GmodNode*(
+                const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select,
             const std::vector<Location>& locations) const&;
 
         /**
@@ -218,7 +223,8 @@ namespace dnv::vista::sdk
          * @return New Path builder with node configured
          */
         [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withNode(
-            std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select,
+            std::function<const GmodNode*(
+                const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select,
             const std::vector<Location>& locations) &&;
 
         /**
@@ -228,7 +234,8 @@ namespace dnv::vista::sdk
          * @throws std::invalid_argument if node not in path
          */
         [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withAnyNodeBefore(
-            std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) const&;
+            std::function<const GmodNode*(
+                const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select) const&;
 
         /**
          * @brief Ignore nodes before specified node in path
@@ -237,7 +244,8 @@ namespace dnv::vista::sdk
          * @throws std::invalid_argument if node not in path
          */
         [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withAnyNodeBefore(
-            std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) &&;
+            std::function<const GmodNode*(
+                const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select) &&;
 
         /**
          * @brief Ignore nodes after specified node in path
@@ -246,7 +254,8 @@ namespace dnv::vista::sdk
          * @throws std::invalid_argument if node not in path
          */
         [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withAnyNodeAfter(
-            std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) const&;
+            std::function<const GmodNode*(
+                const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select) const&;
 
         /**
          * @brief Ignore nodes after specified node in path
@@ -255,7 +264,8 @@ namespace dnv::vista::sdk
          * @throws std::invalid_argument if node not in path
          */
         [[nodiscard]] DNV_VISTA_SDK_CPP_API Path withAnyNodeAfter(
-            std::function<const GmodNode*(const std::unordered_map<std::string, const GmodNode*>&)> select) &&;
+            std::function<const GmodNode*(
+                const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)> select) &&;
 
         /**
          * @brief Ignore all location individualizations
@@ -278,12 +288,14 @@ namespace dnv::vista::sdk
 
     private:
         [[nodiscard]] virtual std::unique_ptr<GmodPathQueryBuilder> clone() const override;
-        [[nodiscard]] std::unordered_map<std::string, const GmodNode*> resolveSetNodes() const;
-        [[nodiscard]] std::unordered_map<std::string, const GmodNode*> resolveNodes() const;
+        [[nodiscard]] std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>> resolveSetNodes()
+            const;
+        [[nodiscard]] std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>> resolveNodes()
+            const;
 
         GmodPath m_gmodPath;
-        std::unordered_map<std::string, size_t> m_setNodeIndices;
-        std::unordered_map<std::string, size_t> m_nodeIndices;
+        std::unordered_map<std::string, size_t, StringHash, std::equal_to<>> m_setNodeIndices;
+        std::unordered_map<std::string, size_t, StringHash, std::equal_to<>> m_nodeIndices;
     };
 
     /**
