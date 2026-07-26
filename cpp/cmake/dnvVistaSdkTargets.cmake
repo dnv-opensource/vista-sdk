@@ -13,6 +13,8 @@ target_compile_options(dnv-vista-sdk-warnings
     INTERFACE
         $<$<AND:$<BOOL:${DNV_VISTA_SDK_WARNINGS}>,$<CXX_COMPILER_ID:GNU,Clang>>:-Wall -Wextra -Wpedantic>
         $<$<AND:$<BOOL:${DNV_VISTA_SDK_WARNINGS}>,$<CXX_COMPILER_ID:MSVC>>:/W4>
+        $<$<AND:$<BOOL:${DNV_VISTA_SDK_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:GNU,Clang>>:-Werror>
+        $<$<AND:$<BOOL:${DNV_VISTA_SDK_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
 )
 
 #----------------------------------------------
