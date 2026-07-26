@@ -149,7 +149,7 @@ namespace dnv::vista::sdk
         for (size_t i = length() - 1;; --i)
         {
             const GmodNode& child = (*this)[i];
-            auto it = normalAssignmentNames.find(std::string{ child.code() });
+            auto it = normalAssignmentNames.find(child.code());
             if (it != normalAssignmentNames.end())
             {
                 return it->second;
@@ -193,7 +193,7 @@ namespace dnv::vista::sdk
 
             if (!normalAssignmentNames.empty())
             {
-                auto it = normalAssignmentNames.find(std::string{ m_node.code() });
+                auto it = normalAssignmentNames.find(m_node.code());
                 if (it != normalAssignmentNames.end())
                 {
                     name = it->second;
@@ -204,7 +204,7 @@ namespace dnv::vista::sdk
                     for (size_t i = m_parents.size() - 1; i >= depth; --i)
                     {
                         const GmodNode& parent = m_parents[i];
-                        auto pit = normalAssignmentNames.find(std::string{ parent.code() });
+                        auto pit = normalAssignmentNames.find(parent.code());
                         if (pit != normalAssignmentNames.end())
                         {
                             name = pit->second;

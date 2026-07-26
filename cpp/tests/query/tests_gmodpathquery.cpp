@@ -78,7 +78,8 @@ namespace dnv::vista::sdk::tests
                         {
                             builder = std::move(builder).withNode(
                                 [&nodeCode](
-                                    const std::unordered_map<std::string, const GmodNode*>& nodes) -> const GmodNode* {
+                                    const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&
+                                        nodes) -> const GmodNode* {
                                     auto it = nodes.find(nodeCode);
                                     return it != nodes.end() ? it->second : nullptr;
                                 },
@@ -95,7 +96,8 @@ namespace dnv::vista::sdk::tests
                             }
                             builder = std::move(builder).withNode(
                                 [&nodeCode](
-                                    const std::unordered_map<std::string, const GmodNode*>& nodes) -> const GmodNode* {
+                                    const std::unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&
+                                        nodes) -> const GmodNode* {
                                     auto it = nodes.find(nodeCode);
                                     return it != nodes.end() ? it->second : nullptr;
                                 },

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/containers/StringHash.h"
 #include "dnv/vista/sdk/core/Gmod.h"
 #include "dnv/vista/sdk/core/GmodPath.h"
 #include "dnv/vista/sdk/core/LocalId.h"
@@ -36,7 +37,8 @@ namespace dnv::vista::sdk::internal
     struct GmodVersioningNode
     {
         VisVersion visVersion; ///< The VIS version this node represents
-        std::unordered_map<std::string, GmodNodeConversion> versioningNodeChanges; ///< Map of code changes
+        std::unordered_map<std::string, GmodNodeConversion, StringHash, std::equal_to<>>
+            versioningNodeChanges; ///< Map of code changes
 
         /**
          * @brief Constructor from DTO

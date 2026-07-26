@@ -254,18 +254,21 @@ int main()
         {
             const auto* nodeC101 = *nodeC101Opt;
 
-            auto query = LocalIdQueryBuilder::create()
-                             .withPrimaryItem(
-                                 *basePath,
-                                 [nodeC101](const GmodPathQueryBuilder::Path& builder) {
-                                     return builder
-                                         .withAnyNodeBefore(
-                                             [nodeC101](const std::unordered_map<std::string, const GmodNode*>&)
-                                                 -> const GmodNode* { return nodeC101; })
-                                         .withoutLocations()
-                                         .build();
-                                 })
-                             .build();
+            auto query =
+                LocalIdQueryBuilder::create()
+                    .withPrimaryItem(
+                        *basePath,
+                        [nodeC101](const GmodPathQueryBuilder::Path& builder) {
+                            return builder
+                                .withAnyNodeBefore(
+                                    [nodeC101](
+                                        const std::
+                                            unordered_map<std::string, const GmodNode*, StringHash, std::equal_to<>>&)
+                                        -> const GmodNode* { return nodeC101; })
+                                .withoutLocations()
+                                .build();
+                        })
+                    .build();
 
             std::cout << "Query: Match LocalIds with any node before C101 (ignoring nodes before C101)\n\n";
 

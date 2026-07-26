@@ -165,7 +165,7 @@ namespace dnv::vista::sdk
                 }
                 else
                 {
-                    auto it = m_groupMap.find(std::string{ part });
+                    auto it = m_groupMap.find(part);
                     groups.push_back(it != m_groupMap.end() ? it->second : part);
                 }
             }

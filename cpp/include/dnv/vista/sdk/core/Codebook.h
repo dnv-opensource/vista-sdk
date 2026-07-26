@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "dnv/vista/sdk/containers/StringHash.h"
 #include "dnv/vista/sdk/containers/StringSet.h"
 #include "CodebookName.h"
 #include "MetadataTag.h"
@@ -117,7 +118,7 @@ namespace dnv::vista::sdk
 
     private:
         CodebookName m_name;
-        std::unordered_map<std::string, std::string> m_groupMap;
+        std::unordered_map<std::string, std::string, StringHash, std::equal_to<>> m_groupMap;
         StringSet m_standardValues;
         StringSet m_groups;
     };

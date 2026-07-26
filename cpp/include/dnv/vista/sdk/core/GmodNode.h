@@ -9,6 +9,7 @@
 #pragma once
 
 #include "dnv/vista/sdk/containers/StackVector.h"
+#include "dnv/vista/sdk/containers/StringHash.h"
 #include "dnv/vista/sdk/utils/StringBuilder.h"
 #include "Locations.h"
 
@@ -101,7 +102,8 @@ namespace dnv::vista::sdk
             std::optional<std::string> definition = std::nullopt,
             std::optional<std::string> commonDefinition = std::nullopt,
             std::optional<bool> installSubstructure = std::nullopt,
-            std::unordered_map<std::string, std::string> normalAssignmentNames = {}) noexcept;
+            std::unordered_map<std::string, std::string, StringHash, std::equal_to<>>
+                normalAssignmentNames = {}) noexcept;
 
     public:
         GmodNodeMetadata() = delete;
@@ -154,7 +156,8 @@ namespace dnv::vista::sdk
          * @brief Get the normal assignment names dictionary
          * @return Read-only reference to normal assignment names map
          */
-        [[nodiscard]] inline const std::unordered_map<std::string, std::string>& normalAssignmentNames() const noexcept;
+        [[nodiscard]] inline const std::unordered_map<std::string, std::string, StringHash, std::equal_to<>>&
+        normalAssignmentNames() const noexcept;
 
     private:
         std::string m_category;
@@ -164,7 +167,7 @@ namespace dnv::vista::sdk
         std::optional<std::string> m_definition;
         std::optional<std::string> m_commonDefinition;
         std::optional<bool> m_installSubstructure;
-        std::unordered_map<std::string, std::string> m_normalAssignmentNames;
+        std::unordered_map<std::string, std::string, StringHash, std::equal_to<>> m_normalAssignmentNames;
         std::string m_fullType;
     };
 
@@ -420,7 +423,7 @@ namespace dnv::vista::sdk
         std::shared_ptr<const GmodNodeMetadata> m_metadata;
         StackVector<GmodNode*, 16> m_children;
         StackVector<GmodNode*, 16> m_parents;
-        std::shared_ptr<std::unordered_set<std::string>> m_childrenSet;
+        std::shared_ptr<std::unordered_set<std::string, StringHash, std::equal_to<>>> m_childrenSet;
     };
 } // namespace dnv::vista::sdk
 
