@@ -121,6 +121,7 @@ jobs:
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF \
+            -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF \
             -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
 
       - name: Build (Linux)
@@ -146,6 +147,7 @@ jobs:
             -DDNV_VISTA_SDK_BUILD_SAMPLES=ON \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF \
+            -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF \
             -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
 
       - name: Build (Windows MinGW)
@@ -171,6 +173,7 @@ jobs:
           -DDNV_VISTA_SDK_BUILD_SAMPLES=ON
           -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
           -DDNV_VISTA_SDK_WARNINGS=OFF
+          -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF
           -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
 
       - name: Build (Windows MSVC)
@@ -243,6 +246,7 @@ jobs:
             -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF \
             -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF \
             -DDNV_VISTA_SDK_WARNINGS=OFF \
+            -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF \
             -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
 
       - name: Build SDK (Linux)
@@ -284,6 +288,7 @@ jobs:
           -DDNV_VISTA_SDK_BUILD_SAMPLES=OFF
           -DDNV_VISTA_SDK_BUILD_BENCHMARKS=OFF
           -DDNV_VISTA_SDK_WARNINGS=OFF
+          -DDNV_VISTA_SDK_WARNINGS_AS_ERRORS=OFF
           -DDNV_VISTA_SDK_ENABLE_SIMD=OFF
 
       - name: Build SDK (Windows MSVC)
