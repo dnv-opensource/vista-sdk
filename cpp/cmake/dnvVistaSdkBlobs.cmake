@@ -7,18 +7,26 @@
 #----------------------------------------------
 
 if(NOT TARGET dnv-vista-sdk-blobgen)
-    add_executable(dnv-vista-sdk-blobgen
-        ${CMAKE_CURRENT_SOURCE_DIR}/tools/BlobGen.cpp
-    )
-    add_executable(dnv::vista::sdk::blobgen ALIAS dnv-vista-sdk-blobgen)
+    if(CMAKE_CROSSCOMPILING AND DNV_VISTA_SDK_BLOBGEN_HOST_PATH)
+        add_executable(dnv-vista-sdk-blobgen IMPORTED GLOBAL)
+        set_target_properties(dnv-vista-sdk-blobgen
+            PROPERTIES IMPORTED_LOCATION "${DNV_VISTA_SDK_BLOBGEN_HOST_PATH}"
+        )
+        add_executable(dnv::vista::sdk::blobgen ALIAS dnv-vista-sdk-blobgen)
+    else()
+        add_executable(dnv-vista-sdk-blobgen
+            ${CMAKE_CURRENT_SOURCE_DIR}/tools/BlobGen.cpp
+        )
+        add_executable(dnv::vista::sdk::blobgen ALIAS dnv-vista-sdk-blobgen)
 
-    set_target_properties(dnv-vista-sdk-blobgen
-        PROPERTIES
-            CXX_STANDARD          20
-            CXX_STANDARD_REQUIRED ON
-            CXX_EXTENSIONS        OFF
-            DEBUG_POSTFIX         "-d"
-    )
+        set_target_properties(dnv-vista-sdk-blobgen
+            PROPERTIES
+                CXX_STANDARD          20
+                CXX_STANDARD_REQUIRED ON
+                CXX_EXTENSIONS        OFF
+                DEBUG_POSTFIX         "-d"
+        )
+    endif()
 endif()
 
 #----------------------------------------------
