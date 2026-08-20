@@ -8,6 +8,7 @@
     - Local ID validation and inspection
 */
 using Vista.SDK;
+using Vista.SDK.Mqtt;
 
 Console.WriteLine("=== Advanced Local ID Operations ===\n");
 
@@ -178,5 +179,118 @@ var regularLocalId = LocalIdBuilder
 
 Console.WriteLine($"   Verbose mode: {verboseLocalId}");
 Console.WriteLine($"   Regular mode: {regularLocalId}");
+
+// 7. MQTT LocalId: formatting and components
+Console.WriteLine("\n7. MQTT LocalId: MQTT-compatible formatting...");
+
+string[] mqttExamples =
+[
+    "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature",
+    "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
+    "/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet",
+];
+
+foreach (var localIdStr in mqttExamples)
+{
+    if (LocalId.TryParse(localIdStr, out _, out var parsedLocalId))
+    {
+        var mqttLocalId = parsedLocalId.Builder.BuildMqtt();
+        Console.WriteLine($"   Standard : {parsedLocalId}");
+        Console.WriteLine($"   MQTT     : {mqttLocalId}");
+        Console.WriteLine();
+    }
+}
+
+// All 8 slots filled
+var fullPrimary = gmod.ParsePath("411.1/C101.31-2");
+var fullSecondary = gmod.ParsePath("411.1/C101.31-5");
+var fullBuilder = LocalIdBuilder
+    .Create(version)
+    .WithPrimaryItem(fullPrimary)
+    .WithSecondaryItem(fullSecondary)
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Quantity, "temperature"))
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Content, "exhaust.gas"))
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Calculation, "average"))
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.State, "high"))
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Command, "start"))
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Type, "instantaneous"))
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Position, "inlet"))
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Detail, "my_sensor_42"));
+
+var fullStandard = fullBuilder.Build();
+var fullMqtt = fullBuilder.BuildMqtt();
+
+Console.WriteLine("   All 8 slots + secondary + free-form detail:");
+Console.WriteLine($"     Standard : {fullStandard}");
+Console.WriteLine($"     MQTT     : {fullMqtt}");
+Console.WriteLine($"     Slots    : qty/cnt/calc/state/cmd/type/pos/detail");
+Console.WriteLine($"     Detail   : '{fullStandard.Detail?.Value}' (IsCustom: {fullStandard.Detail?.IsCustom})");
+Console.WriteLine();
+
+// Reading components
+var compPrimary = gmod.ParsePath("411.1/C101.31-2");
+var compSecondary = gmod.ParsePath("411.1/C101.31-5");
+var compBuilder = LocalIdBuilder
+    .Create(version)
+    .WithPrimaryItem(compPrimary)
+    .WithSecondaryItem(compSecondary)
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Quantity, "temperature"))
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Content, "exhaust.gas"));
+
+var mqttComp = compBuilder.BuildMqtt();
+
+Console.WriteLine("   Reading components:");
+Console.WriteLine($"     VisVersion     : {mqttComp.VisVersion.ToVersionString()}");
+Console.WriteLine($"     PrimaryItem    : {mqttComp.PrimaryItem}");
+Console.WriteLine($"     SecondaryItem  : {mqttComp.SecondaryItem}");
+Console.WriteLine($"     Quantity       : {mqttComp.Quantity}");
+Console.WriteLine($"     Content        : {mqttComp.Content}");
+Console.WriteLine($"     Calculation    : {mqttComp.Calculation?.ToString() ?? "(none)"}");
+Console.WriteLine();
+
+// 8. MQTT LocalId: builder-level state and equality
+Console.WriteLine("8. MQTT LocalId: builder-level state and equality...");
+
+// Builder-level state not reflected in MQTT format
+var verbosePrimary = gmod.ParsePath("411.1/C101.63/S206");
+var verboseBuilder = LocalIdBuilder
+    .Create(version)
+    .WithVerboseMode(true)
+    .WithPrimaryItem(verbosePrimary)
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Quantity, "temperature"));
+
+var mqttVerbose = verboseBuilder.BuildMqtt();
+
+Console.WriteLine("   Builder-level state (accessible via .Builder):");
+Console.WriteLine("     VerboseMode/HasCustomTag/MetadataTags are not duplicated on MqttLocalId.");
+Console.WriteLine("     VerboseMode has no effect on the MQTT format (unlike LocalId.ToString()).");
+Console.WriteLine($"     Builder.VerboseMode    : {mqttVerbose.Builder.VerboseMode}");
+Console.WriteLine($"     Builder.HasCustomTag   : {mqttVerbose.Builder.HasCustomTag}");
+Console.WriteLine($"     Builder.MetadataTags   : {mqttVerbose.Builder.MetadataTags.Count} tag(s)");
+Console.WriteLine($"     MQTT (no '~' despite VerboseMode=true): {mqttVerbose}");
+Console.WriteLine();
+
+// Equality
+var eqPrimary = gmod.ParsePath("411.1/C101.31-2");
+var eqBuilder = LocalIdBuilder
+    .Create(version)
+    .WithPrimaryItem(eqPrimary)
+    .WithMetadataTag(codebooks.CreateTag(CodebookName.Quantity, "temperature"));
+
+var a = eqBuilder.BuildMqtt();
+var b = eqBuilder.BuildMqtt();
+var c = eqBuilder.WithMetadataTag(codebooks.CreateTag(CodebookName.Content, "exhaust.gas")).BuildMqtt();
+
+Console.WriteLine("   Equality:");
+Console.WriteLine($"     a == b (same builder) : {a == b}");
+Console.WriteLine($"     a == c (extra tag)    : {a == c}");
+Console.WriteLine();
+
+Console.WriteLine("   MQTT format differences vs standard:");
+Console.WriteLine("     - No leading '/'");
+Console.WriteLine("     - Underscores instead of slashes in paths");
+Console.WriteLine("     - No 'meta/' section");
+Console.WriteLine("     - '_' placeholder for absent metadata slots");
+Console.WriteLine("     - 8 fixed slots: qty/cnt/calc/state/cmd/type/pos/detail");
 
 Console.WriteLine("\n=== Advanced operations completed! ===");

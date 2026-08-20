@@ -12,12 +12,13 @@ from typing import TYPE_CHECKING
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.local_id import LocalId
 from vista_sdk.metadata_tag import MetadataTag
+from vista_sdk.vis_version import VisVersion
 
 if TYPE_CHECKING:
     from vista_sdk.local_id_builder import LocalIdBuilder
 
 
-class MqttLocalId(LocalId):
+class MqttLocalId:
     """MQTT-formatted version of the LocalId class.
 
     This class provides a version of LocalId that formats the string representation
@@ -27,13 +28,99 @@ class MqttLocalId(LocalId):
     # Class variables
     _internal_separator = "_"
 
+    NAMING_RULE = LocalId.NAMING_RULE
+
     def __init__(self, builder: LocalIdBuilder) -> None:
         """Initialize a new MqttLocalId from a LocalIdBuilder.
 
         Args:
             builder: The LocalIdBuilder to create the MqttLocalId from
+
+        Raises:
+            ValueError: If the builder is empty or invalid.
         """
-        super().__init__(builder)
+        if builder.is_empty:
+            raise ValueError("LocalId cannot be constructed from empty LocalIdBuilder")
+        if not builder.is_valid:
+            raise ValueError(
+                "LocalId cannot be constructed from invalid LocalIdBuilder"
+            )
+        self._builder = builder
+
+    @property
+    def builder(self) -> LocalIdBuilder:
+        """Get the builder for this MqttLocalId."""
+        return self._builder
+
+    @property
+    def vis_version(self) -> VisVersion:
+        """Get the VIS version for this MqttLocalId."""
+        return self._builder.vis_version  # type: ignore
+
+    @property
+    def primary_item(self) -> GmodPath:
+        """Get the primary item for this MqttLocalId."""
+        return self._builder.primary_item  # type: ignore
+
+    @property
+    def secondary_item(self) -> GmodPath | None:
+        """Get the secondary item for this MqttLocalId."""
+        return self._builder.secondary_item
+
+    @property
+    def quantity(self) -> MetadataTag | None:
+        """Get the quantity metadata tag for this MqttLocalId."""
+        return self._builder.quantity
+
+    @property
+    def content(self) -> MetadataTag | None:
+        """Get the content metadata tag for this MqttLocalId."""
+        return self._builder.content
+
+    @property
+    def calculation(self) -> MetadataTag | None:
+        """Get the calculation metadata tag for this MqttLocalId."""
+        return self._builder.calculation
+
+    @property
+    def state(self) -> MetadataTag | None:
+        """Get the state metadata tag for this MqttLocalId."""
+        return self._builder.state
+
+    @property
+    def command(self) -> MetadataTag | None:
+        """Get the command metadata tag for this MqttLocalId."""
+        return self._builder.command
+
+    @property
+    def type(self) -> MetadataTag | None:
+        """Get the type metadata tag for this MqttLocalId."""
+        return self._builder.type
+
+    @property
+    def position(self) -> MetadataTag | None:
+        """Get the position metadata tag for this MqttLocalId."""
+        return self._builder.position
+
+    @property
+    def detail(self) -> MetadataTag | None:
+        """Get the detail metadata tag for this MqttLocalId."""
+        return self._builder.detail
+
+    def __eq__(self, other: object) -> bool:
+        """Compare this MqttLocalId with another for equality."""
+        if not isinstance(other, MqttLocalId):
+            return False
+
+        return self._builder == other._builder
+
+    def __hash__(self) -> int:
+        """Get the hash code for this MqttLocalId."""
+        return hash(self._builder)
+
+    def __repr__(self) -> str:
+        """Get the official string representation of this MqttLocalId."""
+        return f"MqttLocalId({self!s})"
 
     def __str__(self) -> str:
         """Get the string representation of the MqttLocalId.

@@ -271,6 +271,108 @@ class TestLocalId:
         local_id_str = str(mqtt_local_id)
         assert expected_output == local_id_str
 
+    def test_mqtt_local_id_is_not_a_local_id_the_former_lsp_violation_is_now_impossible_by_construction(
+        self,
+    ) -> None:
+        # MqttLocalId must not inherit from LocalId
+        assert not issubclass(MqttLocalId, LocalId)
+
+    def test_mqtt_local_id_getters(self) -> None:
+        vis = VIS()
+        vis_version = VisVersion.v3_4a
+        gmod = vis.get_gmod(vis_version)
+        codebooks = vis.get_codebooks(vis_version)
+
+        primary_item = gmod.parse_path("411.1/C101.31-2")
+        secondary_item = gmod.parse_path("411.1/C101.31-5")
+        qty_tag = codebooks.try_create_tag(CodebookName.Quantity, "temperature")
+        cnt_tag = codebooks.try_create_tag(CodebookName.Content, "exhaust.gas")
+
+        builder = (
+            LocalIdBuilder.create(vis_version)
+            .try_with_primary_item(primary_item)
+            .try_with_secondary_item(secondary_item)
+            .try_with_metadata_tag(qty_tag)
+            .try_with_metadata_tag(cnt_tag)
+        )
+
+        mqtt_local_id = MqttLocalId(builder)
+
+        assert mqtt_local_id.vis_version == vis_version
+        assert mqtt_local_id.primary_item == primary_item
+        assert mqtt_local_id.secondary_item == secondary_item
+        assert mqtt_local_id.quantity == qty_tag
+        assert mqtt_local_id.content == cnt_tag
+        assert mqtt_local_id.calculation is None
+        assert mqtt_local_id.state is None
+        assert mqtt_local_id.command is None
+        assert mqtt_local_id.type is None
+        assert mqtt_local_id.position is None
+        assert mqtt_local_id.detail is None
+
+    def test_mqtt_local_id_builder_exposes_members_not_reflected_in_the_mqtt_format(
+        self,
+    ) -> None:
+        # verbose_mode/has_custom_tag/metadata_tags have no effect on MqttLocalId.__str__() (the
+        # MQTT format never reads them), so MqttLocalId does not duplicate them as its own
+        # properties - they remain reachable via .builder, same as any other LocalIdBuilder-derived
+        # information.
+        vis = VIS()
+        vis_version = VisVersion.v3_4a
+        gmod = vis.get_gmod(vis_version)
+        codebooks = vis.get_codebooks(vis_version)
+
+        primary_item = gmod.parse_path("411.1/C101.63/S206")
+        qty_tag = codebooks.try_create_tag(CodebookName.Quantity, "temperature")
+
+        builder = (
+            LocalIdBuilder.create(vis_version)
+            .with_verbose_mode(True)
+            .try_with_primary_item(primary_item)
+            .try_with_metadata_tag(qty_tag)
+        )
+
+        mqtt_local_id = MqttLocalId(builder)
+
+        assert mqtt_local_id.builder.verbose_mode is True
+        assert mqtt_local_id.builder.has_custom_tag is False
+        assert len(mqtt_local_id.builder.metadata_tags) == 1
+
+        # Confirms verbose_mode has no effect on the MQTT format itself: no '~' common-name
+        # segments appear even though verbose mode is on and this same primary item DOES produce
+        # '~' segments in the standard LocalId format.
+        assert "~" not in str(mqtt_local_id)
+
+    def test_mqtt_local_id_equality(self) -> None:
+        vis = VIS()
+        vis_version = VisVersion.v3_4a
+        gmod = vis.get_gmod(vis_version)
+        codebooks = vis.get_codebooks(vis_version)
+
+        primary_item = gmod.parse_path("411.1/C101.31-2")
+        qty_tag = codebooks.try_create_tag(CodebookName.Quantity, "temperature")
+
+        builder = (
+            LocalIdBuilder.create(vis_version)
+            .try_with_primary_item(primary_item)
+            .try_with_metadata_tag(qty_tag)
+        )
+
+        a = MqttLocalId(builder)
+        b = MqttLocalId(builder)
+
+        other_tag = codebooks.try_create_tag(CodebookName.Quantity, "pressure")
+        other_builder = (
+            LocalIdBuilder.create(vis_version)
+            .try_with_primary_item(primary_item)
+            .try_with_metadata_tag(other_tag)
+        )
+        c = MqttLocalId(other_builder)
+
+        assert a == b
+        assert hash(a) == hash(b)
+        assert a != c
+
     @pytest.mark.parametrize(
         "input_data",
         [

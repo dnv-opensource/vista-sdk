@@ -7,6 +7,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../../src/Vista.SDK/Vista.SDK.csproj" />
+        <ProjectReference Include="../../src/Vista.SDK.Mqtt/Vista.SDK.Mqtt.csproj" />
     </ItemGroup>
 
 </Project>
