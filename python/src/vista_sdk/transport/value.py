@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 
 
 class Value:
@@ -167,7 +168,7 @@ class DoubleValue(Value):
 class DecimalValue(Value):
     """Decimal value type."""
 
-    def __init__(self, value: float) -> None:
+    def __init__(self, value: Decimal) -> None:
         """Initialize with decimal value."""
         super().__init__()
 

@@ -6,6 +6,7 @@ import math
 import re
 from collections.abc import Iterable, Iterator
 from datetime import datetime, timezone
+from decimal import Decimal
 from enum import Enum
 from typing import Any, TypeVar
 
@@ -489,7 +490,7 @@ class Restriction:
             on_datetime=lambda _: Ok(),
         )
 
-    def _validate_decimal_value(self, dec: float) -> ValidateResult:
+    def _validate_decimal_value(self, dec: Decimal) -> ValidateResult:
         """Validate decimal value against restrictions."""
         if self.fraction_digits is not None:
             decimal_places = self._count_decimal_places(str(dec))
