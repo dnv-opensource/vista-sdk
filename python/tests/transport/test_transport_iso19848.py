@@ -1,13 +1,17 @@
 """Tests for the transport ISO19848 module."""
 
+from decimal import Decimal
+
 import pytest
 
 from vista_sdk.transport.iso19848 import (
     ISO19848,
     DataChannelTypeNames,
+    FormatDataType,
     FormatDataTypes,
     ISO19848Version,
 )
+from vista_sdk.transport.value import DecimalValue
 
 
 def test_iso19848_version_enum() -> None:
@@ -153,3 +157,23 @@ def test_format_data_type_parse(value: str, expected_result: bool) -> None:
         assert result.type_name.type == value
     else:
         assert isinstance(result, FormatDataTypes.ParseResult.Invalid)
+
+
+def test_decimal_format_data_type_iso19848_exactness() -> None:
+    """ISO 19848 Table 2: Decimal is i/10^n (exact base-10, not binary floating-point).
+
+    FormatDataType.validate() parses Decimal values via float(value), which corrupts
+    base-10 exact values that have no binary64 representation. "0.3" must round-trip
+    to exactly Decimal("0.3"), not the binary64 approximation 0.2999999999999999888...
+    """
+    fmt = FormatDataType("Decimal")
+    _, parsed = fmt.validate("0.3")
+
+    assert isinstance(parsed, DecimalValue)
+    actual = Decimal(parsed.value)  # exposes exact binary64 value, no rounding
+    expected = Decimal("0.3")
+
+    assert actual == expected, (
+        f"FormatDataType.validate('0.3') produced {actual} instead of {expected} - "
+        f"float('0.3') is 0.2999999999999999888..., violating ISO 19848 Table 2"
+    )

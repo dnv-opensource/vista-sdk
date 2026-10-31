@@ -7,7 +7,7 @@ import importlib.resources as pkg_resources
 import json
 from collections.abc import Callable, Iterator
 from datetime import datetime
-from decimal import InvalidOperation
+from decimal import Decimal, InvalidOperation
 from enum import Enum
 from typing import Protocol, TypeVar
 
@@ -136,7 +136,7 @@ class FormatDataType:
         """Validate and parse a string value, returning both result and parsed value."""
         if self.type == "Decimal":
             try:
-                return Ok(), DecimalValue(float(value))
+                return Ok(), DecimalValue(Decimal(value))
             except InvalidOperation:
                 return Invalid([f"Invalid decimal value - Value='{value}'"]), None
         if self.type == "Integer":
@@ -163,7 +163,7 @@ class FormatDataType:
     def switch(
         self,
         value: str,
-        on_decimal: Callable[[float], None],
+        on_decimal: Callable[[Decimal], None],
         on_integer: Callable[[int], None],
         on_boolean: Callable[[bool], None],
         on_string: Callable[[str], None],
@@ -189,7 +189,7 @@ class FormatDataType:
     def match(
         self,
         value: str,
-        on_decimal: Callable[[float], T],
+        on_decimal: Callable[[Decimal], T],
         on_integer: Callable[[int], T],
         on_boolean: Callable[[bool], T],
         on_string: Callable[[str], T],
