@@ -12,6 +12,7 @@ from vista_sdk.codebook_names import CodebookName
 from vista_sdk.gmod_path import GmodPath
 from vista_sdk.local_id_builder import LocalIdBuilder
 from vista_sdk.local_id_builder_parsing import LocalIdBuilderParsing
+from vista_sdk.mqtt.mqtt_local_id import MqttLocalId
 from vista_sdk.vis import VIS
 from vista_sdk.vis_version import VisVersion
 
@@ -186,6 +187,125 @@ def main() -> None:  # noqa : C901
 
     print(f"   Verbose mode: {verbose_local_id}")
     print(f"   Regular mode: {regular_local_id}")
+
+    # 7. MQTT LocalId: formatting and components
+    print("\n7. MQTT LocalId: MQTT-compatible formatting...")
+
+    mqtt_examples = [
+        "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature",
+        "/dnv-v2/vis-3-4a/411.1/C101.31-2/meta/qty-temperature/cnt-exhaust.gas/pos-inlet",
+        "/dnv-v2/vis-3-4a/621.21/S90/sec/411.1/C101/meta/qty-mass/cnt-fuel.oil/pos-inlet",
+    ]
+
+    parser = LocalIdBuilderParsing()
+    for local_id_str in mqtt_examples:
+        try:
+            parsed = parser.parse(local_id_str)
+            standard = parsed.build()
+            mqtt_local_id = MqttLocalId(parsed)
+            print(f"   Standard : {standard}")
+            print(f"   MQTT     : {mqtt_local_id}")
+            print()
+        except Exception:
+            pass
+
+    # All 8 slots filled
+    full_primary = GmodPath.parse("411.1/C101.31-2", arg=version)
+    full_secondary = GmodPath.parse("411.1/C101.31-5", arg=version)
+    full_builder = (
+        LocalIdBuilder.create(version)
+        .with_primary_item(full_primary)
+        .with_secondary_item(full_secondary)
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Quantity, "temperature"))
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Content, "exhaust.gas"))
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Calculation, "average"))
+        .with_metadata_tag(codebooks.create_tag(CodebookName.State, "high"))
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Command, "start"))
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Type, "instantaneous"))
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Position, "inlet"))
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Detail, "my_sensor_42"))
+    )
+
+    full_standard = full_builder.build()
+    full_mqtt = MqttLocalId(full_builder)
+
+    print("   All 8 slots + secondary + free-form detail:")
+    print(f"     Standard : {full_standard}")
+    print(f"     MQTT     : {full_mqtt}")
+    print("     Slots    : qty/cnt/calc/state/cmd/type/pos/detail")
+    print(f"     Detail   : '{full_standard.detail.value}' (is_custom: {full_standard.detail.is_custom})")  # type: ignore
+    print()
+
+    # Reading components
+    comp_primary = GmodPath.parse("411.1/C101.31-2", arg=version)
+    comp_secondary = GmodPath.parse("411.1/C101.31-5", arg=version)
+    comp_builder = (
+        LocalIdBuilder.create(version)
+        .with_primary_item(comp_primary)
+        .with_secondary_item(comp_secondary)
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Quantity, "temperature"))
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Content, "exhaust.gas"))
+    )
+
+    mqtt_comp = MqttLocalId(comp_builder)
+
+    print("   Reading components:")
+    print(f"     vis_version    : {mqtt_comp.vis_version}")
+    print(f"     primary_item   : {mqtt_comp.primary_item}")
+    print(f"     secondary_item : {mqtt_comp.secondary_item}")
+    print(f"     quantity       : {mqtt_comp.quantity}")
+    print(f"     content        : {mqtt_comp.content}")
+    print(f"     calculation    : {mqtt_comp.calculation or '(none)'}")
+    print()
+
+    # 8. MQTT LocalId: builder-level state and equality
+    print("8. MQTT LocalId: builder-level state and equality...")
+
+    # Builder-level state not reflected in MQTT format
+    verbose_primary = GmodPath.parse("411.1/C101.63/S206", arg=version)
+    verbose_builder = (
+        LocalIdBuilder.create(version)
+        .with_verbose_mode(True)
+        .with_primary_item(verbose_primary)
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Quantity, "temperature"))
+    )
+
+    mqtt_verbose = MqttLocalId(verbose_builder)
+
+    print("   Builder-level state (accessible via .builder):")
+    print("     verbose_mode/has_custom_tag/metadata_tags are not duplicated on MqttLocalId.")
+    print("     verbose_mode has no effect on the MQTT format (unlike LocalId.__str__()).")
+    print(f"     builder.verbose_mode   : {mqtt_verbose.builder.verbose_mode}")
+    print(f"     builder.has_custom_tag : {mqtt_verbose.builder.has_custom_tag}")
+    print(f"     builder.metadata_tags  : {len(mqtt_verbose.builder.metadata_tags)} tag(s)")
+    print(f"     MQTT (no '~' despite verbose_mode=True): {mqtt_verbose}")
+    print()
+
+    # Equality
+    eq_primary = GmodPath.parse("411.1/C101.31-2", arg=version)
+    eq_builder = (
+        LocalIdBuilder.create(version)
+        .with_primary_item(eq_primary)
+        .with_metadata_tag(codebooks.create_tag(CodebookName.Quantity, "temperature"))
+    )
+
+    a = MqttLocalId(eq_builder)
+    b = MqttLocalId(eq_builder)
+    c = MqttLocalId(
+        eq_builder.with_metadata_tag(codebooks.create_tag(CodebookName.Content, "exhaust.gas"))
+    )
+
+    print("   Equality:")
+    print(f"     a == b (same builder) : {a == b}")
+    print(f"     a == c (extra tag)    : {a == c}")
+    print()
+
+    print("   MQTT format differences vs standard:")
+    print("     - No leading '/'")
+    print("     - Underscores instead of slashes in paths")
+    print("     - No 'meta/' section")
+    print("     - '_' placeholder for absent metadata slots")
+    print("     - 8 fixed slots: qty/cnt/calc/state/cmd/type/pos/detail")
 
     print("\n=== Advanced operations completed! ===")
 
