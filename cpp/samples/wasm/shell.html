@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vista SDK - Gmod Explorer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #0e0e10;
+            color: #e0e0e0;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 8px 16px;
+            background: #1a1a2e;
+            border-bottom: 1px solid #2a2a4a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-size: 14px;
+            color: #7ec8e3;
+        }
+
+        header span {
+            font-size: 12px;
+            color: #888;
+        }
+
+        #status {
+            padding: 16px;
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            flex: 1;
+        }
+
+        canvas.hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Vista SDK - Gmod Explorer</h1>
+        <span>DNV Open Source</span>
+    </header>
+    <div id="status">Loading WebAssembly module&hellip;</div>
+    <canvas id="canvas" class="hidden" oncontextmenu="event.preventDefault()"></canvas>
+
+    <script>
+        var Module = {
+            canvas: (function () {
+                var canvas = document.getElementById('canvas');
+                return canvas;
+            })(),
+            onRuntimeInitialized: function () {
+                document.getElementById('status').style.display = 'none';
+                document.getElementById('canvas').classList.remove('hidden');
+            },
+            print: function (text) { console.log(text); },
+            printErr: function (text) { console.error(text); }
+        };
+    </script>
+    {{{ SCRIPT }}}
+</body>
+
+</html>

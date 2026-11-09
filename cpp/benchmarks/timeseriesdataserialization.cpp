@@ -1,0 +1,66 @@
+/**
+ * @file timeseriesdataserialization.cpp
+ * @brief Nanobench benchmark for TimeSeriesData JSON serialization performance
+ */
+
+#define ANKERL_NANOBENCH_IMPLEMENT
+#include <nanobench.h>
+
+#include <dnv/VistaSDK.h>
+
+#include <SchemasRegistry.h>
+
+#include <stdexcept>
+#include <string>
+
+namespace dnv::vista::sdk::benchmarks
+{
+    namespace jts = transport::serialization::json::timeseries;
+
+    int run()
+    {
+        const auto* resource = dnv::vista::sdk::schemas::find("TimeSeriesData.sample.json");
+        if (!resource || resource->size == 0)
+        {
+            throw std::runtime_error{ "Failed to load TimeSeriesData.sample.json" };
+        }
+
+        std::string json{ resource->str() };
+
+        auto dtoOpt = jts::fromJsonString(json);
+        if (!dtoOpt.has_value())
+        {
+            throw std::runtime_error{ "Failed to parse TimeSeriesData.sample.json" };
+        }
+
+        auto package = jts::toDomain(*dtoOpt);
+
+        StringBuilder warmupBuffer;
+        jts::toJsonString(warmupBuffer, package);
+
+        ankerl::nanobench::Bench bench;
+        bench.title("TimeSeriesDataSerialization").warmup(1000).minEpochIterations(10000);
+
+        StringBuilder serializeBuffer;
+        bench.run("Serialize", [&] {
+            serializeBuffer.clear();
+            jts::toJsonString(serializeBuffer, package);
+            ankerl::nanobench::doNotOptimizeAway(serializeBuffer.size());
+        });
+
+        StringBuilder serializedBuffer;
+        jts::toJsonString(serializedBuffer, package);
+        auto serialized = serializedBuffer.toString();
+        bench.run("Deserialize", [&] {
+            auto result = jts::fromJsonString(serialized);
+            ankerl::nanobench::doNotOptimizeAway(result);
+        });
+
+        return 0;
+    }
+} // namespace dnv::vista::sdk::benchmarks
+
+int main()
+{
+    return dnv::vista::sdk::benchmarks::run();
+}

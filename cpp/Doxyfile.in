@@ -1,0 +1,32 @@
+PROJECT_NAME           = "Vista SDK"
+PROJECT_NUMBER         = @PROJECT_VERSION@
+PROJECT_BRIEF          = "C++ implementation of the DNV Vista SDK"
+
+OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@/docs"
+
+INPUT                  = "@DNV_VISTA_SDK_INCLUDE_DIR@" \
+
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */detail/* \
+                         */generated/*
+
+EXCLUDE                = "@DNV_VISTA_SDK_INCLUDE_DIR@/dnv/vista/sdk/Export.h" \
+                         "@DNV_VISTA_SDK_INCLUDE_DIR@/dnv/vista/sdk/Version.h"
+
+STRIP_FROM_PATH        = "@DNV_VISTA_SDK_INCLUDE_DIR@"
+
+EXTRACT_ALL            = NO
+SHOW_NAMESPACES        = NO
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+
+AUTOLINK_SUPPORT       = YES
+
+GENERATE_HTML          = YES
+GENERATE_XML           = NO
+GENERATE_LATEX         = NO
+
+WARN_AS_ERROR          = @DNV_VISTA_SDK_DOXYGEN_WARN_AS_ERROR@
+QUIET                  = NO
+
+HAVE_DOT               = @DNV_VISTA_SDK_HAVE_DOT@

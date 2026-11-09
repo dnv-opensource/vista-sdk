@@ -1,6 +1,7 @@
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dnv-opensource/vista-sdk/build-csharp.yml?branch=main&label=C%23)](https://github.com/dnv-opensource/vista-sdk/actions)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dnv-opensource/vista-sdk/build-js.yml?branch=main&label=JS)](https://github.com/dnv-opensource/vista-sdk/actions)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dnv-opensource/vista-sdk/build-python.yml?branch=main&label=Python)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dnv-opensource/vista-sdk/build-python.yml?branch=main&label=Python)](https://github.com/dnv-opensource/vista-sdk/actions)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dnv-opensource/vista-sdk/cpp-build-and-test.yml?branch=main&label=C%2B%2B)](https://github.com/dnv-opensource/vista-sdk/actions)
 [![GitHub](https://img.shields.io/github/license/dnv-opensource/vista-sdk?style=flat-square)](https://github.com/dnv-opensource/vista-sdk/blob/main/LICENSE)<br/>
 [![SDK NuGet current](https://img.shields.io/nuget/v/DNV.Vista.SDK?label=NuGet%20DNV.Vista.SDK)](https://www.nuget.org/packages/DNV.Vista.SDK)
 [![SDK NuGet prerelease](https://img.shields.io/nuget/vpre/DNV.Vista.SDK?label=NuGet%20DNV.Vista.SDK)](https://www.nuget.org/packages/DNV.Vista.SDK)<br/>
@@ -54,8 +55,8 @@ The SDK supports multiple versions of VIS. Each version includes updated GMOD st
 | VIS 3.4a  | `v3_4a`           |
 | VIS 3.5a  | `v3_5a`           |
 | ...       |                   |
-| VIS 3.9a  | `v3_9a`           |
-| VIS 3.10a | `v3_10a` (Latest) |
+| VIS 3.10a | `v3_10a`          |
+| VIS 3.11a | `v3_11a` (Latest) |
 
 ### Tackling Different VIS Versions
 
@@ -70,6 +71,7 @@ We provide SDKs for the most common platforms. Each implementation has its own d
 | **C#/.NET**               | [![NuGet](https://img.shields.io/nuget/v/DNV.Vista.SDK?label=NuGet)](https://www.nuget.org/packages/DNV.Vista.SDK) | [csharp/](csharp/) |
 | **JavaScript/TypeScript** | [![NPM](https://img.shields.io/npm/v/dnv-vista-sdk?label=NPM)](https://www.npmjs.com/package/dnv-vista-sdk)        | [js/](js/)         |
 | **Python**                | [![PyPI](https://img.shields.io/pypi/v/vista-sdk?label=PyPI)](https://pypi.org/project/vista-sdk/)                 | [python/](python/) |
+| **C++**                   | *Not published to a package registry yet. Consume from source via CMake `find_package` / `FetchContent`*           | [cpp/](cpp/)       |
 
 ### Quick Installation
 
@@ -82,6 +84,9 @@ npm install dnv-vista-sdk
 
 # Python
 pip install vista-sdk
+
+# C++
+cmake -B build -S cpp -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel $(nproc)
 ```
 
 ## 📁 Repository Structure
@@ -97,6 +102,7 @@ pip install vista-sdk
  ┃ ┃ ┣ 📜DataChannelList.schema.json
  ┃ ┃ ┗ 📜TimeSeriesData.schema.json
  ┃ ┗ 📂xml
+ ┣ 📂cpp                # C++ SDK
  ┣ 📂csharp             # C#/.NET SDK
  ┣ 📂js                 # JavaScript/TypeScript SDK
  ┣ 📂python             # Python SDK
@@ -109,23 +115,23 @@ pip install vista-sdk
 
 This section outlines the various components and modules in our SDKs.
 
-| Component                  | Description                                       | C#  | JS  | Python |
-| -------------------------- | ------------------------------------------------- | :-: | :-: | :----: |
-| **Gmod**                   | Generic product model (traversal, node lookup)    |  ✓  |  ✓  |   ✓    |
-| **GmodPath**               | Path parsing, full-path support, serialization    |  ✓  |  ✓  |   ✓    |
-| **Pmod**\*                 | Asset-specific product model                      |     |  ✓  |        |
-| **Codebooks**              | Metadata tag lookup and validation                |  ✓  |  ✓  |   ✓    |
-| **Locations**              | Physical positioning and location parsing         |  ✓  |  ✓  |   ✓    |
-| **Local ID**               | Parsing, building, and serialization              |  ✓  |  ✓  |   ✓    |
-| **Universal ID**           | Parsing, building, and serialization              |  ✓  |  ✓  |   ✓    |
-| **GmodPath Versioning**    | Path/node/LocalId conversion between VIS versions |  ✓  |  ✓  |   ✓    |
-| **ImoNumber**              | IMO number validation                             |  ✓  |  ✓  |   ✓    |
-| **LocalIdQuery**           | Programmatic filtering of Local IDs               |  ✓  |  ✓  |   ✓    |
-| **GmodPathQuery**          | Querying and filtering GmodPaths                  |  ✓  |  ✓  |   ✓    |
-| **MetadataTagsQuery**      | Querying and filtering metadata tags              |  ✓  |  ✓  |   ✓    |
-| **DataChannelList (JSON)** | ISO 19848 data channel definitions                |  ✓  |  ✓  |   ✓    |
-| **TimeSeriesData (JSON)**  | ISO 19848 timeseries and event data               |  ✓  |  ✓  |   ✓    |
-| **MQTT Transport**         | MQTT-specific Local ID support                    |  ✓  |     |   ✓    |
+| Component                  | Description                                       |  C#   |  JS   | Python |  C++  |
+| -------------------------- | ------------------------------------------------- | :---: | :---: | :----: | :---: |
+| **Gmod**                   | Generic product model (traversal, node lookup)    |   ✓   |   ✓   |   ✓    |   ✓   |
+| **GmodPath**               | Path parsing, full-path support, serialization    |   ✓   |   ✓   |   ✓    |   ✓   |
+| **Pmod**\*                 | Asset-specific product model                      |       |   ✓   |        |       |
+| **Codebooks**              | Metadata tag lookup and validation                |   ✓   |   ✓   |   ✓    |   ✓   |
+| **Locations**              | Physical positioning and location parsing         |   ✓   |   ✓   |   ✓    |   ✓   |
+| **Local ID**               | Parsing, building, and serialization              |   ✓   |   ✓   |   ✓    |   ✓   |
+| **Universal ID**           | Parsing, building, and serialization              |   ✓   |   ✓   |   ✓    |   ✓   |
+| **GmodPath Versioning**    | Path/node/LocalId conversion between VIS versions |   ✓   |   ✓   |   ✓    |   ✓   |
+| **ImoNumber**              | IMO number validation                             |   ✓   |   ✓   |   ✓    |   ✓   |
+| **LocalIdQuery**           | Programmatic filtering of Local IDs               |   ✓   |   ✓   |   ✓    |   ✓   |
+| **GmodPathQuery**          | Querying and filtering GmodPaths                  |   ✓   |   ✓   |   ✓    |   ✓   |
+| **MetadataTagsQuery**      | Querying and filtering metadata tags              |   ✓   |   ✓   |   ✓    |   ✓   |
+| **DataChannelList (JSON)** | ISO 19848 data channel definitions                |   ✓   |   ✓   |   ✓    |   ✓   |
+| **TimeSeriesData (JSON)**  | ISO 19848 timeseries and event data               |   ✓   |   ✓   |   ✓    |   ✓   |
+| **MQTT Transport**         | MQTT-specific Local ID support                    |   ✓   |       |   ✓    |   ✓   |
 
 > \* The naming "Pmod" (Product Model) is inspired by DNV class terminology where it refers to asset-specific class information model. In the Vista SDK, Pmod represents a subset of Gmod built from GmodPaths or LocalIds, which can originate from any source—not limited to class-specific data.
 
